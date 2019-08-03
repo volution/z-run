@@ -480,7 +480,7 @@ func loadLibrary (_candidate string) (*Library, error) {
 
 
 
-func main_0 (_executable string, _arguments []string, _environment map[string]string) (error) {
+func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (error) {
 	
 	_library, _error := loadLibrary ()
 	if _error != nil {
@@ -513,32 +513,45 @@ func main () () {
 		panic (abortError (_error))
 	}
 	
-	_arguments := append ([]string (nil), os.Args ...)
+	_argument0 := os.Args[0]
+	_arguments := append ([]string (nil), os.Args[1:] ...)
 	
 	_environment := make (map[string]string, 128)
 	for _, _variable := range os.Environ () {
 		if _splitIndex := strings.IndexByte (_variable, '='); _splitIndex >= 0 {
+			
 			_name := _variable[:_splitIndex]
 			_value := _variable[_splitIndex + 1:]
-			if _name == "" {
-				logf ('w', 0x0ffb0031, "invalid environment variable (name empty):  `%q`", _variable)
-			} else if ! utf8.Valid ([]byte (_name)) {
-				logf ('w', 0x54278534, "invalid environment variable (name invalid UTF-c):  `%q`", _name)
-			} else if ! utf8.Valid ([]byte (_value)) {
-				logf ('w', 0x785ba004, "invalid environment variable (value invalid UTF-c):  `%q`", _name)
-			} else if _value == "" {
-				logf ('w', 0xfe658d34, "invalid environment variable (value empty):  `%q`", _name)
-			} else if _, _exists := _environment[_name]; _exists {
-				logf ('w', 0x7e7e41a5, "invalid environment variable (name duplicate):  `%q`", _name)
-			} else {
-				_environment[_name] = _value
+			
+			_nameTrimmed := strings.TrimSpace (_name)
+			if _name != _nameTrimmed {
+				logf ('w', 0x1d362f26, "invalid environment variable (name has spaces):  `%s`", _name)
+				_name = _nameTrimmed
 			}
+			if strings.IndexFunc (_name, func (r rune) (bool) { return unicode.IsSpace (r) || (r > unicode.MaxASCII) }) >= 0 {
+				logf ('w', 0x81ac6f2e, "invalid environment variable (name is not ASCII):  `%s`", _name)
+			}
+			
+			if _name == "" {
+				logf ('w', 0x0ffb0031, "invalid environment variable (name empty):  `%s`", _variable)
+			} else if ! utf8.Valid ([]byte (_name)) {
+				logf ('w', 0x54278534, "invalid environment variable (name invalid UTF-c):  `%s`", _name)
+			} else if ! utf8.Valid ([]byte (_value)) {
+				logf ('w', 0x785ba004, "invalid environment variable (value invalid UTF-c):  `%s`", _name)
+			} else if _value == "" {
+//				logf ('w', 0xfe658d34, "invalid environment variable (value empty):  `%s`", _name)
+			} else if _, _exists := _environment[_name]; _exists {
+				logf ('w', 0x7e7e41a5, "invalid environment variable (name duplicate):  `%s`", _name)
+			} else {
+				_environment[_nameTrimmed] = _value
+			}
+			
 		} else {
-			logf ('w', 0xe745517c, "invalid environment variable (missing `=`):  `%q`", _variable)
+			logf ('w', 0xe745517c, "invalid environment variable (missing `=`):  `%s`", _variable)
 		}
 	}
 	
-	if _error := main_0 (_executable, _arguments, _environment); _error == nil {
+	if _error := main_0 (_executable, _argument0, _arguments, _environment); _error == nil {
 		os.Exit (0)
 	} else {
 		panic (abortError (_error))
