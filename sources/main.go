@@ -482,10 +482,68 @@ func loadLibrary (_candidate string) (*Library, error) {
 
 func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (error) {
 	
-	_library, _error := loadLibrary ()
+	var _sourcePath string
+	var _cleanArguments []string
+	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
+	
+	for _name, _value := range _environment {
+		
+		var _nameCanonical string
+		{
+			_nameCanonical = strings.ToUpper (_name)
+			_nameCanonical = strings.ReplaceAll (_nameCanonical, "-", "_")
+			for {
+				_nameCanonical_0 := strings.ReplaceAll (_nameCanonical, "__", "_")
+				if _nameCanonical != _nameCanonical_0 {
+					_nameCanonical = _nameCanonical_0
+				} else {
+					break
+				}
+			}
+			_nameCanonical = strings.Replace (_nameCanonical, "X_RUN", "XRUN", 1)
+		}
+		
+		if strings.HasPrefix (_nameCanonical, "XRUN") || strings.HasPrefix (_nameCanonical, "_XRUN") {
+			
+			if _name != _nameCanonical {
+				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
+			}
+			
+			switch _nameCanonical {
+				case "XRUN_SOURCE" :
+					_sourcePath = _value
+				default :
+					logf ('w', 0xdf61b057, "environment variable unknown: `%s`", _nameCanonical)
+			}
+			
+		} else {
+			_cleanEnvironment[_name] = _value
+		}
+	}
+	
+	for _index, _argument := range _arguments {
+		if _argument == "--" {
+			_cleanArguments = _arguments[_index + 1:]
+			break
+		} else if strings.HasPrefix (_argument, "-") {
+			if strings.HasPrefix (_argument, "--source=") {
+				_sourcePath = _argument[len ("--source="):]
+			} else {
+				return errorf (0x33555ffb, "invalid argument `%s`", _argument)
+			}
+		} else {
+			_cleanArguments = _arguments[_index:]
+			break
+		}
+	}
+	
+	_library, _error := loadLibrary (_sourcePath)
 	if _error != nil {
 		return _error
 	}
+	
+	_ = _cleanArguments
+	_ = _cleanEnvironment
 	
 	{
 		_encoder := json.NewEncoder (os.Stdout)
