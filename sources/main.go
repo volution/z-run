@@ -18,6 +18,7 @@ import "log"
 import "os"
 import "os/exec"
 import "path"
+import "path/filepath"
 import "regexp"
 import "sort"
 import "strings"
@@ -411,7 +412,15 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 
 func parseFromSource (_library *Library, _source *Source) (string, error) {
 	if _source.Executable {
-		_command := exec.Command (_source.Path)
+		_path := _source.Path
+		if ! path.IsAbs (_path) {
+			if _path_0, _error := filepath.Abs (_path); _error == nil {
+				_path = _path_0
+			} else {
+				return "", _error
+			}
+		}
+		_command := exec.Command (_path)
 		if _output, _error := _command.Output (); _error == nil {
 			return parseFromStream (_library, bytes.NewBuffer (_output), _source.Path)
 		} else {
@@ -702,7 +711,6 @@ func resolveSourcesPath_1 () (string, os.FileInfo, error) {
 			path.Join (".", ".git"),
 			path.Join (".", ".hg"),
 			path.Join (".", ".svn"),
-			
 		)
 	for _, _folder := range _folders {
 		_folders = append (_folders, path.Join (_folder, "scripts"))
