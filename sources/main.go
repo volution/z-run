@@ -67,6 +67,21 @@ func NewLibrary () (*Library) {
 }
 
 
+func (_library *Library) Labels () ([]string, error) {
+	return _library.ScriptletLabels, nil
+}
+
+
+func (_library *Library) Resolve (_label string) (*Scriptlet, error) {
+	if _index, _exists := _library.ScriptletsByLabel[_label]; _exists {
+		_scriptlet := _library.Scriptlets[_index]
+		return _scriptlet, nil
+	} else {
+		return nil, nil
+	}
+}
+
+
 
 
 func parseFromSource (_library *Library, _source *Source) (string, error) {
@@ -172,7 +187,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 					_text := _line[3:]
 					var _label string
 					var _body string
-					if _splitIndex := strings.Index (_line, " :: "); _splitIndex >= 0 {
+					if _splitIndex := strings.Index (_text, " :: "); _splitIndex >= 0 {
 						_label = _text[:_splitIndex]
 						_body = _text[_splitIndex + 4:]
 					} else {
@@ -480,9 +495,56 @@ func loadLibrary (_candidate string) (*Library, error) {
 
 
 
+func doExecute (_library *Library, _executable string, _scriptlet string, _arguments []string, _environment map[string]string) (error) {
+	return errorf (0x4f41e9bd, "not-implemented")
+}
+
+
+func doExportLabelsList (_library *Library, _stream io.Writer) (error) {
+	if _labels, _error := _library.Labels (); _error == nil {
+		for _, _label := range _labels {
+			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
+				return _error
+			}
+		}
+		return nil
+	} else {
+		return _error
+	}
+}
+
+
+func doExportScript (_library *Library, _label string, _stream io.Writer) (error) {
+	if _scriptlet, _error := _library.Resolve (_label); _error == nil {
+		if _scriptlet != nil {
+			_, _error := io.WriteString (_stream, _scriptlet.Body)
+			return _error
+		} else {
+			return errorf (0x95e0b174, "undefined scriptlet `%s`", _label)
+		}
+	} else {
+		return _error
+	}
+}
+
+
+func doExportLibraryJson (_library *Library, _stream io.Writer) (error) {
+	_encoder := json.NewEncoder (_stream)
+	_encoder.SetIndent ("", "    ")
+	_encoder.SetEscapeHTML (false)
+	return _encoder.Encode (_library)
+}
+
+
+
+
 func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (error) {
 	
+	var _cachePath string
 	var _sourcePath string
+	var _command string
+	var _scriptlet string
+	
 	var _cleanArguments []string
 	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
 	
@@ -512,6 +574,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			switch _nameCanonical {
 				case "XRUN_SOURCE" :
 					_sourcePath = _value
+				case "XRUN_LIBRARY" :
+					_cachePath = _value
 				default :
 					logf ('w', 0xdf61b057, "environment variable unknown: `%s`", _nameCanonical)
 			}
@@ -522,19 +586,69 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	}
 	
 	for _index, _argument := range _arguments {
+		
 		if _argument == "--" {
 			_cleanArguments = _arguments[_index + 1:]
 			break
+			
 		} else if strings.HasPrefix (_argument, "-") {
+			if _command != "" {
+				return errorf (0xae04b5ff, "unexpected argument `%s`", _argument)
+			}
 			if strings.HasPrefix (_argument, "--source=") {
 				_sourcePath = _argument[len ("--source="):]
+			} else if strings.HasPrefix (_argument, "--library=") {
+				_cachePath = _argument[len ("--library="):]
 			} else {
 				return errorf (0x33555ffb, "invalid argument `%s`", _argument)
 			}
+			
+		} else if strings.HasPrefix (_argument, "::") {
+			if _command == "" {
+				_command = "execute"
+			}
+			_scriptlet = _argument
+			_cleanArguments = _arguments[_index + 1:]
+			break
+			
 		} else {
+			if _command == "" {
+				switch _argument {
+					
+					case "execute" :
+						_command = "execute"
+						continue
+					
+					case "export-script" :
+						_command = "export-script"
+						continue
+					
+					case "export-labels-list", "export-labels", "list" :
+						_command = "export-labels-list"
+						_index += 1
+					
+					case "export-library-json", "export-library", "export" :
+						_command = "export-library-json"
+						_index += 1
+				}
+			} else {
+				_scriptlet = _argument
+				_index += 1
+			}
 			_cleanArguments = _arguments[_index:]
 			break
 		}
+	}
+	
+	if _cachePath != "" {
+		if _sourcePath != "" {
+			logf ('w', 0x1fe0b572, "both library and source path specified;  using library!")
+			_sourcePath = ""
+		}
+	}
+	
+	if (_command == "") && (_scriptlet == "") {
+		_command = "export-labels-list"
 	}
 	
 	_library, _error := loadLibrary (_sourcePath)
@@ -542,19 +656,41 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		return _error
 	}
 	
-	_ = _cleanArguments
-	_ = _cleanEnvironment
-	
-	{
-		_encoder := json.NewEncoder (os.Stdout)
-		_encoder.SetIndent ("", "    ")
-		_encoder.SetEscapeHTML (false)
-		if _error := _encoder.Encode (_library); _error != nil {
-			return _error
-		}
+	switch _command {
+		
+		case "execute" :
+			if _scriptlet == "" {
+				return errorf (0x39718e70, "execute:  expected scriptlet")
+			}
+			return doExecute (_library, _executable, _scriptlet, _cleanArguments, _cleanEnvironment)
+		
+		case "export-script" :
+			if _scriptlet == "" {
+				return errorf (0xf24640a2, "export:  expected scriptlet")
+			}
+			if len (_cleanArguments) != 0 {
+				return errorf (0xcf8db3c0, "export:  unexpected arguments")
+			}
+			return doExportScript (_library, _scriptlet, os.Stdout)
+		
+		case "export-labels-list" :
+			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+				return errorf (0xf7b9c7f3, "list:  unexpected scriptlet or arguments")
+			}
+			return doExportLabelsList (_library, os.Stdout)
+		
+		case "export-library-json" :
+			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+				return errorf (0x400ec122, "export:  unexpected scriptlet or arguments")
+			}
+			return doExportLibraryJson (_library, os.Stdout)
+		
+		case "" :
+			return errorf (0x5d2a4326, "expected command")
+		
+		default :
+			return errorf (0x66cf8700, "unexpected command `%s`", _command)
 	}
-	
-	return nil
 }
 
 
