@@ -411,6 +411,12 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 
 func parseFromSource (_library *Library, _source *Source) (string, error) {
 	if _source.Executable {
+		_command := exec.Command (_source.Path)
+		if _output, _error := _command.Output (); _error == nil {
+			return parseFromStream (_library, bytes.NewBuffer (_output), _source.Path)
+		} else {
+			return "", _error
+		}
 		return "", errorf (0x566095fc, "not-implemented")
 	} else {
 		return parseFromFile (_library, _source.Path)
@@ -679,8 +685,10 @@ func resolveSources (_candidate string) ([]*Source, error) {
 
 func resolveSourcesPath_0 (_candidate string) (string, os.FileInfo, error) {
 	if _candidate != "" {
+//		logf ('d', 0x16563f01, "using candidate `%s`...", _candidate)
 		return resolveSourcesPath_2 (_candidate)
 	} else {
+//		logf ('d', 0xef5420f5, "searching candidate...")
 		return resolveSourcesPath_1 ()
 	}
 }
@@ -694,9 +702,15 @@ func resolveSourcesPath_1 () (string, os.FileInfo, error) {
 			path.Join (".", ".git"),
 			path.Join (".", ".hg"),
 			path.Join (".", ".svn"),
+			
 		)
 	for _, _folder := range _folders {
 		_folders = append (_folders, path.Join (_folder, "scripts"))
+	}
+	var _home string
+	if _home_0, _error := os.UserHomeDir (); _error == nil {
+		_home = _home_0
+		_folders = append (_folders, _home)
 	}
 	
 	_files := []string {
@@ -708,6 +722,9 @@ func resolveSourcesPath_1 () (string, os.FileInfo, error) {
 	_candidates := make ([]string, 0, 16)
 	
 	for _, _folder := range _folders {
+		if (_folder == _home) && (len (_candidates) > 0) {
+			continue
+		}
 		for _, _file := range _files {
 			_path := path.Join (_folder, _file)
 			if _, _error := os.Lstat (_path); _error == nil {
@@ -967,8 +984,9 @@ func doExecute (_library LibraryStore, _executable string, _scriptletLabel strin
 		} else {
 			return errorf (0x3be6dcd7, "unknown scriptlet for `%s`", _scriptletLabel)
 		}
+	} else {
+		return _error
 	}
-	return errorf (0x4f41e9bd, "not-implemented")
 }
 
 
@@ -1053,17 +1071,49 @@ exec %d<&-
 
 
 
-func doSelectExecute (_library LibraryStore, _executable string, _arguments []string, _environment map[string]string) (error) {
-	if _label, _error := doSelectLabel_0 (_library, _executable); _error == nil {
+func doSelectExecute (_library LibraryStore, _executable string, _terminal string, _arguments []string, _environment map[string]string) (error) {
+	if _label, _error := doSelectLabel_0 (_library, _executable, _terminal); _error == nil {
 		return doExecute (_library, _executable, _label, _arguments, _environment)
 	} else {
 		return _error
 	}
 }
 
+func doSelectLegacyOutput (_library LibraryStore, _executable string, _terminal string, _label string, _stream io.Writer) (error) {
+	if _scriptlet, _error := doSelectScriptlet (_library, _executable, _terminal, _label); _error == nil {
+		if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error != nil {
+			return _error
+		}
+		return nil
+	} else {
+		return _error
+	}
+}
 
-func doSelectLabel (_library LibraryStore, _executable string, _stream io.Writer) (error) {
-	if _label, _error := doSelectLabel_0 (_library, _executable); _error == nil {
+
+
+
+func doSelectScriptlet (_library LibraryStore, _executable string, _terminal string, _label string) (*Scriptlet, error) {
+	if _label == "" {
+		if _label_0, _error := doSelectLabel_0 (_library, _executable, _terminal); _error == nil {
+			_label = _label_0
+		} else {
+			return nil, _error
+		}
+	}
+	if _scriptlet, _error := _library.ResolveFullByLabel (_label); _error == nil {
+		if _scriptlet != nil {
+			return _scriptlet, nil
+		} else {
+			return nil, errorf (0x06ef8e1d, "unknown scriptlet for `%s`", _label)
+		}
+	} else {
+		return nil, _error
+	}
+}
+
+func doSelectLabel (_library LibraryStore, _executable string, _terminal string, _stream io.Writer) (error) {
+	if _label, _error := doSelectLabel_0 (_library, _executable, _terminal); _error == nil {
 		if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
 			return _error
 		}
@@ -1073,8 +1123,8 @@ func doSelectLabel (_library LibraryStore, _executable string, _stream io.Writer
 	return nil
 }
 
-func doSelectLabels (_library LibraryStore, _executable string, _stream io.Writer) (error) {
-	if _labels, _error := doSelectLabels_0 (_library, _executable); _error == nil {
+func doSelectLabels (_library LibraryStore, _executable string, _terminal string, _stream io.Writer) (error) {
+	if _labels, _error := doSelectLabels_0 (_library, _executable, _terminal); _error == nil {
 		for _, _label := range _labels {
 			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
 				return _error
@@ -1087,8 +1137,8 @@ func doSelectLabels (_library LibraryStore, _executable string, _stream io.Write
 }
 
 
-func doSelectLabel_0 (_library LibraryStore, _executable string) (string, error) {
-	if _labels, _error := doSelectLabels_0 (_library, _executable); _error == nil {
+func doSelectLabel_0 (_library LibraryStore, _executable string, _terminal string) (string, error) {
+	if _labels, _error := doSelectLabels_0 (_library, _executable, _terminal); _error == nil {
 		if len (_labels) == 1 {
 			return _labels[0], nil
 		} else {
@@ -1099,7 +1149,7 @@ func doSelectLabel_0 (_library LibraryStore, _executable string) (string, error)
 	}
 }
 
-func doSelectLabels_0 (_library LibraryStore, _executable string) ([]string, error) {
+func doSelectLabels_0 (_library LibraryStore, _executable string, _terminal string) ([]string, error) {
 	var _inputs []string
 	if _inputs_0, _error := _library.SelectLabels (); _error == nil {
 		_inputs = _inputs_0
@@ -1107,7 +1157,7 @@ func doSelectLabels_0 (_library LibraryStore, _executable string) ([]string, err
 		return nil, _error
 	}
 	var _outputs []string
-	if _outputs_0, _error := fzfSelectFrom (_executable, _inputs); _error == nil {
+	if _outputs_0, _error := menuSelectFrom (_executable, _terminal, _inputs); _error == nil {
 		_outputs = _outputs_0
 	} else {
 		return nil, _error
@@ -1124,6 +1174,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	var _sourcePath string
 	var _command string
 	var _scriptlet string
+	var _terminal string
 	
 	var _cleanArguments []string
 	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
@@ -1148,11 +1199,11 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		if strings.HasPrefix (_nameCanonical, "XRUN") || strings.HasPrefix (_nameCanonical, "_XRUN") {
 			
 			if _name != _nameCanonical {
-				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
+//				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
 			}
 			
 			switch _nameCanonical {
-				case "XRUN_SOURCE" :
+				case "XRUN_SOURCE", "XRUN_COMMANDS" :
 					_sourcePath = _value
 				case "XRUN_LIBRARY" :
 					_cachePath = _value
@@ -1160,13 +1211,24 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					if _executable != _value {
 						logf ('w', 0x31ee572e, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
 					}
+				case "XRUN_ACTION" :
+					_command = "legacy:" + _value
+				case "XRUN_TERM" :
+					_terminal = _value
 				default :
-					logf ('w', 0xdf61b057, "environment variable unknown:  `%s`", _nameCanonical)
+					logf ('w', 0xdf61b057, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
 			}
 			
 		} else {
 			_cleanEnvironment[_name] = _value
 		}
+	}
+	
+	if _terminal == "" {
+		_terminal, _ = _cleanEnvironment["TERM"]
+	}
+	if _terminal == "dumb" {
+		_terminal = ""
 	}
 	
 	for _index, _argument := range _arguments {
@@ -1296,13 +1358,13 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0x203e410a, "execute:  unexpected scriptlet or arguments")
 			}
-			return doSelectExecute (_library, _executable, _cleanArguments, _cleanEnvironment)
+			return doSelectExecute (_library, _executable, _terminal, _cleanArguments, _cleanEnvironment)
 		
 		case "select-label" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0x2d19b1bc, "select:  unexpected scriptlet or arguments")
 			}
-			return doSelectLabel (_library, _executable, os.Stdout)
+			return doSelectLabel (_library, _executable, _terminal, os.Stdout)
 		
 		case "export-script" :
 			if _scriptlet == "" {
@@ -1341,6 +1403,12 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			return doExportLibraryCdb (_library, _cleanArguments[0])
 		
+		case "legacy:output-selection-and-command" :
+			if len (_cleanArguments) != 0 {
+				return errorf (0xe4f7e6f5, "export:  unexpected arguments")
+			}
+			return doSelectLegacyOutput (_library, _executable, _terminal, _scriptlet, os.Stdout)
+		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")
 		
@@ -1356,6 +1424,13 @@ func main () () {
 	
 	log.SetFlags (0)
 	
+	var _executable string
+	if _executable_0, _error := os.Executable (); _error == nil {
+		_executable = _executable_0
+	} else {
+		panic (abortError (_error))
+	}
+	
 	_argument0 := os.Args[0]
 	switch _argument0 {
 		case "[x-run:select]" :
@@ -1370,18 +1445,11 @@ func main () () {
 			_arguments := os.Args
 			_arguments[0] = "[x-run]"
 			_environment := os.Environ ()
-			if _error := syscall.Exec (_argument0, _arguments, _environment); _error != nil {
+			if _error := syscall.Exec (_executable, _arguments, _environment); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0xe13aab5f)
 			}
-	}
-	
-	var _executable string
-	if _executable_0, _error := os.Executable (); _error == nil {
-		_executable = _executable_0
-	} else {
-		panic (abortError (_error))
 	}
 	
 	_arguments := append ([]string (nil), os.Args[1:] ...)
@@ -1458,6 +1526,7 @@ func logErrorf (_slug rune, _code uint32, _error error, _format string, _argumen
 			}
 			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, 0xda900de1, _errorString)
 			log.Printf ("[%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, 0x4fb5d56d, _error)
+			panic (_error)
 		}
 	}
 }
@@ -1758,7 +1827,7 @@ func fzfSelectMain () (error) {
 
 
 
-func fzfSelectFrom (_executable string, _inputs []string) ([]string, error) {
+func menuSelectFrom (_executable string, _terminal string, _inputs []string) ([]string, error) {
 	_inputsChannel := make (chan string, 1024)
 	go func () () {
 		for _, _input := range _inputs {
@@ -1766,52 +1835,63 @@ func fzfSelectFrom (_executable string, _inputs []string) ([]string, error) {
 		}
 		close (_inputsChannel)
 	} ()
-	return fzfSelect (_executable, _inputsChannel)
+	return menuSelect (_executable, _terminal, _inputsChannel)
 }
 
 
-func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
+func menuSelect (_executable string, _terminal string, _inputs <-chan string) ([]string, error) {
 	
-	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-		return nil, errorf (0xfc026596, "stderr is not a TTY")
+	_term := _terminal
+	if _term != "" {
+		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+			return nil, errorf (0xfc026596, "stderr is not a TTY")
+		}
+	} else {
+//		return nil, errorf (0xbdbc268d, "expected `TERM`")
 	}
 	
-	_term := os.Getenv ("TERM")
-	if _term == "" {
-		return nil, errorf (0xbdbc268d, "expected `TERM`")
-	}
-	
-	_fzfCommand := & exec.Cmd {
-			Path : _executable,
-			Args : []string {
-					"[x-run:select]",
-				},
-			Env : []string {
-					"TERM=" + _term,
-				},
-			Dir : "",
+	_command := & exec.Cmd {
 			Stdin : nil,
 			Stdout : nil,
 			Stderr : os.Stderr,
+				Dir : "",
 		}
+	if _term != "" {
+		_command.Path = _executable
+		_command.Args = []string {
+				"[x-run:select]",
+			}
+		_command.Env = []string {
+				"TERM=" + _term,
+			}
+	} else if _path, _error := exec.LookPath ("x-input"); _error == nil {
+		_command.Path = _path
+		_command.Args = []string {
+				"[x-run:input]",
+				"select",
+				"run:",
+			}
+	} else {
+		return nil, errorf (0xb91714f7, "expected `x-input`")
+	}
 	
-	var _fzfStdin io.WriteCloser
-	if _stream, _error := _fzfCommand.StdinPipe (); _error == nil {
-		_fzfStdin = _stream
+	var _stdin io.WriteCloser
+	if _stream, _error := _command.StdinPipe (); _error == nil {
+		_stdin = _stream
 	} else {
 		return nil, _error
 	}
-	var _fzfStdout io.ReadCloser
-	if _stream, _error := _fzfCommand.StdoutPipe (); _error == nil {
-		_fzfStdout = _stream
+	var _stdout io.ReadCloser
+	if _stream, _error := _command.StdoutPipe (); _error == nil {
+		_stdout = _stream
 	} else {
-		_fzfStdin.Close ()
+		_stdin.Close ()
 		return nil, _error
 	}
 	
-	if _error := _fzfCommand.Start (); _error != nil {
-		_fzfStdin.Close ()
-		_fzfStdout.Close ()
+	if _error := _command.Start (); _error != nil {
+		_stdin.Close ()
+		_stdout.Close ()
 		return nil, _error
 	}
 	
@@ -1829,7 +1909,7 @@ func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
 				_buffer.Reset ()
 				_buffer.WriteString (_input)
 				_buffer.WriteByte ('\n')
-				if _, _error := _buffer.WriteTo (_fzfStdin); _error != nil {
+				if _, _error := _buffer.WriteTo (_stdin); _error != nil {
 					_stdinError = _error
 					break
 				}
@@ -1837,7 +1917,7 @@ func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
 				break
 			}
 		}
-		if _error := _fzfStdin.Close (); _error != nil {
+		if _error := _stdin.Close (); _error != nil {
 			_stdinError = _error
 		}
 //		logf ('d', 0xc6eca1ca, "ending stdin loop")
@@ -1849,7 +1929,7 @@ func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
 	var _outputs []string
 	go func () () {
 //		logf ('d', 0x61503d28, "starting stdout loop")
-		_buffer := bufio.NewReader (_fzfStdout)
+		_buffer := bufio.NewReader (_stdout)
 		for {
 			if _line, _error := _buffer.ReadString ('\n'); _error == nil {
 				_output := strings.TrimRight (_line, "\n")
@@ -1865,7 +1945,7 @@ func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
 				break
 			}
 		}
-		if _error := _fzfStdout.Close (); _error != nil {
+		if _error := _stdout.Close (); _error != nil {
 			_stdoutError = _error
 		}
 //		logf ('d', 0x90515c65, "ending stdout loop")
@@ -1874,7 +1954,7 @@ func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
 	
 	var _waitError error
 //	logf ('d', 0x7ce5281a, "starting wait")
-	if _error := _fzfCommand.Wait (); _error != nil {
+	if _error := _command.Wait (); _error != nil {
 		_waitError = _error
 	}
 //	logf ('d', 0xa36df40d, "ending wait")
@@ -1882,7 +1962,7 @@ func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
 	_waiter.Wait ()
 	
 	var _outputError error
-	switch _fzfCommand.ProcessState.ExitCode () {
+	switch _command.ProcessState.ExitCode () {
 		case 0 :
 			if len (_outputs) == 0 {
 				_outputError = errorf (0xbb7ff442, "invalid outputs")
