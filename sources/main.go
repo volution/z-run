@@ -9,6 +9,7 @@ import "encoding/hex"
 import "encoding/json"
 import "errors"
 import "fmt"
+import "hash"
 import "io"
 import "io/ioutil"
 import "log"
@@ -51,7 +52,8 @@ type Library struct {
 type Source struct {
 	Path string `json:"path"`
 	Executable bool `json:"executable"`
-	Fingerprint string `json:"fingerprint"`
+	FingerprintMeta string `json:"fingerprint_meta"`
+	FingerprintData string `json:"fingerprint_data"`
 }
 
 
@@ -108,10 +110,9 @@ func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string) 
 		if ! utf8.Valid (_data) {
 			return "", errorf (0x2a19cfc7, "invalid UTF-8 source")
 		}
-		_fingerprintBytes := sha256.Sum256 (_data)
-		_fingerprint := hex.EncodeToString (_fingerprintBytes[:])
 		_data := string (_data)
 		if _error := parseFromData (_library, _data, _sourcePath); _error == nil {
+			_fingerprint := NewFingerprinter () .String (_data) .Build ()
 			return _fingerprint, _error
 		} else {
 			return "", _error
@@ -337,26 +338,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 		_scriptlet.Interpreter = "<shell>"
 	}
 	
-	var _fingerprint string
-	{
-		_hasher := sha256.New ()
-		var _bytes [8]byte
-		
-		binary.BigEndian.PutUint64 (_bytes[:], uint64 (len (_scriptlet.Label)))
-		_hasher.Write (_bytes[:])
-		io.WriteString (_hasher, _scriptlet.Label)
-		
-		binary.BigEndian.PutUint64 (_bytes[:], uint64 (len (_scriptlet.Interpreter)))
-		_hasher.Write (_bytes[:])
-		io.WriteString (_hasher, _scriptlet.Interpreter)
-		
-		binary.BigEndian.PutUint64 (_bytes[:], uint64 (len (_scriptlet.Body)))
-		_hasher.Write (_bytes[:])
-		io.WriteString (_hasher, _scriptlet.Body)
-		
-		_fingerprintRaw := _hasher.Sum (nil)
-		_fingerprint = hex.EncodeToString (_fingerprintRaw)
-	}
+	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
 	
 	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
 		return nil
@@ -387,14 +369,19 @@ func resolveSources (_candidate string) ([]*Source, error) {
 	
 	_statMode := _stat.Mode ()
 	switch {
+		
 		case _statMode.IsRegular () :
+			_fingerprint := NewFingerprinter () .StringWithLen (_candidate) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
 			_source := & Source {
 					Path : _candidate,
 					Executable : (_statMode.Perm () & 0111) != 0,
+					FingerprintMeta : _fingerprint,
 				}
 			_sources = append (_sources, _source)
+		
 		case _statMode.IsDir () :
 			return nil, errorf (0x8a04b23b, "not-implemented")
+		
 		default :
 			return nil, errorf (0xa35428a2, "invalid source `%s`", _candidate)
 	}
@@ -481,7 +468,7 @@ func loadLibrary (_candidate string) (*Library, error) {
 	
 	for _, _source := range _sources {
 		if _fingerprint, _error := parseFromSource (_library, _source); _error == nil {
-			_source.Fingerprint = _fingerprint
+			_source.FingerprintData = _fingerprint
 		} else {
 			return nil, _error
 		}
@@ -800,5 +787,52 @@ func errorf (_code uint32, _format string, _arguments ... interface{}) (error) {
 	_message := fmt.Sprintf (_format, _arguments ...)
 	_prefix := fmt.Sprintf ("[%08x]  ", _code)
 	return errors.New (_prefix + _message)
+}
+
+
+
+
+type Fingerprinter struct {
+	hasher hash.Hash
+}
+
+func NewFingerprinter () (Fingerprinter) {
+	return Fingerprinter {
+			hasher : sha256.New (),
+		}
+}
+
+func (_fingerprinter Fingerprinter) Uint64 (_value uint64) (Fingerprinter) {
+	var _bytes [8]byte
+	binary.BigEndian.PutUint64 (_bytes[:], _value)
+	_fingerprinter.hasher.Write (_bytes[:])
+	return _fingerprinter
+}
+func (_fingerprinter Fingerprinter) Int64 (_value int64) (Fingerprinter) {
+	return _fingerprinter.Uint64 (uint64 (_value))
+}
+
+func (_fingerprinter Fingerprinter) String (_value string) (Fingerprinter) {
+	io.WriteString (_fingerprinter.hasher, _value)
+	return _fingerprinter
+}
+func (_fingerprinter Fingerprinter) StringWithLen (_value string) (Fingerprinter) {
+	_fingerprinter.Uint64 (uint64 (len (_value)))
+	io.WriteString (_fingerprinter.hasher, _value)
+	return _fingerprinter
+}
+
+func (_fingerprinter Fingerprinter) Bytes (_value []byte) (Fingerprinter) {
+	_fingerprinter.hasher.Write (_value)
+	return _fingerprinter
+}
+func (_fingerprinter Fingerprinter) BytesWithLen (_value []byte) (Fingerprinter) {
+	_fingerprinter.Uint64 (uint64 (len (_value)))
+	_fingerprinter.hasher.Write (_value)
+	return _fingerprinter
+}
+
+func (_fingerprinter Fingerprinter) Build () (string) {
+	return hex.EncodeToString (_fingerprinter.hasher.Sum (nil))
 }
 
