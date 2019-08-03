@@ -361,11 +361,11 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 
 
 
-func resolveSources () ([]*Source, error) {
+func resolveSources (_candidate string) ([]*Source, error) {
 	
 	_sources := make ([]*Source, 0, 128)
 	
-	_candidate, _stat, _error := resolveSourcesPath_0 ()
+	_candidate, _stat, _error := resolveSourcesPath_0 (_candidate)
 	if _error != nil {
 		return nil, _error
 	}
@@ -388,7 +388,16 @@ func resolveSources () ([]*Source, error) {
 }
 
 
-func resolveSourcesPath_0 () (string, os.FileInfo, error) {
+func resolveSourcesPath_0 (_candidate string) (string, os.FileInfo, error) {
+	if _candidate != "" {
+		return resolveSourcesPath_2 (_candidate)
+	} else {
+		return resolveSourcesPath_1 ()
+	}
+}
+
+
+func resolveSourcesPath_1 () (string, os.FileInfo, error) {
 	
 	_folders := make ([]string, 0, 128)
 	_folders = append (_folders,
@@ -427,12 +436,12 @@ func resolveSourcesPath_0 () (string, os.FileInfo, error) {
 	} else if len (_candidates) > 1 {
 		return "", nil, errorf (0x519bb041, "too many sources found: `%s`", _candidates)
 	} else {
-		return resolveSourcesPath_1 (_candidates[0])
+		return resolveSourcesPath_2 (_candidates[0])
 	}
 }
 
 
-func resolveSourcesPath_1 (_candidate string) (string, os.FileInfo, error) {
+func resolveSourcesPath_2 (_candidate string) (string, os.FileInfo, error) {
 	if _stat, _error := os.Stat (_candidate); _error == nil {
 		return _candidate, _stat, nil
 	} else if os.IsNotExist (_error) {
@@ -445,9 +454,9 @@ func resolveSourcesPath_1 (_candidate string) (string, os.FileInfo, error) {
 
 
 
-func loadLibrary () (*Library, error) {
+func loadLibrary (_candidate string) (*Library, error) {
 	
-	_sources, _error := resolveSources ()
+	_sources, _error := resolveSources (_candidate)
 	if _error != nil {
 		return nil, _error
 	}
