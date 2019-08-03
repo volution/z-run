@@ -9,10 +9,26 @@
 	exec -- ./.outputs/main-debug.elf "${@}"
 !!
 
+<< x-run / 0
+	test "${#}" -ge 1
+	"${X_RUN[@]}" ':: go / build / main / debug'
+	export -n -- X_RUN_INSIDE X_RUN_COMMAND X_RUN_TRACE
+	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
+!!
+
 :: x-run / execute :: exec -- "${X_RUN[@]}" ':: x-run' execute "${@}"
 :: x-run / script :: exec -- "${X_RUN[@]}" ':: x-run' export-script "${@}"
 :: x-run / list :: exec -- "${X_RUN[@]}" ':: x-run' export-labels "${@}"
-:: x-run / export :: exec -- "${X_RUN[@]}" ':: x-run' export-library "${@}"
+:: x-run / select :: exec -- "${X_RUN[@]}" ':: x-run' select-label "${@}"
+:: x-run / export-json :: exec -- "${X_RUN[@]}" ':: x-run' export-library-json "${@}"
+:: x-run / export-cdb :: exec -- "${X_RUN[@]}" ':: x-run' export-library-cdb "${@}"
+:: x-run / parse :: exec -- "${X_RUN[@]}" ':: x-run' parse-library "${@}"
+:: x-run / fzf :: exec -- "${X_RUN[@]}" ':: x-run / 0' '[x-run:select]' "${@}"
+
+:: x-run / use / workspace :: export -- XRUN_SOURCE=./.x-run
+:: x-run / use / photos :: export -- XRUN_SOURCE=./examples/photos.x-run
+:: x-run / use / desktop :: export -- XRUN_SOURCE=./examples/desktop.x-run
+:: x-run / use / vonuvoli :: export -- XRUN_SOURCE=./examples/vonuvoli.x-run
 
 
 
@@ -150,4 +166,28 @@
 			--color \
 	#
 !!
+
+
+
+
+:: dummy / sleep / 30s :: test "${#}" -eq 0 ; sleep -- 30s
+:: dummy / sleep / 1h :: test "${#}" -eq 0 ; sleep -- 1h
+
+:: dummy / sleep / loop :: printf -- '.' ; sleep -- 1s ; exec -- "${X_RUN[@]}" ':: dummy / sleep / loop' "${@}"
+:: dummy / sleep / bomb :: printf -- '.' ; sleep -- 1s ;         "${X_RUN[@]}" ':: dummy / sleep / bomb' "${@}"
+
+:: dummy / env :: test "${#}" -eq 0 ; tr '\0' '\n' < "/proc/${$}/environ"
+:: dummy / env / loop :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ; exec -- "${X_RUN[@]}" ':: dummy / env / loop' "${@}"
+:: dummy / env / bomb :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ;         "${X_RUN[@]}" ':: dummy / env / bomb' "${@}"
+
+:: dummy / lsof :: test "${#}" -eq 0 ; lsof -p "${$}" -w
+:: dummy / lsof / loop :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ; exec -- "${X_RUN[@]}" ':: dummy / lsof / loop' "${@}"
+:: dummy / lsof / bomb :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ;         "${X_RUN[@]}" ':: dummy / lsof / bomb' "${@}"
+
+:: dummy / touch :: test "${#}" -eq 0 ; touch -- ./.x-run
+:: dummy / touch / loop :: printf -- '.' ; touch -- ./.x-run ; sleep 1s ; exec -- "${X_RUN[@]}" ':: dummy / touch / loop' "${@}"
+:: dummy / touch / bomb :: printf -- '.' ; touch -- ./.x-run ; sleep 1s ;         "${X_RUN[@]}" ':: dummy / touch / bomb' "${@}"
+
+:: dummy / true :: exec -- true "${@}"
+:: dummy / false :: exec -- false "${@}"
 
