@@ -3,17 +3,481 @@
 package main
 
 
+import "crypto/sha256"
+import "encoding/binary"
+import "encoding/hex"
+import "encoding/json"
 import "errors"
 import "fmt"
+import "io"
+import "io/ioutil"
 import "log"
 import "os"
+import "path"
 import "regexp"
+import "sort"
+import "strings"
+import "unicode"
+import "unicode/utf8"
+
+
+
+
+type Scriptlet struct {
+	Index uint `json:"id"`
+	Label string `json:"label"`
+	Interpreter string `json:"interpreter"`
+	Body string `json:"body"`
+	Fingerprint string `json:"fingerprint"`
+	Source ScriptletSource `json:"source"`
+}
+
+type ScriptletSource struct {
+	Path string `json:"path"`
+	LineStart uint `json:"line_start"`
+	LineEnd uint `json:"line_end"`
+}
+
+
+type Library struct {
+	Scriptlets []*Scriptlet `json:"scriptlets"`
+	ScriptletsByLabel map[string]uint `json:"scriptlets_by_label"`
+	ScriptletsByFingerprint map[string]uint `json:"scriptlets_by_fingerprint"`
+	ScriptletLabels []string `json:"scriptlet_labels"`
+	Sources []*Source `json:"sources"`
+}
+
+
+type Source struct {
+	Path string `json:"path"`
+	Executable bool `json:"executable"`
+	Fingerprint string `json:"fingerprint"`
+}
+
+
+
+
+func NewLibrary () (*Library) {
+	return & Library {
+			Scriptlets : make ([]*Scriptlet, 0, 1024),
+			ScriptletsByLabel : make (map[string]uint, 1024),
+			ScriptletsByFingerprint : make (map[string]uint, 1024),
+			ScriptletLabels : make ([]string, 0, 1024),
+		}
+}
+
+
+
+
+func parseFromSource (_library *Library, _source *Source) (string, error) {
+	if _source.Executable {
+		return "", errorf (0x566095fc, "not-implemented")
+	} else {
+		return parseFromFile (_library, _source.Path)
+	}
+}
+
+
+func parseFromFile (_library *Library, _path string) (string, error) {
+	if _stream, _error := os.Open (_path); _error == nil {
+		defer _stream.Close ()
+		return parseFromStream (_library, _stream, _path)
+	} else {
+		return "", _error
+	}
+}
+
+
+func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string) (string, error) {
+	if _data, _error := ioutil.ReadAll (_stream); _error == nil {
+		if ! utf8.Valid (_data) {
+			return "", errorf (0x2a19cfc7, "invalid UTF-8 source")
+		}
+		_fingerprintBytes := sha256.Sum256 (_data)
+		_fingerprint := hex.EncodeToString (_fingerprintBytes[:])
+		_data := string (_data)
+		if _error := parseFromData (_library, _data, _sourcePath); _error == nil {
+			return _fingerprint, _error
+		} else {
+			return "", _error
+		}
+	} else {
+		return "", _error
+	}
+}
+
+
+func parseFromData (_library *Library, _source string, _sourcePath string) (error) {
+	
+	
+	const (
+		WAITING = 1 + iota
+		SCRIPTLET_BODY
+		SCRIPTLET_PUSH
+		SKIPPING
+	)
+	
+	type scriptletState struct {
+		label string
+		body string
+		bodyBuffer strings.Builder
+		bodyStrip string
+		bodyLines uint
+		lineStart uint
+		lineEnd uint
+	}
+	
+	_trimCr := func (s string) (string) { return strings.TrimFunc (s, func (r rune) (bool) { return r == '\r' }) }
+	_trimSpace := func (s string) (string) { return strings.TrimFunc (s, unicode.IsSpace) }
+	_trimRightSpace := func (s string) (string) { return strings.TrimRightFunc (s, unicode.IsSpace) }
+	
+	_state := WAITING
+	_remaining := _source
+	_lineIndex := uint (0)
+	var _scriptletState scriptletState
+	
+	for {
+		
+		_remaining = _trimCr (_remaining)
+		_remainingLen := len (_remaining)
+		if _remainingLen == 0 {
+			break
+		}
+		
+		var _line string
+		if _lineEnd := strings.IndexByte (_remaining, '\n'); _lineEnd >= 0 {
+			_line = _remaining[:_lineEnd]
+			_remaining = _remaining[_lineEnd + 1:]
+		} else {
+			_line = _remaining
+			_remaining = ""
+		}
+		
+		_line = _trimCr (_line)
+		_lineIndex += 1
+		
+//		logf ('d', 0xc2d2b73d, "processing line (%d):  %s", _lineIndex, _line)
+		
+		switch _state {
+			
+			case WAITING :
+				_line = _trimRightSpace (_line)
+				_lineTrimmed := _trimSpace (_line)
+				
+				if _lineTrimmed == "" {
+					// NOP
+					
+				} else if strings.HasPrefix (_line, ":: ") {
+					
+					_text := _line[3:]
+					var _label string
+					var _body string
+					if _splitIndex := strings.Index (_line, " :: "); _splitIndex >= 0 {
+						_label = _text[:_splitIndex]
+						_body = _text[_splitIndex + 4:]
+					} else {
+						return errorf (0x53eafa1a, "invalid syntax (%d):  missing scriptlet separator `::`", _lineIndex, _line)
+					}
+					_label = _trimSpace (_label)
+					_body = _trimSpace (_body)
+					
+					if _label == "" {
+						return errorf (0xddec2340, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
+					}
+					if _body == "" {
+						return errorf (0xc1dc94cc, "invalid syntax (%d):  empty scriptlet body", _lineIndex, _line)
+					}
+					
+					_scriptletState = scriptletState {
+							label : _label,
+							body : _body + "\n",
+							lineStart : _lineIndex,
+							lineEnd : _lineIndex,
+						}
+					_state = SCRIPTLET_PUSH
+					
+				} else if strings.HasPrefix (_line, "<< ") {
+					
+					_label := _line[3:]
+					_label = _trimSpace (_label)
+					if _label == "" {
+						return errorf (0x64c17a76, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
+					}
+					
+					_scriptletState = scriptletState {
+							label : _label,
+							lineStart : _lineIndex,
+						}
+					_state = SCRIPTLET_BODY
+					
+				} else if strings.HasPrefix (_line, "##<< ") || (_lineTrimmed == "##<<") {
+					_state = SKIPPING
+					
+				} else if strings.HasPrefix (_line, "# ") || (_lineTrimmed == "#") {
+					// NOP
+					
+				} else if (_lineIndex == 1) && strings.HasPrefix (_line, "#!/") {
+					// NOP
+					
+				} else {
+					return errorf (0x183de0fd, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+				}
+			
+			case SCRIPTLET_BODY :
+				_lineTrimmed := _trimSpace (_line)
+				
+				if _lineTrimmed == "!!" {
+					_scriptletState.body = _scriptletState.bodyBuffer.String ()
+					_scriptletState.lineEnd = _lineIndex
+					_state = SCRIPTLET_PUSH
+					
+				} else if strings.HasPrefix (_line, "!!") {
+					return errorf (0xf9900c0c, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+					
+				} else if _lineTrimmed == "" {
+					_scriptletState.bodyBuffer.WriteByte ('\n')
+					
+				} else if strings.HasPrefix (_line, _scriptletState.bodyStrip) {
+					if _scriptletState.bodyLines == 0 {
+						if _stripIndex := strings.IndexFunc (_line, func (r rune) (bool) { return ! unicode.IsSpace (r) }); _stripIndex > 0 {
+							_scriptletState.bodyStrip = _line[:_stripIndex]
+						}
+					}
+					_bodyLine := _line[len (_scriptletState.bodyStrip):]
+					_scriptletState.bodyBuffer.WriteString (_bodyLine)
+					_scriptletState.bodyBuffer.WriteByte ('\n')
+					_scriptletState.bodyLines += 1
+					
+				} else {
+					return errorf (0xc4e05443, "invalid syntax (%d):  unexpected indentation `%s`", _lineIndex, _line)
+				}
+			
+			case SKIPPING :
+				_line = _trimRightSpace (_line)
+				_lineTrimmed := _trimSpace (_line)
+				if _lineTrimmed == "##!!" {
+					_state = WAITING
+				} else if strings.HasPrefix (_line, "##!!") {
+					return errorf (0x183de0fd, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+				} else {
+					// NOP
+				}
+		}
+		
+		if _state == SCRIPTLET_PUSH {
+			_scriptlet := & Scriptlet {
+					Label : _scriptletState.label,
+					Body : _scriptletState.body,
+					Source : ScriptletSource {
+							Path : _sourcePath,
+							LineStart : _scriptletState.lineStart,
+							LineEnd : _scriptletState.lineEnd,
+						},
+				}
+			if _error := includeScriptlet (_library, _scriptlet); _error != nil {
+				return _error
+			}
+			_state = WAITING
+		}
+	}
+	
+	switch _state {
+		case WAITING :
+		case SCRIPTLET_BODY :
+			return errorf (0x9d55df33, "invalid syntax (%d):  missing scriptlet body closing tag `!!` (and reached end of file)", _lineIndex)
+		case SKIPPING :
+			return errorf (0x357f15e1, "invalid syntax (%d):  missing comment body closing tag `##!!` (and reached end of file)", _lineIndex)
+		default :
+			return errorf (0xc0f78380, "invalid syntax (%d):  unexpected state `%s` (and reached end of file)", _lineIndex, _state)
+	}
+	
+	return nil
+}
+
+
+
+
+func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
+	
+	if _scriptlet.Label != strings.TrimSpace (_scriptlet.Label) {
+		return errorf (0xd8797e9e, "invalid scriptlet label `%s`", _scriptlet.Label)
+	}
+	if _scriptlet.Label == "" {
+		return errorf (0xaede3d8c, "invalid scriptlet label `%s`", _scriptlet.Label)
+	}
+	if _, _exists := _library.ScriptletsByLabel[_scriptlet.Label]; _exists {
+		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
+	}
+	
+	if _scriptlet.Interpreter == "" {
+		_scriptlet.Interpreter = "<shell>"
+	}
+	
+	var _fingerprint string
+	{
+		_hasher := sha256.New ()
+		var _bytes [8]byte
+		
+		binary.BigEndian.PutUint64 (_bytes[:], uint64 (len (_scriptlet.Label)))
+		_hasher.Write (_bytes[:])
+		io.WriteString (_hasher, _scriptlet.Label)
+		
+		binary.BigEndian.PutUint64 (_bytes[:], uint64 (len (_scriptlet.Interpreter)))
+		_hasher.Write (_bytes[:])
+		io.WriteString (_hasher, _scriptlet.Interpreter)
+		
+		binary.BigEndian.PutUint64 (_bytes[:], uint64 (len (_scriptlet.Body)))
+		_hasher.Write (_bytes[:])
+		io.WriteString (_hasher, _scriptlet.Body)
+		
+		_fingerprintRaw := _hasher.Sum (nil)
+		_fingerprint = hex.EncodeToString (_fingerprintRaw)
+	}
+	
+	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
+		return nil
+	}
+	
+	_scriptlet.Index = uint (len (_library.Scriptlets))
+	_scriptlet.Fingerprint = _fingerprint
+	
+	_library.Scriptlets = append (_library.Scriptlets, _scriptlet)
+	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
+	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index
+	_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
+	
+	return nil
+}
+
+
+
+
+func resolveSources () ([]*Source, error) {
+	
+	_sources := make ([]*Source, 0, 128)
+	
+	_candidate, _stat, _error := resolveSourcesPath_0 ()
+	if _error != nil {
+		return nil, _error
+	}
+	
+	_statMode := _stat.Mode ()
+	switch {
+		case _statMode.IsRegular () :
+			_source := & Source {
+					Path : _candidate,
+					Executable : (_statMode.Perm () & 0111) != 0,
+				}
+			_sources = append (_sources, _source)
+		case _statMode.IsDir () :
+			return nil, errorf (0x8a04b23b, "not-implemented")
+		default :
+			return nil, errorf (0xa35428a2, "invalid source `%s`", _candidate)
+	}
+	
+	return _sources, nil
+}
+
+
+func resolveSourcesPath_0 () (string, os.FileInfo, error) {
+	
+	_folders := make ([]string, 0, 128)
+	_folders = append (_folders,
+			".",
+			path.Join (".", ".git"),
+			path.Join (".", ".hg"),
+			path.Join (".", ".svn"),
+		)
+	for _, _folder := range _folders {
+		_folders = append (_folders, path.Join (_folder, "scripts"))
+	}
+	
+	_files := []string {
+			"x-run",
+			".x-run",
+			"_x-run",
+		}
+	
+	_candidates := make ([]string, 0, 16)
+	
+	for _, _folder := range _folders {
+		for _, _file := range _files {
+			_path := path.Join (_folder, _file)
+			if _, _error := os.Lstat (_path); _error == nil {
+				_candidates = append (_candidates, _path)
+			} else if os.IsNotExist (_error) {
+				// NOP
+			} else {
+				return "", nil, _error
+			}
+		}
+	}
+	
+	if len (_candidates) == 0 {
+		return "", nil, errorf (0x779f9a9f, "no sources found")
+	} else if len (_candidates) > 1 {
+		return "", nil, errorf (0x519bb041, "too many sources found: `%s`", _candidates)
+	} else {
+		return resolveSourcesPath_1 (_candidates[0])
+	}
+}
+
+
+func resolveSourcesPath_1 (_candidate string) (string, os.FileInfo, error) {
+	if _stat, _error := os.Stat (_candidate); _error == nil {
+		return _candidate, _stat, nil
+	} else if os.IsNotExist (_error) {
+		return "", nil, errorf (0x4b0005de, "source does not exist `%s`", _candidate)
+	} else {
+		return "", nil, _error
+	}
+}
+
+
+
+
+func loadLibrary () (*Library, error) {
+	
+	_sources, _error := resolveSources ()
+	if _error != nil {
+		return nil, _error
+	}
+	
+	_library := NewLibrary ()
+	_library.Sources = _sources
+	
+	for _, _source := range _sources {
+		if _fingerprint, _error := parseFromSource (_library, _source); _error == nil {
+			_source.Fingerprint = _fingerprint
+		} else {
+			return nil, _error
+		}
+	}
+	
+	sort.Strings (_library.ScriptletLabels)
+	
+	return _library, nil
+}
 
 
 
 
 func main_0 () (error) {
-	logf ('i', 0xfe68754c, "hello!")
+	
+	_library, _error := loadLibrary ()
+	if _error != nil {
+		return _error
+	}
+	
+	{
+		_encoder := json.NewEncoder (os.Stdout)
+		_encoder.SetIndent ("", "    ")
+		_encoder.SetEscapeHTML (false)
+		if _error := _encoder.Encode (_library); _error != nil {
+			return _error
+		}
+	}
+	
 	return nil
 }
 
