@@ -28,7 +28,7 @@ type Scriptlet struct {
 	Index uint `json:"id"`
 	Label string `json:"label"`
 	Interpreter string `json:"interpreter"`
-	Body string `json:"body"`
+	Body string `json:"body,omitempty"`
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
 }
@@ -54,6 +54,17 @@ type Source struct {
 	Executable bool `json:"executable"`
 	FingerprintMeta string `json:"fingerprint_meta"`
 	FingerprintData string `json:"fingerprint_data"`
+}
+
+
+
+
+type StoreOutput interface {
+	Include (_namespace string, _key string, _value interface{}) (error)
+}
+
+type StoreInput interface {
+	Select (_namespace string, _key string, _value interface{}) (error)
 }
 
 
@@ -454,6 +465,24 @@ func resolveSourcesPath_2 (_candidate string) (string, os.FileInfo, error) {
 }
 
 
+func resolveCache () (string, error) {
+	var _cache string
+	if _cache_0, _error := os.UserCacheDir (); _error == nil {
+		_cache = _cache_0
+	} else {
+		return "", _error
+	}
+	if _error := os.MkdirAll (_cache, 0750); _error != nil {
+		return "", _error
+	}
+	_cache = path.Join (_cache, "x-run")
+	if _error := os.MkdirAll (_cache, 0750); _error != nil {
+		return "", _error
+	}
+	return _cache, nil
+}
+
+
 
 
 func loadLibrary (_candidate string) (*Library, error) {
@@ -520,6 +549,45 @@ func doExportLibraryJson (_library *Library, _stream io.Writer) (error) {
 	_encoder.SetIndent ("", "    ")
 	_encoder.SetEscapeHTML (false)
 	return _encoder.Encode (_library)
+}
+
+
+func doExportLibraryStore (_library *Library, _store StoreOutput) (error) {
+	
+	_labels := make ([]string, 0, len (_library.Scriptlets))
+	_fingerprints := make ([]string, 0, len (_library.Scriptlets))
+	_indexByLabels := make (map[string]string, len (_library.Scriptlets))
+	
+	for _, _scriptlet := range _library.Scriptlets {
+		
+		_scriptletMeta := *_scriptlet
+		_scriptletMeta.Body = ""
+		if _error := _store.Include ("scriptlets-by-label", _scriptlet.Label, _scriptlet.Fingerprint); _error != nil {
+			return _error
+		}
+		if _error := _store.Include ("scriptlets-meta", _scriptlet.Fingerprint, &_scriptletMeta); _error != nil {
+			return _error
+		}
+		if _error := _store.Include ("scriptlets-body", _scriptlet.Fingerprint, _scriptlet.Body); _error != nil {
+			return _error
+		}
+		
+		_labels = append (_labels, _scriptlet.Label)
+		_fingerprints = append (_fingerprints, _scriptlet.Fingerprint)
+		_indexByLabels[_scriptlet.Label] = _scriptlet.Fingerprint
+	}
+	
+	sort.Strings (_labels)
+	sort.Strings (_fingerprints)
+	
+	if _error := _store.Include ("scriptlets-indices", "labels", _labels); _error != nil {
+		return _error
+	}
+	if _error := _store.Include ("scriptlets-indices", "fingerprints", _fingerprints); _error != nil {
+		return _error
+	}
+	
+	return nil
 }
 
 
@@ -617,6 +685,10 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					case "export-library-json", "export-library", "export" :
 						_command = "export-library-json"
 						_index += 1
+					
+					case "compile-library", "compile-library-json" :
+						_command = "compile-library-json"
+						_index += 1
 				}
 			} else {
 				_scriptlet = _argument
@@ -666,11 +738,18 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			return doExportLabelsList (_library, os.Stdout)
 		
-		case "export-library-json" :
+		case "export-library-json", "compile-library-json" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0x400ec122, "export:  unexpected scriptlet or arguments")
 			}
-			return doExportLibraryJson (_library, os.Stdout)
+			switch _command {
+				case "export-library-json" :
+					return doExportLibraryJson (_library, os.Stdout)
+				case "compile-library-json" :
+					return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout))
+				default :
+					panic (0xda7243ef)
+			}
 		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")
@@ -787,6 +866,39 @@ func errorf (_code uint32, _format string, _arguments ... interface{}) (error) {
 	_message := fmt.Sprintf (_format, _arguments ...)
 	_prefix := fmt.Sprintf ("[%08x]  ", _code)
 	return errors.New (_prefix + _message)
+}
+
+
+
+
+type JsonStreamStoreOutput struct {
+	stream io.Writer
+	encoder *json.Encoder
+}
+
+type JsonStoreRecord struct {
+	Namespace string `json:"namespace"`
+	Key string `json:"key"`
+	Value interface{} `json:"value"`
+}
+
+func NewJsonStreamStoreOutput (_stream io.Writer) (*JsonStreamStoreOutput) {
+	_encoder := json.NewEncoder (_stream)
+	_encoder.SetIndent ("", "    ")
+	_encoder.SetEscapeHTML (false)
+	return & JsonStreamStoreOutput {
+			stream : _stream,
+			encoder : _encoder,
+		}
+}
+
+func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _value interface{}) (error) {
+	_record := & JsonStoreRecord {
+			Namespace : _namespace,
+			Key : _key,
+			Value : _value,
+		}
+	return _store.encoder.Encode (_record)
 }
 
 
