@@ -3,6 +3,7 @@
 package main
 
 
+import "bufio"
 import "bytes"
 import "crypto/sha256"
 import "encoding/binary"
@@ -15,15 +16,22 @@ import "io"
 import "io/ioutil"
 import "log"
 import "os"
+import "os/exec"
 import "path"
 import "regexp"
 import "sort"
 import "strings"
+import "sync"
+import "syscall"
 import "unicode"
 import "unicode/utf8"
 
 
 import cdb "github.com/cipriancraciun/go-cdb-lib"
+
+import fzf "github.com/junegunn/fzf/src"
+import fzf_tui "github.com/junegunn/fzf/src/tui"
+import isatty "github.com/mattn/go-isatty"
 
 
 
@@ -927,6 +935,28 @@ func doExportLibraryCdb (_library LibraryStore, _path string) (error) {
 }
 
 
+func doSelectLabel (_library LibraryStore, _executable string, _stream io.Writer) (error) {
+	var _inputs []string
+	if _inputs_0, _error := _library.SelectLabels (); _error == nil {
+		_inputs = _inputs_0
+	} else {
+		return _error
+	}
+	var _outputs []string
+	if _outputs_0, _error := fzfSelectFrom (_executable, _inputs); _error == nil {
+		_outputs = _outputs_0
+	} else {
+		return _error
+	}
+	for _, _output := range _outputs {
+		if _, _error := fmt.Fprintf (_stream, "%s\n", _output); _error != nil {
+			return _error
+		}
+	}
+	return nil
+}
+
+
 
 
 func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (error) {
@@ -1018,6 +1048,10 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 						_command = "export-labels-list"
 						_index += 1
 					
+					case "select-label", "select" :
+						_command = "select-label"
+						_index += 1
+					
 					case "parse-library-json", "parse-library", "parse" :
 						_command = "parse-library-json"
 						_index += 1
@@ -1105,6 +1139,12 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			return doExportLibraryCdb (_library, _cleanArguments[0])
 		
+		case "select-label" :
+			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+				return errorf (0x2d19b1bc, "select:  unexpected scriptlet or arguments")
+			}
+			return doSelectLabel (_library, _executable, os.Stdout)
+		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")
 		
@@ -1120,6 +1160,27 @@ func main () () {
 	
 	log.SetFlags (0)
 	
+	_argument0 := os.Args[0]
+	switch _argument0 {
+		case "[x-run:select]" :
+			if _error := fzfSelectMain (); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x2346ca3f)
+			}
+		case "[x-run]" :
+			// NOP
+		default :
+			_arguments := os.Args
+			_arguments[0] = "[x-run]"
+			_environment := os.Environ ()
+			if _error := syscall.Exec (_argument0, _arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0xe13aab5f)
+			}
+	}
+	
 	var _executable string
 	if _executable_0, _error := os.Executable (); _error == nil {
 		_executable = _executable_0
@@ -1127,7 +1188,6 @@ func main () () {
 		panic (abortError (_error))
 	}
 	
-	_argument0 := os.Args[0]
 	_arguments := append ([]string (nil), os.Args[1:] ...)
 	
 	_environment := make (map[string]string, 128)
@@ -1456,5 +1516,204 @@ func (_fingerprinter Fingerprinter) BytesWithLen (_value []byte) (Fingerprinter)
 
 func (_fingerprinter Fingerprinter) Build () (string) {
 	return hex.EncodeToString (_fingerprinter.hasher.Sum (nil))
+}
+
+
+
+
+func fzfSelectMain () (error) {
+	
+	if isatty.IsTerminal (os.Stdin.Fd ()) {
+		return errorf (0x34efe59c, "stdin is a TTY")
+	}
+	if isatty.IsTerminal (os.Stdout.Fd ()) {
+		return errorf (0xf12b8d81, "stdout is a TTY")
+	}
+	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+		return errorf (0x55a1298a, "stderr is not a TTY")
+	}
+	
+	_options := fzf.DefaultOptions ()
+	
+	_options.Fuzzy = false
+	_options.Extended = true
+	_options.Case = fzf.CaseIgnore
+	_options.Normalize = true
+	_options.Sort = 1
+	_options.Multi = false
+	
+	_options.Theme = fzf_tui.Default16
+	_options.Theme = nil
+	_options.Bold = false
+	_options.ClearOnExit = true
+	_options.Mouse = false
+	
+	fzf.Run (_options, "x-run")
+	panic (0x4716a580)
+}
+
+
+
+
+func fzfSelectFrom (_executable string, _inputs []string) ([]string, error) {
+	_inputsChannel := make (chan string, 1024)
+	go func () () {
+		for _, _input := range _inputs {
+			_inputsChannel <- _input
+		}
+		close (_inputsChannel)
+	} ()
+	return fzfSelect (_executable, _inputsChannel)
+}
+
+
+func fzfSelect (_executable string, _inputs <-chan string) ([]string, error) {
+	
+	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+		return nil, errorf (0xfc026596, "stderr is not a TTY")
+	}
+	
+	_term := os.Getenv ("TERM")
+	if _term == "" {
+		return nil, errorf (0xbdbc268d, "expected `TERM`")
+	}
+	
+	_fzfCommand := & exec.Cmd {
+			Path : _executable,
+			Args : []string {
+					"[x-run:select]",
+				},
+			Env : []string {
+					"TERM=" + _term,
+				},
+			Dir : "",
+			Stdin : nil,
+			Stdout : nil,
+			Stderr : os.Stderr,
+		}
+	
+	var _fzfStdin io.WriteCloser
+	if _stream, _error := _fzfCommand.StdinPipe (); _error == nil {
+		_fzfStdin = _stream
+	} else {
+		return nil, _error
+	}
+	var _fzfStdout io.ReadCloser
+	if _stream, _error := _fzfCommand.StdoutPipe (); _error == nil {
+		_fzfStdout = _stream
+	} else {
+		_fzfStdin.Close ()
+		return nil, _error
+	}
+	
+	if _error := _fzfCommand.Start (); _error != nil {
+		_fzfStdin.Close ()
+		_fzfStdout.Close ()
+		return nil, _error
+	}
+	
+	_waiter := & sync.WaitGroup {}
+	
+	_waiter.Add (1)
+	var _stdinError error
+	go func () () {
+//		logf ('d', 0x41785333, "starting stdin loop")
+		_buffer := bytes.NewBuffer (nil)
+		for {
+			_input, _ok := <- _inputs
+//			logf ('d', 0xf997ad63, "writing to stdin: `%s`", _input)
+			if _ok {
+				_buffer.Reset ()
+				_buffer.WriteString (_input)
+				_buffer.WriteByte ('\n')
+				if _, _error := _buffer.WriteTo (_fzfStdin); _error != nil {
+					_stdinError = _error
+					break
+				}
+			} else {
+				break
+			}
+		}
+		if _error := _fzfStdin.Close (); _error != nil {
+			_stdinError = _error
+		}
+//		logf ('d', 0xc6eca1ca, "ending stdin loop")
+		_waiter.Done ()
+	} ()
+	
+	_waiter.Add (1)
+	var _stdoutError error
+	var _outputs []string
+	go func () () {
+//		logf ('d', 0x61503d28, "starting stdout loop")
+		_buffer := bufio.NewReader (_fzfStdout)
+		for {
+			if _line, _error := _buffer.ReadString ('\n'); _error == nil {
+				_output := strings.TrimRight (_line, "\n")
+//				logf ('d', 0xa6f11fbf, "read from stdout: `%s`", _output)
+				_outputs = append (_outputs, _output)
+			} else if _error == io.EOF {
+				if _line != "" {
+					_stdoutError = errorf (0x1bc14ac4, "expected proper line")
+				}
+				break
+			} else {
+				_stdoutError = _error
+				break
+			}
+		}
+		if _error := _fzfStdout.Close (); _error != nil {
+			_stdoutError = _error
+		}
+//		logf ('d', 0x90515c65, "ending stdout loop")
+		_waiter.Done ()
+	} ()
+	
+	var _waitError error
+//	logf ('d', 0x7ce5281a, "starting wait")
+	if _error := _fzfCommand.Wait (); _error != nil {
+		_waitError = _error
+	}
+//	logf ('d', 0xa36df40d, "ending wait")
+	
+	_waiter.Wait ()
+	
+	var _outputError error
+	switch _fzfCommand.ProcessState.ExitCode () {
+		case 0 :
+			if len (_outputs) == 0 {
+				_outputError = errorf (0xbb7ff442, "invalid outputs")
+			}
+		case 1 :
+			if len (_outputs) != 0 {
+				_outputError = errorf (0x6bd364da, "invalid outputs")
+			}
+			_outputs = []string {}
+			_waitError = nil
+		case 130 :
+			if len (_outputs) != 0 {
+				_outputError = errorf (0xac4b1681, "invalid outputs")
+			}
+			_outputs = nil
+			_waitError = nil
+		case 2 :
+			_outputError = errorf (0x85cabb2a, "failed")
+			_outputs = nil
+	}
+	
+	if _outputError != nil {
+		return nil, _outputError
+	}
+	if _waitError != nil {
+		return nil, _waitError
+	}
+	if _stdinError != nil {
+		return nil, _stdinError
+	}
+	if _stdoutError != nil {
+		return nil, _stdoutError
+	}
+	
+	return _outputs, nil
 }
 
