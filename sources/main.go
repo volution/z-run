@@ -213,10 +213,19 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 				} else if strings.HasPrefix (_line, "##<< ") || (_lineTrimmed == "##<<") {
 					_state = SKIPPING
 					
+				} else if strings.HasPrefix (_line, "#:: ") {
+					// NOP
+					
 				} else if strings.HasPrefix (_line, "# ") || (_lineTrimmed == "#") {
 					// NOP
 					
 				} else if (_lineIndex == 1) && strings.HasPrefix (_line, "#!/") {
+					// NOP
+					
+				} else if false ||
+						(_line == "##== sort = false") ||
+						(_line == "##== sort = true") ||
+						false {
 					// NOP
 					
 				} else {
@@ -237,19 +246,19 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 				} else if _lineTrimmed == "" {
 					_scriptletState.bodyBuffer.WriteByte ('\n')
 					
-				} else if strings.HasPrefix (_line, _scriptletState.bodyStrip) {
+				} else {
 					if _scriptletState.bodyLines == 0 {
 						if _stripIndex := strings.IndexFunc (_line, func (r rune) (bool) { return ! unicode.IsSpace (r) }); _stripIndex > 0 {
 							_scriptletState.bodyStrip = _line[:_stripIndex]
 						}
 					}
+					if ! strings.HasPrefix (_line, _scriptletState.bodyStrip) {
+						logf ('w', 0xc4e05443, "invalid syntax (%d):  unexpected indentation `%s`", _lineIndex, _line)
+					}
 					_bodyLine := _line[len (_scriptletState.bodyStrip):]
 					_scriptletState.bodyBuffer.WriteString (_bodyLine)
 					_scriptletState.bodyBuffer.WriteByte ('\n')
 					_scriptletState.bodyLines += 1
-					
-				} else {
-					return errorf (0xc4e05443, "invalid syntax (%d):  unexpected indentation `%s`", _lineIndex, _line)
 				}
 			
 			case SKIPPING :
@@ -462,7 +471,7 @@ func loadLibrary () (*Library, error) {
 
 
 
-func main_0 () (error) {
+func main_0 (_executable string, _arguments []string, _environment map[string]string) (error) {
 	
 	_library, _error := loadLibrary ()
 	if _error != nil {
@@ -488,7 +497,39 @@ func main () () {
 	
 	log.SetFlags (0)
 	
-	if _error := main_0 (); _error == nil {
+	var _executable string
+	if _executable_0, _error := os.Executable (); _error == nil {
+		_executable = _executable_0
+	} else {
+		panic (abortError (_error))
+	}
+	
+	_arguments := append ([]string (nil), os.Args ...)
+	
+	_environment := make (map[string]string, 128)
+	for _, _variable := range os.Environ () {
+		if _splitIndex := strings.IndexByte (_variable, '='); _splitIndex >= 0 {
+			_name := _variable[:_splitIndex]
+			_value := _variable[_splitIndex + 1:]
+			if _name == "" {
+				logf ('w', 0x0ffb0031, "invalid environment variable (name empty):  `%q`", _variable)
+			} else if ! utf8.Valid ([]byte (_name)) {
+				logf ('w', 0x54278534, "invalid environment variable (name invalid UTF-c):  `%q`", _name)
+			} else if ! utf8.Valid ([]byte (_value)) {
+				logf ('w', 0x785ba004, "invalid environment variable (value invalid UTF-c):  `%q`", _name)
+			} else if _value == "" {
+				logf ('w', 0xfe658d34, "invalid environment variable (value empty):  `%q`", _name)
+			} else if _, _exists := _environment[_name]; _exists {
+				logf ('w', 0x7e7e41a5, "invalid environment variable (name duplicate):  `%q`", _name)
+			} else {
+				_environment[_name] = _value
+			}
+		} else {
+			logf ('w', 0xe745517c, "invalid environment variable (missing `=`):  `%q`", _variable)
+		}
+	}
+	
+	if _error := main_0 (_executable, _arguments, _environment); _error == nil {
 		os.Exit (0)
 	} else {
 		panic (abortError (_error))
