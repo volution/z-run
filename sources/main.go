@@ -786,7 +786,7 @@ func resolveCache () (string, error) {
 
 
 
-func resolveLibrary (_candidate string, _cacheEnabled bool) (LibraryStore, error) {
+func resolveLibrary (_candidate string, _cacheEnabled bool, _environment map[string]string) (LibraryStore, error) {
 	
 	_sources, _error := resolveSources (_candidate)
 	if _error != nil {
@@ -801,6 +801,10 @@ func resolveLibrary (_candidate string, _cacheEnabled bool) (LibraryStore, error
 			if _source.FingerprintData != "" {
 				_fingerprints = append (_fingerprints, _source.FingerprintData)
 			}
+		}
+		for _name, _value := range _environment {
+			_fingerprint := NewFingerprinter () .String ("d33041e6571901d0a5a6dfbde7c7a312") .StringWithLen (_name) .StringWithLen (_value) .Build ()
+			_fingerprints = append (_fingerprints, _fingerprint)
 		}
 		sort.Strings (_fingerprints)
 		_fingerprinter := NewFingerprinter ()
@@ -1347,7 +1351,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		}
 	} else {
 //		logf ('d', 0x93dbfd8c, "resolving library...")
-		if _library_0, _error := resolveLibrary (_sourcePath, _cacheEnabled); _error == nil {
+		if _library_0, _error := resolveLibrary (_sourcePath, _cacheEnabled, _environment); _error == nil {
 			_library = _library_0
 		} else {
 			return _error
@@ -1534,7 +1538,6 @@ func logErrorf (_slug rune, _code uint32, _error error, _format string, _argumen
 			}
 			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, 0xda900de1, _errorString)
 			log.Printf ("[%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, 0x4fb5d56d, _error)
-			panic (_error)
 		}
 	}
 }
