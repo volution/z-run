@@ -55,6 +55,7 @@ type Library struct {
 	ScriptletsByLabel map[string]uint `json:"index_by_label"`
 	
 	Sources []*Source `json:"sources"`
+	SourcesFingerprint string `json:"sources_fingerprint"`
 }
 
 
@@ -178,6 +179,64 @@ func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool
 	} else {
 		return "", false, _error
 	}
+}
+
+
+
+
+func parseLibrary (_sources []*Source, _sourcesFingerprint string) (*Library, error) {
+	
+	_library := NewLibrary ()
+	_library.Sources = _sources
+	_library.SourcesFingerprint = _sourcesFingerprint
+	
+	for _, _source := range _sources {
+		if _fingerprint, _error := parseFromSource (_library, _source); _error == nil {
+			_source.FingerprintData = _fingerprint
+		} else {
+			return nil, _error
+		}
+	}
+	
+	sort.Strings (_library.ScriptletFingerprints)
+	sort.Strings (_library.ScriptletLabels)
+	
+	return _library, nil
+}
+
+
+func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
+	
+	if _scriptlet.Label != strings.TrimSpace (_scriptlet.Label) {
+		return errorf (0xd8797e9e, "invalid scriptlet label `%s`", _scriptlet.Label)
+	}
+	if _scriptlet.Label == "" {
+		return errorf (0xaede3d8c, "invalid scriptlet label `%s`", _scriptlet.Label)
+	}
+	if _, _exists := _library.ScriptletsByLabel[_scriptlet.Label]; _exists {
+		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
+	}
+	
+	if _scriptlet.Interpreter == "" {
+		_scriptlet.Interpreter = "<shell>"
+	}
+	
+	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
+	
+	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
+		return nil
+	}
+	
+	_scriptlet.Index = uint (len (_library.Scriptlets))
+	_scriptlet.Fingerprint = _fingerprint
+	
+	_library.Scriptlets = append (_library.Scriptlets, _scriptlet)
+	_library.ScriptletFingerprints = append (_library.ScriptletFingerprints, _scriptlet.Fingerprint)
+	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index
+	_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
+	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
+	
+	return nil
 }
 
 
@@ -419,43 +478,6 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 
 
 
-func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
-	
-	if _scriptlet.Label != strings.TrimSpace (_scriptlet.Label) {
-		return errorf (0xd8797e9e, "invalid scriptlet label `%s`", _scriptlet.Label)
-	}
-	if _scriptlet.Label == "" {
-		return errorf (0xaede3d8c, "invalid scriptlet label `%s`", _scriptlet.Label)
-	}
-	if _, _exists := _library.ScriptletsByLabel[_scriptlet.Label]; _exists {
-		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
-	}
-	
-	if _scriptlet.Interpreter == "" {
-		_scriptlet.Interpreter = "<shell>"
-	}
-	
-	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
-	
-	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
-		return nil
-	}
-	
-	_scriptlet.Index = uint (len (_library.Scriptlets))
-	_scriptlet.Fingerprint = _fingerprint
-	
-	_library.Scriptlets = append (_library.Scriptlets, _scriptlet)
-	_library.ScriptletFingerprints = append (_library.ScriptletFingerprints, _scriptlet.Fingerprint)
-	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index
-	_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
-	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
-	
-	return nil
-}
-
-
-
-
 func resolveSources (_candidate string) ([]*Source, error) {
 	
 	_sources := make ([]*Source, 0, 128)
@@ -572,27 +594,35 @@ func resolveCache () (string, error) {
 
 
 
-func loadLibrary (_candidate string) (LibraryStore, error) {
+func resolveLibrary (_candidate string) (LibraryStore, error) {
 	
 	_sources, _error := resolveSources (_candidate)
 	if _error != nil {
 		return nil, _error
 	}
 	
-	_library := NewLibrary ()
-	_library.Sources = _sources
-	
-	for _, _source := range _sources {
-		if _fingerprint, _error := parseFromSource (_library, _source); _error == nil {
-			_source.FingerprintData = _fingerprint
-		} else {
-			return nil, _error
+	var _sourcesFingerprint string
+	{
+		_fingerprints := make ([]string, 0, len (_sources) * 2)
+		for _, _source := range _sources {
+			_fingerprints = append (_fingerprints, _source.FingerprintMeta)
+			if _source.FingerprintData != "" {
+				_fingerprints = append (_fingerprints, _source.FingerprintData)
+			}
 		}
+		sort.Strings (_fingerprints)
+		_fingerprinter := NewFingerprinter ()
+		for _, _fingerprint := range _fingerprints {
+			_fingerprinter.StringWithLen (_fingerprint)
+		}
+		_sourcesFingerprint = _fingerprinter.Build ()
 	}
 	
-	sort.Strings (_library.ScriptletLabels)
-	
-	return _library, nil
+	if _library, _error := parseLibrary (_sources, _sourcesFingerprint); _error == nil {
+		return _library, _error
+	} else {
+		return nil, _error
+	}
 }
 
 
@@ -841,7 +871,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		_command = "export-labels-list"
 	}
 	
-	_library, _error := loadLibrary (_sourcePath)
+	_library, _error := resolveLibrary (_sourcePath)
 	if _error != nil {
 		return _error
 	}
