@@ -3,6 +3,20 @@
 
 
 
+<< x-run
+	"${X_RUN[@]}" ':: go / build / main / debug'
+	export -n -- X_RUN_INSIDE X_RUN_COMMAND X_RUN_TRACE
+	exec -- ./.outputs/main-debug.elf "${@}"
+!!
+
+:: x-run / execute :: exec -- "${X_RUN[@]}" ':: x-run' execute "${@}"
+:: x-run / script :: exec -- "${X_RUN[@]}" ':: x-run' export-script "${@}"
+:: x-run / list :: exec -- "${X_RUN[@]}" ':: x-run' export-labels "${@}"
+:: x-run / export :: exec -- "${X_RUN[@]}" ':: x-run' export-library "${@}"
+
+
+
+
 << go / build / main / debug
 	test "${#}" -eq 0
 	exec -- "${X_RUN[@]}" ':: go / tool' \
