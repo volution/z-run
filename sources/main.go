@@ -64,6 +64,8 @@ type Library struct {
 	
 	Sources []*Source `json:"sources"`
 	SourcesFingerprint string `json:"sources_fingerprint"`
+	
+	url string
 }
 
 
@@ -89,11 +91,14 @@ type LibraryStore interface {
 	ResolveMetaByLabel (_label string) (*Scriptlet, error)
 	ResolveBodyByLabel (_label string) (string, bool, error)
 	ResolveFingerprintByLabel (_label string) (string, bool, error)
+	
+	Url () (string)
 }
 
 
 type LibraryStoreInput struct {
 	store StoreInput
+	url string
 }
 
 
@@ -198,11 +203,17 @@ func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool
 }
 
 
+func (_library *Library) Url () (string) {
+	return _library.url
+}
 
 
-func NewLibraryStoreInput (_store StoreInput) (*LibraryStoreInput, error) {
+
+
+func NewLibraryStoreInput (_store StoreInput, _url string) (*LibraryStoreInput, error) {
 	_library := & LibraryStoreInput {
 			store : _store,
+			url : _url,
 		}
 	return _library, nil
 }
@@ -330,6 +341,11 @@ func (_library *LibraryStoreInput) ResolveFingerprintByLabel (_label string) (st
 	} else {
 		return "", false, _error
 	}
+}
+
+
+func (_library *LibraryStoreInput) Url () (string) {
+	return _library.url
 }
 
 
@@ -781,15 +797,15 @@ func resolveLibrary (_candidate string, _cacheEnabled bool) (LibraryStore, error
 		}
 		
 		_cacheLibrary = path.Join (_cacheRoot, _sourcesFingerprint + ".cdb")
-		if _store, _error := NewCdbStoreInput (_cacheLibrary); _error == nil {
-//			logf ('d', 0x63ae360d, "opened library cachad at `%s`;", _cacheLibrary)
-			return NewLibraryStoreInput (_store)
+		if _store, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
+			return _store, nil
 		} else if ! os.IsNotExist (_error) {
 			return nil, _error
 		}
 	}
 	
 	var _library *Library
+	logf ('i', 0xbd44916b, "parsing library from sources...")
 	if _library_0, _error := parseLibrary (_sources, _sourcesFingerprint); _error == nil {
 //		logf ('d', 0x71b45ebc, "parsed library from sources;")
 		_library = _library_0
@@ -798,8 +814,10 @@ func resolveLibrary (_candidate string, _cacheEnabled bool) (LibraryStore, error
 	}
 	
 	if _cacheEnabled {
-		if _error := doExportLibraryCdb (_library, _cacheLibrary); _error != nil {
+		if _error := doExportLibraryCdb (_library, _cacheLibrary); _error == nil {
 //			logf ('d', 0xdf78377c, "created library cached at `%s`;", _cacheLibrary)
+			_library.url = _cacheLibrary
+		} else {
 			return nil, _error
 		}
 	}
@@ -808,11 +826,16 @@ func resolveLibrary (_candidate string, _cacheEnabled bool) (LibraryStore, error
 }
 
 
-
-
-func doExecute (_library LibraryStore, _executable string, _scriptlet string, _arguments []string, _environment map[string]string) (error) {
-	return errorf (0x4f41e9bd, "not-implemented")
+func resolveLibraryCached (_path string) (LibraryStore, error) {
+	if _store, _error := NewCdbStoreInput (_path); _error == nil {
+//		logf ('d', 0x63ae360d, "opened library cachad at `%s`;", _cacheLibrary)
+		return NewLibraryStoreInput (_store, _path)
+	} else {
+		return nil, _error
+	}
 }
+
+
 
 
 func doExportLabelsList (_library LibraryStore, _stream io.Writer) (error) {
@@ -935,25 +958,161 @@ func doExportLibraryCdb (_library LibraryStore, _path string) (error) {
 }
 
 
+
+
+func doExecute (_library LibraryStore, _executable string, _scriptletLabel string, _arguments []string, _environment map[string]string) (error) {
+	if _scriptlet, _error := _library.ResolveFullByLabel (_scriptletLabel); _error == nil {
+		if _scriptlet != nil {
+			return doExecuteScriptlet (_library, _executable, _scriptlet, _arguments, _environment)
+		} else {
+			return errorf (0x3be6dcd7, "unknown scriptlet for `%s`", _scriptletLabel)
+		}
+	}
+	return errorf (0x4f41e9bd, "not-implemented")
+}
+
+
+func doExecuteScriptlet (_library LibraryStore, _executable string, _scriptlet *Scriptlet, _arguments []string, _environment map[string]string) (error) {
+	
+	var _interpreterExecutable string
+	var _interpreterArguments []string = make ([]string, 0, len (_arguments) + 16)
+	var _interpreterEnvironment []string = make ([]string, 0, len (_environment) + 16)
+	
+	var _interpreterScriptInput int
+	var _interpreterScriptOutput *os.File
+	var _interpreterScriptDescriptors [2]int
+	if _error := syscall.Pipe (_interpreterScriptDescriptors[:]); _error == nil {
+		_interpreterScriptInput = _interpreterScriptDescriptors[0]
+		_interpreterScriptOutput = os.NewFile (uintptr (_interpreterScriptDescriptors[1]), "")
+	} else {
+		return _error
+	}
+	
+	_interpreterScriptBuffer := bytes.NewBuffer (nil)
+	_interpreterScriptBuffer.Grow (128 * 1024)
+	
+	switch _scriptlet.Interpreter {
+		
+		case "<shell>" :
+			_interpreterExecutable = "/bin/bash"
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[x-run:shell] [%s]", _scriptlet.Label),
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (
+					fmt.Sprintf (
+`#!/dev/null
+set -e -E -u -o pipefail -o noclobber -o noglob +o braceexpand || exit -- 1
+trap 'printf -- "[ee] failed: %%s\n" "${BASH_COMMAND}" >&2' ERR || exit -- 1
+BASH_ARGV0='x-run'
+X_RUN=( %s )
+exec %d<&-
+
+`,
+							_executable,
+							_interpreterScriptInput,
+						))
+			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
+		
+		default :
+			syscall.Close (_interpreterScriptInput)
+			_interpreterScriptOutput.Close ()
+			return errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _scriptlet.Interpreter, _scriptlet.Label)
+	}
+	
+//	logf ('d', 0xedfcf88b, "\n----------\n%s----------\n", _interpreterScriptBuffer.Bytes ())
+	
+	if _, _error := _interpreterScriptBuffer.WriteTo (_interpreterScriptOutput); _error == nil {
+		_interpreterScriptOutput.Close ()
+	} else {
+		syscall.Close (_interpreterScriptInput)
+		_interpreterScriptOutput.Close ()
+		return _error
+	}
+	
+	_interpreterArguments = append (_interpreterArguments, _arguments ...)
+	
+	for _name, _value := range _environment {
+		_variable := _name + "=" + _value
+		_interpreterEnvironment = append (_interpreterEnvironment, _variable)
+	}
+	if _url := _library.Url (); _url != "" {
+		_interpreterEnvironment = append (_interpreterEnvironment, "XRUN_EXECUTABLE=" + _executable)
+		_interpreterEnvironment = append (_interpreterEnvironment, "XRUN_LIBRARY=" + _url)
+	}
+	sort.Strings (_interpreterEnvironment)
+	
+	if _error := syscall.Exec (_interpreterExecutable, _interpreterArguments, _interpreterEnvironment); _error != nil {
+		return _error
+	} else {
+		panic (0xb6dfe17e)
+	}
+}
+
+
+
+
+func doSelectExecute (_library LibraryStore, _executable string, _arguments []string, _environment map[string]string) (error) {
+	if _label, _error := doSelectLabel_0 (_library, _executable); _error == nil {
+		return doExecute (_library, _executable, _label, _arguments, _environment)
+	} else {
+		return _error
+	}
+}
+
+
 func doSelectLabel (_library LibraryStore, _executable string, _stream io.Writer) (error) {
+	if _label, _error := doSelectLabel_0 (_library, _executable); _error == nil {
+		if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
+			return _error
+		}
+	} else {
+		return _error
+	}
+	return nil
+}
+
+func doSelectLabels (_library LibraryStore, _executable string, _stream io.Writer) (error) {
+	if _labels, _error := doSelectLabels_0 (_library, _executable); _error == nil {
+		for _, _label := range _labels {
+			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
+				return _error
+			}
+		}
+	} else {
+		return _error
+	}
+	return nil
+}
+
+
+func doSelectLabel_0 (_library LibraryStore, _executable string) (string, error) {
+	if _labels, _error := doSelectLabels_0 (_library, _executable); _error == nil {
+		if len (_labels) == 1 {
+			return _labels[0], nil
+		} else {
+			return "", errorf (0xa11d1022, "no scriptlet selected")
+		}
+	} else {
+		return "", _error
+	}
+}
+
+func doSelectLabels_0 (_library LibraryStore, _executable string) ([]string, error) {
 	var _inputs []string
 	if _inputs_0, _error := _library.SelectLabels (); _error == nil {
 		_inputs = _inputs_0
 	} else {
-		return _error
+		return nil, _error
 	}
 	var _outputs []string
 	if _outputs_0, _error := fzfSelectFrom (_executable, _inputs); _error == nil {
 		_outputs = _outputs_0
 	} else {
-		return _error
+		return nil, _error
 	}
-	for _, _output := range _outputs {
-		if _, _error := fmt.Fprintf (_stream, "%s\n", _output); _error != nil {
-			return _error
-		}
-	}
-	return nil
+	return _outputs, nil
 }
 
 
@@ -997,8 +1156,12 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					_sourcePath = _value
 				case "XRUN_LIBRARY" :
 					_cachePath = _value
+				case "XRUN_EXECUTABLE" :
+					if _executable != _value {
+						logf ('w', 0x31ee572e, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
+					}
 				default :
-					logf ('w', 0xdf61b057, "environment variable unknown: `%s`", _nameCanonical)
+					logf ('w', 0xdf61b057, "environment variable unknown:  `%s`", _nameCanonical)
 			}
 			
 		} else {
@@ -1040,16 +1203,20 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 						_command = "execute"
 						continue
 					
+					case "select-execute" :
+						_command = "select-execute"
+						_index += 1
+					
+					case "select-label", "select" :
+						_command = "select-label"
+						_index += 1
+					
 					case "export-script" :
 						_command = "export-script"
 						continue
 					
 					case "export-labels-list", "export-labels", "list" :
 						_command = "export-labels-list"
-						_index += 1
-					
-					case "select-label", "select" :
-						_command = "select-label"
 						_index += 1
 					
 					case "parse-library-json", "parse-library", "parse" :
@@ -1081,17 +1248,40 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	}
 	
 	if (_command == "") && (_scriptlet == "") {
-		_command = "export-labels-list"
+		_command = "select-execute"
+	}
+	
+	if _scriptlet != "" {
+		if strings.HasPrefix (_scriptlet, ":: ") {
+			_scriptlet = _scriptlet[3:]
+		} else {
+			return errorf (0x72ad17f7, "invalid scriptlet label `%s`", _scriptlet)
+		}
 	}
 	
 	_cacheEnabled := true
 	if _command == "parse-library-json" {
 		_cacheEnabled = false
 	}
+	if !_cacheEnabled {
+		_cachePath = ""
+	}
 	
-	_library, _error := resolveLibrary (_sourcePath, _cacheEnabled)
-	if _error != nil {
-		return _error
+	var _library LibraryStore
+	if _cachePath != "" {
+//		logf ('d', 0xeeedb7f0, "opening library...")
+		if _library_0, _error := resolveLibraryCached (_cachePath); _error == nil {
+			_library = _library_0
+		} else {
+			return _error
+		}
+	} else {
+//		logf ('d', 0x93dbfd8c, "resolving library...")
+		if _library_0, _error := resolveLibrary (_sourcePath, _cacheEnabled); _error == nil {
+			_library = _library_0
+		} else {
+			return _error
+		}
 	}
 	
 	switch _command {
@@ -1101,6 +1291,18 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				return errorf (0x39718e70, "execute:  expected scriptlet")
 			}
 			return doExecute (_library, _executable, _scriptlet, _cleanArguments, _cleanEnvironment)
+		
+		case "select-execute" :
+			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+				return errorf (0x203e410a, "execute:  unexpected scriptlet or arguments")
+			}
+			return doSelectExecute (_library, _executable, _cleanArguments, _cleanEnvironment)
+		
+		case "select-label" :
+			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+				return errorf (0x2d19b1bc, "select:  unexpected scriptlet or arguments")
+			}
+			return doSelectLabel (_library, _executable, os.Stdout)
 		
 		case "export-script" :
 			if _scriptlet == "" {
@@ -1138,12 +1340,6 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				return errorf (0xf76f4459, "export:  expected database path")
 			}
 			return doExportLibraryCdb (_library, _cleanArguments[0])
-		
-		case "select-label" :
-			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
-				return errorf (0x2d19b1bc, "select:  unexpected scriptlet or arguments")
-			}
-			return doSelectLabel (_library, _executable, os.Stdout)
 		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")
@@ -1236,8 +1432,9 @@ func main () () {
 
 
 func logf (_slug rune, _code uint32, _format string, _arguments ... interface{}) () {
+	_pid := os.Getpid ()
 	_message := fmt.Sprintf (_format, _arguments ...)
-	_prefix := fmt.Sprintf ("[%c%c]  [%08x]  ", _slug, _slug, _code)
+	_prefix := fmt.Sprintf ("[%08d] [%c%c] [%08x]  ", _pid, _slug, _slug, _code)
 	log.Print (_prefix + _message + "\n")
 }
 
@@ -1246,15 +1443,21 @@ func logError (_slug rune, _error error) () {
 }
 
 func logErrorf (_slug rune, _code uint32, _error error, _format string, _arguments ... interface{}) () {
-	logf (_slug, _code, _format, _arguments ...)
+	_pid := os.Getpid ()
+	if (_format != "") || (len (_arguments) != 0) {
+		logf (_slug, _code, _format, _arguments ...)
+	}
 	if _error != nil {
 		_errorString := _error.Error ()
 		_errorRegexp := regexp.MustCompile (`^\[[0-9a-f]{8}\]  [^\n]+$`)
 		if _matches := _errorRegexp.MatchString (_errorString); _matches {
-			log.Printf ("[%c%c]  %s\n", _slug, _slug, _errorString)
+			log.Printf ("[%08d] [%c%c] %s\n", _pid, _slug, _slug, _errorString)
 		} else {
-			log.Printf ("[%c%c]  [%08x]  %s\n", _slug, _slug, 0xda900de1, _errorString)
-			log.Printf ("[%c%c]  [%08x]  %#v\n", _slug, _slug, 0x4fb5d56d, _error)
+			if (_format == "") && (len (_arguments) == 0) {
+				log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, 0xcd0eb584, "unexpected error encountered!")
+			}
+			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, 0xda900de1, _errorString)
+			log.Printf ("[%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, 0x4fb5d56d, _error)
 		}
 	}
 }
@@ -1265,7 +1468,7 @@ func abortf (_code uint32, _format string, _arguments ... interface{}) (error) {
 }
 
 func abortError (_error error) (error) {
-	return abortErrorf (_error, 0xe6ed2b0f, "unexpected error encountered!")
+	return abortErrorf (_error, 0xe6ed2b0f, "")
 }
 
 func abortErrorf (_error error, _code uint32, _format string, _arguments ... interface{}) (error) {
