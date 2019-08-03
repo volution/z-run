@@ -1,0 +1,139 @@
+#!/dev/null
+
+
+
+
+<< go / build / main / debug
+	test "${#}" -eq 0
+	exec -- "${X_RUN[@]}" ':: go / tool' \
+			build \
+			-v \
+			-o ./.outputs/main-debug.elf \
+			-- \
+			./sources/main.go \
+	#
+!!
+
+<< go / build / main / release
+	test "${#}" -eq 0
+	exec -- "${X_RUN[@]}" ':: go / tool' \
+			build \
+			-v \
+			-o ./.outputs/main-release.elf \
+			-ldflags '-s' \
+			-- \
+			./sources/main.go \
+	#
+!!
+
+
+
+
+<< go / execute / main / debug
+	"${X_RUN[@]}" ':: go / build / main / debug'
+	exec -- ./.outputs/main-debug.elf "${@}"
+!!
+
+<< go / execute / main / release
+	"${X_RUN[@]}" ':: go / build / main / release'
+	exec -- ./.outputs/main-release.elf "${@}"
+!!
+
+
+
+
+<< go / dependencies / update
+	test "${#}" -eq 0
+	exec -- "${X_RUN[@]}" ':: go / tool' \
+			get \
+			-v \
+			-d \
+			-- \
+			./sources/... \
+	#
+!!
+
+
+
+
+<< go / tool
+	test "${#}" -ge 1
+	test -d ./.outputs
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	
+	export -- GOPATH="${_outputs}/go"
+	export -- GOBIN="${_outputs}/go/bin"
+	export -- GOTMPDIR="${_outputs}/go/tmp"
+	export -- GOCACHE="${_outputs}/go/cache"
+	
+	exec -- go "${@}"
+!!
+
+
+
+
+<< workspace / initialize / go
+	test "${#}" -eq 0
+	test -d ./.outputs
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	_sources="$( exec -- readlink -e -- ./sources )"
+	_vendor="$( exec -- readlink -e -- ./vendor )"
+	
+	GOPATH="${_outputs}/go"
+	GOBIN="${_outputs}/go/bin"
+	GOTMPDIR="${_outputs}/go/tmp"
+	GOCACHE="${_outputs}/go/cache"
+	
+	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" ; do
+		if test ! -e "${_folder}" ; then
+			mkdir -- "${_folder}"
+		fi
+	done
+	
+	if test ! -e "${GOPATH}/src" ; then
+		ln -s -T -- "${_vendor}" "${GOPATH}/src"
+	fi
+!!
+
+
+
+
+<< workspace / initialize / outputs
+	test "${#}" -eq 0
+	if test ! -d ./.outputs ; then
+		_outputs_store="${TMPDIR:-/tmp}/go--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+		mkdir -- "${_outputs_store}"
+		_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
+		ln -s -f -T -- "${_outputs_store}" ./.outputs
+	fi
+!!
+
+
+
+
+<< workspace / sources / codes / duplicates
+	test "${#}" -eq 0
+	exec -- xargs \
+			-r -d '\n' -I {} \
+			-a <(
+				grep \
+						-o \
+						-P \
+						-e '(?<=\[)[0-9a-f]{8}(?=\])|(?<=0x)[0-9a-f]{8}(?=[^0-9a-zA-Z]|$)' \
+						-h \
+						-r ./sources \
+						--include '*.go' \
+				| sort \
+				| uniq -d
+			) \
+			-- \
+		grep \
+			-P \
+			-e '(?<=\[){}(?=\])|(?<=0x){}(?=[^0-9a-zA-Z]|$)' \
+			-r ./sources \
+			-n \
+			--include '*.go' \
+			--color \
+	#
+!!
+
