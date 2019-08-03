@@ -3,6 +3,7 @@
 package main
 
 
+import "bytes"
 import "crypto/sha256"
 import "encoding/binary"
 import "encoding/hex"
@@ -20,6 +21,9 @@ import "sort"
 import "strings"
 import "unicode"
 import "unicode/utf8"
+
+
+import cdb "github.com/cipriancraciun/go-cdb-lib"
 
 
 
@@ -41,10 +45,15 @@ type ScriptletSource struct {
 
 
 type Library struct {
+	
 	Scriptlets []*Scriptlet `json:"scriptlets"`
-	ScriptletsByLabel map[string]uint `json:"scriptlets_by_label"`
-	ScriptletsByFingerprint map[string]uint `json:"scriptlets_by_fingerprint"`
-	ScriptletLabels []string `json:"scriptlet_labels"`
+	
+	ScriptletFingerprints []string `json:"fingerprints"`
+	ScriptletsByFingerprint map[string]uint `json:"index_by_fingerprint"`
+	
+	ScriptletLabels []string `json:"labels"`
+	ScriptletsByLabel map[string]uint `json:"index_by_label"`
+	
 	Sources []*Source `json:"sources"`
 }
 
@@ -57,14 +66,31 @@ type Source struct {
 }
 
 
+type LibraryStore interface {
+	
+	SelectFingerprints () ([]string, error)
+	ResolveFullByFingerprint (_label string) (*Scriptlet, error)
+	ResolveMetaByFingerprint (_label string) (*Scriptlet, error)
+	ResolveBodyByFingerprint (_label string) (string, bool, error)
+	
+	SelectLabels () ([]string, error)
+	ResolveFullByLabel (_label string) (*Scriptlet, error)
+	ResolveMetaByLabel (_label string) (*Scriptlet, error)
+	ResolveBodyByLabel (_label string) (string, bool, error)
+	ResolveFingerprintByLabel (_label string) (string, bool, error)
+}
+
+
 
 
 type StoreOutput interface {
 	Include (_namespace string, _key string, _value interface{}) (error)
+	Commit () (error)
 }
 
 type StoreInput interface {
 	Select (_namespace string, _key string, _value interface{}) (error)
+	Close () (error)
 }
 
 
@@ -73,24 +99,84 @@ type StoreInput interface {
 func NewLibrary () (*Library) {
 	return & Library {
 			Scriptlets : make ([]*Scriptlet, 0, 1024),
-			ScriptletsByLabel : make (map[string]uint, 1024),
+			ScriptletFingerprints : make ([]string, 0, 1024),
 			ScriptletsByFingerprint : make (map[string]uint, 1024),
 			ScriptletLabels : make ([]string, 0, 1024),
+			ScriptletsByLabel : make (map[string]uint, 1024),
 		}
 }
 
+func (_library *Library) SelectFingerprints () ([]string, error) {
+	return _library.ScriptletFingerprints, nil
+}
 
-func (_library *Library) Labels () ([]string, error) {
+func (_library *Library) SelectLabels () ([]string, error) {
 	return _library.ScriptletLabels, nil
 }
 
 
-func (_library *Library) Resolve (_label string) (*Scriptlet, error) {
+func (_library *Library) ResolveFullByFingerprint (_fingerprint string) (*Scriptlet, error) {
+	if _index, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
+		_scriptlet := _library.Scriptlets[_index]
+		return _scriptlet, nil
+	} else {
+		return nil, nil
+	}
+}
+
+func (_library *Library) ResolveMetaByFingerprint (_fingerprint string) (*Scriptlet, error) {
+	if _scriptlet, _error := _library.ResolveFullByFingerprint (_fingerprint); (_error == nil) && (_scriptlet != nil) {
+		_meta := & Scriptlet {}
+		*_meta = *_scriptlet
+		_meta.Body = ""
+		return _meta, nil
+	} else {
+		return nil, _error
+	}
+}
+
+func (_library *Library) ResolveBodyByFingerprint (_fingerprint string) (string, bool, error) {
+	if _scriptlet, _error := _library.ResolveFullByFingerprint (_fingerprint); (_error == nil) && (_scriptlet != nil) {
+		return _scriptlet.Body, true, nil
+	} else {
+		return "", false, _error
+	}
+}
+
+
+func (_library *Library) ResolveFullByLabel (_label string) (*Scriptlet, error) {
 	if _index, _exists := _library.ScriptletsByLabel[_label]; _exists {
 		_scriptlet := _library.Scriptlets[_index]
 		return _scriptlet, nil
 	} else {
 		return nil, nil
+	}
+}
+
+func (_library *Library) ResolveMetaByLabel (_label string) (*Scriptlet, error) {
+	if _scriptlet, _error := _library.ResolveFullByLabel (_label); (_error == nil) && (_scriptlet != nil) {
+		_meta := & Scriptlet {}
+		*_meta = *_scriptlet
+		_meta.Body = ""
+		return _meta, nil
+	} else {
+		return nil, _error
+	}
+}
+
+func (_library *Library) ResolveBodyByLabel (_label string) (string, bool, error) {
+	if _scriptlet, _error := _library.ResolveFullByLabel (_label); (_error == nil) && (_scriptlet != nil) {
+		return _scriptlet.Body, true, nil
+	} else {
+		return "", false, _error
+	}
+}
+
+func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool, error) {
+	if _scriptlet, _error := _library.ResolveFullByLabel (_label); (_error == nil) && (_scriptlet != nil) {
+		return _scriptlet.Fingerprint, true, nil
+	} else {
+		return "", false, _error
 	}
 }
 
@@ -359,9 +445,10 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 	_scriptlet.Fingerprint = _fingerprint
 	
 	_library.Scriptlets = append (_library.Scriptlets, _scriptlet)
-	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
+	_library.ScriptletFingerprints = append (_library.ScriptletFingerprints, _scriptlet.Fingerprint)
 	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index
 	_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
+	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
 	
 	return nil
 }
@@ -485,7 +572,7 @@ func resolveCache () (string, error) {
 
 
 
-func loadLibrary (_candidate string) (*Library, error) {
+func loadLibrary (_candidate string) (LibraryStore, error) {
 	
 	_sources, _error := resolveSources (_candidate)
 	if _error != nil {
@@ -511,13 +598,13 @@ func loadLibrary (_candidate string) (*Library, error) {
 
 
 
-func doExecute (_library *Library, _executable string, _scriptlet string, _arguments []string, _environment map[string]string) (error) {
+func doExecute (_library LibraryStore, _executable string, _scriptlet string, _arguments []string, _environment map[string]string) (error) {
 	return errorf (0x4f41e9bd, "not-implemented")
 }
 
 
-func doExportLabelsList (_library *Library, _stream io.Writer) (error) {
-	if _labels, _error := _library.Labels (); _error == nil {
+func doExportLabelsList (_library LibraryStore, _stream io.Writer) (error) {
+	if _labels, _error := _library.SelectLabels (); _error == nil {
 		for _, _label := range _labels {
 			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
 				return _error
@@ -530,10 +617,10 @@ func doExportLabelsList (_library *Library, _stream io.Writer) (error) {
 }
 
 
-func doExportScript (_library *Library, _label string, _stream io.Writer) (error) {
-	if _scriptlet, _error := _library.Resolve (_label); _error == nil {
-		if _scriptlet != nil {
-			_, _error := io.WriteString (_stream, _scriptlet.Body)
+func doExportScript (_library LibraryStore, _label string, _stream io.Writer) (error) {
+	if _body, _found, _error := _library.ResolveBodyByLabel (_label); _error == nil {
+		if _found {
+			_, _error := io.WriteString (_stream, _body)
 			return _error
 		} else {
 			return errorf (0x95e0b174, "undefined scriptlet `%s`", _label)
@@ -544,7 +631,7 @@ func doExportScript (_library *Library, _label string, _stream io.Writer) (error
 }
 
 
-func doExportLibraryJson (_library *Library, _stream io.Writer) (error) {
+func doExportLibraryJson (_library LibraryStore, _stream io.Writer) (error) {
 	_encoder := json.NewEncoder (_stream)
 	_encoder.SetIndent ("", "    ")
 	_encoder.SetEscapeHTML (false)
@@ -552,42 +639,82 @@ func doExportLibraryJson (_library *Library, _stream io.Writer) (error) {
 }
 
 
-func doExportLibraryStore (_library *Library, _store StoreOutput) (error) {
+func doExportLibraryStore (_library LibraryStore, _store StoreOutput) (error) {
 	
-	_labels := make ([]string, 0, len (_library.Scriptlets))
-	_fingerprints := make ([]string, 0, len (_library.Scriptlets))
-	_indexByLabels := make (map[string]string, len (_library.Scriptlets))
+	_fingerprints := make ([]string, 0, 1024)
+	_fingerprintsByLabels := make (map[string]string, 1024)
+	_labels := make ([]string, 0, 1024)
+	_labelsByFingerprints := make (map[string]string, 1024)
 	
-	for _, _scriptlet := range _library.Scriptlets {
-		
-		_scriptletMeta := *_scriptlet
-		_scriptletMeta.Body = ""
-		if _error := _store.Include ("scriptlets-by-label", _scriptlet.Label, _scriptlet.Fingerprint); _error != nil {
-			return _error
-		}
-		if _error := _store.Include ("scriptlets-meta", _scriptlet.Fingerprint, &_scriptletMeta); _error != nil {
-			return _error
-		}
-		if _error := _store.Include ("scriptlets-body", _scriptlet.Fingerprint, _scriptlet.Body); _error != nil {
-			return _error
-		}
-		
-		_labels = append (_labels, _scriptlet.Label)
-		_fingerprints = append (_fingerprints, _scriptlet.Fingerprint)
-		_indexByLabels[_scriptlet.Label] = _scriptlet.Fingerprint
+	var _fingerprintsFromStore []string
+	if _fingerprints_0, _error := _library.SelectFingerprints (); _error == nil {
+		_fingerprintsFromStore = _fingerprints_0
+	} else {
+		return _error
 	}
 	
-	sort.Strings (_labels)
-	sort.Strings (_fingerprints)
+	for _, _fingerprint := range _fingerprintsFromStore {
+		
+		if _meta, _error := _library.ResolveMetaByFingerprint (_fingerprint); _error == nil {
+			if _meta == nil {
+				return errorf (0x20bc9d40, "invalid store")
+			}
+			_label := _meta.Label
+			if _error := _store.Include ("scriptlets-fingerprint-by-label", _label, _fingerprint); _error != nil {
+				return _error
+			}
+			if _error := _store.Include ("scriptlets-label-by-fingerprint", _fingerprint, _label); _error != nil {
+				return _error
+			}
+			if _error := _store.Include ("scriptlets-meta", _fingerprint, _meta); _error != nil {
+				return _error
+			}
+			_fingerprints = append (_fingerprints, _fingerprint)
+			_fingerprintsByLabels[_label] = _fingerprint
+			_labels = append (_labels, _label)
+			_labelsByFingerprints[_fingerprint] = _label
+		}
+		
+		if _body, _found, _error := _library.ResolveBodyByFingerprint (_fingerprint); _error == nil {
+			if !_found {
+				return errorf (0xd80a265e, "invalid store")
+			}
+			if _error := _store.Include ("scriptlets-body", _fingerprint, _body); _error != nil {
+				return _error
+			}
+		}
+	}
 	
+	sort.Strings (_fingerprints)
+	sort.Strings (_labels)
+	
+	if _error := _store.Include ("scriptlets-indices", "fingerprints", _fingerprints); _error != nil {
+		return _error
+	}
+	if _error := _store.Include ("scriptlets-indices", "fingerprints-by-labels", _fingerprintsByLabels); _error != nil {
+		return _error
+	}
 	if _error := _store.Include ("scriptlets-indices", "labels", _labels); _error != nil {
 		return _error
 	}
-	if _error := _store.Include ("scriptlets-indices", "fingerprints", _fingerprints); _error != nil {
+	if _error := _store.Include ("scriptlets-indices", "labels-by-fingerprints", _labelsByFingerprints); _error != nil {
+		return _error
+	}
+	
+	if _error := _store.Commit (); _error != nil {
 		return _error
 	}
 	
 	return nil
+}
+
+
+func doExportLibraryCdb (_library LibraryStore, _path string) (error) {
+	if _store, _error := NewCdbStoreOutput (_path); _error == nil {
+		return doExportLibraryStore (_library, _store)
+	} else {
+		return _error
+	}
 }
 
 
@@ -686,8 +813,12 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 						_command = "export-library-json"
 						_index += 1
 					
-					case "compile-library", "compile-library-json" :
+					case "compile-library-json", "compile-library" :
 						_command = "compile-library-json"
+						_index += 1
+					
+					case "compile-library-cdb" :
+						_command = "compile-library-cdb"
 						_index += 1
 				}
 			} else {
@@ -746,10 +877,19 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				case "export-library-json" :
 					return doExportLibraryJson (_library, os.Stdout)
 				case "compile-library-json" :
-					return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout))
+					return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout, nil))
 				default :
 					panic (0xda7243ef)
 			}
+		
+		case "compile-library-cdb" :
+			if _scriptlet != "" {
+				return errorf (0x492ac50e, "export:  unexpected scriptlet")
+			}
+			if len (_cleanArguments) != 1 {
+				return errorf (0xf76f4459, "export:  expected database path")
+			}
+			return doExportLibraryCdb (_library, _cleanArguments[0])
 		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")
@@ -873,6 +1013,7 @@ func errorf (_code uint32, _format string, _arguments ... interface{}) (error) {
 
 type JsonStreamStoreOutput struct {
 	stream io.Writer
+	closer io.Closer
 	encoder *json.Encoder
 }
 
@@ -882,12 +1023,13 @@ type JsonStoreRecord struct {
 	Value interface{} `json:"value"`
 }
 
-func NewJsonStreamStoreOutput (_stream io.Writer) (*JsonStreamStoreOutput) {
+func NewJsonStreamStoreOutput (_stream io.Writer, _closer io.Closer) (*JsonStreamStoreOutput) {
 	_encoder := json.NewEncoder (_stream)
 	_encoder.SetIndent ("", "    ")
 	_encoder.SetEscapeHTML (false)
 	return & JsonStreamStoreOutput {
 			stream : _stream,
+			closer : _closer,
 			encoder : _encoder,
 		}
 }
@@ -899,6 +1041,156 @@ func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _v
 			Value : _value,
 		}
 	return _store.encoder.Encode (_record)
+}
+
+func (_store *JsonStreamStoreOutput) Commit () (error) {
+	var _error error
+	if _store.closer != nil {
+		_error = _store.closer.Close ()
+	}
+	_store.stream = nil
+	_store.closer = nil
+	_store.encoder = nil
+	return _error
+}
+
+
+
+
+type CdbStoreInput struct {
+	reader *cdb.CDB
+	path string
+}
+
+
+func NewCdbStoreInput (_path string) (*CdbStoreInput, error) {
+	if _file, _error := os.Open (_path); _error == nil {
+		defer _file.Close ()
+		if _reader, _error := cdb.NewFromMappedWithHasher (_file, nil); _error == nil {
+			_store := & CdbStoreInput {
+					reader : _reader,
+					path : _path,
+				}
+			return _store, nil
+		} else {
+			return nil, _error
+		}
+	} else {
+		return nil, _error
+	}
+}
+
+
+func (_store *CdbStoreInput) Select (_namespace string, _key string, _value interface{}) (error) {
+	
+	_keyBuffer := bytes.NewBuffer (nil)
+	_keyBuffer.WriteString (_namespace)
+	_keyBuffer.WriteString (" // ")
+	_keyBuffer.WriteString (_key)
+	
+	var _valueData []byte
+	if _valueData_0, _error := _store.reader.Get (_keyBuffer.Bytes ()); _error == nil {
+		_valueData = _valueData_0
+	} else {
+		return _error
+	}
+	
+	switch _value := _value.(type) {
+		case []byte :
+			return errorf (0x36de066a, "unexpected type")
+		case *[]byte :
+			if *_value == nil {
+				*_value = _valueData
+			} else {
+				*_value = append ((*_value)[:0], _valueData ...)
+			}
+		case string :
+			return errorf (0x36de066a, "unexpected type")
+		case *string :
+			*_value = string (_valueData)
+		default :
+			if _error := json.Unmarshal (_valueData, _value); _error != nil {
+				return _error
+			}
+	}
+	
+	return nil
+}
+
+
+func (_store *CdbStoreInput) Close () (error) {
+	if _error := _store.reader.Close (); _error == nil {
+		_store.reader = nil
+		return _error
+	} else {
+		return nil
+	}
+}
+
+
+
+
+type CdbStoreOutput struct {
+	writer *cdb.Writer
+	pathFinal string
+	pathTemporary string
+}
+
+
+func NewCdbStoreOutput (_path string) (*CdbStoreOutput, error) {
+	if _path == "" {
+		return nil, errorf (0x6917ab7d, "invalid path")
+	}
+	_pathFinal := _path
+	_pathTemporary := fmt.Sprintf ("%s--%08x.tmp", _pathFinal, os.Getpid ())
+	if _writer, _error := cdb.Create (_pathTemporary); _error == nil {
+		_store := & CdbStoreOutput {
+				writer : _writer,
+				pathFinal : _pathFinal,
+				pathTemporary : _pathTemporary,
+			}
+		return _store, nil
+	} else {
+		return nil, _error
+	}
+}
+
+
+func (_store *CdbStoreOutput) Include (_namespace string, _key string, _value interface{}) (error) {
+	
+	_keyBuffer := bytes.NewBuffer (nil)
+	_keyBuffer.WriteString (_namespace)
+	_keyBuffer.WriteString (" // ")
+	_keyBuffer.WriteString (_key)
+	
+	_valueBuffer := bytes.NewBuffer (nil)
+	switch _value := _value.(type) {
+		case []byte :
+			_valueBuffer.Write (_value)
+		case *[]byte :
+			_valueBuffer.Write (*_value)
+		case string :
+			_valueBuffer.WriteString (_value)
+		case *string :
+			_valueBuffer.WriteString (*_value)
+		default :
+			if _error := json.NewEncoder (_valueBuffer) .Encode (_value); _error != nil {
+				return _error
+			}
+	}
+	
+	return _store.writer.Put (_keyBuffer.Bytes (), _valueBuffer.Bytes ())
+}
+
+func (_store *CdbStoreOutput) Commit () (error) {
+	if _error := _store.writer.Close (); _error != nil {
+		return _error
+	}
+	_store.writer = nil
+	if _error := os.Rename (_store.pathTemporary, _store.pathFinal); _error != nil {
+		return _error
+	}
+	return nil
 }
 
 
