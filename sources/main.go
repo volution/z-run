@@ -1175,7 +1175,7 @@ func doSelectLabels_0 (_library LibraryStore, _context *Context) ([]string, erro
 		return nil, _error
 	}
 	var _outputs []string
-	if _outputs_0, _error := menuSelectFrom (_inputs, _context); _error == nil {
+	if _outputs_0, _error := menuSelect (_inputs, _context); _error == nil {
 		_outputs = _outputs_0
 	} else {
 		return nil, _error
@@ -1867,7 +1867,7 @@ func fzfSelectMain () (error) {
 
 
 
-func menuSelectFrom (_inputs []string, _context *Context) ([]string, error) {
+func menuSelect (_inputs []string, _context *Context) ([]string, error) {
 	
 	_inputsChannel := make (chan string, 1024)
 	_outputsChannel := make (chan string, 1024)
@@ -1892,7 +1892,7 @@ func menuSelectFrom (_inputs []string, _context *Context) ([]string, error) {
 		close (_outputsChannel)
 	} ()
 	
-	if _error := menuSelect (_inputsChannel, _outputsChannel, _context); _error == nil {
+	if _error := menuSelect_0 (_inputsChannel, _outputsChannel, _context); _error == nil {
 		return _outputs, nil
 	} else {
 		return nil, _error
@@ -1900,7 +1900,7 @@ func menuSelectFrom (_inputs []string, _context *Context) ([]string, error) {
 }
 
 
-func menuSelect (_inputsChannel <-chan string, _outputsChannel chan<- string, _context *Context) (error) {
+func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, _context *Context) (error) {
 	
 	if _context.terminal != "" {
 		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
@@ -1916,7 +1916,10 @@ func menuSelect (_inputsChannel <-chan string, _outputsChannel chan<- string, _c
 			Stderr : os.Stderr,
 				Dir : "",
 		}
+	
+	_commandFzf := false
 	if _context.terminal != "" {
+		_commandFzf = true
 		_command.Path = _context.selfExecutable
 		_command.Args = []string {
 				"[x-run:select]",
@@ -1935,85 +1938,132 @@ func menuSelect (_inputsChannel <-chan string, _outputsChannel chan<- string, _c
 		return errorf (0xb91714f7, "expected `x-input`")
 	}
 	
-	var _stdin io.WriteCloser
-	if _stream, _error := _command.StdinPipe (); _error == nil {
-		_stdin = _stream
+	if _exitCode, _, _outputsCount, _error := commandExecuteAndPipe (_command, _inputsChannel, _outputsChannel); _error == nil {
+		if _commandFzf {
+			switch _exitCode {
+				case 0 :
+					if _outputsCount == 0 {
+						return errorf (0xbb7ff442, "invalid outputs")
+					}
+				case 1 :
+					if _outputsCount != 0 {
+						return errorf (0x6bd364da, "invalid outputs")
+					}
+				case 130 :
+					if _outputsCount != 0 {
+						return errorf (0xac4b1681, "invalid outputs")
+					}
+				case 2 :
+					return errorf (0x85cabb2a, "failed")
+				default :
+					return errorf (0xef9908df, "failed")
+			}
+		} else {
+			if _exitCode != 0 {
+				return errorf (0xb156b11d, "failed")
+			}
+		}
 	} else {
-		return _error
-	}
-	var _stdout io.ReadCloser
-	if _stream, _error := _command.StdoutPipe (); _error == nil {
-		_stdout = _stream
-	} else {
-		_stdin.Close ()
 		return _error
 	}
 	
+	return nil
+}
+
+
+
+
+func commandExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string) (int, uint, uint, error) {
+	
+	var _stdin io.WriteCloser
+	if _inputsChannel != nil {
+		if _stream, _error := _command.StdinPipe (); _error == nil {
+			// NOTE:  Due to race conditions within the goroutine, we leave this to be closed by the garbage collector.
+			// defer _stream.Close ()
+			_stdin = _stream
+		} else {
+			return -1, 0, 0, _error
+		}
+	}
+	
+	var _stdout io.ReadCloser
+	if _outputsChannel != nil {
+		if _stream, _error := _command.StdoutPipe (); _error == nil {
+			// NOTE:  Due to race conditions within the goroutine, we leave this to be closed by the garbage collector.
+			// defer _stream.Close ()
+			_stdout = _stream
+		} else {
+			return -1, 0, 0, _error
+		}
+	}
+	
 	if _error := _command.Start (); _error != nil {
-		_stdin.Close ()
-		_stdout.Close ()
-		return _error
+		return -1, 0, 0, _error
 	}
 	
 	_waiter := & sync.WaitGroup {}
 	
-	_waiter.Add (1)
 	var _stdinError error
 	var _inputsCount uint
-	go func () () {
-//		logf ('d', 0x41785333, "starting stdin loop")
-		_buffer := bytes.NewBuffer (nil)
-		for {
-			_input, _ok := <- _inputsChannel
-//			logf ('d', 0xf997ad63, "writing to stdin: `%s`", _input)
-			if _ok {
-				_buffer.Reset ()
-				_buffer.WriteString (_input)
-				_buffer.WriteByte ('\n')
-				if _, _error := _buffer.WriteTo (_stdin); _error != nil {
-					_stdinError = _error
+	if _inputsChannel != nil {
+		_waiter.Add (1)
+		go func () () {
+//			logf ('d', 0x41785333, "starting stdin loop")
+			_buffer := bytes.NewBuffer (nil)
+			for {
+				_input, _ok := <- _inputsChannel
+//				logf ('d', 0xf997ad63, "writing to stdin: `%s`", _input)
+				if _ok {
+					_buffer.Reset ()
+					_buffer.WriteString (_input)
+					_buffer.WriteByte ('\n')
+					if _, _error := _buffer.WriteTo (_stdin); _error != nil {
+						_stdinError = _error
+						break
+					}
+					_inputsCount += 1
+				} else {
 					break
 				}
-				_inputsCount += 1
-			} else {
-				break
 			}
-		}
-		if _error := _stdin.Close (); _error != nil {
-			_stdinError = _error
-		}
-//		logf ('d', 0xc6eca1ca, "ending stdin loop")
-		_waiter.Done ()
-	} ()
+			if _error := _stdin.Close (); _error != nil {
+				_stdinError = _error
+			}
+//			logf ('d', 0xc6eca1ca, "ending stdin loop")
+			_waiter.Done ()
+		} ()
+	}
 	
-	_waiter.Add (1)
 	var _stdoutError error
 	var _outputsCount uint
-	go func () () {
-//		logf ('d', 0x61503d28, "starting stdout loop")
-		_buffer := bufio.NewReader (_stdout)
-		for {
-			if _line, _error := _buffer.ReadString ('\n'); _error == nil {
-				_output := strings.TrimRight (_line, "\n")
-//				logf ('d', 0xa6f11fbf, "read from stdout: `%s`", _output)
-				_outputsChannel <- _output
-				_outputsCount += 1
-			} else if _error == io.EOF {
-				if _line != "" {
-					_stdoutError = errorf (0x1bc14ac4, "expected proper line")
+	if _outputsChannel != nil {
+		_waiter.Add (1)
+		go func () () {
+//			logf ('d', 0x61503d28, "starting stdout loop")
+			_buffer := bufio.NewReader (_stdout)
+			for {
+				if _line, _error := _buffer.ReadString ('\n'); _error == nil {
+					_output := strings.TrimRight (_line, "\n")
+//					logf ('d', 0xa6f11fbf, "read from stdout: `%s`", _output)
+					_outputsChannel <- _output
+					_outputsCount += 1
+				} else if _error == io.EOF {
+					if _line != "" {
+						_stdoutError = errorf (0x1bc14ac4, "expected proper line")
+					}
+					break
+				} else {
+					_stdoutError = _error
+					break
 				}
-				break
-			} else {
-				_stdoutError = _error
-				break
 			}
-		}
-		if _error := _stdout.Close (); _error != nil {
-			_stdoutError = _error
-		}
-//		logf ('d', 0x90515c65, "ending stdout loop")
-		_waiter.Done ()
-	} ()
+			if _error := _stdout.Close (); _error != nil {
+				_stdoutError = _error
+			}
+//			logf ('d', 0x90515c65, "ending stdout loop")
+			_waiter.Done ()
+		} ()
+	}
 	
 	var _waitError error
 //	logf ('d', 0x7ce5281a, "starting wait")
@@ -2024,39 +2074,25 @@ func menuSelect (_inputsChannel <-chan string, _outputsChannel chan<- string, _c
 	
 	_waiter.Wait ()
 	
-	var _outputError error
-	switch _command.ProcessState.ExitCode () {
-		case 0 :
-			if _outputsCount == 0 {
-				_outputError = errorf (0xbb7ff442, "invalid outputs")
-			}
-		case 1 :
-			if _outputsCount != 0 {
-				_outputError = errorf (0x6bd364da, "invalid outputs")
-			}
-			_waitError = nil
-		case 130 :
-			if _outputsCount != 0 {
-				_outputError = errorf (0xac4b1681, "invalid outputs")
-			}
-			_waitError = nil
-		case 2 :
-			_outputError = errorf (0x85cabb2a, "failed")
-	}
-	
-	if _outputError != nil {
-		return _outputError
-	}
-	if _waitError != nil {
-		return _waitError
-	}
 	if _stdinError != nil {
-		return _stdinError
+		return -1, 0, 0, _stdinError
 	}
 	if _stdoutError != nil {
-		return _stdoutError
+		return -1, 0, 0, _stdoutError
 	}
 	
-	return nil
+	if _waitError != nil {
+		if _command.ProcessState.Exited () {
+			if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
+				return _exitCode, _inputsCount, _outputsCount, nil
+			} else {
+				return -1, _inputsCount, _outputsCount, _waitError
+			}
+		} else {
+			return -1, 0, 0, _waitError
+		}
+	} else {
+		return 0, _inputsCount, _outputsCount, nil
+	}
 }
 
