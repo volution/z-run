@@ -6,6 +6,11 @@
 << x-run
 	"${X_RUN[@]}" ':: go / build / main / debug'
 	export -n -- X_RUN_INSIDE X_RUN_COMMAND X_RUN_TRACE
+	export -n -- XRUN_SOURCE XRUN_LIBRARY XRUN_EXECUTABLE XRUN_CACHE XRUN_TERM XRUN_ACTION
+	if test -n "${XRUNDEV_SOURCE:-}" ; then
+		export -- XRUN_SOURCE="${XRUNDEV_SOURCE:-}"
+		export -n -- XRUNDEV_SOURCE
+	fi
 	exec -- ./.outputs/main-debug.elf "${@}"
 !!
 
@@ -25,10 +30,10 @@
 :: x-run / parse :: exec -- "${X_RUN[@]}" ':: x-run' parse-library "${@}"
 :: x-run / fzf :: exec -- "${X_RUN[@]}" ':: x-run / 0' '[x-run:select]' "${@}"
 
-:: x-run / use / workspace :: export -- XRUN_SOURCE=./.x-run
-:: x-run / use / photos :: export -- XRUN_SOURCE=./examples/photos.x-run
-:: x-run / use / desktop :: export -- XRUN_SOURCE=./examples/desktop.x-run
-:: x-run / use / vonuvoli :: export -- XRUN_SOURCE=./examples/vonuvoli.x-run
+:: x-run / use / workspace :: export -- XRUNDEV_SOURCE=./.x-run
+:: x-run / use / photos :: export -- XRUNDEV_SOURCE=./examples/photos.x-run
+:: x-run / use / desktop :: export -- XRUNDEV_SOURCE=./examples/desktop.x-run
+:: x-run / use / vonuvoli :: export -- XRUNDEV_SOURCE=./examples/vonuvoli.x-run
 
 
 

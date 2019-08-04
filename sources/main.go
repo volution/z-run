@@ -117,6 +117,20 @@ type StoreInput interface {
 
 
 
+type Context struct {
+	selfExecutable string
+	selfArgument0 string
+	selfArguments []string
+	selfEnvironment map[string]string
+	cleanArguments []string
+	cleanEnvironment map[string]string
+	cacheRoot string
+	cacheEnabled bool
+	terminal string
+}
+
+
+
 
 func NewLibrary () (*Library) {
 	return & Library {
@@ -786,7 +800,7 @@ func resolveCache () (string, error) {
 
 
 
-func resolveLibrary (_candidate string, _cacheEnabled bool, _environment map[string]string) (LibraryStore, error) {
+func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error) {
 	
 	_sources, _error := resolveSources (_candidate)
 	if _error != nil {
@@ -802,7 +816,7 @@ func resolveLibrary (_candidate string, _cacheEnabled bool, _environment map[str
 				_fingerprints = append (_fingerprints, _source.FingerprintData)
 			}
 		}
-		for _name, _value := range _environment {
+		for _name, _value := range _context.cleanEnvironment {
 			_fingerprint := NewFingerprinter () .String ("d33041e6571901d0a5a6dfbde7c7a312") .StringWithLen (_name) .StringWithLen (_value) .Build ()
 			_fingerprints = append (_fingerprints, _fingerprint)
 		}
@@ -814,18 +828,10 @@ func resolveLibrary (_candidate string, _cacheEnabled bool, _environment map[str
 		_sourcesFingerprint = _fingerprinter.Build ()
 	}
 	
-	var _cacheRoot string
 	var _cacheLibrary string
 	
-	if _cacheEnabled {
-		
-		if _cacheRoot_0, _error := resolveCache (); _error == nil {
-			_cacheRoot = _cacheRoot_0
-		} else {
-			return nil, _error
-		}
-		
-		_cacheLibrary = path.Join (_cacheRoot, _sourcesFingerprint + ".cdb")
+	if _context.cacheEnabled && (_context.cacheRoot != "") {
+		_cacheLibrary = path.Join (_context.cacheRoot, _sourcesFingerprint + ".cdb")
 		if _store, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
 			return _store, nil
 		} else if ! os.IsNotExist (_error) {
@@ -842,8 +848,8 @@ func resolveLibrary (_candidate string, _cacheEnabled bool, _environment map[str
 		return nil, _error
 	}
 	
-	if _cacheEnabled {
-		if _error := doExportLibraryCdb (_library, _cacheLibrary); _error == nil {
+	if _context.cacheEnabled {
+		if _error := doExportLibraryCdb (_library, _cacheLibrary, _context); _error == nil {
 //			logf ('d', 0xdf78377c, "created library cached at `%s`;", _cacheLibrary)
 			_library.url = _cacheLibrary
 		} else {
@@ -867,7 +873,7 @@ func resolveLibraryCached (_path string) (LibraryStore, error) {
 
 
 
-func doExportLabelsList (_library LibraryStore, _stream io.Writer) (error) {
+func doExportLabelsList (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
 	if _labels, _error := _library.SelectLabels (); _error == nil {
 		_buffer := bytes.NewBuffer (nil)
 		for _, _label := range _labels {
@@ -882,7 +888,7 @@ func doExportLabelsList (_library LibraryStore, _stream io.Writer) (error) {
 }
 
 
-func doExportScript (_library LibraryStore, _label string, _stream io.Writer) (error) {
+func doExportScript (_library LibraryStore, _label string, _stream io.Writer, _context *Context) (error) {
 	if _body, _found, _error := _library.ResolveBodyByLabel (_label); _error == nil {
 		if _found {
 			_, _error := io.WriteString (_stream, _body)
@@ -896,7 +902,7 @@ func doExportScript (_library LibraryStore, _label string, _stream io.Writer) (e
 }
 
 
-func doExportLibraryJson (_library LibraryStore, _stream io.Writer) (error) {
+func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
 	_library, _ok := _library.(*Library)
 	if !_ok {
 		return errorf (0x4f480517, "only works with in-memory library store")
@@ -908,7 +914,7 @@ func doExportLibraryJson (_library LibraryStore, _stream io.Writer) (error) {
 }
 
 
-func doExportLibraryStore (_library LibraryStore, _store StoreOutput) (error) {
+func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *Context) (error) {
 	
 	_fingerprints := make ([]string, 0, 1024)
 	_fingerprintsByLabels := make (map[string]string, 1024)
@@ -978,9 +984,9 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput) (error) {
 }
 
 
-func doExportLibraryCdb (_library LibraryStore, _path string) (error) {
+func doExportLibraryCdb (_library LibraryStore, _path string, _context *Context) (error) {
 	if _store, _error := NewCdbStoreOutput (_path); _error == nil {
-		return doExportLibraryStore (_library, _store)
+		return doExportLibraryStore (_library, _store, _context)
 	} else {
 		return _error
 	}
@@ -989,10 +995,10 @@ func doExportLibraryCdb (_library LibraryStore, _path string) (error) {
 
 
 
-func doExecute (_library LibraryStore, _executable string, _scriptletLabel string, _arguments []string, _environment map[string]string) (error) {
+func doExecute (_library LibraryStore, _scriptletLabel string, _context *Context) (error) {
 	if _scriptlet, _error := _library.ResolveFullByLabel (_scriptletLabel); _error == nil {
 		if _scriptlet != nil {
-			return doExecuteScriptlet (_library, _executable, _scriptlet, _arguments, _environment)
+			return doExecuteScriptlet (_library, _scriptlet, _context)
 		} else {
 			return errorf (0x3be6dcd7, "unknown scriptlet for `%s`", _scriptletLabel)
 		}
@@ -1002,11 +1008,11 @@ func doExecute (_library LibraryStore, _executable string, _scriptletLabel strin
 }
 
 
-func doExecuteScriptlet (_library LibraryStore, _executable string, _scriptlet *Scriptlet, _arguments []string, _environment map[string]string) (error) {
+func doExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (error) {
 	
 	var _interpreterExecutable string
-	var _interpreterArguments []string = make ([]string, 0, len (_arguments) + 16)
-	var _interpreterEnvironment []string = make ([]string, 0, len (_environment) + 16)
+	var _interpreterArguments []string = make ([]string, 0, len (_context.cleanArguments) + 16)
+	var _interpreterEnvironment []string = make ([]string, 0, len (_context.cleanEnvironment) + 16)
 	
 	var _interpreterScriptInput int
 	var _interpreterScriptOutput *os.File
@@ -1040,7 +1046,7 @@ X_RUN=( %s )
 exec %d<&-
 
 `,
-							_executable,
+							_context.selfExecutable,
 							_interpreterScriptInput,
 						))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
@@ -1061,14 +1067,14 @@ exec %d<&-
 		return _error
 	}
 	
-	_interpreterArguments = append (_interpreterArguments, _arguments ...)
+	_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
 	
-	for _name, _value := range _environment {
+	for _name, _value := range _context.cleanEnvironment {
 		_variable := _name + "=" + _value
 		_interpreterEnvironment = append (_interpreterEnvironment, _variable)
 	}
 	if _url := _library.Url (); _url != "" {
-		_interpreterEnvironment = append (_interpreterEnvironment, "XRUN_EXECUTABLE=" + _executable)
+		_interpreterEnvironment = append (_interpreterEnvironment, "XRUN_EXECUTABLE=" + _context.selfExecutable)
 		_interpreterEnvironment = append (_interpreterEnvironment, "XRUN_LIBRARY=" + _url)
 	}
 	sort.Strings (_interpreterEnvironment)
@@ -1083,16 +1089,16 @@ exec %d<&-
 
 
 
-func doSelectExecute (_library LibraryStore, _executable string, _terminal string, _arguments []string, _environment map[string]string) (error) {
-	if _label, _error := doSelectLabel_0 (_library, _executable, _terminal); _error == nil {
-		return doExecute (_library, _executable, _label, _arguments, _environment)
+func doSelectExecute (_library LibraryStore, _context *Context) (error) {
+	if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
+		return doExecute (_library, _label, _context)
 	} else {
 		return _error
 	}
 }
 
-func doSelectLegacyOutput (_library LibraryStore, _executable string, _terminal string, _label string, _stream io.Writer) (error) {
-	if _scriptlet, _error := doSelectScriptlet (_library, _executable, _terminal, _label); _error == nil {
+func doSelectLegacyOutput (_library LibraryStore, _label string, _stream io.Writer, _context *Context) (error) {
+	if _scriptlet, _error := doSelectScriptlet (_library, _label, _context); _error == nil {
 		if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error != nil {
 			return _error
 		}
@@ -1105,9 +1111,9 @@ func doSelectLegacyOutput (_library LibraryStore, _executable string, _terminal 
 
 
 
-func doSelectScriptlet (_library LibraryStore, _executable string, _terminal string, _label string) (*Scriptlet, error) {
+func doSelectScriptlet (_library LibraryStore, _label string, _context *Context) (*Scriptlet, error) {
 	if _label == "" {
-		if _label_0, _error := doSelectLabel_0 (_library, _executable, _terminal); _error == nil {
+		if _label_0, _error := doSelectLabel_0 (_library, _context); _error == nil {
 			_label = _label_0
 		} else {
 			return nil, _error
@@ -1124,8 +1130,8 @@ func doSelectScriptlet (_library LibraryStore, _executable string, _terminal str
 	}
 }
 
-func doSelectLabel (_library LibraryStore, _executable string, _terminal string, _stream io.Writer) (error) {
-	if _label, _error := doSelectLabel_0 (_library, _executable, _terminal); _error == nil {
+func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
+	if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
 		if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
 			return _error
 		}
@@ -1135,8 +1141,8 @@ func doSelectLabel (_library LibraryStore, _executable string, _terminal string,
 	return nil
 }
 
-func doSelectLabels (_library LibraryStore, _executable string, _terminal string, _stream io.Writer) (error) {
-	if _labels, _error := doSelectLabels_0 (_library, _executable, _terminal); _error == nil {
+func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
+	if _labels, _error := doSelectLabels_0 (_library, _context); _error == nil {
 		for _, _label := range _labels {
 			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
 				return _error
@@ -1149,8 +1155,8 @@ func doSelectLabels (_library LibraryStore, _executable string, _terminal string
 }
 
 
-func doSelectLabel_0 (_library LibraryStore, _executable string, _terminal string) (string, error) {
-	if _labels, _error := doSelectLabels_0 (_library, _executable, _terminal); _error == nil {
+func doSelectLabel_0 (_library LibraryStore, _context *Context) (string, error) {
+	if _labels, _error := doSelectLabels_0 (_library, _context); _error == nil {
 		if len (_labels) == 1 {
 			return _labels[0], nil
 		} else {
@@ -1161,7 +1167,7 @@ func doSelectLabel_0 (_library LibraryStore, _executable string, _terminal strin
 	}
 }
 
-func doSelectLabels_0 (_library LibraryStore, _executable string, _terminal string) ([]string, error) {
+func doSelectLabels_0 (_library LibraryStore, _context *Context) ([]string, error) {
 	var _inputs []string
 	if _inputs_0, _error := _library.SelectLabels (); _error == nil {
 		_inputs = _inputs_0
@@ -1169,7 +1175,7 @@ func doSelectLabels_0 (_library LibraryStore, _executable string, _terminal stri
 		return nil, _error
 	}
 	var _outputs []string
-	if _outputs_0, _error := menuSelectFrom (_executable, _terminal, _inputs); _error == nil {
+	if _outputs_0, _error := menuSelectFrom (_inputs, _context); _error == nil {
 		_outputs = _outputs_0
 	} else {
 		return nil, _error
@@ -1182,14 +1188,15 @@ func doSelectLabels_0 (_library LibraryStore, _executable string, _terminal stri
 
 func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (error) {
 	
-	var _cachePath string
-	var _sourcePath string
 	var _command string
 	var _scriptlet string
-	var _terminal string
+	var _sourcePath string
+	var _cacheRoot string
+	var _cachePath string
 	
 	var _cleanArguments []string
 	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
+	var _terminal string
 	
 	for _name, _value := range _environment {
 		
@@ -1208,7 +1215,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			_nameCanonical = strings.Replace (_nameCanonical, "X_RUN", "XRUN", 1)
 		}
 		
-		if strings.HasPrefix (_nameCanonical, "XRUN") || strings.HasPrefix (_nameCanonical, "_XRUN") {
+		if strings.HasPrefix (_nameCanonical, "XRUN_") || strings.HasPrefix (_nameCanonical, "_XRUN_") {
 			
 			if _name != _nameCanonical {
 //				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
@@ -1225,6 +1232,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					}
 				case "XRUN_ACTION" :
 					_command = "legacy:" + _value
+				case "XRUN_CACHE" :
+					_cacheRoot = _value
 				case "XRUN_TERM" :
 					_terminal = _value
 				default :
@@ -1234,13 +1243,6 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		} else {
 			_cleanEnvironment[_name] = _value
 		}
-	}
-	
-	if _terminal == "" {
-		_terminal, _ = _cleanEnvironment["TERM"]
-	}
-	if _terminal == "dumb" {
-		_terminal = ""
 	}
 	
 	for _index, _argument := range _arguments {
@@ -1314,17 +1316,6 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		}
 	}
 	
-	if _cachePath != "" {
-		if _sourcePath != "" {
-			logf ('w', 0x1fe0b572, "both library and source path specified;  using library!")
-			_sourcePath = ""
-		}
-	}
-	
-	if (_command == "") && (_scriptlet == "") {
-		_command = "select-execute"
-	}
-	
 	if _scriptlet != "" {
 		if strings.HasPrefix (_scriptlet, ":: ") {
 			_scriptlet = _scriptlet[3:]
@@ -1333,13 +1324,51 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		}
 	}
 	
+	if (_command == "") && (_scriptlet == "") {
+		_command = "select-execute"
+	}
+	
 	_cacheEnabled := true
 	if _command == "parse-library-json" {
 		_cacheEnabled = false
 	}
-	if !_cacheEnabled {
+	if _cacheEnabled {
+		if _cacheRoot == "" {
+			if _cacheRoot_0, _error := resolveCache (); _error == nil {
+				_cacheRoot = _cacheRoot_0
+			} else {
+				return _error
+			}
+		}
+	} else {
+		_cacheRoot = ""
 		_cachePath = ""
 	}
+	
+	if _terminal == "" {
+		_terminal, _ = _cleanEnvironment["TERM"]
+	}
+	if _terminal == "dumb" {
+		_terminal = ""
+	}
+	
+	if _cachePath != "" {
+		if _sourcePath != "" {
+			logf ('w', 0x1fe0b572, "both library and source path specified;  using library!")
+			_sourcePath = ""
+		}
+	}
+	
+	_context := & Context {
+			selfExecutable : _executable,
+			selfArguments : _arguments,
+			selfEnvironment : _environment,
+			cleanArguments : _cleanArguments,
+			cleanEnvironment : _cleanEnvironment,
+			cacheRoot : _cacheRoot,
+			cacheEnabled : _cacheEnabled,
+			terminal : _terminal,
+		}
 	
 	var _library LibraryStore
 	if _cachePath != "" {
@@ -1351,7 +1380,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		}
 	} else {
 //		logf ('d', 0x93dbfd8c, "resolving library...")
-		if _library_0, _error := resolveLibrary (_sourcePath, _cacheEnabled, _environment); _error == nil {
+		if _library_0, _error := resolveLibrary (_sourcePath, _context); _error == nil {
 			_library = _library_0
 		} else {
 			return _error
@@ -1364,19 +1393,19 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if _scriptlet == "" {
 				return errorf (0x39718e70, "execute:  expected scriptlet")
 			}
-			return doExecute (_library, _executable, _scriptlet, _cleanArguments, _cleanEnvironment)
+			return doExecute (_library, _scriptlet, _context)
 		
 		case "select-execute" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0x203e410a, "execute:  unexpected scriptlet or arguments")
 			}
-			return doSelectExecute (_library, _executable, _terminal, _cleanArguments, _cleanEnvironment)
+			return doSelectExecute (_library, _context)
 		
 		case "select-label" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0x2d19b1bc, "select:  unexpected scriptlet or arguments")
 			}
-			return doSelectLabel (_library, _executable, _terminal, os.Stdout)
+			return doSelectLabel (_library, os.Stdout, _context)
 		
 		case "export-script" :
 			if _scriptlet == "" {
@@ -1385,13 +1414,13 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if len (_cleanArguments) != 0 {
 				return errorf (0xcf8db3c0, "export:  unexpected arguments")
 			}
-			return doExportScript (_library, _scriptlet, os.Stdout)
+			return doExportScript (_library, _scriptlet, os.Stdout, _context)
 		
 		case "export-labels-list" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0xf7b9c7f3, "list:  unexpected scriptlet or arguments")
 			}
-			return doExportLabelsList (_library, os.Stdout)
+			return doExportLabelsList (_library, os.Stdout, _context)
 		
 		case "parse-library-json", "export-library-json" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
@@ -1399,9 +1428,9 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			switch _command {
 				case "parse-library-json" :
-					return doExportLibraryJson (_library, os.Stdout)
+					return doExportLibraryJson (_library, os.Stdout, _context)
 				case "export-library-json" :
-					return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout, nil))
+					return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout, nil), _context)
 				default :
 					panic (0xda7243ef)
 			}
@@ -1413,13 +1442,13 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if len (_cleanArguments) != 1 {
 				return errorf (0xf76f4459, "export:  expected database path")
 			}
-			return doExportLibraryCdb (_library, _cleanArguments[0])
+			return doExportLibraryCdb (_library, _cleanArguments[0], _context)
 		
 		case "legacy:output-selection-and-command" :
 			if len (_cleanArguments) != 0 {
 				return errorf (0xe4f7e6f5, "export:  unexpected arguments")
 			}
-			return doSelectLegacyOutput (_library, _executable, _terminal, _scriptlet, os.Stdout)
+			return doSelectLegacyOutput (_library, _scriptlet, os.Stdout, _context)
 		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")
@@ -1838,7 +1867,7 @@ func fzfSelectMain () (error) {
 
 
 
-func menuSelectFrom (_executable string, _terminal string, _inputs []string) ([]string, error) {
+func menuSelectFrom (_inputs []string, _context *Context) ([]string, error) {
 	_inputsChannel := make (chan string, 1024)
 	go func () () {
 		for _, _input := range _inputs {
@@ -1846,14 +1875,13 @@ func menuSelectFrom (_executable string, _terminal string, _inputs []string) ([]
 		}
 		close (_inputsChannel)
 	} ()
-	return menuSelect (_executable, _terminal, _inputsChannel)
+	return menuSelect (_inputsChannel, _context)
 }
 
 
-func menuSelect (_executable string, _terminal string, _inputs <-chan string) ([]string, error) {
+func menuSelect (_inputs <-chan string, _context *Context) ([]string, error) {
 	
-	_term := _terminal
-	if _term != "" {
+	if _context.terminal != "" {
 		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
 			return nil, errorf (0xfc026596, "stderr is not a TTY")
 		}
@@ -1867,13 +1895,13 @@ func menuSelect (_executable string, _terminal string, _inputs <-chan string) ([
 			Stderr : os.Stderr,
 				Dir : "",
 		}
-	if _term != "" {
-		_command.Path = _executable
+	if _context.terminal != "" {
+		_command.Path = _context.selfExecutable
 		_command.Args = []string {
 				"[x-run:select]",
 			}
 		_command.Env = []string {
-				"TERM=" + _term,
+				"TERM=" + _context.terminal,
 			}
 	} else if _path, _error := exec.LookPath ("x-input"); _error == nil {
 		_command.Path = _path
