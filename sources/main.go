@@ -366,14 +366,14 @@ func (_library *LibraryStoreInput) Url () (string) {
 
 
 
-func parseLibrary (_sources []*Source, _sourcesFingerprint string) (*Library, error) {
+func parseLibrary (_sources []*Source, _sourcesFingerprint string, _context *Context) (*Library, error) {
 	
 	_library := NewLibrary ()
 	_library.Sources = _sources
 	_library.SourcesFingerprint = _sourcesFingerprint
 	
 	for _, _source := range _sources {
-		if _fingerprint, _error := parseFromSource (_library, _source); _error == nil {
+		if _fingerprint, _error := parseFromSource (_library, _source, _context); _error == nil {
 			_source.FingerprintData = _fingerprint
 		} else {
 			return nil, _error
@@ -424,23 +424,42 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 
 
 
-func parseFromSource (_library *Library, _source *Source) (string, error) {
+func parseFromSource (_library *Library, _source *Source, _context *Context) (string, error) {
 	if _source.Executable {
-		_path := _source.Path
-		if ! path.IsAbs (_path) {
-			if _path_0, _error := filepath.Abs (_path); _error == nil {
-				_path = _path_0
+		
+		_executable := _source.Path
+		if ! path.IsAbs (_executable) {
+			if _executable_0, _error := filepath.Abs (_executable); _error == nil {
+				_executable = _executable_0
 			} else {
 				return "", _error
 			}
 		}
-		_command := exec.Command (_path)
-		if _output, _error := _command.Output (); _error == nil {
-			return parseFromStream (_library, bytes.NewBuffer (_output), _source.Path)
+		
+		_command := & exec.Cmd {
+				Path : _executable,
+				Args : []string {
+						"[x-run:generator]",
+					},
+				Env : commandEnvironment (_context, nil),
+				Stdin : nil,
+				Stdout : nil,
+				Stderr : os.Stderr,
+				Dir : "",
+			}
+		
+		if _exitCode, _data, _error := commandExecuteGetStdout (_command); _error == nil {
+			if _exitCode == 0 {
+				return parseFromData (_library, string (_data), _source.Path)
+			} else {
+				return "", errorf (0x5fd5c9b7, "generated failed with exit code `%d`", _exitCode)
+			}
 		} else {
 			return "", _error
 		}
+		
 		return "", errorf (0x566095fc, "not-implemented")
+		
 	} else {
 		return parseFromFile (_library, _source.Path)
 	}
@@ -459,15 +478,10 @@ func parseFromFile (_library *Library, _path string) (string, error) {
 
 func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string) (string, error) {
 	if _data, _error := ioutil.ReadAll (_stream); _error == nil {
-		if ! utf8.Valid (_data) {
-			return "", errorf (0x2a19cfc7, "invalid UTF-8 source")
-		}
-		_data := string (_data)
-		if _error := parseFromData (_library, _data, _sourcePath); _error == nil {
-			_fingerprint := NewFingerprinter () .String (_data) .Build ()
-			return _fingerprint, _error
+		if utf8.Valid (_data) {
+			return parseFromData (_library, string (_data), _sourcePath)
 		} else {
-			return "", _error
+			return "", errorf (0x2a19cfc7, "invalid UTF-8 source")
 		}
 	} else {
 		return "", _error
@@ -475,8 +489,7 @@ func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string) 
 }
 
 
-func parseFromData (_library *Library, _source string, _sourcePath string) (error) {
-	
+func parseFromData (_library *Library, _source string, _sourcePath string) (string, error) {
 	
 	const (
 		WAITING = 1 + iota
@@ -494,6 +507,8 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 		lineStart uint
 		lineEnd uint
 	}
+	
+	_fingerprint := NewFingerprinter () .String (_source) .Build ()
 	
 	_trimCr := func (s string) (string) { return strings.TrimFunc (s, func (r rune) (bool) { return r == '\r' }) }
 	_trimSpace := func (s string) (string) { return strings.TrimFunc (s, unicode.IsSpace) }
@@ -544,16 +559,16 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 						_label = _text[:_splitIndex]
 						_body = _text[_splitIndex + 4:]
 					} else {
-						return errorf (0x53eafa1a, "invalid syntax (%d):  missing scriptlet separator `::`", _lineIndex, _line)
+						return "", errorf (0x53eafa1a, "invalid syntax (%d):  missing scriptlet separator `::`", _lineIndex, _line)
 					}
 					_label = _trimSpace (_label)
 					_body = _trimSpace (_body)
 					
 					if _label == "" {
-						return errorf (0xddec2340, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
+						return "", errorf (0xddec2340, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
 					}
 					if _body == "" {
-						return errorf (0xc1dc94cc, "invalid syntax (%d):  empty scriptlet body", _lineIndex, _line)
+						return "", errorf (0xc1dc94cc, "invalid syntax (%d):  empty scriptlet body", _lineIndex, _line)
 					}
 					
 					_scriptletState = scriptletState {
@@ -569,7 +584,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 					_label := _line[3:]
 					_label = _trimSpace (_label)
 					if _label == "" {
-						return errorf (0x64c17a76, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
+						return "", errorf (0x64c17a76, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
 					}
 					
 					_scriptletState = scriptletState {
@@ -597,7 +612,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 					// NOP
 					
 				} else {
-					return errorf (0x9f8daae4, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+					return "", errorf (0x9f8daae4, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
 				}
 			
 			case SCRIPTLET_BODY :
@@ -609,7 +624,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 					_state = SCRIPTLET_PUSH
 					
 				} else if strings.HasPrefix (_line, "!!") {
-					return errorf (0xf9900c0c, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+					return "", errorf (0xf9900c0c, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
 					
 				} else if _lineTrimmed == "" {
 					_scriptletState.bodyBuffer.WriteByte ('\n')
@@ -635,7 +650,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 				if _lineTrimmed == "##!!" {
 					_state = WAITING
 				} else if strings.HasPrefix (_line, "##!!") {
-					return errorf (0x183de0fd, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+					return "", errorf (0x183de0fd, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
 				} else {
 					// NOP
 				}
@@ -652,7 +667,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 						},
 				}
 			if _error := includeScriptlet (_library, _scriptlet); _error != nil {
-				return _error
+				return "", _error
 			}
 			_state = WAITING
 		}
@@ -661,14 +676,14 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (erro
 	switch _state {
 		case WAITING :
 		case SCRIPTLET_BODY :
-			return errorf (0x9d55df33, "invalid syntax (%d):  missing scriptlet body closing tag `!!` (and reached end of file)", _lineIndex)
+			return "", errorf (0x9d55df33, "invalid syntax (%d):  missing scriptlet body closing tag `!!` (and reached end of file)", _lineIndex)
 		case SKIPPING :
-			return errorf (0x357f15e1, "invalid syntax (%d):  missing comment body closing tag `##!!` (and reached end of file)", _lineIndex)
+			return "", errorf (0x357f15e1, "invalid syntax (%d):  missing comment body closing tag `##!!` (and reached end of file)", _lineIndex)
 		default :
-			return errorf (0xc0f78380, "invalid syntax (%d):  unexpected state `%s` (and reached end of file)", _lineIndex, _state)
+			return "", errorf (0xc0f78380, "invalid syntax (%d):  unexpected state `%s` (and reached end of file)", _lineIndex, _state)
 	}
 	
-	return nil
+	return _fingerprint, nil
 }
 
 
@@ -841,7 +856,7 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 	
 	var _library *Library
 	logf ('i', 0xbd44916b, "parsing library from sources...")
-	if _library_0, _error := parseLibrary (_sources, _sourcesFingerprint); _error == nil {
+	if _library_0, _error := parseLibrary (_sources, _sourcesFingerprint, _context); _error == nil {
 //		logf ('d', 0x71b45ebc, "parsed library from sources;")
 		_library = _library_0
 	} else {
@@ -1012,7 +1027,6 @@ func doExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context 
 	
 	var _interpreterExecutable string
 	var _interpreterArguments []string = make ([]string, 0, len (_context.cleanArguments) + 16)
-	var _interpreterEnvironment []string = make ([]string, 0, len (_context.cleanEnvironment) + 16)
 	
 	var _interpreterScriptInput int
 	var _interpreterScriptOutput *os.File
@@ -1068,16 +1082,10 @@ exec %d<&-
 	}
 	
 	_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
-	
-	for _name, _value := range _context.cleanEnvironment {
-		_variable := _name + "=" + _value
-		_interpreterEnvironment = append (_interpreterEnvironment, _variable)
-	}
-	if _url := _library.Url (); _url != "" {
-		_interpreterEnvironment = append (_interpreterEnvironment, "XRUN_EXECUTABLE=" + _context.selfExecutable)
-		_interpreterEnvironment = append (_interpreterEnvironment, "XRUN_LIBRARY=" + _url)
-	}
-	sort.Strings (_interpreterEnvironment)
+	_interpreterEnvironment := commandEnvironment (_context, map[string]string {
+			"XRUN_EXECUTABLE" : _context.selfExecutable,
+			"XRUN_LIBRARY" : _library.Url (),
+		})
 	
 	if _error := syscall.Exec (_interpreterExecutable, _interpreterArguments, _interpreterEnvironment); _error != nil {
 		return _error
@@ -1181,6 +1189,35 @@ func doSelectLabels_0 (_library LibraryStore, _context *Context) ([]string, erro
 		return nil, _error
 	}
 	return _outputs, nil
+}
+
+
+
+
+func commandEnvironment (_context *Context, _overrides map[string]string) ([]string) {
+	
+	_environmentMap := make (map[string]string, len (_context.cleanEnvironment) + len (_overrides))
+	
+	for _name, _value := range _context.cleanEnvironment {
+		_environmentMap[_name] = _value
+	}
+	for _name, _value := range _overrides {
+		if _value != "" {
+			_environmentMap[_name] = _value
+		} else {
+			delete (_environmentMap, _name)
+		}
+	}
+	
+	var _environmentArray []string = make ([]string, 0, len (_environmentMap))
+	for _name, _value := range _environmentMap {
+		_variable := _name + "=" + _value
+		_environmentArray = append (_environmentArray, _variable)
+	}
+	
+	sort.Strings (_environmentArray)
+	
+	return _environmentArray
 }
 
 
@@ -1914,7 +1951,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 			Stdin : nil,
 			Stdout : nil,
 			Stderr : os.Stderr,
-				Dir : "",
+			Dir : "",
 		}
 	
 	_commandFzf := false
@@ -1934,6 +1971,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"select",
 				"run:",
 			}
+		_command.Env = commandEnvironment (_context, nil)
 	} else {
 		return errorf (0xb91714f7, "expected `x-input`")
 	}
@@ -2093,6 +2131,37 @@ func commandExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 		}
 	} else {
 		return 0, _inputsCount, _outputsCount, nil
+	}
+}
+
+
+
+
+func commandExecuteGetStdout (_command *exec.Cmd) (int, []byte, error) {
+	
+	_stdout := bytes.NewBuffer (nil)
+	_stdout.Grow (128 * 1024)
+	
+	if _command.Stdout == nil {
+		_command.Stdout = _stdout
+	} else {
+		return -1, nil, errorf (0x7cd15552, "invalid state")
+	}
+	
+	_waitError := _command.Run ()
+	
+	if _waitError != nil {
+		if _command.ProcessState.Exited () {
+			if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
+				return _exitCode, _stdout.Bytes (), nil
+			} else {
+				return -1, _stdout.Bytes (), _waitError
+			}
+		} else {
+			return -1, nil, _waitError
+		}
+	} else {
+		return 0, _stdout.Bytes (), nil
 	}
 }
 
