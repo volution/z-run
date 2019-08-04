@@ -1868,25 +1868,46 @@ func fzfSelectMain () (error) {
 
 
 func menuSelectFrom (_inputs []string, _context *Context) ([]string, error) {
+	
 	_inputsChannel := make (chan string, 1024)
+	_outputsChannel := make (chan string, 1024)
+	_outputs := make ([]string, 0, 1024)
+	
 	go func () () {
 		for _, _input := range _inputs {
 			_inputsChannel <- _input
 		}
 		close (_inputsChannel)
 	} ()
-	return menuSelect (_inputsChannel, _context)
+	
+	go func () () {
+		for {
+			_output, _ok := <- _outputsChannel
+			if _ok {
+				_outputs = append (_outputs, _output)
+			} else {
+				break
+			}
+		}
+		close (_outputsChannel)
+	} ()
+	
+	if _error := menuSelect (_inputsChannel, _outputsChannel, _context); _error == nil {
+		return _outputs, nil
+	} else {
+		return nil, _error
+	}
 }
 
 
-func menuSelect (_inputs <-chan string, _context *Context) ([]string, error) {
+func menuSelect (_inputsChannel <-chan string, _outputsChannel chan<- string, _context *Context) (error) {
 	
 	if _context.terminal != "" {
 		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-			return nil, errorf (0xfc026596, "stderr is not a TTY")
+			return errorf (0xfc026596, "stderr is not a TTY")
 		}
 	} else {
-//		return nil, errorf (0xbdbc268d, "expected `TERM`")
+//		return errorf (0xbdbc268d, "expected `TERM`")
 	}
 	
 	_command := & exec.Cmd {
@@ -1911,38 +1932,39 @@ func menuSelect (_inputs <-chan string, _context *Context) ([]string, error) {
 				"run:",
 			}
 	} else {
-		return nil, errorf (0xb91714f7, "expected `x-input`")
+		return errorf (0xb91714f7, "expected `x-input`")
 	}
 	
 	var _stdin io.WriteCloser
 	if _stream, _error := _command.StdinPipe (); _error == nil {
 		_stdin = _stream
 	} else {
-		return nil, _error
+		return _error
 	}
 	var _stdout io.ReadCloser
 	if _stream, _error := _command.StdoutPipe (); _error == nil {
 		_stdout = _stream
 	} else {
 		_stdin.Close ()
-		return nil, _error
+		return _error
 	}
 	
 	if _error := _command.Start (); _error != nil {
 		_stdin.Close ()
 		_stdout.Close ()
-		return nil, _error
+		return _error
 	}
 	
 	_waiter := & sync.WaitGroup {}
 	
 	_waiter.Add (1)
 	var _stdinError error
+	var _inputsCount uint
 	go func () () {
 //		logf ('d', 0x41785333, "starting stdin loop")
 		_buffer := bytes.NewBuffer (nil)
 		for {
-			_input, _ok := <- _inputs
+			_input, _ok := <- _inputsChannel
 //			logf ('d', 0xf997ad63, "writing to stdin: `%s`", _input)
 			if _ok {
 				_buffer.Reset ()
@@ -1952,6 +1974,7 @@ func menuSelect (_inputs <-chan string, _context *Context) ([]string, error) {
 					_stdinError = _error
 					break
 				}
+				_inputsCount += 1
 			} else {
 				break
 			}
@@ -1965,7 +1988,7 @@ func menuSelect (_inputs <-chan string, _context *Context) ([]string, error) {
 	
 	_waiter.Add (1)
 	var _stdoutError error
-	var _outputs []string
+	var _outputsCount uint
 	go func () () {
 //		logf ('d', 0x61503d28, "starting stdout loop")
 		_buffer := bufio.NewReader (_stdout)
@@ -1973,7 +1996,8 @@ func menuSelect (_inputs <-chan string, _context *Context) ([]string, error) {
 			if _line, _error := _buffer.ReadString ('\n'); _error == nil {
 				_output := strings.TrimRight (_line, "\n")
 //				logf ('d', 0xa6f11fbf, "read from stdout: `%s`", _output)
-				_outputs = append (_outputs, _output)
+				_outputsChannel <- _output
+				_outputsCount += 1
 			} else if _error == io.EOF {
 				if _line != "" {
 					_stdoutError = errorf (0x1bc14ac4, "expected proper line")
@@ -2003,39 +2027,36 @@ func menuSelect (_inputs <-chan string, _context *Context) ([]string, error) {
 	var _outputError error
 	switch _command.ProcessState.ExitCode () {
 		case 0 :
-			if len (_outputs) == 0 {
+			if _outputsCount == 0 {
 				_outputError = errorf (0xbb7ff442, "invalid outputs")
 			}
 		case 1 :
-			if len (_outputs) != 0 {
+			if _outputsCount != 0 {
 				_outputError = errorf (0x6bd364da, "invalid outputs")
 			}
-			_outputs = []string {}
 			_waitError = nil
 		case 130 :
-			if len (_outputs) != 0 {
+			if _outputsCount != 0 {
 				_outputError = errorf (0xac4b1681, "invalid outputs")
 			}
-			_outputs = nil
 			_waitError = nil
 		case 2 :
 			_outputError = errorf (0x85cabb2a, "failed")
-			_outputs = nil
 	}
 	
 	if _outputError != nil {
-		return nil, _outputError
+		return _outputError
 	}
 	if _waitError != nil {
-		return nil, _waitError
+		return _waitError
 	}
 	if _stdinError != nil {
-		return nil, _stdinError
+		return _stdinError
 	}
 	if _stdoutError != nil {
-		return nil, _stdoutError
+		return _stdoutError
 	}
 	
-	return _outputs, nil
+	return nil
 }
 
