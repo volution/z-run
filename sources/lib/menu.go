@@ -79,12 +79,12 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"select",
 				"run:",
 			}
-		_command.Env = commandEnvironment (_context, nil)
+		_command.Env = processEnvironment (_context, nil)
 	} else {
 		return errorf (0xb91714f7, "expected `x-input`")
 	}
 	
-	if _exitCode, _, _outputsCount, _error := commandExecuteAndPipe (_command, _inputsChannel, _outputsChannel); _error == nil {
+	if _exitCode, _, _outputsCount, _error := processExecuteAndPipe (_command, _inputsChannel, _outputsChannel); _error == nil {
 		if _commandFzf {
 			switch _exitCode {
 				case 0 :

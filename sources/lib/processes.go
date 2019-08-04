@@ -14,7 +14,7 @@ import "sync"
 
 
 
-func commandEnvironment (_context *Context, _overrides map[string]string) ([]string) {
+func processEnvironment (_context *Context, _overrides map[string]string) ([]string) {
 	
 	_environmentMap := make (map[string]string, len (_context.cleanEnvironment) + len (_overrides))
 	
@@ -43,7 +43,7 @@ func commandEnvironment (_context *Context, _overrides map[string]string) ([]str
 
 
 
-func commandExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string) (int, uint, uint, error) {
+func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string) (int, uint, uint, error) {
 	
 	var _stdin io.WriteCloser
 	if _inputsChannel != nil {
@@ -169,7 +169,7 @@ func commandExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 
 
 
-func commandExecuteGetStdout (_command *exec.Cmd) (int, []byte, error) {
+func processExecuteGetStdout (_command *exec.Cmd) (int, []byte, error) {
 	
 	_stdout := bytes.NewBuffer (nil)
 	_stdout.Grow (128 * 1024)

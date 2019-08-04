@@ -208,7 +208,7 @@ exec %d<&-
 	}
 	
 	_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
-	_interpreterEnvironment := commandEnvironment (_context, map[string]string {
+	_interpreterEnvironment := processEnvironment (_context, map[string]string {
 			"XRUN_EXECUTABLE" : _context.selfExecutable,
 			"XRUN_LIBRARY" : _library.Url (),
 		})

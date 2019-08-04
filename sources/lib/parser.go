@@ -56,14 +56,14 @@ func parseFromSource (_library *Library, _source *Source, _context *Context) (st
 				Args : []string {
 						"[x-run:generator]",
 					},
-				Env : commandEnvironment (_context, nil),
+				Env : processEnvironment (_context, nil),
 				Stdin : nil,
 				Stdout : nil,
 				Stderr : os.Stderr,
 				Dir : "",
 			}
 		
-		if _exitCode, _data, _error := commandExecuteGetStdout (_command); _error == nil {
+		if _exitCode, _data, _error := processExecuteGetStdout (_command); _error == nil {
 			if _exitCode == 0 {
 				return parseFromData (_library, string (_data), _source.Path)
 			} else {
