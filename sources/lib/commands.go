@@ -173,7 +173,7 @@ func doExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context 
 			_interpreterExecutable = "/bin/bash"
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[x-run:shell] [%s]", _scriptlet.Label),
+					fmt.Sprintf ("[z-run:shell] [%s]", _scriptlet.Label),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (
@@ -181,11 +181,13 @@ func doExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context 
 `#!/dev/null
 set -e -E -u -o pipefail -o noclobber -o noglob +o braceexpand || exit -- 1
 trap 'printf -- "[ee] failed: %%s\n" "${BASH_COMMAND}" >&2' ERR || exit -- 1
-BASH_ARGV0='x-run'
+BASH_ARGV0='z-run'
+ZRUN=( %s )
 X_RUN=( %s )
 exec %d<&-
 
 `,
+							_context.selfExecutable,
 							_context.selfExecutable,
 							_interpreterScriptInput,
 						))
@@ -209,8 +211,8 @@ exec %d<&-
 	
 	_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
 	_interpreterEnvironment := processEnvironment (_context, map[string]string {
-			"XRUN_EXECUTABLE" : _context.selfExecutable,
-			"XRUN_LIBRARY" : _library.Url (),
+			"ZRUN_EXECUTABLE" : _context.selfExecutable,
+			"ZRUN_LIBRARY" : _library.Url (),
 		})
 	
 	if _error := syscall.Exec (_interpreterExecutable, _interpreterArguments, _interpreterEnvironment); _error != nil {

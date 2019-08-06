@@ -40,7 +40,7 @@ func fzfSelectMain () (error) {
 	_options.ClearOnExit = true
 	_options.Mouse = false
 	
-	fzf.Run (_options, "x-run")
+	fzf.Run (_options, "z-run")
 	panic (0x4716a580)
 }
 

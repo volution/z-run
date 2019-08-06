@@ -54,7 +54,7 @@ func parseFromSource (_library *Library, _source *Source, _context *Context) (st
 		_command := & exec.Cmd {
 				Path : _executable,
 				Args : []string {
-						"[x-run:generator]",
+						"[z-run:generator]",
 					},
 				Env : processEnvironment (_context, nil),
 				Stdin : nil,

@@ -67,7 +67,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_commandFzf = true
 		_command.Path = _context.selfExecutable
 		_command.Args = []string {
-				"[x-run:select]",
+				"[z-run:select]",
 			}
 		_command.Env = []string {
 				"TERM=" + _context.terminal,
@@ -75,7 +75,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 	} else if _path, _error := exec.LookPath ("x-input"); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
-				"[x-run:input]",
+				"[z-run:input]",
 				"select",
 				"run:",
 			}

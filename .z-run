@@ -1,0 +1,215 @@
+#!/dev/null
+
+
+
+
+<< z-run / 0
+	"${ZRUN[@]}" ':: go / build / main / debug'
+	test "${#}" -ge 1
+	export -n -- \
+			X_RUN \
+			X_RUN_COMMAND \
+			X_RUN_COMMANDS \
+			X_RUN_COMMANDS_CDB \
+			X_RUN_ACTION \
+			X_RUN_FILTER \
+			X_RUN_INSIDE \
+			X_RUN_TERM \
+			X_RUN_TRACE \
+			X_RUN_CLEAN \
+			X_RUN_CACHE_IDENTITY \
+	#
+	export -n -- \
+			ZRUN_ACTION \
+			ZRUN_SOURCE \
+			ZRUN_LIBRARY \
+			ZRUN_EXECUTABLE \
+			ZRUN_CACHE \
+			ZRUN_TERM \
+	#
+	if test -n "${ZRUNDEV_SOURCE:-}" ; then
+		export -- ZRUN_SOURCE="${ZRUNDEV_SOURCE:-}"
+		export -n -- ZRUNDEV_SOURCE
+	fi
+	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
+!!
+
+<< z-run
+	exec -- "${ZRUN[@]}" ':: z-run / 0' z-run "${@}"
+!!
+
+:: z-run / execute :: exec -- "${ZRUN[@]}" ':: z-run' execute "${@}"
+:: z-run / script :: exec -- "${ZRUN[@]}" ':: z-run' export-script "${@}"
+:: z-run / list :: exec -- "${ZRUN[@]}" ':: z-run' export-labels "${@}"
+:: z-run / select :: exec -- "${ZRUN[@]}" ':: z-run' select-label "${@}"
+:: z-run / export-json :: exec -- "${ZRUN[@]}" ':: z-run' export-library-json "${@}"
+:: z-run / export-cdb :: exec -- "${ZRUN[@]}" ':: z-run' export-library-cdb "${@}"
+:: z-run / parse :: exec -- "${ZRUN[@]}" ':: z-run' parse-library "${@}"
+:: z-run / fzf :: exec -- "${ZRUN[@]}" ':: z-run / 0' '[z-run:select]' "${@}"
+
+:: z-run / use / workspace :: export -- ZRUNDEV_SOURCE=./.z-run
+:: z-run / use / photos :: export -- ZRUNDEV_SOURCE=./examples/photos.z-run
+:: z-run / use / desktop :: export -- ZRUNDEV_SOURCE=./examples/desktop.z-run
+:: z-run / use / vonuvoli :: export -- ZRUNDEV_SOURCE=./examples/vonuvoli.z-run
+
+
+
+
+<< go / build / main / debug
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			build \
+			-v \
+			-o ./.outputs/main-debug.elf \
+			-- \
+			./sources/main.go \
+	#
+!!
+
+<< go / build / main / release
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			build \
+			-v \
+			-o ./.outputs/main-release.elf \
+			-ldflags '-s' \
+			-- \
+			./sources/main.go \
+	#
+!!
+
+
+
+
+<< go / execute / main / debug
+	"${ZRUN[@]}" ':: go / build / main / debug'
+	exec -- ./.outputs/main-debug.elf "${@}"
+!!
+
+<< go / execute / main / release
+	"${ZRUN[@]}" ':: go / build / main / release'
+	exec -- ./.outputs/main-release.elf "${@}"
+!!
+
+
+
+
+<< go / dependencies / update
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			get \
+			-v \
+			-d \
+			-- \
+			./sources/... \
+	#
+!!
+
+
+
+
+<< go / tool
+	test "${#}" -ge 1
+	test -d ./.outputs
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	
+	export -- GOPATH="${_outputs}/go"
+	export -- GOBIN="${_outputs}/go/bin"
+	export -- GOTMPDIR="${_outputs}/go/tmp"
+	export -- GOCACHE="${_outputs}/go/cache"
+	
+	exec -- go "${@}"
+!!
+
+
+
+
+<< workspace / initialize / go
+	test "${#}" -eq 0
+	test -d ./.outputs
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	_sources="$( exec -- readlink -e -- ./sources )"
+	_vendor="$( exec -- readlink -e -- ./vendor )"
+	
+	GOPATH="${_outputs}/go"
+	GOBIN="${_outputs}/go/bin"
+	GOTMPDIR="${_outputs}/go/tmp"
+	GOCACHE="${_outputs}/go/cache"
+	
+	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" ; do
+		if test ! -e "${_folder}" ; then
+			mkdir -- "${_folder}"
+		fi
+	done
+	
+	if test ! -e "${GOPATH}/src" ; then
+		ln -s -T -- "${_vendor}" "${GOPATH}/src"
+	fi
+!!
+
+
+
+
+<< workspace / initialize / outputs
+	test "${#}" -eq 0
+	if test ! -d ./.outputs ; then
+		_outputs_store="${TMPDIR:-/tmp}/go--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+		mkdir -- "${_outputs_store}"
+		_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
+		ln -s -f -T -- "${_outputs_store}" ./.outputs
+	fi
+!!
+
+
+
+
+<< workspace / sources / codes / duplicates
+	test "${#}" -eq 0
+	exec -- xargs \
+			-r -d '\n' -I {} \
+			-a <(
+				grep \
+						-o \
+						-P \
+						-e '(?<=\[)[0-9a-f]{8}(?=\])|(?<=0x)[0-9a-f]{8}(?=[^0-9a-zA-Z]|$)' \
+						-h \
+						-r ./sources \
+						--include '*.go' \
+				| sort \
+				| uniq -d
+			) \
+			-- \
+		grep \
+			-P \
+			-e '(?<=\[){}(?=\])|(?<=0x){}(?=[^0-9a-zA-Z]|$)' \
+			-r ./sources \
+			-n \
+			--include '*.go' \
+			--color \
+	#
+!!
+
+
+
+
+:: dummy / sleep / 30s :: test "${#}" -eq 0 ; sleep -- 30s
+:: dummy / sleep / 1h :: test "${#}" -eq 0 ; sleep -- 1h
+
+:: dummy / sleep / loop :: printf -- '.' ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: dummy / sleep / loop' "${@}"
+:: dummy / sleep / bomb :: printf -- '.' ; sleep -- 1s ;         "${ZRUN[@]}" ':: dummy / sleep / bomb' "${@}"
+
+:: dummy / env :: test "${#}" -eq 0 ; tr '\0' '\n' < "/proc/${$}/environ"
+:: dummy / env / loop :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ; exec -- "${ZRUN[@]}" ':: dummy / env / loop' "${@}"
+:: dummy / env / bomb :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ;         "${ZRUN[@]}" ':: dummy / env / bomb' "${@}"
+
+:: dummy / lsof :: test "${#}" -eq 0 ; lsof -p "${$}" -w
+:: dummy / lsof / loop :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: dummy / lsof / loop' "${@}"
+:: dummy / lsof / bomb :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ;         "${ZRUN[@]}" ':: dummy / lsof / bomb' "${@}"
+
+:: dummy / touch :: test "${#}" -eq 0 ; touch -- ./.z-run
+:: dummy / touch / loop :: printf -- '.' ; touch -- ./.z-run ; sleep 1s ; exec -- "${ZRUN[@]}" ':: dummy / touch / loop' "${@}"
+:: dummy / touch / bomb :: printf -- '.' ; touch -- ./.z-run ; sleep 1s ;         "${ZRUN[@]}" ':: dummy / touch / bomb' "${@}"
+
+:: dummy / true :: exec -- true "${@}"
+:: dummy / false :: exec -- false "${@}"
+

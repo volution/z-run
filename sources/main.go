@@ -3,12 +3,12 @@
 package main
 
 
-import xrun "github.com/cipriancraciun/x-run"
+import zrun "github.com/cipriancraciun/z-run"
 
 
 
 
 func main () () {
-	xrun.Main ()
+	zrun.Main ()
 }
 

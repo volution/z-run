@@ -72,6 +72,11 @@ func resolveSourcesPath_1 () (string, os.FileInfo, error) {
 	}
 	
 	_files := []string {
+			
+			"z-run",
+			".z-run",
+			"_z-run",
+			
 			"x-run",
 			".x-run",
 			"_x-run",
@@ -126,7 +131,7 @@ func resolveCache () (string, error) {
 	if _error := os.MkdirAll (_cache, 0750); _error != nil {
 		return "", _error
 	}
-	_cache = path.Join (_cache, "x-run")
+	_cache = path.Join (_cache, "z-run")
 	if _error := os.MkdirAll (_cache, 0750); _error != nil {
 		return "", _error
 	}

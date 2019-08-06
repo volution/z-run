@@ -54,29 +54,44 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					break
 				}
 			}
-			_nameCanonical = strings.Replace (_nameCanonical, "X_RUN", "XRUN", 1)
+			_nameCanonical = strings.Replace (_nameCanonical, "Z_RUN", "ZRUN", 1)
 		}
 		
-		if strings.HasPrefix (_nameCanonical, "XRUN_") || strings.HasPrefix (_nameCanonical, "_XRUN_") {
+		if strings.HasPrefix (_nameCanonical, "ZRUN_") || strings.HasPrefix (_nameCanonical, "_ZRUN_") {
 			
 			if _name != _nameCanonical {
-//				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
+				logf ('w', 0x9bc8b3da, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
 			}
 			
 			switch _nameCanonical {
-				case "XRUN_SOURCE", "XRUN_COMMANDS" :
+				case "ZRUN_SOURCE" :
 					_sourcePath = _value
-				case "XRUN_LIBRARY" :
+				case "ZRUN_LIBRARY" :
 					_cachePath = _value
-				case "XRUN_EXECUTABLE" :
+				case "ZRUN_EXECUTABLE" :
 					if _executable != _value {
-						logf ('w', 0x31ee572e, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
+						logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
 					}
-				case "XRUN_ACTION" :
-					_command = "legacy:" + _value
-				case "XRUN_CACHE" :
+				case "ZRUN_CACHE" :
 					_cacheRoot = _value
-				case "XRUN_TERM" :
+				case "ZRUN_TERM" :
+					_terminal = _value
+				default :
+					logf ('w', 0xafe247b0, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
+			}
+			
+		} else if strings.HasPrefix (_nameCanonical, "X_RUN_") || strings.HasPrefix (_nameCanonical, "_X_RUN_") {
+			
+			if _name != _nameCanonical {
+				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
+			}
+			
+			switch _nameCanonical {
+				case "X_RUN_COMMANDS" :
+					_sourcePath = _value
+				case "X_RUN_ACTION" :
+					_command = "legacy:" + _value
+				case "X_RUN_TERM" :
 					_terminal = _value
 				default :
 					logf ('w', 0xdf61b057, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
@@ -316,17 +331,17 @@ func Main () () {
 	
 	_argument0 := os.Args[0]
 	switch _argument0 {
-		case "[x-run:select]" :
+		case "[z-run:select]" :
 			if _error := fzfSelectMain (); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0x2346ca3f)
 			}
-		case "[x-run]" :
+		case "[z-run]" :
 			// NOP
 		default :
 			_arguments := os.Args
-			_arguments[0] = "[x-run]"
+			_arguments[0] = "[z-run]"
 			_environment := os.Environ ()
 			if _error := syscall.Exec (_executable, _arguments, _environment); _error != nil {
 				panic (abortError (_error))
