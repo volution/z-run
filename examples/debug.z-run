@@ -1,0 +1,24 @@
+#!/dev/null
+
+
+:: sleep / 30s :: test "${#}" -eq 0 ; sleep -- 30s
+:: sleep / 1h :: test "${#}" -eq 0 ; sleep -- 1h
+
+:: sleep / loop :: printf -- '.' ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: sleep / loop' "${@}"
+:: sleep / bomb :: printf -- '.' ; sleep -- 1s ;         "${ZRUN[@]}" ':: sleep / bomb' "${@}"
+
+:: env :: test "${#}" -eq 0 ; tr '\0' '\n' < "/proc/${$}/environ"
+:: env / loop :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ; exec -- "${ZRUN[@]}" ':: env / loop' "${@}"
+:: env / bomb :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ;         "${ZRUN[@]}" ':: env / bomb' "${@}"
+
+:: lsof :: test "${#}" -eq 0 ; lsof -p "${$}" -w
+:: lsof / loop :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: lsof / loop' "${@}"
+:: lsof / bomb :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ;         "${ZRUN[@]}" ':: lsof / bomb' "${@}"
+
+:: touch :: test "${#}" -eq 0 ; touch -- ./examples/debug.z-run
+:: touch / loop :: printf -- '.' ; touch -- ./examples/debug.z-run ; sleep 1s ; exec -- "${ZRUN[@]}" ':: touch / loop' "${@}"
+:: touch / bomb :: printf -- '.' ; touch -- ./examples/debug.z-run ; sleep 1s ;         "${ZRUN[@]}" ':: touch / bomb' "${@}"
+
+:: true :: exec -- true "${@}"
+:: false :: exec -- false "${@}"
+

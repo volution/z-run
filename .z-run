@@ -3,6 +3,15 @@
 
 
 
+<< deploy
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: go / build / main / release'
+	cp -f -- ./.outputs/main-release.elf "${HOME}/.bin/z-run-0"
+!!
+
+
+
+
 << z-run / 0
 	"${ZRUN[@]}" ':: go / build / main / debug'
 	test "${#}" -ge 1
@@ -38,6 +47,7 @@
 	exec -- "${ZRUN[@]}" ':: z-run / 0' z-run "${@}"
 !!
 
+
 :: z-run / execute :: exec -- "${ZRUN[@]}" ':: z-run' execute "${@}"
 :: z-run / script :: exec -- "${ZRUN[@]}" ':: z-run' export-script "${@}"
 :: z-run / list :: exec -- "${ZRUN[@]}" ':: z-run' export-labels "${@}"
@@ -47,11 +57,14 @@
 :: z-run / parse :: exec -- "${ZRUN[@]}" ':: z-run' parse-library "${@}"
 :: z-run / fzf :: exec -- "${ZRUN[@]}" ':: z-run / 0' '[z-run:select]' "${@}"
 
+
 :: z-run / use / workspace :: export -- ZRUNDEV_SOURCE=./.z-run
+:: z-run / use / debug :: export -- ZRUNDEV_SOURCE=./examples/debug.z-run
+:: z-run / use / generators :: export -- ZRUNDEV_SOURCE=./examples/generators.z-run
+
 :: z-run / use / photos :: export -- ZRUNDEV_SOURCE=./examples/photos.z-run
 :: z-run / use / desktop :: export -- ZRUNDEV_SOURCE=./examples/desktop.z-run
 :: z-run / use / vonuvoli :: export -- ZRUNDEV_SOURCE=./examples/vonuvoli.z-run
-:: z-run / use / generators :: export -- ZRUNDEV_SOURCE=./examples/generators.z-run
 
 
 
@@ -189,28 +202,4 @@
 			--color \
 	#
 !!
-
-
-
-
-:: dummy / sleep / 30s :: test "${#}" -eq 0 ; sleep -- 30s
-:: dummy / sleep / 1h :: test "${#}" -eq 0 ; sleep -- 1h
-
-:: dummy / sleep / loop :: printf -- '.' ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: dummy / sleep / loop' "${@}"
-:: dummy / sleep / bomb :: printf -- '.' ; sleep -- 1s ;         "${ZRUN[@]}" ':: dummy / sleep / bomb' "${@}"
-
-:: dummy / env :: test "${#}" -eq 0 ; tr '\0' '\n' < "/proc/${$}/environ"
-:: dummy / env / loop :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ; exec -- "${ZRUN[@]}" ':: dummy / env / loop' "${@}"
-:: dummy / env / bomb :: printf -- '--------\n' ; tr '\0' '\n' < "/proc/${$}/environ" ; sleep 1s ;         "${ZRUN[@]}" ':: dummy / env / bomb' "${@}"
-
-:: dummy / lsof :: test "${#}" -eq 0 ; lsof -p "${$}" -w
-:: dummy / lsof / loop :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: dummy / lsof / loop' "${@}"
-:: dummy / lsof / bomb :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ;         "${ZRUN[@]}" ':: dummy / lsof / bomb' "${@}"
-
-:: dummy / touch :: test "${#}" -eq 0 ; touch -- ./.z-run
-:: dummy / touch / loop :: printf -- '.' ; touch -- ./.z-run ; sleep 1s ; exec -- "${ZRUN[@]}" ':: dummy / touch / loop' "${@}"
-:: dummy / touch / bomb :: printf -- '.' ; touch -- ./.z-run ; sleep 1s ;         "${ZRUN[@]}" ':: dummy / touch / bomb' "${@}"
-
-:: dummy / true :: exec -- true "${@}"
-:: dummy / false :: exec -- false "${@}"
 
