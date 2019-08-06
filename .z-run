@@ -51,6 +51,7 @@
 :: z-run / use / photos :: export -- ZRUNDEV_SOURCE=./examples/photos.z-run
 :: z-run / use / desktop :: export -- ZRUNDEV_SOURCE=./examples/desktop.z-run
 :: z-run / use / vonuvoli :: export -- ZRUNDEV_SOURCE=./examples/vonuvoli.z-run
+:: z-run / use / generators :: export -- ZRUNDEV_SOURCE=./examples/generators.z-run
 
 
 

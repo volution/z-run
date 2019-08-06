@@ -1,0 +1,39 @@
+#!/dev/null
+
+
+<<++ generator / 1
+	test "${#}" -eq 0
+	cat <<'EOS'
+	
+	:: generated / 1 / a :: printf -- '1-a\n'
+	
+	<< generated / 2 / a
+		printf '1-a\n'
+	!!
+	
+	EOS
+!!
+
+
+<<++ generator / 2
+	test "${#}" -eq 0
+	cat <<'EOS'
+	
+	<<++ generator / 3
+		cat <<'EOS'
+		
+		:: generated / 3 / a :: printf -- '3-a\n'
+		
+		EOS
+	!!
+	
+	EOS
+!!
+
+
+<<++ generator / 4
+	test "${#}" -eq 0
+	for x in a b c d e f ; do
+		printf -- ':: generated / 4 / %s :: printf -- %q\n' "${x}" "4-${x}\n"
+	done
+!!
