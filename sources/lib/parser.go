@@ -3,6 +3,7 @@
 package lib
 
 
+import "fmt"
 import "io"
 import "io/ioutil"
 import "os"
@@ -31,11 +32,63 @@ func parseLibrary (_sources []*Source, _sourcesFingerprint string, _context *Con
 		}
 	}
 	
+	for {
+		_found := false
+		for _, _scriptlet := range _library.Scriptlets {
+			if _scriptlet.Kind == "generator-pending" {
+				if _error := parseFromGenerator (_library, _scriptlet, _context); _error == nil {
+					_scriptlet.Kind = "generator"
+					_found = true
+				} else {
+					return nil, _error
+				}
+			}
+		}
+		if !_found {
+			break
+		}
+	}
+	
 	sort.Strings (_library.ScriptletFingerprints)
 	sort.Strings (_library.ScriptletLabels)
 	
 	return _library, nil
 }
+
+
+
+
+func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Context) (error) {
+	
+	var _command *exec.Cmd
+	var _descriptors []int
+	if _command_0, _descriptors_0, _error := prepareExecution (_library, _source, _context); _error == nil {
+		_command = _command_0
+		_descriptors = _descriptors_0
+	} else {
+		return _error
+	}
+	
+	if _command.Stderr == nil {
+		_command.Stderr = os.Stderr
+	}
+	
+	for _, _descriptor := range _descriptors {
+		_command.ExtraFiles = append (_command.ExtraFiles, os.NewFile (uintptr (_descriptor), ""))
+	}
+	
+	if _exitCode, _data, _error := processExecuteGetStdout (_command); _error == nil {
+		if _exitCode == 0 {
+			_, _error := parseFromData (_library, string (_data), fmt.Sprintf ("<generator> %s", _source.Label))
+			return _error
+		} else {
+			return errorf (0x42669a76, "generator failed with exit code `%d`", _exitCode)
+		}
+	} else {
+		return _error
+	}
+}
+
 
 
 
@@ -73,8 +126,6 @@ func parseFromSource (_library *Library, _source *Source, _context *Context) (st
 			return "", _error
 		}
 		
-		return "", errorf (0x566095fc, "not-implemented")
-		
 	} else {
 		return parseFromFile (_library, _source.Path)
 	}
@@ -104,6 +155,8 @@ func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string) 
 }
 
 
+
+
 func parseFromData (_library *Library, _source string, _sourcePath string) (string, error) {
 	
 	const (
@@ -115,6 +168,8 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 	
 	type scriptletState struct {
 		label string
+		kind string
+		hidden bool
 		body string
 		bodyBuffer strings.Builder
 		bodyStrip string
@@ -159,13 +214,12 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 		switch _state {
 			
 			case WAITING :
-				_line = _trimRightSpace (_line)
-				_lineTrimmed := _trimSpace (_line)
+				_lineTrimmed := _trimRightSpace (_line)
 				
 				if _lineTrimmed == "" {
 					// NOP
 					
-				} else if strings.HasPrefix (_line, ":: ") {
+				} else if strings.HasPrefix (_lineTrimmed, ":: ") {
 					
 					_text := _line[3:]
 					var _label string
@@ -188,44 +242,55 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 					
 					_scriptletState = scriptletState {
 							label : _label,
+							kind : "executable",
+							hidden : false,
 							body : _body + "\n",
 							lineStart : _lineIndex,
 							lineEnd : _lineIndex,
 						}
 					_state = SCRIPTLET_PUSH
 					
-				} else if strings.HasPrefix (_line, "<< ") {
+				} else if strings.HasPrefix (_lineTrimmed, "<< ") || strings.HasPrefix (_lineTrimmed, "<<++ ") {
 					
-					_label := _line[3:]
+					_label := _line[strings.IndexByte (_line, ' ') + 1:]
 					_label = _trimSpace (_label)
 					if _label == "" {
 						return "", errorf (0x64c17a76, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
 					}
 					
+					_kind := "executable"
+					_hidden := false
+					if strings.HasPrefix (_lineTrimmed, "<<++ ") {
+						_kind = "generator"
+						_hidden = true
+					}
+					
 					_scriptletState = scriptletState {
 							label : _label,
+							kind : _kind,
+							hidden : _hidden,
 							lineStart : _lineIndex,
 						}
 					_state = SCRIPTLET_BODY
 					
-				} else if strings.HasPrefix (_line, "##<< ") || (_lineTrimmed == "##<<") {
+				} else if strings.HasPrefix (_lineTrimmed, "##<< ") || (_lineTrimmed == "##<<") {
 					_state = SKIPPING
 					
-				} else if strings.HasPrefix (_line, "#:: ") {
+				} else if strings.HasPrefix (_lineTrimmed, "#:: ") {
 					// NOP
 					
-				} else if strings.HasPrefix (_line, "# ") || (_lineTrimmed == "#") {
+				} else if strings.HasPrefix (_lineTrimmed, "# ") || (_lineTrimmed == "#") {
 					// NOP
 					
-				} else if (_lineIndex == 1) && strings.HasPrefix (_line, "#!/") {
+				} else if (_lineIndex == 1) && strings.HasPrefix (_lineTrimmed, "#!/") {
 					// NOP
 					
-				} else if strings.HasPrefix (_line, "#!/") {
+				} else if strings.HasPrefix (_lineTrimmed, "#!/") {
 					// FIXME:  This should be a warning!
 					
 				} else if false ||
-						(_line == "##== sort = false") ||
-						(_line == "##== sort = true") ||
+						(_lineTrimmed == "##== sort = false") ||
+						(_lineTrimmed == "##== sort = true") ||
 						false {
 					// NOP
 					
@@ -234,14 +299,14 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 				}
 			
 			case SCRIPTLET_BODY :
-				_lineTrimmed := _trimSpace (_line)
+				_lineTrimmed := _trimRightSpace (_line)
 				
 				if _lineTrimmed == "!!" {
 					_scriptletState.body = _scriptletState.bodyBuffer.String ()
 					_scriptletState.lineEnd = _lineIndex
 					_state = SCRIPTLET_PUSH
 					
-				} else if strings.HasPrefix (_line, "!!") {
+				} else if strings.HasPrefix (_lineTrimmed, "!!") {
 					return "", errorf (0xf9900c0c, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
 					
 				} else if _lineTrimmed == "" {
@@ -263,11 +328,10 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 				}
 			
 			case SKIPPING :
-				_line = _trimRightSpace (_line)
-				_lineTrimmed := _trimSpace (_line)
+				_lineTrimmed := _trimRightSpace (_line)
 				if _lineTrimmed == "##!!" {
 					_state = WAITING
-				} else if strings.HasPrefix (_line, "##!!") {
+				} else if strings.HasPrefix (_lineTrimmed, "##!!") {
 					return "", errorf (0x183de0fd, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
 				} else {
 					// NOP
@@ -277,11 +341,14 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 		if _state == SCRIPTLET_PUSH {
 			_scriptlet := & Scriptlet {
 					Label : _scriptletState.label,
+					Kind : _scriptletState.kind,
+					Hidden : _scriptletState.hidden,
 					Body : _scriptletState.body,
 					Source : ScriptletSource {
 							Path : _sourcePath,
 							LineStart : _scriptletState.lineStart,
 							LineEnd : _scriptletState.lineEnd,
+							Fingerprint : _fingerprint,
 						},
 				}
 			if _error := includeScriptlet (_library, _scriptlet); _error != nil {

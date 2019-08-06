@@ -7,7 +7,7 @@ import "bytes"
 import "encoding/json"
 import "fmt"
 import "io"
-import "os"
+import "os/exec"
 import "sort"
 import "syscall"
 
@@ -86,8 +86,10 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 				return _error
 			}
 			_fingerprints = append (_fingerprints, _fingerprint)
+			if !_meta.Hidden {
+				_labels = append (_labels, _label)
+			}
 			_fingerprintsByLabels[_label] = _fingerprint
-			_labels = append (_labels, _label)
 			_labelsByFingerprints[_fingerprint] = _label
 		}
 		
@@ -151,71 +153,48 @@ func doExecute (_library LibraryStore, _scriptletLabel string, _context *Context
 
 func doExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (error) {
 	
-	var _interpreterExecutable string
-	var _interpreterArguments []string = make ([]string, 0, len (_context.cleanArguments) + 16)
-	
-	var _interpreterScriptInput int
-	var _interpreterScriptOutput *os.File
-	var _interpreterScriptDescriptors [2]int
-	if _error := syscall.Pipe (_interpreterScriptDescriptors[:]); _error == nil {
-		_interpreterScriptInput = _interpreterScriptDescriptors[0]
-		_interpreterScriptOutput = os.NewFile (uintptr (_interpreterScriptDescriptors[1]), "")
+	var _command *exec.Cmd
+	var _descriptors []int
+	if _command_0, _descriptors_0, _error := prepareExecution (_library, _scriptlet, _context); _error == nil {
+		_command = _command_0
+		_descriptors = _descriptors_0
 	} else {
 		return _error
 	}
 	
-	_interpreterScriptBuffer := bytes.NewBuffer (nil)
-	_interpreterScriptBuffer.Grow (128 * 1024)
-	
-	switch _scriptlet.Interpreter {
-		
-		case "<shell>" :
-			_interpreterExecutable = "/bin/bash"
-			_interpreterArguments = append (
-					_interpreterArguments,
-					fmt.Sprintf ("[z-run:shell] [%s]", _scriptlet.Label),
-					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
-				)
-			_interpreterScriptBuffer.WriteString (
-					fmt.Sprintf (
-`#!/dev/null
-set -e -E -u -o pipefail -o noclobber -o noglob +o braceexpand || exit -- 1
-trap 'printf -- "[ee] failed: %%s\n" "${BASH_COMMAND}" >&2' ERR || exit -- 1
-BASH_ARGV0='z-run'
-ZRUN=( %s )
-X_RUN=( %s )
-exec %d<&-
-
-`,
-							_context.selfExecutable,
-							_context.selfExecutable,
-							_interpreterScriptInput,
-						))
-			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
-		
-		default :
-			syscall.Close (_interpreterScriptInput)
-			_interpreterScriptOutput.Close ()
-			return errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _scriptlet.Interpreter, _scriptlet.Label)
+	_closeDescriptors := func () () {
+		for _, _descriptor := range _descriptors {
+			syscall.Close (_descriptor)
+		}
 	}
 	
-//	logf ('d', 0xedfcf88b, "\n----------\n%s----------\n", _interpreterScriptBuffer.Bytes ())
-	
-	if _, _error := _interpreterScriptBuffer.WriteTo (_interpreterScriptOutput); _error == nil {
-		_interpreterScriptOutput.Close ()
-	} else {
-		syscall.Close (_interpreterScriptInput)
-		_interpreterScriptOutput.Close ()
-		return _error
+	if _command.Dir != "" {
+		_closeDescriptors ()
+		return errorf (0xe4bab179, "invalid state")
+	}
+	if _command.Stdin != nil {
+		_closeDescriptors ()
+		return errorf (0x78cfda21, "invalid state")
+	}
+	if _command.Stdout != nil {
+		_closeDescriptors ()
+		return errorf (0xf9a9dc74, "invalid state")
+	}
+	if _command.Stderr != nil {
+		_closeDescriptors ()
+		return errorf (0xf887025f, "invalid state")
+	}
+	if _command.ExtraFiles != nil {
+		_closeDescriptors ()
+		return errorf (0x50354e63, "invalid state")
+	}
+	if (_command.Process != nil) || (_command.ProcessState != nil) {
+		_closeDescriptors ()
+		return errorf (0x9d640d1e, "invalid state")
 	}
 	
-	_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
-	_interpreterEnvironment := processEnvironment (_context, map[string]string {
-			"ZRUN_EXECUTABLE" : _context.selfExecutable,
-			"ZRUN_LIBRARY" : _library.Url (),
-		})
-	
-	if _error := syscall.Exec (_interpreterExecutable, _interpreterArguments, _interpreterEnvironment); _error != nil {
+	if _error := syscall.Exec (_command.Path, _command.Args, _command.Env); _error != nil {
+		_closeDescriptors ()
 		return _error
 	} else {
 		panic (0xb6dfe17e)

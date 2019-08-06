@@ -11,18 +11,20 @@ import "strings"
 type Scriptlet struct {
 	Index uint `json:"id"`
 	Label string `json:"label"`
+	Kind string `json:"kind"`
 	Interpreter string `json:"interpreter"`
 	Body string `json:"body,omitempty"`
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
+	Hidden bool `json:"hidden"`
 }
 
 type ScriptletSource struct {
 	Path string `json:"path"`
 	LineStart uint `json:"line_start"`
 	LineEnd uint `json:"line_end"`
+	Fingerprint string `json:"fingerprint"`
 }
-
 
 
 
@@ -165,19 +167,32 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 		_scriptlet.Interpreter = "<shell>"
 	}
 	
-	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
+	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Kind) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
 	
 	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
 		return nil
+	}
+	
+	switch _scriptlet.Kind {
+		case "executable" :
+			// NOP
+		case "generator" :
+			_scriptlet.Kind = "generator-pending"
+		default :
+			return errorf (0x4b8aacf2, "invalid scriptlet kind `%s`", _scriptlet.Kind)
 	}
 	
 	_scriptlet.Index = uint (len (_library.Scriptlets))
 	_scriptlet.Fingerprint = _fingerprint
 	
 	_library.Scriptlets = append (_library.Scriptlets, _scriptlet)
+	
 	_library.ScriptletFingerprints = append (_library.ScriptletFingerprints, _scriptlet.Fingerprint)
+	if !_scriptlet.Hidden {
+		_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
+	}
+	
 	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index
-	_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
 	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
 	
 	return nil

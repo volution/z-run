@@ -151,6 +151,12 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 	var _sourcesFingerprint string
 	{
 		_fingerprints := make ([]string, 0, len (_sources) * 2)
+		if _stat, _error := os.Stat (_context.selfExecutable); _error == nil {
+			_fingerprint := NewFingerprinter () .StringWithLen (_context.selfExecutable) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
+			_fingerprints = append (_fingerprints, _fingerprint)
+		} else {
+			return nil, _error
+		}
 		for _, _source := range _sources {
 			_fingerprints = append (_fingerprints, _source.FingerprintMeta)
 			if _source.FingerprintData != "" {
