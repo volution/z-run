@@ -220,6 +220,9 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 				} else if (_lineIndex == 1) && strings.HasPrefix (_line, "#!/") {
 					// NOP
 					
+				} else if strings.HasPrefix (_line, "#!/") {
+					// FIXME:  This should be a warning!
+					
 				} else if false ||
 						(_line == "##== sort = false") ||
 						(_line == "##== sort = true") ||
