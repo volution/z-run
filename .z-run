@@ -3,7 +3,7 @@
 
 
 
-<< deploy
+<< workspace / deploy
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
 	cp -f -- ./.outputs/main-release.elf "${HOME}/.bin/z-run-0"
@@ -12,7 +12,7 @@
 
 
 
-<< z-run / 0
+<< do / 0
 	"${ZRUN[@]}" ':: go / build / main / debug'
 	test "${#}" -ge 1
 	export -n -- \
@@ -43,28 +43,28 @@
 	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
 !!
 
-<< z-run
-	exec -- "${ZRUN[@]}" ':: z-run / 0' z-run "${@}"
+<< do
+	exec -- "${ZRUN[@]}" ':: do / 0' z-run "${@}"
 !!
 
 
-:: z-run / execute :: exec -- "${ZRUN[@]}" ':: z-run' execute "${@}"
-:: z-run / script :: exec -- "${ZRUN[@]}" ':: z-run' export-script "${@}"
-:: z-run / list :: exec -- "${ZRUN[@]}" ':: z-run' export-labels "${@}"
-:: z-run / select :: exec -- "${ZRUN[@]}" ':: z-run' select-label "${@}"
-:: z-run / export-json :: exec -- "${ZRUN[@]}" ':: z-run' export-library-json "${@}"
-:: z-run / export-cdb :: exec -- "${ZRUN[@]}" ':: z-run' export-library-cdb "${@}"
-:: z-run / parse :: exec -- "${ZRUN[@]}" ':: z-run' parse-library "${@}"
-:: z-run / fzf :: exec -- "${ZRUN[@]}" ':: z-run / 0' '[z-run:select]' "${@}"
+:: do / execute :: exec -- "${ZRUN[@]}" ':: do' execute "${@}"
+:: do / script :: exec -- "${ZRUN[@]}" ':: do' export-script "${@}"
+:: do / list :: exec -- "${ZRUN[@]}" ':: do' export-labels "${@}"
+:: do / select :: exec -- "${ZRUN[@]}" ':: do' select-label "${@}"
+:: do / export-json :: exec -- "${ZRUN[@]}" ':: do' export-library-json "${@}"
+:: do / export-cdb :: exec -- "${ZRUN[@]}" ':: do' export-library-cdb "${@}"
+:: do / parse :: exec -- "${ZRUN[@]}" ':: do' parse-library "${@}"
+:: do / fzf :: exec -- "${ZRUN[@]}" ':: do / 0' '[z-run:select]' "${@}"
 
 
-:: z-run / use / workspace :: export -- ZRUNDEV_SOURCE=./.z-run
-:: z-run / use / debug :: export -- ZRUNDEV_SOURCE=./examples/debug.z-run
-:: z-run / use / generators :: export -- ZRUNDEV_SOURCE=./examples/generators.z-run
+:: do / use / workspace :: export -- ZRUNDEV_SOURCE=./.z-run
+:: do / use / debug :: export -- ZRUNDEV_SOURCE=./examples/debug.z-run
+:: do / use / generators :: export -- ZRUNDEV_SOURCE=./examples/generators.z-run
 
-:: z-run / use / photos :: export -- ZRUNDEV_SOURCE=./examples/photos.z-run
-:: z-run / use / desktop :: export -- ZRUNDEV_SOURCE=./examples/desktop.z-run
-:: z-run / use / vonuvoli :: export -- ZRUNDEV_SOURCE=./examples/vonuvoli.z-run
+:: do / use / photos :: export -- ZRUNDEV_SOURCE=./examples/photos.z-run
+:: do / use / desktop :: export -- ZRUNDEV_SOURCE=./examples/desktop.z-run
+:: do / use / vonuvoli :: export -- ZRUNDEV_SOURCE=./examples/vonuvoli.z-run
 
 
 
