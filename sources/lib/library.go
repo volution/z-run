@@ -179,6 +179,8 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 			// NOP
 		case "generator" :
 			_scriptlet.Kind = "generator-pending"
+		case "replacer" :
+			_scriptlet.Kind = "replacer-pending"
 		default :
 			return errorf (0x4b8aacf2, "invalid scriptlet kind `%s`", _scriptlet.Kind)
 	}

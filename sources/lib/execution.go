@@ -12,7 +12,7 @@ import "syscall"
 
 
 
-func prepareExecution (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (*exec.Cmd, []int, error) {
+func prepareExecution (_library LibraryStore, _interpreter string, _scriptlet *Scriptlet, _context *Context) (*exec.Cmd, []int, error) {
 	
 	var _interpreterExecutable string
 	var _interpreterArguments []string = make ([]string, 0, len (_context.cleanArguments) + 16)
@@ -30,7 +30,11 @@ func prepareExecution (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 	_interpreterScriptBuffer := bytes.NewBuffer (nil)
 	_interpreterScriptBuffer.Grow (128 * 1024)
 	
-	switch _scriptlet.Interpreter {
+	if _interpreter == "" {
+		_interpreter = _scriptlet.Interpreter
+	}
+	
+	switch _interpreter {
 		
 		case "<shell>" :
 			_interpreterExecutable = "/bin/bash"
@@ -68,7 +72,7 @@ exec %d<&-
 		default :
 			syscall.Close (_interpreterScriptInput)
 			_interpreterScriptOutput.Close ()
-			return nil, nil, errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _scriptlet.Interpreter, _scriptlet.Label)
+			return nil, nil, errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _interpreter, _scriptlet.Label)
 	}
 	
 //	logf ('d', 0xedfcf88b, "\n----------\n%s----------\n", _interpreterScriptBuffer.Bytes ())

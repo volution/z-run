@@ -34,13 +34,25 @@ func parseLibrary (_sources []*Source, _sourcesFingerprint string, _context *Con
 	for {
 		_found := false
 		for _, _scriptlet := range _library.Scriptlets {
-			if _scriptlet.Kind == "generator-pending" {
-				if _error := parseFromGenerator (_library, _scriptlet, _context); _error == nil {
-					_scriptlet.Kind = "generator"
-					_found = true
-				} else {
-					return nil, _error
-				}
+			switch _scriptlet.Kind {
+				case "executable", "generator" :
+					// NOP
+				case "generator-pending" :
+					if _error := parseFromGenerator (_library, _scriptlet, _context); _error == nil {
+						_scriptlet.Kind = "generator"
+						_found = true
+					} else {
+						return nil, _error
+					}
+				case "replacer-pending" :
+					if _error := parseFromReplacer (_library, _scriptlet, _context); _error == nil {
+						_scriptlet.Kind = "executable"
+						_found = true
+					} else {
+						return nil, _error
+					}
+				default :
+					return nil, errorf (0xd5f0c788, "invalid state `%s`", _scriptlet.Kind)
 			}
 		}
 		if !_found {
@@ -61,7 +73,7 @@ func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Contex
 	
 	var _command *exec.Cmd
 	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_library, _source, _context); _error == nil {
+	if _command_0, _descriptors_0, _error := prepareExecution (_library, "", _source, _context); _error == nil {
 		_command = _command_0
 		_descriptors = _descriptors_0
 	} else {
@@ -80,6 +92,38 @@ func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Contex
 		if _exitCode == 0 {
 			_, _error := parseFromData (_library, string (_data), _source.Source.Path)
 			return _error
+		} else {
+			return errorf (0x42669a76, "generator failed with exit code `%d`", _exitCode)
+		}
+	} else {
+		return _error
+	}
+}
+
+
+func parseFromReplacer (_library *Library, _source *Scriptlet, _context *Context) (error) {
+	
+	var _command *exec.Cmd
+	var _descriptors []int
+	if _command_0, _descriptors_0, _error := prepareExecution (_library, "<shell>", _source, _context); _error == nil {
+		_command = _command_0
+		_descriptors = _descriptors_0
+	} else {
+		return _error
+	}
+	
+	if _command.Stderr == nil {
+		_command.Stderr = os.Stderr
+	}
+	
+	for _, _descriptor := range _descriptors {
+		_command.ExtraFiles = append (_command.ExtraFiles, os.NewFile (uintptr (_descriptor), ""))
+	}
+	
+	if _exitCode, _data, _error := processExecuteGetStdout (_command); _error == nil {
+		if _exitCode == 0 {
+			_source.Body = string (_data)
+			return nil
 		} else {
 			return errorf (0x42669a76, "generator failed with exit code `%d`", _exitCode)
 		}

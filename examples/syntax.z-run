@@ -5,13 +5,26 @@
 
 ::.. hello / one-line (print) :: hello world!
 
-
 << hello / multi-line (bash)
 	printf -- 'hello world!\n'
 !!
 
 <<.. hello / multi-line (print)
 	hello world!
+!!
+
+
+
+::~~ hello / one-line replacer (bash) :: cat -- ./examples/hello.bash
+
+::~~.. hello / one-line replacer (print) :: cat -- ./examples/hello.txt
+
+<<~~ hello / multi-line replacer (bash)
+	cat -- ./examples/hello.bash
+!!
+
+<<~~.. hello / multi-line replacer (print)
+	cat -- ./examples/hello.txt
 !!
 
 
