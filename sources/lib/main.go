@@ -34,13 +34,15 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	var _command string
 	var _scriptlet string
-	var _sourcePath string
-	var _cacheRoot string
-	var _cachePath string
+	
+	var _librarySourcePath string
+	var _libraryCachePath string
 	
 	var _cleanArguments []string
 	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
+	
 	var _workspace string
+	var _cacheRoot string
 	var _terminal string
 	
 	for _name, _value := range _environment {
@@ -67,10 +69,10 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			
 			switch _nameCanonical {
-				case "ZRUN_SOURCE" :
-					_sourcePath = _value
-				case "ZRUN_LIBRARY" :
-					_cachePath = _value
+				case "ZRUN_LIBRARY_SOURCE" :
+					_librarySourcePath = _value
+				case "ZRUN_LIBRARY_CACHE" :
+					_libraryCachePath = _value
 				case "ZRUN_EXECUTABLE" :
 					if _executable != _value {
 						logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
@@ -91,7 +93,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			
 			switch _nameCanonical {
 				case "X_RUN_COMMANDS" :
-					_sourcePath = _value
+					_librarySourcePath = _value
 				case "X_RUN_ACTION" :
 					_command = "legacy:" + _value
 				case "X_RUN_TERM" :
@@ -115,10 +117,10 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if _command != "" {
 				return errorf (0xae04b5ff, "unexpected argument `%s`", _argument)
 			}
-			if strings.HasPrefix (_argument, "--source=") {
-				_sourcePath = _argument[len ("--source="):]
-			} else if strings.HasPrefix (_argument, "--library=") {
-				_cachePath = _argument[len ("--library="):]
+			if strings.HasPrefix (_argument, "--library-source=") {
+				_librarySourcePath = _argument[len ("--library-source="):]
+			} else if strings.HasPrefix (_argument, "--library-cache=") {
+				_libraryCachePath = _argument[len ("--library-cache="):]
 			} else {
 				return errorf (0x33555ffb, "invalid argument `%s`", _argument)
 			}
@@ -201,8 +203,11 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 		}
 	} else {
+		if _libraryCachePath != "" {
+			logf ('w', 0xdb80c4de, "cached library path specified, but caching is disabled;  ignoring cached path!")
+			_libraryCachePath = ""
+		}
 		_cacheRoot = ""
-		_cachePath = ""
 	}
 	
 	if _workspace == "" {
@@ -224,10 +229,10 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		_terminal = ""
 	}
 	
-	if _cachePath != "" {
-		if _sourcePath != "" {
-			logf ('w', 0x1fe0b572, "both library and source path specified;  using library!")
-			_sourcePath = ""
+	if _libraryCachePath != "" {
+		if _librarySourcePath != "" {
+			logf ('w', 0x1fe0b572, "cached library path specified, but also source path specified;  ignoring cached path!")
+			_libraryCachePath = ""
 		}
 	}
 	
@@ -244,16 +249,14 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		}
 	
 	var _library LibraryStore
-	if _cachePath != "" {
-//		logf ('d', 0xeeedb7f0, "opening library...")
-		if _library_0, _error := resolveLibraryCached (_cachePath); _error == nil {
+	if _libraryCachePath != "" {
+		if _library_0, _error := resolveLibraryCached (_libraryCachePath); _error == nil {
 			_library = _library_0
 		} else {
 			return _error
 		}
 	} else {
-//		logf ('d', 0x93dbfd8c, "resolving library...")
-		if _library_0, _error := resolveLibrary (_sourcePath, _context); _error == nil {
+		if _library_0, _error := resolveLibrary (_librarySourcePath, _context); _error == nil {
 			_library = _library_0
 		} else {
 			return _error

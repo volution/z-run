@@ -29,16 +29,15 @@
 			X_RUN_CACHE_IDENTITY \
 	#
 	export -n -- \
-			ZRUN_ACTION \
-			ZRUN_SOURCE \
-			ZRUN_LIBRARY \
+			ZRUN_LIBRARY_SOURCE \
+			ZRUN_LIBRARY_CACHE \
 			ZRUN_EXECUTABLE \
 			ZRUN_CACHE \
 			ZRUN_TERM \
 	#
-	if test -n "${ZRUNDEV_SOURCE:-}" ; then
-		export -- ZRUN_SOURCE="${ZRUNDEV_SOURCE:-}"
-		export -n -- ZRUNDEV_SOURCE
+	if test -n "${ZRUNDEV_USE:-}" ; then
+		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE:-}"
+		export -n -- ZRUNDEV_USE
 	fi
 	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
 !!
@@ -58,15 +57,15 @@
 :: do / fzf :: exec -- "${ZRUN[@]}" ':: do / 0' '[z-run:select]' "${@}"
 
 
-:: do / use / syntax :: export -- ZRUNDEV_SOURCE=./examples/syntax.z-run
-:: do / use / debug :: export -- ZRUNDEV_SOURCE=./examples/debug.z-run
-:: do / use / generators :: export -- ZRUNDEV_SOURCE=./examples/generators.z-run
-:: do / use / comments :: export -- ZRUNDEV_SOURCE=./examples/comments.z-run
-:: do / use / workspace :: export -- ZRUNDEV_SOURCE=./.z-run
+:: do / use / syntax :: export -- ZRUNDEV_USE=./examples/syntax.z-run
+:: do / use / debug :: export -- ZRUNDEV_USE=./examples/debug.z-run
+:: do / use / generators :: export -- ZRUNDEV_USE=./examples/generators.z-run
+:: do / use / comments :: export -- ZRUNDEV_USE=./examples/comments.z-run
+:: do / use / workspace :: export -- ZRUNDEV_USE=./.z-run
 
-:: do / use / photos :: export -- ZRUNDEV_SOURCE=./examples/photos.z-run
-:: do / use / desktop :: export -- ZRUNDEV_SOURCE=./examples/desktop.z-run
-:: do / use / vonuvoli :: export -- ZRUNDEV_SOURCE=./examples/vonuvoli.z-run
+:: do / use / photos :: export -- ZRUNDEV_USE=./examples/photos.z-run
+:: do / use / desktop :: export -- ZRUNDEV_USE=./examples/desktop.z-run
+:: do / use / vonuvoli :: export -- ZRUNDEV_USE=./examples/vonuvoli.z-run
 
 
 

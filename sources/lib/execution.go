@@ -88,7 +88,7 @@ exec %d<&-
 	_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
 	_interpreterEnvironment := processEnvironment (_context, map[string]string {
 			"ZRUN_EXECUTABLE" : _context.selfExecutable,
-			"ZRUN_LIBRARY" : _library.Url (),
+			"ZRUN_LIBRARY_CACHE" : _library.Url (),
 		})
 	
 	_descriptors := []int {
