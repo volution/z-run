@@ -206,7 +206,12 @@ func doExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context 
 
 func doSelectExecute (_library LibraryStore, _context *Context) (error) {
 	if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
-		return doExecute (_library, _label, _context)
+		if _label != "" {
+			return doExecute (_library, _label, _context)
+		} else {
+//			logf ('d', 0x899f4d5a, "no scriptlet selected!")
+			return nil
+		}
 	} else {
 		return _error
 	}
@@ -214,10 +219,15 @@ func doSelectExecute (_library LibraryStore, _context *Context) (error) {
 
 func doSelectLegacyOutput (_library LibraryStore, _label string, _stream io.Writer, _context *Context) (error) {
 	if _scriptlet, _error := doSelectScriptlet (_library, _label, _context); _error == nil {
-		if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error != nil {
-			return _error
+		if _scriptlet != nil {
+			if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error != nil {
+				return _error
+			}
+			return nil
+		} else {
+//			logf ('d', 0x13ba2d3b, "no scriptlet selected!")
+			return nil
 		}
-		return nil
 	} else {
 		return _error
 	}
@@ -234,6 +244,10 @@ func doSelectScriptlet (_library LibraryStore, _label string, _context *Context)
 			return nil, _error
 		}
 	}
+	if _label == "" {
+//		logf ('d', 0x16a84cd1, "no scriptlet selected!")
+		return nil, nil
+	}
 	if _scriptlet, _error := _library.ResolveFullByLabel (_label); _error == nil {
 		if _scriptlet != nil {
 			return _scriptlet, nil
@@ -247,8 +261,13 @@ func doSelectScriptlet (_library LibraryStore, _label string, _context *Context)
 
 func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
 	if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
-		if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
-			return _error
+		if _label != "" {
+			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
+				return _error
+			}
+		} else {
+//			logf ('d', 0x2f4b716a, "no scriptlet selected!")
+			return nil
 		}
 	} else {
 		return _error
@@ -258,10 +277,15 @@ func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context)
 
 func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
 	if _labels, _error := doSelectLabels_0 (_library, _context); _error == nil {
-		for _, _label := range _labels {
-			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
-				return _error
+		if len (_labels) != 0 {
+			for _, _label := range _labels {
+				if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
+					return _error
+				}
 			}
+		} else {
+//			logf ('d', 0x9e431309, "no scriptlet selected!")
+			return nil
 		}
 	} else {
 		return _error
@@ -272,7 +296,9 @@ func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context
 
 func doSelectLabel_0 (_library LibraryStore, _context *Context) (string, error) {
 	if _labels, _error := doSelectLabels_0 (_library, _context); _error == nil {
-		if len (_labels) == 1 {
+		if len (_labels) == 0 {
+			return "", nil
+		} else if len (_labels) == 1 {
 			return _labels[0], nil
 		} else {
 			return "", errorf (0xa11d1022, "no scriptlet selected")

@@ -207,7 +207,7 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 	}
 	
 	var _library *Library
-	logf ('i', 0xbd44916b, "parsing library from sources...")
+//	logf ('i', 0xbd44916b, "parsing library from sources...")
 	if _library_0, _error := parseLibrary (_sources, _environmentFingerprint, _context); _error == nil {
 //		logf ('d', 0x71b45ebc, "parsed library from sources;")
 		_library = _library_0

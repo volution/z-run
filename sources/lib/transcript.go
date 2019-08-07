@@ -54,7 +54,7 @@ func abortError (_error error) (error) {
 
 func abortErrorf (_error error, _code uint32, _format string, _arguments ... interface{}) (error) {
 	logErrorf ('!', _code, _error, _format, _arguments ...)
-	logf ('!', 0xb7a5fb86, "aborting!")
+//	logf ('!', 0xb7a5fb86, "aborting!")
 	os.Exit (1)
 	panic (0xa235deea)
 }
