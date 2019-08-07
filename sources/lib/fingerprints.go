@@ -51,6 +51,12 @@ func (_fingerprinter Fingerprinter) StringWithLen (_value string) (Fingerprinter
 	io.WriteString (_fingerprinter.hasher, _value)
 	return _fingerprinter
 }
+func (_fingerprinter Fingerprinter) StringsWithLen (_values []string) (Fingerprinter) {
+	for _, _value := range _values {
+		_fingerprinter.StringWithLen (_value)
+	}
+	return _fingerprinter
+}
 
 
 func (_fingerprinter Fingerprinter) Bytes (_value []byte) (Fingerprinter) {

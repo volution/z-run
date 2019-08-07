@@ -23,13 +23,11 @@ func resolveSources (_candidate string) ([]*Source, error) {
 	switch {
 		
 		case _statMode.IsRegular () :
-			_fingerprint := NewFingerprinter () .StringWithLen (_candidate) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
-			_source := & Source {
-					Path : _candidate,
-					Executable : (_statMode.Perm () & 0111) != 0,
-					FingerprintMeta : _fingerprint,
-				}
-			_sources = append (_sources, _source)
+			if _source, _error := resolveSource_0 (_candidate, _stat); _error == nil {
+				_sources = append (_sources, _source)
+			} else {
+				return nil, _error
+			}
 		
 		case _statMode.IsDir () :
 			return nil, errorf (0x8a04b23b, "not-implemented")
@@ -40,6 +38,33 @@ func resolveSources (_candidate string) ([]*Source, error) {
 	
 	return _sources, nil
 }
+
+
+func resolveSource (_candidate string) (*Source, error) {
+	if _candidate, _stat, _error := resolveSourcesPath_0 (_candidate); _error == nil {
+		return resolveSource_0 (_candidate, _stat)
+	} else {
+		return nil, _error
+	}
+}
+
+
+func resolveSource_0 (_candidate string, _stat os.FileInfo) (*Source, error) {
+	_statMode := _stat.Mode ()
+	if _statMode.IsRegular () {
+		_fingerprint := NewFingerprinter () .StringWithLen (_candidate) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
+		_source := & Source {
+				Path : _candidate,
+				Executable : (_statMode.Perm () & 0111) != 0,
+				FingerprintMeta : _fingerprint,
+			}
+		return _source, nil
+	} else {
+		return nil, errorf (0x557961c4, "invalid source `%s`", _candidate)
+	}
+}
+
+
 
 
 func resolveSourcesPath_0 (_candidate string) (string, os.FileInfo, error) {
@@ -148,38 +173,33 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 		return nil, _error
 	}
 	
-	var _sourcesFingerprint string
+	var _environmentFingerprint string
 	{
 		_fingerprints := make ([]string, 0, len (_sources) * 2)
 		if _stat, _error := os.Stat (_context.selfExecutable); _error == nil {
 			_fingerprint := NewFingerprinter () .StringWithLen (_context.selfExecutable) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
-			_fingerprints = append (_fingerprints, _fingerprint)
+			_fingerprints = append (_fingerprints, "self-executable:" + _fingerprint)
 		} else {
 			return nil, _error
 		}
+		_fingerprints = append (_fingerprints, "workspace:" + _context.workspace)
 		for _, _source := range _sources {
-			_fingerprints = append (_fingerprints, _source.FingerprintMeta)
-			if _source.FingerprintData != "" {
-				_fingerprints = append (_fingerprints, _source.FingerprintData)
-			}
+			_fingerprints = append (_fingerprints, "sources:" + _source.FingerprintMeta)
 		}
 		for _name, _value := range _context.cleanEnvironment {
 			_fingerprint := NewFingerprinter () .String ("d33041e6571901d0a5a6dfbde7c7a312") .StringWithLen (_name) .StringWithLen (_value) .Build ()
-			_fingerprints = append (_fingerprints, _fingerprint)
+			_fingerprints = append (_fingerprints, "clean-environment:" + _fingerprint)
 		}
 		sort.Strings (_fingerprints)
-		_fingerprinter := NewFingerprinter ()
-		for _, _fingerprint := range _fingerprints {
-			_fingerprinter.StringWithLen (_fingerprint)
-		}
-		_sourcesFingerprint = _fingerprinter.Build ()
+		_environmentFingerprint = NewFingerprinter () .StringsWithLen (_fingerprints) .Build ()
 	}
 	
 	var _cacheLibrary string
 	
 	if _context.cacheEnabled && (_context.cacheRoot != "") {
-		_cacheLibrary = path.Join (_context.cacheRoot, _sourcesFingerprint + ".cdb")
+		_cacheLibrary = path.Join (_context.cacheRoot, _environmentFingerprint + ".cdb")
 		if _store, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
+			// FIXME:  Check each source for changes!
 			return _store, nil
 		} else if ! os.IsNotExist (_error) {
 			return nil, _error
@@ -188,7 +208,7 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 	
 	var _library *Library
 	logf ('i', 0xbd44916b, "parsing library from sources...")
-	if _library_0, _error := parseLibrary (_sources, _sourcesFingerprint, _context); _error == nil {
+	if _library_0, _error := parseLibrary (_sources, _environmentFingerprint, _context); _error == nil {
 //		logf ('d', 0x71b45ebc, "parsed library from sources;")
 		_library = _library_0
 	} else {

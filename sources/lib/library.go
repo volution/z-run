@@ -41,6 +41,7 @@ type Library struct {
 	
 	Sources []*Source `json:"sources"`
 	SourcesFingerprint string `json:"sources_fingerprint"`
+	EnvironmentFingerprint string `json:"environment_fingerprint"`
 	
 	url string
 }
@@ -198,6 +199,34 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index
 	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
 	
+	return nil
+}
+
+
+
+
+func includeSource (_library *Library, _source *Source) (error) {
+	if _source.Path == "" {
+		return errorf (0x12bdc134, "invalid state")
+	}
+	if _source.FingerprintMeta == "" {
+		return errorf (0x152074de, "invalid state")
+	}
+	if _source.FingerprintData == "" {
+		return errorf (0x401d0c16, "invalid state")
+	}
+	for _, _existing := range _library.Sources {
+		if _existing.Path == _source.Path {
+			return errorf (0xf01b93ea, "invalid state")
+		}
+		if _existing.FingerprintMeta == _source.FingerprintMeta {
+			return errorf (0x310f6193, "invalid state")
+		}
+		if _existing.FingerprintData == _source.FingerprintData {
+			return errorf (0x00fb18a1, "invalid state %#v %#v", _existing, _source)
+		}
+	}
+	_library.Sources = append (_library.Sources, _source)
 	return nil
 }
 

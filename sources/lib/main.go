@@ -5,6 +5,7 @@ package lib
 
 import "log"
 import "os"
+import "path/filepath"
 import "strings"
 import "syscall"
 import "unicode"
@@ -20,6 +21,7 @@ type Context struct {
 	selfEnvironment map[string]string
 	cleanArguments []string
 	cleanEnvironment map[string]string
+	workspace string
 	cacheRoot string
 	cacheEnabled bool
 	terminal string
@@ -38,6 +40,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	var _cleanArguments []string
 	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
+	var _workspace string
 	var _terminal string
 	
 	for _name, _value := range _environment {
@@ -202,6 +205,18 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		_cachePath = ""
 	}
 	
+	if _workspace == "" {
+		if _path, _error := os.Getwd (); _error == nil {
+			if _path, _error := filepath.Abs (_path); _error == nil {
+				_workspace = _path
+			} else {
+				return _error
+			}
+		} else {
+			return _error
+		}
+	}
+	
 	if _terminal == "" {
 		_terminal, _ = _cleanEnvironment["TERM"]
 	}
@@ -222,6 +237,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			selfEnvironment : _environment,
 			cleanArguments : _cleanArguments,
 			cleanEnvironment : _cleanEnvironment,
+			workspace : _workspace,
 			cacheRoot : _cacheRoot,
 			cacheEnabled : _cacheEnabled,
 			terminal : _terminal,
