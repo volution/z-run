@@ -403,6 +403,11 @@ func Main () () {
 		}
 	}
 	
+//	logf ('d', 0x256b2c94, "self-executable: %s", _executable)
+//	logf ('d', 0xb59e4f73, "self-argument0: %s", _argument0)
+//	logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
+//	logf ('d', 0x7a411846, "self-environment: %s", _environment)
+	
 	if _error := main_0 (_executable, _argument0, _arguments, _environment); _error == nil {
 		os.Exit (0)
 	} else {

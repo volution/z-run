@@ -57,8 +57,15 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		}
 	}
 	
+	sort.Sort (_library.Scriptlets)
+	for _index, _scriptlet := range _library.Scriptlets {
+		_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = uint (_index)
+		_library.ScriptletsByLabel[_scriptlet.Label] = uint (_index)
+	}
+	
 	sort.Strings (_library.ScriptletFingerprints)
 	sort.Strings (_library.ScriptletLabels)
+	sort.Sort (_library.Sources)
 	
 	{
 		_fingerprints := make ([]string, 0, len (_library.Sources))

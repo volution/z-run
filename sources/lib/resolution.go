@@ -5,6 +5,7 @@ package lib
 
 import "os"
 import "path"
+import "path/filepath"
 import "sort"
 
 
@@ -50,11 +51,17 @@ func resolveSource (_candidate string) (*Source, error) {
 
 
 func resolveSource_0 (_candidate string, _stat os.FileInfo) (*Source, error) {
+	_path := _candidate
+	if _path_0, _error := filepath.Abs (_path); _error == nil {
+		_path = _path_0
+	} else {
+		return nil, _error
+	}
 	_statMode := _stat.Mode ()
 	if _statMode.IsRegular () {
-		_fingerprint := NewFingerprinter () .StringWithLen (_candidate) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
+		_fingerprint := NewFingerprinter () .StringWithLen (_path) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
 		_source := & Source {
-				Path : _candidate,
+				Path : _path,
 				Executable : (_statMode.Perm () & 0111) != 0,
 				FingerprintMeta : _fingerprint,
 			}

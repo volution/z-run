@@ -18,6 +18,8 @@ type LibraryStore interface {
 	ResolveBodyByLabel (_label string) (string, bool, error)
 	ResolveFingerprintByLabel (_label string) (string, bool, error)
 	
+	SelectSources () (LibrarySources, error)
+	
 	Url () (string)
 }
 
@@ -163,6 +165,19 @@ func (_library *LibraryStoreInput) ResolveFingerprintByLabel (_label string) (st
 	}
 }
 
+
+func (_library *LibraryStoreInput) SelectSources () (LibrarySources, error) {
+	var _value LibrarySources
+	if _found, _error := _library.store.Select ("library-meta", "sources", &_value); _error == nil {
+		if _found {
+			return _value, nil
+		} else {
+			return nil, errorf (0x2986327f, "invalid store")
+		}
+	} else {
+		return nil, _error
+	}
+}
 
 func (_library *LibraryStoreInput) Url () (string) {
 	return _library.url

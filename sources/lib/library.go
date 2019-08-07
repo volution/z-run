@@ -23,7 +23,6 @@ type ScriptletSource struct {
 	Path string `json:"path"`
 	LineStart uint `json:"line_start"`
 	LineEnd uint `json:"line_end"`
-	Fingerprint string `json:"fingerprint"`
 }
 
 
@@ -31,7 +30,7 @@ type ScriptletSource struct {
 
 type Library struct {
 	
-	Scriptlets []*Scriptlet `json:"scriptlets"`
+	Scriptlets LibraryScriptlets `json:"scriptlets"`
 	
 	ScriptletFingerprints []string `json:"fingerprints"`
 	ScriptletsByFingerprint map[string]uint `json:"index_by_fingerprint"`
@@ -39,7 +38,7 @@ type Library struct {
 	ScriptletLabels []string `json:"labels"`
 	ScriptletsByLabel map[string]uint `json:"index_by_label"`
 	
-	Sources []*Source `json:"sources"`
+	Sources LibrarySources `json:"sources"`
 	SourcesFingerprint string `json:"sources_fingerprint"`
 	EnvironmentFingerprint string `json:"environment_fingerprint"`
 	
@@ -145,6 +144,10 @@ func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool
 }
 
 
+func (_library *Library) SelectSources () (LibrarySources, error) {
+	return _library.Sources, nil
+}
+
 func (_library *Library) Url () (string) {
 	return _library.url
 }
@@ -228,5 +231,33 @@ func includeSource (_library *Library, _source *Source) (error) {
 	}
 	_library.Sources = append (_library.Sources, _source)
 	return nil
+}
+
+
+
+
+type LibraryScriptlets []*Scriptlet
+
+func (_scriptlets LibraryScriptlets) Len () (int) {
+	return len (_scriptlets)
+}
+func (_scriptlets LibraryScriptlets) Less (_left int, _right int) (bool) {
+	return (_scriptlets[_left].Label < _scriptlets[_right].Label)
+}
+func (_scriptlets LibraryScriptlets) Swap (_left int, _right int) () {
+	_scriptlets[_left], _scriptlets[_right] = _scriptlets[_right], _scriptlets[_left]
+}
+
+
+type LibrarySources []*Source
+
+func (_sources LibrarySources) Len () (int) {
+	return len (_sources)
+}
+func (_sources LibrarySources) Less (_left int, _right int) (bool) {
+	return (_sources[_left].Path < _sources[_right].Path)
+}
+func (_sources LibrarySources) Swap (_left int, _right int) () {
+	_sources[_left], _sources[_right] = _sources[_right], _sources[_left]
 }
 
