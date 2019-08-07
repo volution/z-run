@@ -50,8 +50,6 @@ func resolveSource (_candidate string) (*Source, error) {
 }
 
 
-
-
 func resolveSource_0 (_path string, _stat os.FileInfo) (*Source, error) {
 	_statMode := _stat.Mode ()
 	if _statMode.IsRegular () {
@@ -67,6 +65,22 @@ func resolveSource_0 (_path string, _stat os.FileInfo) (*Source, error) {
 }
 
 
+
+
+func fingerprintSource (_path string) (*Source, error) {
+	if _path, _stat, _error := resolveSourcePath_2 (_path); _error == nil {
+		_source := & Source {
+				Path : _path,
+				Executable : false,
+				FingerprintMeta : fingerprintSource_1 (_path, _stat),
+			}
+		return _source, nil
+	} else {
+		return nil, _error
+	}
+}
+
+
 func fingerprintSource_0 (_path string) (string, error) {
 	if _stat, _error := os.Stat (_path); _error == nil {
 		return fingerprintSource_1 (_path, _stat), nil
@@ -74,6 +88,7 @@ func fingerprintSource_0 (_path string) (string, error) {
 		return "", _error
 	}
 }
+
 
 func fingerprintSource_1 (_path string, _stat os.FileInfo) (string) {
 	return NewFingerprinter () .StringWithLen (_path) .Int64 (int64 (_stat.Mode ())) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()

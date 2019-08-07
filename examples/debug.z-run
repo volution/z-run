@@ -15,10 +15,10 @@
 :: lsof / loop :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: lsof / loop' "${@}"
 :: lsof / bomb :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ;         "${ZRUN[@]}" ':: lsof / bomb' "${@}"
 
-&& ./touch.z-run
 :: touch :: test "${#}" -eq 0 ; touch -- ./examples/touch.z-run
 :: touch / loop :: printf -- '.' ; touch -- ./examples/touch.z-run ; sleep 1s ; exec -- "${ZRUN[@]}" ':: touch / loop' "${@}"
 :: touch / bomb :: printf -- '.' ; touch -- ./examples/touch.z-run ; sleep 1s ;         "${ZRUN[@]}" ':: touch / bomb' "${@}"
+&&__ ./touch.z-run
 
 :: true :: exec -- true "${@}"
 :: false :: exec -- false "${@}"

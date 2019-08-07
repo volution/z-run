@@ -222,9 +222,9 @@ func includeSource (_library *Library, _source *Source) (error) {
 	if _source.FingerprintMeta == "" {
 		return errorf (0x152074de, "invalid state")
 	}
-	if _source.FingerprintData == "" {
-		return errorf (0x401d0c16, "invalid state")
-	}
+//	if _source.FingerprintData == "" {
+//		return errorf (0x401d0c16, "invalid state")
+//	}
 	for _, _existing := range _library.Sources {
 		if _existing.Path == _source.Path {
 			return errorf (0xf01b93ea, "invalid state")

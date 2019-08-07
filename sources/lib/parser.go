@@ -372,14 +372,31 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
 					_includePath = path.Join (path.Dir (_sourcePath), _includePath)
 					
-					if _includeSources, _error := resolveSources (_includePath); _error == nil {
-						for _, _includeSource := range _includeSources {
-							if _error := parseFromSource (_library, _includeSource, _context); _error != nil {
+					if !_disabled {
+						if _includeSources, _error := resolveSources (_includePath); _error == nil {
+							for _, _includeSource := range _includeSources {
+								if _error := parseFromSource (_library, _includeSource, _context); _error != nil {
+									return _error
+								}
+							}
+						} else {
+							return _error
+						}
+					}
+					
+				} else if strings.HasPrefix (_lineTrimmed, "&&__ ") {
+					
+					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
+					_includePath = path.Join (path.Dir (_sourcePath), _includePath)
+					
+					if !_disabled {
+						if _includeSource, _error := fingerprintSource (_includePath); _error == nil {
+							if _error := includeSource (_library, _includeSource); _error != nil {
 								return _error
 							}
+						} else {
+							return _error
 						}
-					} else {
-						return _error
 					}
 					
 				} else if strings.HasPrefix (_lineTrimmed, "{{") {
@@ -389,7 +406,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						return errorf (0x79d4d781, "invalid syntax (%d):  unknown block type | %s", _lineIndex, _line)
 					}
 					
-				} else if strings.HasPrefix (_lineTrimmed, "#!/") {
+				} else if strings.HasPrefix (_line, "#!/") {
 					if (_lineIndex == 1) {
 						// NOP
 					} else {
