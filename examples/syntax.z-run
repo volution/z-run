@@ -14,3 +14,11 @@
 	hello world!
 !!
 
+
+::&& hello / included (bash) :: ./hello.bash
+::&&.. hello / included (print) :: ./hello.txt
+
+
+&& ./comments.z-run
+&& ./generators.z-run
+

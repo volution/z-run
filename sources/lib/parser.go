@@ -3,7 +3,6 @@
 package lib
 
 
-import "fmt"
 import "io"
 import "io/ioutil"
 import "os"
@@ -79,7 +78,7 @@ func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Contex
 	
 	if _exitCode, _data, _error := processExecuteGetStdout (_command); _error == nil {
 		if _exitCode == 0 {
-			_, _error := parseFromData (_library, string (_data), fmt.Sprintf ("<generator> %s", _source.Label))
+			_, _error := parseFromData (_library, string (_data), _source.Source.Path)
 			return _error
 		} else {
 			return errorf (0x42669a76, "generator failed with exit code `%d`", _exitCode)
@@ -231,6 +230,8 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 						strings.HasPrefix (_lineTrimmed, "::.. ") ||
 						strings.HasPrefix (_lineTrimmed, "::~~ ") ||
 						strings.HasPrefix (_lineTrimmed, "::~~.. ") ||
+						strings.HasPrefix (_lineTrimmed, "::&& ") ||
+						strings.HasPrefix (_lineTrimmed, "::&&.. ") ||
 						strings.HasPrefix (_lineTrimmed, "::++ ") {
 					
 					_prefix := _lineTrimmed[: strings.IndexByte (_lineTrimmed, ' ')]
@@ -258,6 +259,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 					_kind := ""
 					_interpreter := ""
 					_hidden := false
+					_include := false
 					switch _prefix[2:] {
 						case "" :
 							_kind = "executable"
@@ -275,8 +277,32 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 							_kind = "generator"
 							_interpreter = "<shell>"
 							_hidden = true
+						case "&&" :
+							_kind = "executable"
+							_interpreter = "<shell>"
+							_include = true
+						case "&&.." :
+							_kind = "executable"
+							_interpreter = "<print>"
+							_include = true
 						default :
 							return "", errorf (0xfba805b9, "invalid syntax (%d):  unknown scriptlet type | %s", _lineIndex, _line)
+					}
+					
+					if _include {
+						_includePath := path.Join (path.Dir (_sourcePath), _body)
+						if _stream, _error := os.Open (_includePath); _error == nil {
+							defer _stream.Close ()
+							if _data, _error := ioutil.ReadAll (_stream); _error == nil {
+								_body = string (_data)
+							} else {
+								return "", _error
+							}
+						} else {
+							return "", _error
+						}
+					} else {
+						_body = _body + "\n"
 					}
 					
 					_scriptletState = scriptletState {
@@ -285,7 +311,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 							interpreter : _interpreter,
 							disabled : _disabled,
 							hidden : _hidden,
-							body : _body + "\n",
+							body : _body,
 							lineStart : _lineIndex,
 							lineEnd : _lineIndex,
 						}
@@ -343,6 +369,14 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 						}
 					
 					_state = SCRIPTLET_BODY
+					
+				} else if strings.HasPrefix (_lineTrimmed, "&& ") {
+					
+					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
+					_includePath = path.Join (path.Dir (_sourcePath), _includePath)
+					if _, _error := parseFromFile (_library, _includePath); _error != nil {
+						return "", _error
+					}
 					
 				} else if strings.HasPrefix (_lineTrimmed, "{{") {
 					if _disabled {
