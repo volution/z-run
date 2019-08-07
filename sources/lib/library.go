@@ -148,8 +148,15 @@ func (_library *Library) SelectSources () (LibrarySources, error) {
 	return _library.Sources, nil
 }
 
+
 func (_library *Library) Url () (string) {
 	return _library.url
+}
+
+
+func (_library *Library) Close () (error) {
+	*_library = Library {}
+	return nil
 }
 
 

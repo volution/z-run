@@ -21,6 +21,8 @@ type LibraryStore interface {
 	SelectSources () (LibrarySources, error)
 	
 	Url () (string)
+	
+	Close () (error)
 }
 
 
@@ -179,7 +181,13 @@ func (_library *LibraryStoreInput) SelectSources () (LibrarySources, error) {
 	}
 }
 
+
 func (_library *LibraryStoreInput) Url () (string) {
 	return _library.url
+}
+
+
+func (_library *LibraryStoreInput) Close () (error) {
+	return _library.store.Close ()
 }
 

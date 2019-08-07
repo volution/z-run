@@ -15,7 +15,7 @@ func resolveSources (_candidate string) ([]*Source, error) {
 	
 	_sources := make ([]*Source, 0, 128)
 	
-	_candidate, _stat, _error := resolveSourcesPath_0 (_candidate)
+	_path, _stat, _error := resolveSourcePath_0 (_candidate)
 	if _error != nil {
 		return nil, _error
 	}
@@ -24,7 +24,7 @@ func resolveSources (_candidate string) ([]*Source, error) {
 	switch {
 		
 		case _statMode.IsRegular () :
-			if _source, _error := resolveSource_0 (_candidate, _stat); _error == nil {
+			if _source, _error := resolveSource_0 (_path, _stat); _error == nil {
 				_sources = append (_sources, _source)
 			} else {
 				return nil, _error
@@ -34,7 +34,7 @@ func resolveSources (_candidate string) ([]*Source, error) {
 			return nil, errorf (0x8a04b23b, "not-implemented")
 		
 		default :
-			return nil, errorf (0xa35428a2, "invalid source `%s`", _candidate)
+			return nil, errorf (0xa35428a2, "invalid source `%s`", _path)
 	}
 	
 	return _sources, nil
@@ -42,50 +42,58 @@ func resolveSources (_candidate string) ([]*Source, error) {
 
 
 func resolveSource (_candidate string) (*Source, error) {
-	if _candidate, _stat, _error := resolveSourcesPath_0 (_candidate); _error == nil {
-		return resolveSource_0 (_candidate, _stat)
+	if _path, _stat, _error := resolveSourcePath_0 (_candidate); _error == nil {
+		return resolveSource_0 (_path, _stat)
 	} else {
 		return nil, _error
 	}
 }
 
 
-func resolveSource_0 (_candidate string, _stat os.FileInfo) (*Source, error) {
-	_path := _candidate
-	if _path_0, _error := filepath.Abs (_path); _error == nil {
-		_path = _path_0
-	} else {
-		return nil, _error
-	}
+
+
+func resolveSource_0 (_path string, _stat os.FileInfo) (*Source, error) {
 	_statMode := _stat.Mode ()
 	if _statMode.IsRegular () {
-		_fingerprint := NewFingerprinter () .StringWithLen (_path) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
 		_source := & Source {
 				Path : _path,
 				Executable : (_statMode.Perm () & 0111) != 0,
-				FingerprintMeta : _fingerprint,
+				FingerprintMeta : fingerprintSource_1 (_path, _stat),
 			}
 		return _source, nil
 	} else {
-		return nil, errorf (0x557961c4, "invalid source `%s`", _candidate)
+		return nil, errorf (0x557961c4, "invalid source `%s`", _path)
 	}
+}
+
+
+func fingerprintSource_0 (_path string) (string, error) {
+	if _stat, _error := os.Stat (_path); _error == nil {
+		return fingerprintSource_1 (_path, _stat), nil
+	} else {
+		return "", _error
+	}
+}
+
+func fingerprintSource_1 (_path string, _stat os.FileInfo) (string) {
+	return NewFingerprinter () .StringWithLen (_path) .Int64 (int64 (_stat.Mode ())) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
 }
 
 
 
 
-func resolveSourcesPath_0 (_candidate string) (string, os.FileInfo, error) {
+func resolveSourcePath_0 (_candidate string) (string, os.FileInfo, error) {
 	if _candidate != "" {
 //		logf ('d', 0x16563f01, "using candidate `%s`...", _candidate)
-		return resolveSourcesPath_2 (_candidate)
+		return resolveSourcePath_2 (_candidate)
 	} else {
 //		logf ('d', 0xef5420f5, "searching candidate...")
-		return resolveSourcesPath_1 ()
+		return resolveSourcePath_1 ()
 	}
 }
 
 
-func resolveSourcesPath_1 () (string, os.FileInfo, error) {
+func resolveSourcePath_1 () (string, os.FileInfo, error) {
 	
 	_folders := make ([]string, 0, 128)
 	_folders = append (_folders,
@@ -137,20 +145,26 @@ func resolveSourcesPath_1 () (string, os.FileInfo, error) {
 	} else if len (_candidates) > 1 {
 		return "", nil, errorf (0x519bb041, "too many sources found: `%s`", _candidates)
 	} else {
-		return resolveSourcesPath_2 (_candidates[0])
+		return resolveSourcePath_2 (_candidates[0])
 	}
 }
 
 
-func resolveSourcesPath_2 (_candidate string) (string, os.FileInfo, error) {
-	if _stat, _error := os.Stat (_candidate); _error == nil {
-		return _candidate, _stat, nil
+func resolveSourcePath_2 (_path string) (string, os.FileInfo, error) {
+	if _stat, _error := os.Stat (_path); _error == nil {
+		if _path, _error := filepath.Abs (_path); _error == nil {
+			return _path, _stat, nil
+		} else {
+			return "", nil, _error
+		}
 	} else if os.IsNotExist (_error) {
-		return "", nil, errorf (0x4b0005de, "source does not exist `%s`", _candidate)
+		return "", nil, errorf (0x4b0005de, "source does not exist `%s`", _path)
 	} else {
 		return "", nil, _error
 	}
 }
+
+
 
 
 func resolveCache () (string, error) {
@@ -183,8 +197,7 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 	var _environmentFingerprint string
 	{
 		_fingerprints := make ([]string, 0, len (_sources) * 2)
-		if _stat, _error := os.Stat (_context.selfExecutable); _error == nil {
-			_fingerprint := NewFingerprinter () .StringWithLen (_context.selfExecutable) .Int64 (_stat.Size ()) .Int64 (_stat.ModTime () .Unix ()) .Build ()
+		if _fingerprint, _error := fingerprintSource_0 (_context.selfExecutable); _error == nil {
 			_fingerprints = append (_fingerprints, "self-executable:" + _fingerprint)
 		} else {
 			return nil, _error
@@ -194,7 +207,7 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 			_fingerprints = append (_fingerprints, "sources:" + _source.FingerprintMeta)
 		}
 		for _name, _value := range _context.cleanEnvironment {
-			_fingerprint := NewFingerprinter () .String ("d33041e6571901d0a5a6dfbde7c7a312") .StringWithLen (_name) .StringWithLen (_value) .Build ()
+			_fingerprint := NewFingerprinter () .StringWithLen (_name) .StringWithLen (_value) .Build ()
 			_fingerprints = append (_fingerprints, "clean-environment:" + _fingerprint)
 		}
 		sort.Strings (_fingerprints)
@@ -205,9 +218,19 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 	
 	if _context.cacheEnabled && (_context.cacheRoot != "") {
 		_cacheLibrary = path.Join (_context.cacheRoot, _environmentFingerprint + ".cdb")
-		if _store, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
-			// FIXME:  Check each source for changes!
-			return _store, nil
+		if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
+			if _fresh, _error := checkLibraryCached (_library); _error == nil {
+				if _fresh {
+//					logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
+					return _library, nil
+				} else {
+//					logf ('d', 0x8fc67fa1, "ignoring library cached at `%s`;", _cacheLibrary)
+					_library.Close ()
+				}
+			} else {
+				_library.Close ()
+				return nil, _error
+			}
 		} else if ! os.IsNotExist (_error) {
 			return nil, _error
 		}
@@ -235,12 +258,42 @@ func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error)
 }
 
 
+
+
 func resolveLibraryCached (_path string) (LibraryStore, error) {
 	if _store, _error := NewCdbStoreInput (_path); _error == nil {
-//		logf ('d', 0x63ae360d, "opened library cachad at `%s`;", _cacheLibrary)
-		return NewLibraryStoreInput (_store, _path)
+		if _library, _error := NewLibraryStoreInput (_store, _path); _error == nil {
+//			logf ('d', 0x63ae360d, "opened library cached at `%s`;", _cacheLibrary)
+			return _library, nil
+		} else {
+			_store.Close ()
+			return nil, _error
+		}
 	} else {
 		return nil, _error
 	}
+}
+
+
+func checkLibraryCached (_library LibraryStore) (bool, error) {
+	var _sources LibrarySources
+	if _sources_0, _error := _library.SelectSources (); _error == nil {
+		_sources = _sources_0
+	} else {
+		return false, _error
+	}
+	for _, _source := range _sources {
+		if _stat, _error := os.Stat (_source.Path); _error == nil {
+			_fingerprint := fingerprintSource_1 (_source.Path, _stat)
+			if _fingerprint != _source.FingerprintMeta {
+				return false, nil
+			}
+		} else if os.IsNotExist (_error) {
+			return false, nil
+		} else {
+			return false, _error
+		}
+	}
+	return true, nil
 }
 
