@@ -1,0 +1,16 @@
+#!/dev/null
+
+
+:: hello / one-line (bash) :: printf -- 'hello world!\n'
+
+::.. hello / one-line (print) :: hello world!
+
+
+<< hello / multi-line (bash)
+	printf -- 'hello world!\n'
+!!
+
+<<.. hello / multi-line (print)
+	hello world!
+!!
+

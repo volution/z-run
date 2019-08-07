@@ -58,9 +58,11 @@
 :: do / fzf :: exec -- "${ZRUN[@]}" ':: do / 0' '[z-run:select]' "${@}"
 
 
-:: do / use / workspace :: export -- ZRUNDEV_SOURCE=./.z-run
+:: do / use / syntax :: export -- ZRUNDEV_SOURCE=./examples/syntax.z-run
 :: do / use / debug :: export -- ZRUNDEV_SOURCE=./examples/debug.z-run
 :: do / use / generators :: export -- ZRUNDEV_SOURCE=./examples/generators.z-run
+:: do / use / comments :: export -- ZRUNDEV_SOURCE=./examples/comments.z-run
+:: do / use / workspace :: export -- ZRUNDEV_SOURCE=./.z-run
 
 :: do / use / photos :: export -- ZRUNDEV_SOURCE=./examples/photos.z-run
 :: do / use / desktop :: export -- ZRUNDEV_SOURCE=./examples/desktop.z-run

@@ -37,3 +37,7 @@
 		printf -- ':: generated / 4 / %s :: printf -- %q\n' "${x}" "4-${x}\n"
 	done
 !!
+
+
+::++ generator / 5 :: printf -- ':: generated / 5 :: printf -- %q\n' "5\n"
+

@@ -1,0 +1,43 @@
+#!/dev/null
+
+
+##:: test-1 :: test-1
+##::.. test-1 :: test-1
+##::~~ test-1 :: test-1
+##::~~.. test-1 :: test-1
+##::++ test-1 :: test-1
+
+
+##<< test-2
+	test-2
+!!
+##<<.. test-2
+	test-2
+!!
+##<<~~ test-2
+	test-2
+!!
+##<<~~.. test-2
+	test-2
+!!
+##<<++ test-2
+	test-2
+!!
+
+
+##{{
+
+abc
+cde
+
+:: test-3 :: test-3
+
+<< test-3 ::
+	test-3
+!!
+
+123
+456
+
+##}}
+
