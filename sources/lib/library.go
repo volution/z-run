@@ -162,9 +162,10 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 	if _, _exists := _library.ScriptletsByLabel[_scriptlet.Label]; _exists {
 		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
 	}
-	
-	if _scriptlet.Interpreter == "" {
-		_scriptlet.Interpreter = "<shell>"
+	if (_scriptlet.Interpreter == "<shell>") || (_scriptlet.Interpreter == "<print>") {
+		// NOP
+	} else {
+		return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
 	}
 	
 	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Kind) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()

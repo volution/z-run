@@ -169,6 +169,8 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 	type scriptletState struct {
 		label string
 		kind string
+		interpreter string
+		disabled bool
 		hidden bool
 		body string
 		bodyBuffer strings.Builder
@@ -216,86 +218,148 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 			case WAITING :
 				_lineTrimmed := _trimRightSpace (_line)
 				
+				_disabled := false
+				if strings.HasPrefix (_lineTrimmed, "##") && (_lineTrimmed != "##") {
+					_lineTrimmed = _lineTrimmed[2:]
+					_disabled = true
+				}
+				
 				if _lineTrimmed == "" {
 					// NOP
 					
-				} else if strings.HasPrefix (_lineTrimmed, ":: ") {
+				} else if strings.HasPrefix (_lineTrimmed, ":: ") ||
+						strings.HasPrefix (_lineTrimmed, "::.. ") ||
+						strings.HasPrefix (_lineTrimmed, "::~~ ") ||
+						strings.HasPrefix (_lineTrimmed, "::~~.. ") ||
+						strings.HasPrefix (_lineTrimmed, "::++ ") {
 					
-					_text := _line[3:]
-					var _label string
-					var _body string
-					if _splitIndex := strings.Index (_text, " :: "); _splitIndex >= 0 {
-						_label = _text[:_splitIndex]
-						_body = _text[_splitIndex + 4:]
-					} else {
-						return "", errorf (0x53eafa1a, "invalid syntax (%d):  missing scriptlet separator `::`", _lineIndex, _line)
+					_prefix := _lineTrimmed[: strings.IndexByte (_lineTrimmed, ' ')]
+					_label := ""
+					_body := ""
+					{
+						_text := _lineTrimmed[len (_prefix) + 1:]
+						if _splitIndex := strings.Index (_text, " :: "); _splitIndex >= 0 {
+							_label = _text[:_splitIndex]
+							_body = _text[_splitIndex + 4:]
+						} else {
+							return "", errorf (0x53eafa1a, "invalid syntax (%d):  missing scriptlet separator `::` | %s", _lineIndex, _line)
+						}
+						_label = _trimSpace (_label)
+						_body = _trimSpace (_body)
 					}
-					_label = _trimSpace (_label)
-					_body = _trimSpace (_body)
 					
 					if _label == "" {
-						return "", errorf (0xddec2340, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
+						return "", errorf (0xddec2340, "invalid syntax (%d):  empty scriptlet label | %s", _lineIndex, _line)
 					}
 					if _body == "" {
-						return "", errorf (0xc1dc94cc, "invalid syntax (%d):  empty scriptlet body", _lineIndex, _line)
+						return "", errorf (0xc1dc94cc, "invalid syntax (%d):  empty scriptlet body | %s", _lineIndex, _line)
 					}
 					
-					_scriptletState = scriptletState {
-							label : _label,
-							kind : "executable",
-							hidden : false,
-							body : _body + "\n",
-							lineStart : _lineIndex,
-							lineEnd : _lineIndex,
-						}
-					_state = SCRIPTLET_PUSH
-					
-				} else if strings.HasPrefix (_lineTrimmed, "<< ") || strings.HasPrefix (_lineTrimmed, "<<++ ") {
-					
-					_label := _line[strings.IndexByte (_line, ' ') + 1:]
-					_label = _trimSpace (_label)
-					if _label == "" {
-						return "", errorf (0x64c17a76, "invalid syntax (%d):  empty scriptlet label", _lineIndex, _line)
-					}
-					
-					_kind := "executable"
+					_kind := ""
+					_interpreter := ""
 					_hidden := false
-					if strings.HasPrefix (_lineTrimmed, "<<++ ") {
-						_kind = "generator"
-						_hidden = true
+					switch _prefix[2:] {
+						case "" :
+							_kind = "executable"
+							_interpreter = "<shell>"
+						case ".." :
+							_kind = "executable"
+							_interpreter = "<print>"
+						case "~~" :
+							_kind = "replacer"
+							_interpreter = "<shell>"
+						case "~~.." :
+							_kind = "replacer"
+							_interpreter = "<print>"
+						case "++" :
+							_kind = "generator"
+							_interpreter = "<shell>"
+							_hidden = true
+						default :
+							return "", errorf (0xfba805b9, "invalid syntax (%d):  unknown scriptlet type | %s", _lineIndex, _line)
 					}
 					
 					_scriptletState = scriptletState {
 							label : _label,
 							kind : _kind,
+							interpreter : _interpreter,
+							disabled : _disabled,
+							hidden : _hidden,
+							body : _body + "\n",
+							lineStart : _lineIndex,
+							lineEnd : _lineIndex,
+						}
+					
+					_state = SCRIPTLET_PUSH
+					
+				} else if strings.HasPrefix (_lineTrimmed, "<< ") ||
+						strings.HasPrefix (_lineTrimmed, "<<.. ") ||
+						strings.HasPrefix (_lineTrimmed, "<<~~ ") ||
+						strings.HasPrefix (_lineTrimmed, "<<~~.. ") ||
+						strings.HasPrefix (_lineTrimmed, "<<++ ") {
+					
+					_prefix := _lineTrimmed[: strings.IndexByte (_lineTrimmed, ' ')]
+					_label := ""
+					{
+						_label = _lineTrimmed[len (_prefix) + 1:]
+						_label = _trimSpace (_label)
+					}
+					
+					if _label == "" {
+						return "", errorf (0x64c17a76, "invalid syntax (%d):  empty scriptlet label | %s", _lineIndex, _line)
+					}
+					
+					_kind := ""
+					_interpreter := ""
+					_hidden := false
+					switch _prefix[2:] {
+						case "" :
+							_kind = "executable"
+							_interpreter = "<shell>"
+						case ".." :
+							_kind = "executable"
+							_interpreter = "<print>"
+						case "~~" :
+							_kind = "replacer"
+							_interpreter = "<shell>"
+						case "~~.." :
+							_kind = "replacer"
+							_interpreter = "<print>"
+						case "++" :
+							_kind = "generator"
+							_interpreter = "<shell>"
+							_hidden = true
+						default :
+							return "", errorf (0xd08972fe, "invalid syntax (%d):  unknown scriptlet type | %s", _lineIndex, _line)
+					}
+					
+					_scriptletState = scriptletState {
+							label : _label,
+							kind : _kind,
+							interpreter : _interpreter,
+							disabled : _disabled,
 							hidden : _hidden,
 							lineStart : _lineIndex,
 						}
+					
 					_state = SCRIPTLET_BODY
 					
-				} else if strings.HasPrefix (_lineTrimmed, "##<< ") || (_lineTrimmed == "##<<") {
-					_state = SKIPPING
-					
-				} else if strings.HasPrefix (_lineTrimmed, "#:: ") {
-					// NOP
-					
-				} else if strings.HasPrefix (_lineTrimmed, "# ") || (_lineTrimmed == "#") {
-					// NOP
-					
-				} else if (_lineIndex == 1) && strings.HasPrefix (_lineTrimmed, "#!/") {
-					// NOP
+				} else if strings.HasPrefix (_lineTrimmed, "{{") {
+					if _disabled {
+						_state = SKIPPING
+					} else {
+						return "", errorf (0x79d4d781, "invalid syntax (%d):  unknown block type | %s", _lineIndex, _line)
+					}
 					
 				} else if strings.HasPrefix (_lineTrimmed, "#!/") {
-					// FIXME:  This should be a warning!
-					
-				} else if false ||
-						(_lineTrimmed == "##== sort = false") ||
-						(_lineTrimmed == "##== sort = true") ||
-						false {
-					// NOP
+					if (_lineIndex == 1) {
+						// NOP
+					} else {
+						// FIXME:  This should be a warning!
+					}
 					
 				} else {
-					return "", errorf (0x9f8daae4, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+					return "", errorf (0x9f8daae4, "invalid syntax (%d):  unexpected statement | %s", _lineIndex, _line)
 				}
 			
 			case SCRIPTLET_BODY :
@@ -307,7 +371,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 					_state = SCRIPTLET_PUSH
 					
 				} else if strings.HasPrefix (_lineTrimmed, "!!") {
-					return "", errorf (0xf9900c0c, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+					return "", errorf (0xf9900c0c, "invalid syntax (%d):  unexpected statement | %s", _lineIndex, _line)
 					
 				} else if _lineTrimmed == "" {
 					_scriptletState.bodyBuffer.WriteByte ('\n')
@@ -329,30 +393,33 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 			
 			case SKIPPING :
 				_lineTrimmed := _trimRightSpace (_line)
-				if _lineTrimmed == "##!!" {
+				if _lineTrimmed == "##}}" {
 					_state = WAITING
-				} else if strings.HasPrefix (_lineTrimmed, "##!!") {
-					return "", errorf (0x183de0fd, "invalid syntax (%d):  unexpected statement `%s`", _lineIndex, _line)
+				} else if strings.HasPrefix (_lineTrimmed, "##}}") {
+					return "", errorf (0x183de0fd, "invalid syntax (%d):  unexpected statement | %s", _lineIndex, _line)
 				} else {
 					// NOP
 				}
 		}
 		
 		if _state == SCRIPTLET_PUSH {
-			_scriptlet := & Scriptlet {
-					Label : _scriptletState.label,
-					Kind : _scriptletState.kind,
-					Hidden : _scriptletState.hidden,
-					Body : _scriptletState.body,
-					Source : ScriptletSource {
-							Path : _sourcePath,
-							LineStart : _scriptletState.lineStart,
-							LineEnd : _scriptletState.lineEnd,
-							Fingerprint : _fingerprint,
-						},
+			if !_scriptletState.disabled {
+				_scriptlet := & Scriptlet {
+						Label : _scriptletState.label,
+						Kind : _scriptletState.kind,
+						Interpreter : _scriptletState.interpreter,
+						Hidden : _scriptletState.hidden,
+						Body : _scriptletState.body,
+						Source : ScriptletSource {
+								Path : _sourcePath,
+								LineStart : _scriptletState.lineStart,
+								LineEnd : _scriptletState.lineEnd,
+								Fingerprint : _fingerprint,
+							},
+					}
+				if _error := includeScriptlet (_library, _scriptlet); _error != nil {
+					return "", _error
 				}
-			if _error := includeScriptlet (_library, _scriptlet); _error != nil {
-				return "", _error
 			}
 			_state = WAITING
 		}
@@ -363,7 +430,7 @@ func parseFromData (_library *Library, _source string, _sourcePath string) (stri
 		case SCRIPTLET_BODY :
 			return "", errorf (0x9d55df33, "invalid syntax (%d):  missing scriptlet body closing tag `!!` (and reached end of file)", _lineIndex)
 		case SKIPPING :
-			return "", errorf (0x357f15e1, "invalid syntax (%d):  missing comment body closing tag `##!!` (and reached end of file)", _lineIndex)
+			return "", errorf (0x357f15e1, "invalid syntax (%d):  missing comment body closing tag `##}}` (and reached end of file)", _lineIndex)
 		default :
 			return "", errorf (0xc0f78380, "invalid syntax (%d):  unexpected state `%s` (and reached end of file)", _lineIndex, _state)
 	}
