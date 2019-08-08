@@ -69,6 +69,15 @@ exec %d<&-
 				)
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
+		case "<select>" :
+			_interpreterExecutable = _context.selfExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:select] [%s]", _scriptlet.Label),
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
+		
 		default :
 			syscall.Close (_interpreterScriptInput)
 			_interpreterScriptOutput.Close ()

@@ -25,6 +25,7 @@ type Context struct {
 	cacheRoot string
 	cacheEnabled bool
 	terminal string
+	top bool
 }
 
 
@@ -44,6 +45,9 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	var _workspace string
 	var _cacheRoot string
 	var _terminal string
+	var _top bool
+	
+	_top = true
 	
 	for _name, _value := range _environment {
 		
@@ -77,6 +81,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					if _executable != _value {
 						logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
 					}
+					// FIXME:  Find a better way to handle this!
+					_top = false
 				case "ZRUN_CACHE" :
 					_cacheRoot = _value
 				case "ZRUN_TERM" :
@@ -126,9 +132,9 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			
 		} else if strings.HasPrefix (_argument, "::") {
-			if _command == "" {
-				_command = "execute"
-			}
+//			if _command == "" {
+//				_command = "execute"
+//			}
 			_scriptlet = _argument
 			_cleanArguments = _arguments[_index + 1:]
 			break
@@ -186,8 +192,12 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		}
 	}
 	
-	if (_command == "") && (_scriptlet == "") {
-		_command = "select-execute"
+	if (_command == "") {
+		if (_scriptlet == "") || _top {
+			_command = "select-execute"
+		} else {
+			_command = "execute"
+		}
 	}
 	
 	_cacheEnabled := true
@@ -272,10 +282,14 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			return doExecute (_library, _scriptlet, _context)
 		
 		case "select-execute" :
-			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+			if len (_cleanArguments) != 0 {
 				return errorf (0x203e410a, "execute:  unexpected scriptlet or arguments")
 			}
-			return doSelectExecute (_library, _context)
+			if _scriptlet == "" {
+				return doSelectExecute (_library, _context)
+			} else {
+				return doSelectExecute_0 (_library, _scriptlet, _context)
+			}
 		
 		case "select-label" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
@@ -349,6 +363,9 @@ func Main () () {
 	}
 	
 	_argument0 := os.Args[0]
+	if strings.HasPrefix (_argument0, "[z-run:select] ") {
+		_argument0 = "[z-run:select]"
+	}
 	switch _argument0 {
 		case "[z-run:select]" :
 			if _error := fzfSelectMain (); _error != nil {

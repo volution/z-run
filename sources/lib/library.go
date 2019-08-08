@@ -17,6 +17,7 @@ type Scriptlet struct {
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
 	Hidden bool `json:"hidden"`
+	Menus []string `json:"menus"`
 }
 
 type ScriptletSource struct {
@@ -173,10 +174,11 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 	if _, _exists := _library.ScriptletsByLabel[_scriptlet.Label]; _exists {
 		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
 	}
-	if (_scriptlet.Interpreter == "<shell>") || (_scriptlet.Interpreter == "<print>") {
-		// NOP
-	} else {
-		return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
+	switch _scriptlet.Interpreter {
+		case "<shell>", "<print>", "<select>" :
+			// NOP
+		default :
+			return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
 	}
 	
 	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Kind) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
@@ -192,6 +194,8 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 			_scriptlet.Kind = "generator-pending"
 		case "replacer" :
 			_scriptlet.Kind = "replacer-pending"
+		case "menu" :
+			_scriptlet.Kind = "menu-pending"
 		default :
 			return errorf (0x4b8aacf2, "invalid scriptlet kind `%s`", _scriptlet.Kind)
 	}

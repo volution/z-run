@@ -15,12 +15,23 @@ import isatty "github.com/mattn/go-isatty"
 
 func fzfSelectMain () (error) {
 	
+	if len (os.Args) == 1 {
+		// NOP
+	} else if len (os.Args) == 2 {
+		if _stream, _error := os.Open (os.Args[1]); _error == nil {
+			os.Stdin.Close ()
+			os.Stdin = _stream
+		}
+	} else {
+		return errorf (0x68f8e127, "invalid arguments")
+	}
+	
 	if isatty.IsTerminal (os.Stdin.Fd ()) {
 		return errorf (0x34efe59c, "stdin is a TTY")
 	}
-	if isatty.IsTerminal (os.Stdout.Fd ()) {
-		return errorf (0xf12b8d81, "stdout is a TTY")
-	}
+//	if isatty.IsTerminal (os.Stdout.Fd ()) {
+//		return errorf (0xf12b8d81, "stdout is a TTY")
+//	}
 	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
 		return errorf (0x55a1298a, "stderr is not a TTY")
 	}

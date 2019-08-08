@@ -48,6 +48,8 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 					} else {
 						return nil, _error
 					}
+				case "menu-pending" :
+					// NOP
 				default :
 					return nil, errorf (0xd5f0c788, "invalid state `%s`", _scriptlet.Kind)
 			}
@@ -57,17 +59,45 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		}
 	}
 	
-	sort.Sort (_library.Scriptlets)
-	for _index, _scriptlet := range _library.Scriptlets {
-		_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = uint (_index)
-		_library.ScriptletsByLabel[_scriptlet.Label] = uint (_index)
+	{
+		for _, _scriptlet := range _library.Scriptlets {
+			switch _scriptlet.Kind {
+				case "menu-pending" :
+					if _error := parseFromMenu (_library, _scriptlet, _context); _error == nil {
+						_scriptlet.Kind = "menu"
+					} else {
+						return nil, _error
+					}
+				default :
+					// NOP
+			}
+		}
 	}
 	
-	sort.Strings (_library.ScriptletFingerprints)
-	sort.Strings (_library.ScriptletLabels)
-	sort.Sort (_library.Sources)
+	{
+		for _, _scriptlet := range _library.Scriptlets {
+			sort.Strings (_scriptlet.Menus)
+			if len (_scriptlet.Menus) != 0 {
+				_scriptlet.Hidden = true
+			}
+		}
+	}
 	
 	{
+		sort.Sort (_library.Scriptlets)
+		sort.Strings (_library.ScriptletFingerprints)
+		_library.ScriptletLabels = make ([]string, 0, len (_library.Scriptlets))
+		for _index, _scriptlet := range _library.Scriptlets {
+			_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = uint (_index)
+			_library.ScriptletsByLabel[_scriptlet.Label] = uint (_index)
+			if !_scriptlet.Hidden {
+				_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
+			}
+		}
+	}
+	
+	{
+		sort.Sort (_library.Sources)
 		_fingerprints := make ([]string, 0, len (_library.Sources))
 		for _, _source := range _library.Sources {
 			_fingerprints = append (_fingerprints, _source.FingerprintData)
@@ -101,6 +131,46 @@ func parseFromReplacer (_library *Library, _source *Scriptlet, _context *Context
 	} else {
 		return _error
 	}
+}
+
+func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (error) {
+	_labels := make ([]string, 0, 1024)
+	_matchers := strings.Split (_source.Body, "\n")
+	for _, _scriptlet := range _library.Scriptlets {
+		if _scriptlet == _source {
+			continue
+		}
+		if _scriptlet.Hidden {
+			continue
+		}
+		for _, _matcher := range _matchers {
+			if _matcher == "" {
+				continue
+			}
+			if strings.HasPrefix (_matcher, "^ ") {
+				_pattern := _matcher[2:]
+				if strings.HasPrefix (_scriptlet.Label, _pattern) {
+					_labels = append (_labels, _scriptlet.Label)
+					_scriptlet.Menus = append (_scriptlet.Menus, _source.Label)
+				}
+			} else {
+				return errorf (0xa068e934, "invalid menu matcher `%s`", _matcher)
+			}
+		}
+	}
+	sort.Strings (_labels)
+	_buffer := strings.Builder {}
+	_previousLabel := ""
+	for _, _label := range _labels {
+		if _label == _previousLabel {
+			continue
+		}
+		_buffer.WriteString (_label)
+		_buffer.WriteByte ('\n')
+		_previousLabel = _label
+	}
+	_source.Body = _buffer.String ()
+	return nil
 }
 
 
@@ -225,7 +295,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						strings.HasPrefix (_lineTrimmed, "::~~.. ") ||
 						strings.HasPrefix (_lineTrimmed, "::&& ") ||
 						strings.HasPrefix (_lineTrimmed, "::&&.. ") ||
-						strings.HasPrefix (_lineTrimmed, "::++ ") {
+						strings.HasPrefix (_lineTrimmed, "::++ ") ||
+						strings.HasPrefix (_lineTrimmed, "::// ") {
 					
 					_prefix := _lineTrimmed[: strings.IndexByte (_lineTrimmed, ' ')]
 					_label := ""
@@ -235,8 +306,10 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						if _splitIndex := strings.Index (_text, " :: "); _splitIndex >= 0 {
 							_label = _text[:_splitIndex]
 							_body = _text[_splitIndex + 4:]
-						} else {
+						} else if _prefix != ":://" {
 							return errorf (0x53eafa1a, "invalid syntax (%d):  missing scriptlet separator `::` | %s", _lineIndex, _line)
+						} else {
+							_label = _text
 						}
 						_label = _trimSpace (_label)
 						_body = _trimSpace (_body)
@@ -245,7 +318,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					if _label == "" {
 						return errorf (0xddec2340, "invalid syntax (%d):  empty scriptlet label | %s", _lineIndex, _line)
 					}
-					if _body == "" {
+					if (_body == "") && (_prefix != ":://") {
 						return errorf (0xc1dc94cc, "invalid syntax (%d):  empty scriptlet body | %s", _lineIndex, _line)
 					}
 					
@@ -278,6 +351,13 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_kind = "executable"
 							_interpreter = "<print>"
 							_include = true
+						case "//" :
+							_kind = "menu"
+							_interpreter = "<select>"
+							_include = false
+							if _body == "" {
+								_body = "^ " + _label
+							}
 						default :
 							return errorf (0xfba805b9, "invalid syntax (%d):  unknown scriptlet type | %s", _lineIndex, _line)
 					}
@@ -569,7 +649,7 @@ func loadFromStream (_stream io.Reader) (string, []byte, error) {
 }
 
 
-func loadFromScriptlet (_library *Library, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, error) {
+func loadFromScriptlet (_library LibraryStore, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, error) {
 	
 	var _command *exec.Cmd
 	var _descriptors []int
@@ -595,6 +675,10 @@ func loadFromCommand (_command *exec.Cmd) (string, []byte, error) {
 	}
 	
 	if _exitCode, _data, _error := processExecuteGetStdout (_command); _error == nil {
+		if _exitCode == 130 {
+			// FIXME:  This is used for `<select>` interpreters!  Handle this properly!
+			_exitCode = 0
+		}
 		if _exitCode == 0 {
 			_fingerprint := NewFingerprinter () .Bytes (_data) .Build ()
 			return _fingerprint, _data, nil
