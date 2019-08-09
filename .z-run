@@ -73,24 +73,26 @@
 
 << go / build / main / debug
 	test "${#}" -eq 0
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
-			-o ./.outputs/main-debug.elf \
+			-o "${_outputs}/main-debug.elf" \
 			-- \
-			./sources/main.go \
+			./main.go \
 	#
 !!
 
 << go / build / main / release
 	test "${#}" -eq 0
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
-			-o ./.outputs/main-release.elf \
+			-o "${_outputs}/main-release.elf" \
 			-ldflags '-s' \
 			-- \
-			./sources/main.go \
+			./main.go \
 	#
 !!
 
@@ -117,7 +119,7 @@
 			-v \
 			-d \
 			-- \
-			./sources/... \
+			./... \
 	#
 !!
 
@@ -126,13 +128,15 @@
 
 << go / tool
 	test "${#}" -ge 1
-	test -d ./.outputs
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	_sources="$( exec -- readlink -e -- ./sources )"
 	
 	export -- GOPATH="${_outputs}/go"
 	export -- GOBIN="${_outputs}/go/bin"
 	export -- GOTMPDIR="${_outputs}/go/tmp"
 	export -- GOCACHE="${_outputs}/go/cache"
+	
+	cd -- "${_sources}"
 	
 	exec -- go "${@}"
 !!
@@ -142,7 +146,6 @@
 
 << workspace / initialize / go
 	test "${#}" -eq 0
-	test -d ./.outputs
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	_sources="$( exec -- readlink -e -- ./sources )"
 	_vendor="$( exec -- readlink -e -- ./vendor )"
@@ -151,8 +154,9 @@
 	GOBIN="${_outputs}/go/bin"
 	GOTMPDIR="${_outputs}/go/tmp"
 	GOCACHE="${_outputs}/go/cache"
+	_gopkg="${_outputs}/go/pkg"
 	
-	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" ; do
+	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gopkg}" ; do
 		if test ! -e "${_folder}" ; then
 			mkdir -- "${_folder}"
 		fi
