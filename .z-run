@@ -118,8 +118,28 @@
 			get \
 			-v \
 			-d \
+			-u=patch \
 			-- \
 			./... \
+	#
+!!
+
+
+<< go / dependencies / list
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			list \
+			-m \
+			-- \
+			all \
+	#
+!!
+
+
+<< go / dependencies / tidy
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			mod tidy \
 	#
 !!
 

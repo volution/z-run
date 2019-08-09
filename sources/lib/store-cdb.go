@@ -9,7 +9,7 @@ import "fmt"
 import "os"
 
 
-import cdb "github.com/cipriancraciun/go-cdb-lib"
+import cdb "github.com/colinmarc/cdb"
 
 
 
