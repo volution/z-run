@@ -357,6 +357,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_include = false
 							if _body == "" {
 								_body = "^ " + _label
+								if strings.HasSuffix (_body, " ...") {
+									_body = _body[:len (_body) - 3]
+								}
 							}
 						default :
 							return errorf (0xfba805b9, "invalid syntax (%d):  unknown scriptlet type | %s", _lineIndex, _line)
