@@ -132,9 +132,6 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			
 		} else if strings.HasPrefix (_argument, "::") {
-//			if _command == "" {
-//				_command = "execute"
-//			}
 			_scriptlet = _argument
 			_cleanArguments = _arguments[_index + 1:]
 			break
@@ -193,7 +190,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	}
 	
 	if (_command == "") {
-		if (_scriptlet == "") || _top {
+		if ((_scriptlet == "") || _top) && (len (_cleanArguments) == 0) {
 			_command = "select-execute"
 		} else {
 			_command = "execute"
