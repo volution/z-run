@@ -140,31 +140,35 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if _command == "" {
 				switch _argument {
 					
-					case "execute" :
-						_command = "execute"
+					case "execute-scriptlet", "execute" :
+						_command = "execute-scriptlet"
 						continue
 					
-					case "select-execute" :
-						_command = "select-execute"
-						_index += 1
-					
-					case "select-label", "select" :
-						_command = "select-label"
-						_index += 1
-					
-					case "export-script" :
-						_command = "export-script"
+					case "export-scriptlet-body", "export-body" :
+						_command = "export-scriptlet-body"
 						continue
 					
-					case "export-labels-list", "export-labels", "list" :
-						_command = "export-labels-list"
+					case "select-execute-scriptlet", "select-execute" :
+						_command = "select-execute-scriptlet"
+						continue
+					
+					case "select-export-scriptlet-label", "select-label", "select" :
+						_command = "select-export-scriptlet-label"
+						continue
+					
+					case "select-export-scriptlet-body", "select-body" :
+						_command = "select-export-scriptlet-body"
+						continue
+					
+					case "export-scriptlet-labels", "export-labels", "list" :
+						_command = "export-scriptlet-labels"
 						_index += 1
 					
-					case "parse-library-json", "parse-library", "parse" :
-						_command = "parse-library-json"
+					case "parse-library" :
+						_command = "parse-library"
 						_index += 1
 					
-					case "export-library-json", "export-library" :
+					case "export-library-json" :
 						_command = "export-library-json"
 						_index += 1
 					
@@ -191,14 +195,14 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	if (_command == "") {
 		if ((_scriptlet == "") || _top) && (len (_cleanArguments) == 0) {
-			_command = "select-execute"
+			_command = "select-execute-scriptlet"
 		} else {
-			_command = "execute"
+			_command = "execute-scriptlet"
 		}
 	}
 	
 	_cacheEnabled := true
-	if _command == "parse-library-json" {
+	if _command == "parse-library" {
 		_cacheEnabled = false
 	}
 	if _cacheEnabled {
@@ -272,55 +276,94 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	switch _command {
 		
-		case "execute" :
+		
+		case "execute-scriptlet" :
 			if _scriptlet == "" {
 				return errorf (0x39718e70, "execute:  expected scriptlet")
 			}
-			return doExecute (_library, _scriptlet, _context)
+			return doHandleWithLabel (_library, _scriptlet, doHandleExecuteScriptlet, _context)
 		
-		case "select-execute" :
-			if len (_cleanArguments) != 0 {
-				return errorf (0x203e410a, "execute:  unexpected scriptlet or arguments")
-			}
-			if _scriptlet == "" {
-				return doSelectExecute (_library, _context)
-			} else {
-				return doSelectExecute_0 (_library, _scriptlet, _context)
-			}
-		
-		case "select-label" :
-			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
-				return errorf (0x2d19b1bc, "select:  unexpected scriptlet or arguments")
-			}
-			return doSelectLabel (_library, os.Stdout, _context)
-		
-		case "export-script" :
+		case "export-scriptlet-body" :
 			if _scriptlet == "" {
 				return errorf (0xf24640a2, "export:  expected scriptlet")
 			}
 			if len (_cleanArguments) != 0 {
 				return errorf (0xcf8db3c0, "export:  unexpected arguments")
 			}
-			return doExportScript (_library, _scriptlet, os.Stdout, _context)
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
+				}
+			return doHandleWithLabel (_library, _scriptlet, _handler, _context)
 		
-		case "export-labels-list" :
-			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
-				return errorf (0xf7b9c7f3, "list:  unexpected scriptlet or arguments")
+		
+		case "select-execute-scriptlet" :
+			if len (_cleanArguments) != 0 {
+				return errorf (0x203e410a, "select:  unexpected arguments")
 			}
-			return doExportLabelsList (_library, os.Stdout, _context)
+			if _scriptlet != "" {
+				return doSelectHandleWithLabel (_library, _scriptlet, doHandleExecuteScriptlet, _context)
+			} else {
+				return doSelectHandle (_library, doHandleExecuteScriptlet, _context)
+			}
 		
-		case "parse-library-json", "export-library-json" :
+		case "select-export-scriptlet-label" :
+			if len (_cleanArguments) != 0 {
+				return errorf (0x2d19b1bc, "select:  unexpected arguments")
+			}
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+					return doHandleExportScriptletLabel (_library, _scriptlet, os.Stdout, _context)
+				}
+			if _scriptlet != "" {
+				return doSelectHandleWithLabel (_library, _scriptlet, _handler, _context)
+			} else {
+				return doSelectHandle (_library, _handler, _context)
+			}
+		
+		case "select-export-scriptlet-body" :
+			if len (_cleanArguments) != 0 {
+				return errorf (0x5f573713, "select:  unexpected arguments")
+			}
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
+				}
+			if _scriptlet != "" {
+				return doSelectHandleWithLabel (_library, _scriptlet, _handler, _context)
+			} else {
+				return doSelectHandle (_library, _handler, _context)
+			}
+		
+		case "legacy:output-selection-and-command" :
+			if len (_cleanArguments) != 0 {
+				return errorf (0xe4f7e6f5, "export:  unexpected arguments")
+			}
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+					return doHandleExportScriptletLegacy (_library, _scriptlet, os.Stdout, _context)
+				}
+			if _scriptlet != "" {
+				return doSelectHandleWithLabel (_library, _scriptlet, _handler, _context)
+			} else {
+				return doSelectHandle (_library, _handler, _context)
+			}
+		
+		
+		case "export-scriptlet-labels" :
+			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+				return errorf (0xf7b9c7f3, "export:  unexpected scriptlet or arguments")
+			}
+			return doExportScriptletLabels (_library, os.Stdout, _context)
+		
+		
+		case "parse-library" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0x400ec122, "export:  unexpected scriptlet or arguments")
 			}
-			switch _command {
-				case "parse-library-json" :
-					return doExportLibraryJson (_library, os.Stdout, _context)
-				case "export-library-json" :
-					return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout, nil), _context)
-				default :
-					panic (0xda7243ef)
+			return doExportLibraryJson (_library, os.Stdout, _context)
+		
+		case "export-library-json" :
+			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
+				return errorf (0xdd0752b8, "export:  unexpected scriptlet or arguments")
 			}
+			return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout, nil), _context)
 		
 		case "export-library-cdb" :
 			if _scriptlet != "" {
@@ -331,11 +374,6 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			return doExportLibraryCdb (_library, _cleanArguments[0], _context)
 		
-		case "legacy:output-selection-and-command" :
-			if len (_cleanArguments) != 0 {
-				return errorf (0xe4f7e6f5, "export:  unexpected arguments")
-			}
-			return doSelectLegacyOutput (_library, _scriptlet, os.Stdout, _context)
 		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")

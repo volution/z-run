@@ -3,6 +3,18 @@
 
 
 
+::// do / run / ...
+::// do / use / ...
+
+::// go / build / ...
+::// go / execute / ...
+::// go / dependencies / ...
+
+::// workspace / ...
+
+
+
+
 << workspace / deploy
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
@@ -12,7 +24,7 @@
 
 
 
-<< do / 0
+<< do / run / 0
 	"${ZRUN[@]}" ':: go / build / main / debug'
 	test "${#}" -ge 1
 	export -n -- \
@@ -46,19 +58,19 @@
 	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
 !!
 
-<< do
-	exec -- "${ZRUN[@]}" ':: do / 0' z-run "${@}"
+<< do / run
+	exec -- "${ZRUN[@]}" ':: do / run / 0' z-run "${@}"
 !!
 
 
-:: do / execute :: exec -- "${ZRUN[@]}" ':: do' execute "${@}"
-:: do / script :: exec -- "${ZRUN[@]}" ':: do' export-script "${@}"
-:: do / list :: exec -- "${ZRUN[@]}" ':: do' export-labels "${@}"
-:: do / select :: exec -- "${ZRUN[@]}" ':: do' select-label "${@}"
-:: do / export-json :: exec -- "${ZRUN[@]}" ':: do' export-library-json "${@}"
-:: do / export-cdb :: exec -- "${ZRUN[@]}" ':: do' export-library-cdb "${@}"
-:: do / parse :: exec -- "${ZRUN[@]}" ':: do' parse-library "${@}"
-:: do / fzf :: exec -- "${ZRUN[@]}" ':: do / 0' '[z-run:select]' "${@}"
+:: do / run / execute :: exec -- "${ZRUN[@]}" ':: do / run' execute-scriptlet "${@}"
+:: do / run / select-label :: exec -- "${ZRUN[@]}" ':: do / run' select-export-scriptlet-label "${@}"
+:: do / run / select-body :: exec -- "${ZRUN[@]}" ':: do / run' select-export-scriptlet-body "${@}"
+:: do / run / list-labels :: exec -- "${ZRUN[@]}" ':: do / run' export-scriptlet-labels "${@}"
+:: do / run / parse-library :: exec -- "${ZRUN[@]}" ':: do / run' parse-library "${@}"
+:: do / run / export-library-json :: exec -- "${ZRUN[@]}" ':: do / run' export-library-json "${@}"
+:: do / run / export-library-cdb :: exec -- "${ZRUN[@]}" ':: do / run' export-library-cdb "${@}"
+:: do / run / select :: exec -- "${ZRUN[@]}" ':: do / run / 0' '[z-run:select]' "${@}"
 
 
 :: do / use / workspace :: export -- ZRUNDEV_USE=./.z-run
