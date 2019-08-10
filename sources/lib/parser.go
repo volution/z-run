@@ -147,8 +147,10 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (e
 			if _matcher == "" {
 				continue
 			}
-			if strings.HasPrefix (_matcher, "^ ") {
-				_pattern := _matcher[2:]
+			if _matcher == "*" {
+				_labels = append (_labels, _scriptlet.Label)
+			} else if strings.HasPrefix (_matcher, "+^ ") {
+				_pattern := _matcher[3:]
 				if strings.HasPrefix (_scriptlet.Label, _pattern) {
 					_labels = append (_labels, _scriptlet.Label)
 					_scriptlet.Menus = append (_scriptlet.Menus, _source.Label)
@@ -356,9 +358,13 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_interpreter = "<menu>"
 							_include = false
 							if _body == "" {
-								_body = "^ " + _label
-								if strings.HasSuffix (_body, " ...") {
-									_body = _body[:len (_body) - 3]
+								if (_label == "*") || (_label == "* ...") {
+									_body = "*"
+								} else {
+									_body = "+^ " + _label
+									if strings.HasSuffix (_body, " ...") {
+										_body = _body[:len (_body) - 3]
+									}
 								}
 							}
 						default :
