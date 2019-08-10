@@ -175,7 +175,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
 	}
 	switch _scriptlet.Interpreter {
-		case "<shell>", "<print>", "<select>" :
+		case "<shell>", "<print>", "<menu>" :
 			// NOP
 		default :
 			return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)

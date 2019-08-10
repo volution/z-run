@@ -118,10 +118,11 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 					_outputsChannel <- _output
 					_outputsCount += 1
 				} else if _error == io.EOF {
-					if _line != "" {
+					if _line == "" {
+						break
+					} else {
 						_stdoutError = errorf (0x1bc14ac4, "expected proper line")
 					}
-					break
 				} else {
 					_stdoutError = _error
 					break

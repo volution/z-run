@@ -13,16 +13,9 @@ import isatty "github.com/mattn/go-isatty"
 
 
 
-func fzfSelectMain () (error) {
+func fzfMain () (error) {
 	
-	if len (os.Args) == 1 {
-		// NOP
-	} else if len (os.Args) == 2 {
-		if _stream, _error := os.Open (os.Args[1]); _error == nil {
-			os.Stdin.Close ()
-			os.Stdin = _stream
-		}
-	} else {
+	if len (os.Args) != 1 {
 		return errorf (0x68f8e127, "invalid arguments")
 	}
 	

@@ -353,7 +353,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_include = true
 						case "//" :
 							_kind = "menu"
-							_interpreter = "<select>"
+							_interpreter = "<menu>"
 							_include = false
 							if _body == "" {
 								_body = "^ " + _label
@@ -675,10 +675,6 @@ func loadFromCommand (_command *exec.Cmd) (string, []byte, error) {
 	}
 	
 	if _exitCode, _data, _error := processExecuteGetStdout (_command); _error == nil {
-		if _exitCode == 130 {
-			// FIXME:  This is used for `<select>` interpreters!  Handle this properly!
-			_exitCode = 0
-		}
 		if _exitCode == 0 {
 			_fingerprint := NewFingerprinter () .Bytes (_data) .Build ()
 			return _fingerprint, _data, nil

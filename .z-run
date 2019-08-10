@@ -36,8 +36,12 @@
 			ZRUN_TERM \
 	#
 	if test -n "${ZRUNDEV_USE:-}" ; then
-		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE:-}"
-		export -n -- ZRUNDEV_USE
+		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE}"
+		export -n -- ZRUNDEV_USE=
+	fi
+	if test -n "${ZRUNDEV_TERM:-}" ; then
+		export -- TERM="${ZRUNDEV_TERM}"
+		export -n -- ZRUNDEV_TERM=
 	fi
 	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
 !!
@@ -67,6 +71,9 @@
 :: do / use / photos :: export -- ZRUNDEV_USE=./examples/photos.z-run
 :: do / use / desktop :: export -- ZRUNDEV_USE=./examples/desktop.z-run
 :: do / use / vonuvoli :: export -- ZRUNDEV_USE=./examples/vonuvoli.z-run
+
+:: do / use / term / enable :: export -- ZRUNDEV_TERM="${TERM}"
+:: do / use / term / disable :: export -- ZRUNDEV_TERM=dumb
 
 
 

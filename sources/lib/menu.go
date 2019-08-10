@@ -3,11 +3,65 @@
 package zrun
 
 
+import "bufio"
+import "io"
 import "os"
 import "os/exec"
+import "strings"
 
 
 import isatty "github.com/mattn/go-isatty"
+
+
+
+
+func menuMain () (error) {
+	
+	if len (os.Args) != 2 {
+		return errorf (0x6b439ede, "invalid arguments")
+	}
+	
+	_inputs := make ([]string, 0, 1024)
+	if _stream, _error := os.Open (os.Args[1]); _error == nil {
+		defer _stream.Close ()
+		_reader := bufio.NewReader (_stream)
+		for {
+			if _line, _error := _reader.ReadString ('\n'); _error == nil {
+				_input := strings.TrimRight (_line, "\n")
+				_inputs = append (_inputs, _input)
+			} else if _error == io.EOF {
+				if _line == "" {
+					break
+				} else {
+					errorf (0x1f57b1db, "expected proper line")
+				}
+			} else {
+				return _error
+			}
+		}
+	}
+	
+	// FIXME:  Should refactor this!
+	_executable, _ := os.Executable ()
+	_context := & Context {
+			selfExecutable : _executable,
+			// FIXME:  Handle this!
+			cleanEnvironment : nil,
+			terminal : os.Getenv ("TERM"),
+		}
+	
+	if _outputs, _error := menuSelect (_inputs, _context); _error == nil {
+		for _, _output := range _outputs {
+			if _, _error := io.WriteString (os.Stdout, _output + "\n"); _error != nil {
+				return _error
+			}
+		}
+		os.Exit (0)
+		panic (0x1ad77faa)
+	} else {
+		return _error
+	}
+}
 
 
 
@@ -47,7 +101,9 @@ func menuSelect (_inputs []string, _context *Context) ([]string, error) {
 
 func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, _context *Context) (error) {
 	
-	if _context.terminal != "" {
+	_hasTerminal := (_context.terminal != "") && (_context.terminal != "dumb")
+	
+	if _hasTerminal {
 		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
 			return errorf (0xfc026596, "stderr is not a TTY")
 		}
@@ -63,7 +119,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		}
 	
 	_commandFzf := false
-	if _context.terminal != "" {
+	if _hasTerminal {
 		_commandFzf = true
 		_command.Path = _context.selfExecutable
 		_command.Args = []string {
@@ -72,16 +128,35 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Env = []string {
 				"TERM=" + _context.terminal,
 			}
-	} else if _path, _error := exec.LookPath ("x-input"); _error == nil {
+	} else if _path, _error := exec.LookPath ("rofi"); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
-				"[z-run:input]",
-				"select",
-				"run:",
+				"[z-run:select]",
+				"-dmenu",
+				"-p", "z-run",
+				"-l", "16",
+				"-i",
+				"-no-custom",
 			}
-		_command.Env = processEnvironment (_context, nil)
+	} else if _path, _error := exec.LookPath ("dmenu"); _error == nil {
+		_command.Path = _path
+		_command.Args = []string {
+				"[z-run:select]",
+				"-p", "z-run",
+				"-l", "16",
+				"-i",
+			}
 	} else {
-		return errorf (0xb91714f7, "expected `x-input`")
+		return errorf (0xb91714f7, "unresolved `x-input`")
+	}
+	
+	if _command.Env == nil {
+		if _context.cleanEnvironment != nil {
+			_command.Env = processEnvironment (_context, nil)
+		} else {
+			// FIXME:  Handle this!
+			// _command.Env = []string {}
+		}
 	}
 	
 	if _exitCode, _, _outputsCount, _error := processExecuteAndPipe (_command, _inputsChannel, _outputsChannel); _error == nil {
@@ -105,8 +180,17 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 					return errorf (0xef9908df, "failed")
 			}
 		} else {
-			if _exitCode != 0 {
-				return errorf (0xb156b11d, "failed")
+			switch _exitCode {
+				case 0 :
+					if _outputsCount == 0 {
+						return errorf (0x4e0abce6, "invalid outputs")
+					}
+				case 1 :
+					if _outputsCount != 0 {
+						return errorf (0x6ad0fdcd, "invalid outputs")
+					}
+				default :
+					return errorf (0xb156b11d, "failed")
 			}
 		}
 	} else {

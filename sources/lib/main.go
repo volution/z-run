@@ -360,18 +360,33 @@ func Main () () {
 	}
 	
 	_argument0 := os.Args[0]
+	
+	if strings.HasPrefix (_argument0, "[z-run:menu] ") {
+		_argument0 = "[z-run:menu]"
+	}
 	if strings.HasPrefix (_argument0, "[z-run:select] ") {
 		_argument0 = "[z-run:select]"
 	}
+	
 	switch _argument0 {
+		
+		case "[z-run:menu]" :
+			if _error := menuMain (); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x6b21e0ab)
+			}
+		
 		case "[z-run:select]" :
-			if _error := fzfSelectMain (); _error != nil {
+			if _error := fzfMain (); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0x2346ca3f)
 			}
+		
 		case "[z-run]" :
 			// NOP
+		
 		default :
 			_arguments := os.Args
 			_arguments[0] = "[z-run]"
