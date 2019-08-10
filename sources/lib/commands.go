@@ -236,27 +236,41 @@ func doSelectExecute_0 (_library LibraryStore, _label string, _context *Context)
 		if _scriptlet != nil {
 			if _scriptlet.Kind == "menu" {
 				for {
-					if _, _outputData, _error := loadFromScriptlet (_library, "", _scriptlet, _context); _error == nil {
-						_outputText := string (_outputData)
-						_outputText = strings.TrimSpace (_outputText)
-						var _outputLines []string
-						if _outputText != "" {
-							_outputLines = strings.Split (_outputText, "\n")
-						}
-						if len (_outputLines) == 0 {
-							return nil
-						} else if len (_outputLines) == 1 {
-							_outputLabel := strings.TrimSpace (_outputLines[0])
-							if _error := doSelectExecute_0 (_library, _outputLabel, _context); _error == nil {
-								continue
-							} else {
-								return _error
+					var _outputLines []string
+					if _scriptlet.Interpreter != "<menu>" {
+						if _, _outputData, _error := loadFromScriptlet (_library, "", _scriptlet, _context); _error == nil {
+							_outputText := string (_outputData)
+							_outputText = strings.TrimSpace (_outputText)
+							if _outputText != "" {
+								_outputLines = strings.Split (_outputText, "\n")
 							}
 						} else {
-							return errorf (0xc8e9bf9b, "invalid output")
+							return _error
 						}
 					} else {
-						return _error
+						_inputLines := strings.Split (_scriptlet.Body, "\n")
+						if len (_inputLines) > 0 {
+							if _inputLines[len (_inputLines) - 1] == "" {
+								_inputLines = _inputLines[: len (_inputLines) - 1]
+							}
+						}
+						if _outputLines_0, _error := menuSelect (_inputLines, _context); _error == nil {
+							_outputLines = _outputLines_0
+						} else {
+							return _error
+						}
+					}
+					if len (_outputLines) == 0 {
+						return nil
+					} else if len (_outputLines) == 1 {
+						_outputLabel := strings.TrimSpace (_outputLines[0])
+						if _error := doSelectExecute_0 (_library, _outputLabel, _context); _error == nil {
+							continue
+						} else {
+							return _error
+						}
+					} else {
+						return errorf (0xc8e9bf9b, "invalid output")
 					}
 				}
 			} else {
