@@ -32,6 +32,9 @@
 ::&&.. hello / included (print) :: ./hello.txt
 
 
+--::.. hello / hidden :: hello world!
+
+
 && ./comments.z-run
 && ./generators.z-run
 && ./menus.z-run

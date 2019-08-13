@@ -1,7 +1,7 @@
 #!/dev/null
 
 
-<<++ generator / 1
+<<== generator / 1
 	test "${#}" -eq 0
 	cat <<'EOS'
 	
@@ -15,11 +15,11 @@
 !!
 
 
-<<++ generator / 2
+<<== generator / 2
 	test "${#}" -eq 0
 	cat <<'EOS'
 	
-	<<++ generator / 3
+	<<== generator / 3
 		cat <<'EOS'
 		
 		:: generated / 3 / a :: printf -- '3-a\n'
@@ -31,7 +31,7 @@
 !!
 
 
-<<++ generator / 4
+<<== generator / 4
 	test "${#}" -eq 0
 	for x in a b c d e f ; do
 		printf -- ':: generated / 4 / %s :: printf -- %q\n' "${x}" "4-${x}\n"
@@ -39,5 +39,5 @@
 !!
 
 
-::++ generator / 5 :: printf -- ':: generated / 5 :: printf -- %q\n' "5\n"
+::== generator / 5 :: printf -- ':: generated / 5 :: printf -- %q\n' "5\n"
 

@@ -3,11 +3,13 @@
 
 
 
+::// *
+
 ::// do / run / ...
 ::// do / use / ...
 
-::// go / build / ...
 ::// go / execute / ...
+::// go / build / ...
 ::// go / dependencies / ...
 
 ::// workspace / ...
@@ -15,7 +17,7 @@
 
 
 
-<< workspace / deploy
+++<< workspace / deploy
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
 	cp -f -- ./.outputs/main-release.elf "${HOME}/.bin/z-run-0"

@@ -90,7 +90,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		for _index, _scriptlet := range _library.Scriptlets {
 			_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = uint (_index)
 			_library.ScriptletsByLabel[_scriptlet.Label] = uint (_index)
-			if !_scriptlet.Hidden {
+			if !_scriptlet.Hidden || _scriptlet.Visible {
 				_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
 			}
 		}
@@ -238,6 +238,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 		interpreter string
 		disabled bool
 		hidden bool
+		visible bool
 		body string
 		bodyBuffer strings.Builder
 		bodyStrip string
@@ -287,6 +288,16 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_lineTrimmed = _lineTrimmed[2:]
 					_disabled = true
 				}
+				_visible := false
+				if strings.HasPrefix (_lineTrimmed, "++") && (_lineTrimmed != "++") {
+					_lineTrimmed = _lineTrimmed[2:]
+					_visible = true
+				}
+				_hidden := false
+				if strings.HasPrefix (_lineTrimmed, "--") && (_lineTrimmed != "--") {
+					_lineTrimmed = _lineTrimmed[2:]
+					_hidden = true
+				}
 				
 				if _lineTrimmed == "" {
 					// NOP
@@ -297,7 +308,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						strings.HasPrefix (_lineTrimmed, "::~~.. ") ||
 						strings.HasPrefix (_lineTrimmed, "::&& ") ||
 						strings.HasPrefix (_lineTrimmed, "::&&.. ") ||
-						strings.HasPrefix (_lineTrimmed, "::++ ") ||
+						strings.HasPrefix (_lineTrimmed, "::== ") ||
 						strings.HasPrefix (_lineTrimmed, "::// ") {
 					
 					_prefix := _lineTrimmed[: strings.IndexByte (_lineTrimmed, ' ')]
@@ -326,7 +337,6 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					
 					_kind := ""
 					_interpreter := ""
-					_hidden := false
 					_include := false
 					switch _prefix[2:] {
 						case "" :
@@ -341,7 +351,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						case "~~.." :
 							_kind = "replacer"
 							_interpreter = "<print>"
-						case "++" :
+						case "==" :
 							_kind = "generator"
 							_interpreter = "<shell>"
 							_hidden = true
@@ -396,6 +406,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							kind : _kind,
 							interpreter : _interpreter,
 							disabled : _disabled,
+							visible : _visible,
 							hidden : _hidden,
 							body : _body,
 							lineStart : _lineIndex,
@@ -408,7 +419,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						strings.HasPrefix (_lineTrimmed, "<<.. ") ||
 						strings.HasPrefix (_lineTrimmed, "<<~~ ") ||
 						strings.HasPrefix (_lineTrimmed, "<<~~.. ") ||
-						strings.HasPrefix (_lineTrimmed, "<<++ ") {
+						strings.HasPrefix (_lineTrimmed, "<<== ") {
 					
 					_prefix := _lineTrimmed[: strings.IndexByte (_lineTrimmed, ' ')]
 					_label := ""
@@ -423,7 +434,6 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					
 					_kind := ""
 					_interpreter := ""
-					_hidden := false
 					switch _prefix[2:] {
 						case "" :
 							_kind = "executable"
@@ -437,7 +447,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						case "~~.." :
 							_kind = "replacer"
 							_interpreter = "<print>"
-						case "++" :
+						case "==" :
 							_kind = "generator"
 							_interpreter = "<shell>"
 							_hidden = true
@@ -450,6 +460,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							kind : _kind,
 							interpreter : _interpreter,
 							disabled : _disabled,
+							visible : _visible,
 							hidden : _hidden,
 							lineStart : _lineIndex,
 						}
@@ -552,6 +563,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						Label : _scriptletState.label,
 						Kind : _scriptletState.kind,
 						Interpreter : _scriptletState.interpreter,
+						Visible : _scriptletState.visible,
 						Hidden : _scriptletState.hidden,
 						Body : _scriptletState.body,
 						Source : ScriptletSource {

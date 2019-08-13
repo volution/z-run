@@ -16,6 +16,7 @@ type Scriptlet struct {
 	Body string `json:"body,omitempty"`
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
+	Visible bool `json:"visible"`
 	Hidden bool `json:"hidden"`
 	Menus []string `json:"menus"`
 }
@@ -206,7 +207,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 	_library.Scriptlets = append (_library.Scriptlets, _scriptlet)
 	
 	_library.ScriptletFingerprints = append (_library.ScriptletFingerprints, _scriptlet.Fingerprint)
-	if !_scriptlet.Hidden {
+	if !_scriptlet.Hidden || _scriptlet.Visible {
 		_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
 	}
 	
