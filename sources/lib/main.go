@@ -108,6 +108,10 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					logf ('w', 0xdf61b057, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
 			}
 			
+		} else if _name == "_" {
+			
+			// NOTE:  For some reason `bash` always exports `_` containing the executable, thus we ignore it!
+			
 		} else {
 			_cleanEnvironment[_name] = _value
 		}
