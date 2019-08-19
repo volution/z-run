@@ -84,7 +84,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 				return _error
 			}
 			_fingerprints = append (_fingerprints, _fingerprint)
-			if !_meta.Hidden {
+			if !_meta.Hidden || _meta.Visible {
 				_labels = append (_labels, _label)
 			}
 			_fingerprintsByLabels[_label] = _fingerprint
