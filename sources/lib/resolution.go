@@ -113,6 +113,7 @@ func resolveSourcePath_1 () (string, os.FileInfo, error) {
 	_folders := make ([]string, 0, 128)
 	_folders = append (_folders,
 			".",
+			path.Join (".", "__"),
 			path.Join (".", ".git"),
 			path.Join (".", ".hg"),
 			path.Join (".", ".svn"),
