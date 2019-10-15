@@ -674,7 +674,7 @@ func loadFromScriptlet (_library LibraryStore, _interpreter string, _scriptlet *
 	
 	var _command *exec.Cmd
 	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_library, _interpreter, _scriptlet, _context); _error == nil {
+	if _command_0, _descriptors_0, _error := prepareExecution (_library, _interpreter, _scriptlet, false, _context); _error == nil {
 		_command = _command_0
 		_descriptors = _descriptors_0
 	} else {

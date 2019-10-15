@@ -140,7 +140,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 	
 	var _command *exec.Cmd
 	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_library, "", _scriptlet, _context); _error == nil {
+	if _command_0, _descriptors_0, _error := prepareExecution (_library, "", _scriptlet, true, _context); _error == nil {
 		_command = _command_0
 		_descriptors = _descriptors_0
 	} else {

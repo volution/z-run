@@ -12,7 +12,7 @@ import "syscall"
 
 
 
-func prepareExecution (_library LibraryStore, _interpreter string, _scriptlet *Scriptlet, _context *Context) (*exec.Cmd, []int, error) {
+func prepareExecution (_library LibraryStore, _interpreter string, _scriptlet *Scriptlet, _includeArguments bool, _context *Context) (*exec.Cmd, []int, error) {
 	
 	var _interpreterExecutable string
 	var _interpreterArguments []string = make ([]string, 0, len (_context.cleanArguments) + 16)
@@ -94,7 +94,10 @@ exec %d<&-
 		return nil, nil, _error
 	}
 	
-	_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
+	if _includeArguments {
+		_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
+	}
+	
 	_interpreterEnvironment := processEnvironment (_context, map[string]string {
 			"ZRUN_EXECUTABLE" : _context.selfExecutable,
 			"ZRUN_LIBRARY_CACHE" : _library.Url (),
