@@ -237,7 +237,7 @@ func includeSource (_library *Library, _source *Source) (error) {
 		if _existing.FingerprintMeta == _source.FingerprintMeta {
 			return errorf (0x310f6193, "invalid state")
 		}
-		if _existing.FingerprintData == _source.FingerprintData {
+		if (_existing.FingerprintData == _source.FingerprintData) && (_existing.FingerprintData != "") {
 			return errorf (0x00fb18a1, "invalid state %#v %#v", _existing, _source)
 		}
 	}
