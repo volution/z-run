@@ -13,6 +13,7 @@ type LibraryStore interface {
 	ResolveBodyByFingerprint (_label string) (string, bool, error)
 	
 	SelectLabels () ([]string, error)
+	SelectLabelsAll () ([]string, error)
 	ResolveFullByLabel (_label string) (*Scriptlet, error)
 	ResolveMetaByLabel (_label string) (*Scriptlet, error)
 	ResolveBodyByLabel (_label string) (string, bool, error)
@@ -63,6 +64,19 @@ func (_library *LibraryStoreInput) SelectLabels () ([]string, error) {
 			return _value, nil
 		} else {
 			return nil, errorf (0x64c3a996, "invalid store")
+		}
+	} else {
+		return nil, _error
+	}
+}
+
+func (_library *LibraryStoreInput) SelectLabelsAll () ([]string, error) {
+	var _value []string
+	if _found, _error := _library.store.Select ("scriptlets-indices", "labels-all", &_value); _error == nil {
+		if _found {
+			return _value, nil
+		} else {
+			return nil, errorf (0x4d9d3702, "invalid store")
 		}
 	} else {
 		return nil, _error

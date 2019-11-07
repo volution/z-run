@@ -38,6 +38,7 @@ type Library struct {
 	ScriptletsByFingerprint map[string]uint `json:"index_by_fingerprint"`
 	
 	ScriptletLabels []string `json:"labels"`
+	ScriptletLabelsAll []string `json:"labels"`
 	ScriptletsByLabel map[string]uint `json:"index_by_label"`
 	
 	Sources LibrarySources `json:"sources"`
@@ -66,6 +67,7 @@ func NewLibrary () (*Library) {
 			ScriptletFingerprints : make ([]string, 0, 1024),
 			ScriptletsByFingerprint : make (map[string]uint, 1024),
 			ScriptletLabels : make ([]string, 0, 1024),
+			ScriptletLabelsAll : make ([]string, 0, 1024),
 			ScriptletsByLabel : make (map[string]uint, 1024),
 		}
 }
@@ -77,6 +79,10 @@ func (_library *Library) SelectFingerprints () ([]string, error) {
 
 func (_library *Library) SelectLabels () ([]string, error) {
 	return _library.ScriptletLabels, nil
+}
+
+func (_library *Library) SelectLabelsAll () ([]string, error) {
+	return _library.ScriptletLabelsAll, nil
 }
 
 
@@ -207,6 +213,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 	_library.Scriptlets = append (_library.Scriptlets, _scriptlet)
 	
 	_library.ScriptletFingerprints = append (_library.ScriptletFingerprints, _scriptlet.Fingerprint)
+	_library.ScriptletLabelsAll = append (_library.ScriptletLabelsAll, _scriptlet.Label)
 	if !_scriptlet.Hidden || _scriptlet.Visible {
 		_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
 	}

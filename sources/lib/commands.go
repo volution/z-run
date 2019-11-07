@@ -16,7 +16,7 @@ import "syscall"
 
 
 func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
-	if _labels, _error := _library.SelectLabels (); _error == nil {
+	if _labels, _error := _library.SelectLabelsAll (); _error == nil {
 		_buffer := bytes.NewBuffer (nil)
 		for _, _label := range _labels {
 			_buffer.WriteString (_label)
@@ -57,6 +57,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	_fingerprints := make ([]string, 0, 1024)
 	_fingerprintsByLabels := make (map[string]string, 1024)
 	_labels := make ([]string, 0, 1024)
+	_labelsAll := make ([]string, 0, 1024)
 	_labelsByFingerprints := make (map[string]string, 1024)
 	
 	var _fingerprintsFromStore []string
@@ -84,6 +85,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 				return _error
 			}
 			_fingerprints = append (_fingerprints, _fingerprint)
+			_labelsAll = append (_labelsAll, _label)
 			if !_meta.Hidden || _meta.Visible {
 				_labels = append (_labels, _label)
 			}
@@ -103,6 +105,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	
 	sort.Strings (_fingerprints)
 	sort.Strings (_labels)
+	sort.Strings (_labelsAll)
 	
 	if _error := _store.Include ("scriptlets-indices", "fingerprints", _fingerprints); _error != nil {
 		return _error
@@ -111,6 +114,9 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 		return _error
 	}
 	if _error := _store.Include ("scriptlets-indices", "labels", _labels); _error != nil {
+		return _error
+	}
+	if _error := _store.Include ("scriptlets-indices", "labels-all", _labelsAll); _error != nil {
 		return _error
 	}
 	if _error := _store.Include ("scriptlets-indices", "fingerprints-by-labels", _fingerprintsByLabels); _error != nil {
