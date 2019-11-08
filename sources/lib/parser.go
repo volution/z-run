@@ -9,6 +9,7 @@ import "os"
 import "os/exec"
 import "path"
 import "path/filepath"
+import "regexp"
 import "sort"
 import "strings"
 import "unicode"
@@ -136,6 +137,7 @@ func parseFromReplacer (_library *Library, _source *Scriptlet, _context *Context
 func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (error) {
 	_labels := make ([]string, 0, 1024)
 	_matchers := strings.Split (_source.Body, "\n")
+	_scriptlets := make ([]*Scriptlet, 0, len (_library.Scriptlets))
 	for _, _scriptlet := range _library.Scriptlets {
 		if _scriptlet == _source {
 			continue
@@ -143,21 +145,38 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (e
 		if _scriptlet.Hidden {
 			continue
 		}
-		for _, _matcher := range _matchers {
-			if _matcher == "" {
-				continue
-			}
-			if _matcher == "*" {
+		_scriptlets = append (_scriptlets, _scriptlet)
+	}
+	for _, _matcher := range _matchers {
+		if _matcher == "" {
+			continue
+		} else if _matcher == "*" {
+			for _, _scriptlet := range _scriptlets {
 				_labels = append (_labels, _scriptlet.Label)
-			} else if strings.HasPrefix (_matcher, "+^ ") {
-				_pattern := _matcher[3:]
+			}
+		} else if strings.HasPrefix (_matcher, "+^ ") {
+			_pattern := _matcher[3:]
+			for _, _scriptlet := range _scriptlets {
 				if strings.HasPrefix (_scriptlet.Label, _pattern) {
 					_labels = append (_labels, _scriptlet.Label)
 					_scriptlet.Menus = append (_scriptlet.Menus, _source.Label)
 				}
-			} else {
-				return errorf (0xa068e934, "invalid menu matcher `%s`", _matcher)
 			}
+		} else if strings.HasPrefix (_matcher, "~ ") {
+			var _pattern *regexp.Regexp
+			if _pattern_0, _error := regexp.Compile (_matcher[2:]); _error == nil {
+				_pattern = _pattern_0
+			} else {
+				return errorf (0xabf68b41, "invalid menu matcher `%s`", _matcher)
+			}
+			for _, _scriptlet := range _scriptlets {
+				if _pattern.MatchString (_scriptlet.Label) {
+					_labels = append (_labels, _scriptlet.Label)
+					_scriptlet.Menus = append (_scriptlet.Menus, _source.Label)
+				}
+			}
+		} else {
+			return errorf (0xa068e934, "invalid menu matcher `%s`", _matcher)
 		}
 	}
 	sort.Strings (_labels)
