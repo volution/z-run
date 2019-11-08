@@ -172,6 +172,9 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (e
 		_previousLabel = _label
 	}
 	_source.Body = _buffer.String ()
+	if len (_labels) == 0 {
+		_source.Hidden = true
+	}
 	return nil
 }
 
