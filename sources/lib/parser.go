@@ -644,7 +644,7 @@ func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (s
 			if _executable_0, _error := filepath.Abs (_executable); _error == nil {
 				_executable = _executable_0
 			} else {
-				return "", nil, _error
+				return "", nil, errorw (0x5d248eeb, _error)
 			}
 		}
 		
@@ -677,7 +677,7 @@ func loadFromFile (_path string) (string, []byte, *Error) {
 		defer _stream.Close ()
 		return loadFromStream (_stream)
 	} else {
-		return "", nil, _error
+		return "", nil, errorw (0xe1528040, _error)
 	}
 }
 
@@ -687,7 +687,7 @@ func loadFromStream (_stream io.Reader) (string, []byte, *Error) {
 		_fingerprint := NewFingerprinter () .Bytes (_data) .Build ()
 		return _fingerprint, _data, nil
 	} else {
-		return "", nil, _error
+		return "", nil, errorw (0x42be0790, _error)
 	}
 }
 

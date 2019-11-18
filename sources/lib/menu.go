@@ -36,7 +36,7 @@ func menuMain () (*Error) {
 					errorf (0x1f57b1db, "expected proper line")
 				}
 			} else {
-				return _error
+				return errorw (0x3dd692c8, _error)
 			}
 		}
 	}
@@ -53,7 +53,7 @@ func menuMain () (*Error) {
 	if _outputs, _error := menuSelect (_inputs, _context); _error == nil {
 		for _, _output := range _outputs {
 			if _, _error := io.WriteString (os.Stdout, _output + "\n"); _error != nil {
-				return _error
+				return errorw (0xeb4af0b7, _error)
 			}
 		}
 		os.Exit (0)

@@ -24,7 +24,7 @@ func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context
 			_buffer.WriteByte ('\n')
 		}
 		_, _error := _stream.Write (_buffer.Bytes ())
-		return _error
+		return errorw (0x1215e523, _error)
 	} else {
 		return _error
 	}
@@ -41,7 +41,11 @@ func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Co
 	_encoder := json.NewEncoder (_stream)
 	_encoder.SetIndent ("", "    ")
 	_encoder.SetEscapeHTML (false)
-	return _encoder.Encode (_library)
+	if _error := _encoder.Encode (_library); _error == nil {
+		return nil
+	} else {
+		return errorw (0xb3a1eb99, _error)
+	}
 }
 
 
@@ -162,7 +166,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 	
 	if _command.Dir != "" {
 		if _error := os.Chdir (_command.Dir); _error != nil {
-			return errorf (0xe4bab179, "invalid state;  chdir failed:  %s", _error)
+			return errorw (0xe4bab179, _error)
 		}
 	}
 	if _command.Stdin != nil {
@@ -188,7 +192,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 	
 	if _error := syscall.Exec (_command.Path, _command.Args, _command.Env); _error != nil {
 		_closeDescriptors ()
-		return _error
+		return errorw (0x99b54af1, _error)
 	} else {
 		panic (0xb6dfe17e)
 	}
@@ -210,7 +214,7 @@ func doHandleExportScriptletLabel (_library LibraryStore, _scriptlet *Scriptlet,
 	if _, _error := fmt.Fprintf (_stream, "%s\n", _scriptlet.Label); _error == nil {
 		return true, nil
 	} else {
-		return false, _error
+		return false, errorw (0x75e2481b, _error)
 	}
 }
 
@@ -221,7 +225,7 @@ func doHandleExportScriptletBody (_library LibraryStore, _scriptlet *Scriptlet, 
 			if _, _error := io.WriteString (_stream, _body); _error == nil {
 				return true, nil
 			} else {
-				return false, _error
+				return false, errorw (0x313551b7, _error)
 			}
 		} else {
 			return false, errorf (0x95e0b174, "undefined scriptlet body `%s`", _scriptlet.Label)
@@ -236,7 +240,7 @@ func doHandleExportScriptletLegacy (_library LibraryStore, _scriptlet *Scriptlet
 	if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error == nil {
 		return true, nil
 	} else {
-		return false, _error
+		return false, errorw (0x1827808c, _error)
 	}
 }
 
@@ -408,7 +412,7 @@ func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context)
 	if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
 		if _label != "" {
 			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
-				return _error
+				return errorw (0x0b7f5d09, _error)
 			}
 		} else {
 			return nil
@@ -424,7 +428,7 @@ func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context
 		if len (_labels) != 0 {
 			for _, _label := range _labels {
 				if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
-					return _error
+					return errorw (0x7f0c1122, _error)
 				}
 			}
 		} else {

@@ -236,7 +236,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		if _path, _error := os.Getwd (); _error == nil {
 			_workspace = _path
 		} else {
-			return _error
+			return errorw (0x69daa060, _error)
 		}
 		var _insideVcs bool
 		for _, _subfolder := range resolveWorkspaceSubfolders {
@@ -246,21 +246,21 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			} else if os.IsNotExist (_error) {
 				// NOP
 			} else {
-				return _error
+				return errorw (0x43bc330c, _error)
 			}
 		}
 		if !_insideVcs {
 			if _home, _error := os.UserHomeDir (); _error == nil {
 				_libraryLookupPaths = append (_libraryLookupPaths, _home)
 			} else {
-				return _error
+				return errorw (0x3884b718, _error)
 			}
 		}
 	}
 	if _path, _error := filepath.Abs (_workspace); _error == nil {
 		_workspace = _path
 	} else {
-		return _error
+		return errorw (0x9f5c1d2a, _error)
 	}
 	
 	if _terminal == "" {
@@ -424,7 +424,7 @@ func Main () () {
 	if _executable_0, _error := os.Executable (); _error == nil {
 		_executable = _executable_0
 	} else {
-		panic (abortError (_error))
+		panic (abortError (errorw (0x75f2db30, _error)))
 	}
 	
 	_argument0 := os.Args[0]
@@ -460,7 +460,7 @@ func Main () () {
 			_arguments[0] = "[z-run]"
 			_environment := os.Environ ()
 			if _error := syscall.Exec (_executable, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (abortError (errorw (0x05bd220d, _error)))
 			} else {
 				panic (0xe13aab5f)
 			}

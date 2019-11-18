@@ -52,7 +52,7 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 			// defer _stream.Close ()
 			_stdin = _stream
 		} else {
-			return -1, 0, 0, _error
+			return -1, 0, 0, errorw (0xb3c4228d, _error)
 		}
 	}
 	
@@ -63,17 +63,17 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 			// defer _stream.Close ()
 			_stdout = _stream
 		} else {
-			return -1, 0, 0, _error
+			return -1, 0, 0, errorw (0x1067469f, _error)
 		}
 	}
 	
 	if _error := _command.Start (); _error != nil {
-		return -1, 0, 0, _error
+		return -1, 0, 0, errorw (0x26e1988c, _error)
 	}
 	
 	_waiter := & sync.WaitGroup {}
 	
-	var _stdinError error
+	var _stdinError *Error
 	var _inputsCount uint
 	if _inputsChannel != nil {
 		_waiter.Add (1)
@@ -88,7 +88,7 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 					_buffer.WriteString (_input)
 					_buffer.WriteByte ('\n')
 					if _, _error := _buffer.WriteTo (_stdin); _error != nil {
-						_stdinError = _error
+						_stdinError = errorw (0xb5ca9a1c, _error)
 						break
 					}
 					_inputsCount += 1
@@ -97,14 +97,14 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 				}
 			}
 			if _error := _stdin.Close (); _error != nil {
-				_stdinError = _error
+				_stdinError = errorw (0x7e9a4f14, _error)
 			}
 //			logf ('d', 0xc6eca1ca, "ending stdin loop")
 			_waiter.Done ()
 		} ()
 	}
 	
-	var _stdoutError error
+	var _stdoutError *Error
 	var _outputsCount uint
 	if _outputsChannel != nil {
 		_waiter.Add (1)
@@ -124,22 +124,22 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 						_stdoutError = errorf (0x1bc14ac4, "expected proper line")
 					}
 				} else {
-					_stdoutError = _error
+					_stdoutError = errorw (0xb783c8c4, _error)
 					break
 				}
 			}
 			if _error := _stdout.Close (); _error != nil {
-				_stdoutError = _error
+				_stdoutError = errorw (0xf185ae2a, _error)
 			}
 //			logf ('d', 0x90515c65, "ending stdout loop")
 			_waiter.Done ()
 		} ()
 	}
 	
-	var _waitError error
+	var _waitError *Error
 //	logf ('d', 0x7ce5281a, "starting wait")
 	if _error := _command.Wait (); _error != nil {
-		_waitError = _error
+		_waitError = errorw (0x6f9dfa7d, _error)
 	}
 //	logf ('d', 0xa36df40d, "ending wait")
 	
@@ -188,10 +188,10 @@ func processExecuteGetStdout (_command *exec.Cmd) (int, []byte, *Error) {
 			if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
 				return _exitCode, _stdout.Bytes (), nil
 			} else {
-				return -1, _stdout.Bytes (), _waitError
+				return -1, _stdout.Bytes (), errorw (0xc8553b48, _waitError)
 			}
 		} else {
-			return -1, nil, _waitError
+			return -1, nil, errorw (0x4b785e1d, _waitError)
 		}
 	} else {
 		return 0, _stdout.Bytes (), nil

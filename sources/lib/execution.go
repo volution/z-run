@@ -24,7 +24,7 @@ func prepareExecution (_library LibraryStore, _interpreter string, _scriptlet *S
 		_interpreterScriptInput = _interpreterScriptDescriptors[0]
 		_interpreterScriptOutput = os.NewFile (uintptr (_interpreterScriptDescriptors[1]), "")
 	} else {
-		return nil, nil, _error
+		return nil, nil, errorw (0xece645ff, _error)
 	}
 	
 	_interpreterScriptBuffer := bytes.NewBuffer (nil)
@@ -91,7 +91,7 @@ exec %d<&-
 	} else {
 		syscall.Close (_interpreterScriptInput)
 		_interpreterScriptOutput.Close ()
-		return nil, nil, _error
+		return nil, nil, errorw (0xf789ed3f, _error)
 	}
 	
 	if _includeArguments {

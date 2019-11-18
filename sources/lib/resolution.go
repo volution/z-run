@@ -85,7 +85,7 @@ func fingerprintSource_0 (_path string) (string, *Error) {
 	if _stat, _error := os.Stat (_path); _error == nil {
 		return fingerprintSource_1 (_path, _stat), nil
 	} else {
-		return "", _error
+		return "", errorw (0x375f2514, _error)
 	}
 }
 
@@ -155,7 +155,7 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 			} else if os.IsNotExist (_error) {
 				// NOP
 			} else {
-				return "", nil, _error
+				return "", nil, errorw (0x49b2b24c, _error)
 			}
 		}
 	}
@@ -175,12 +175,12 @@ func resolveSourcePath_2 (_path string) (string, os.FileInfo, *Error) {
 		if _path, _error := filepath.Abs (_path); _error == nil {
 			return _path, _stat, nil
 		} else {
-			return "", nil, _error
+			return "", nil, errorw (0x53c05222, _error)
 		}
 	} else if os.IsNotExist (_error) {
 		return "", nil, errorf (0x4b0005de, "source does not exist `%s`", _path)
 	} else {
-		return "", nil, _error
+		return "", nil, errorw (0x43066170, _error)
 	}
 }
 
@@ -192,14 +192,14 @@ func resolveCache () (string, *Error) {
 	if _cache_0, _error := os.UserCacheDir (); _error == nil {
 		_cache = _cache_0
 	} else {
-		return "", _error
+		return "", errorw (0x4d666a7f, _error)
 	}
 	if _error := os.MkdirAll (_cache, 0750); _error != nil {
-		return "", _error
+		return "", errorw (0xf214ed44, _error)
 	}
 	_cache = path.Join (_cache, "z-run")
 	if _error := os.MkdirAll (_cache, 0750); _error != nil {
-		return "", _error
+		return "", errorw (0xa66a0341, _error)
 	}
 	return _cache, nil
 }
@@ -251,7 +251,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 				_library.Close ()
 				return nil, _error
 			}
-		} else if ! os.IsNotExist (_error) {
+		} else if (_error.error != nil) && ! os.IsNotExist (_error.error) {
 			return nil, _error
 		}
 	}
@@ -311,7 +311,7 @@ func checkLibraryCached (_library LibraryStore) (bool, *Error) {
 		} else if os.IsNotExist (_error) {
 			return false, nil
 		} else {
-			return false, _error
+			return false, errorw (0x0f7764d9, _error)
 		}
 	}
 	return true, nil

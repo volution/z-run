@@ -42,13 +42,19 @@ func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _v
 			Key : _key,
 			Value : _value,
 		}
-	return _store.encoder.Encode (_record)
+	if _error := _store.encoder.Encode (_record); _error == nil {
+		return nil
+	} else {
+		return errorw (0x5435f95a, _error)
+	}
 }
 
 func (_store *JsonStreamStoreOutput) Commit () (*Error) {
-	var _error error
+	var _error *Error
 	if _store.closer != nil {
-		_error = _store.closer.Close ()
+		if _error_0 := _store.closer.Close (); _error_0 != nil {
+			_error = errorw (0x9f5565fc, _error_0)
+		}
 	}
 	_store.stream = nil
 	_store.closer = nil

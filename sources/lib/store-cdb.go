@@ -30,10 +30,10 @@ func NewCdbStoreInput (_path string) (*CdbStoreInput, *Error) {
 				}
 			return _store, nil
 		} else {
-			return nil, _error
+			return nil, errorw (0xb4697ac2, _error)
 		}
 	} else {
-		return nil, _error
+		return nil, errorw (0x9566422e, _error)
 	}
 }
 
@@ -49,7 +49,7 @@ func (_store *CdbStoreInput) Select (_namespace string, _key string, _value inte
 	if _valueData_0, _error := _store.reader.Get (_keyBuffer.Bytes ()); _error == nil {
 		_valueData = _valueData_0
 	} else {
-		return false, _error
+		return false, errorw (0x811cd704, _error)
 	}
 	
 	if _valueData == nil {
@@ -71,7 +71,7 @@ func (_store *CdbStoreInput) Select (_namespace string, _key string, _value inte
 			*_value = string (_valueData)
 		default :
 			if _error := json.Unmarshal (_valueData, _value); _error != nil {
-				return false, _error
+				return false, errorw (0x8ebfc830, _error)
 			}
 	}
 	
@@ -82,7 +82,7 @@ func (_store *CdbStoreInput) Select (_namespace string, _key string, _value inte
 func (_store *CdbStoreInput) Close () (*Error) {
 	if _error := _store.reader.Close (); _error == nil {
 		_store.reader = nil
-		return _error
+		return errorw (0x10dd4299, _error)
 	} else {
 		return nil
 	}
@@ -112,7 +112,7 @@ func NewCdbStoreOutput (_path string) (*CdbStoreOutput, *Error) {
 			}
 		return _store, nil
 	} else {
-		return nil, _error
+		return nil, errorw (0x064e6aec, _error)
 	}
 }
 
@@ -136,20 +136,24 @@ func (_store *CdbStoreOutput) Include (_namespace string, _key string, _value in
 			_valueBuffer.WriteString (*_value)
 		default :
 			if _error := json.NewEncoder (_valueBuffer) .Encode (_value); _error != nil {
-				return _error
+				return errorw (0x02600262, _error)
 			}
 	}
 	
-	return _store.writer.Put (_keyBuffer.Bytes (), _valueBuffer.Bytes ())
+	if _error := _store.writer.Put (_keyBuffer.Bytes (), _valueBuffer.Bytes ()); _error == nil {
+		return nil
+	} else {
+		return errorw (0x28b9a333, _error)
+	}
 }
 
 func (_store *CdbStoreOutput) Commit () (*Error) {
 	if _error := _store.writer.Close (); _error != nil {
-		return _error
+		return errorw (0xfc3f2b2b, _error)
 	}
 	_store.writer = nil
 	if _error := os.Rename (_store.pathTemporary, _store.pathFinal); _error != nil {
-		return _error
+		return errorw (0x62423da2, _error)
 	}
 	return nil
 }
