@@ -129,6 +129,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			if strings.HasPrefix (_argument, "--library-source=") {
 				_librarySourcePath = _argument[len ("--library-source="):]
+				_libraryCachePath = ""
 			} else if strings.HasPrefix (_argument, "--library-cache=") {
 				_libraryCachePath = _argument[len ("--library-cache="):]
 			} else {
