@@ -136,14 +136,14 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 		} ()
 	}
 	
+	_waiter.Wait ()
+	
 	var _waitError *Error
 //	logf ('d', 0x7ce5281a, "starting wait")
 	if _error := _command.Wait (); _error != nil {
 		_waitError = errorw (0x6f9dfa7d, _error)
 	}
 //	logf ('d', 0xa36df40d, "ending wait")
-	
-	_waiter.Wait ()
 	
 	if _stdinError != nil {
 		return -1, 0, 0, _stdinError
