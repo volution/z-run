@@ -11,11 +11,11 @@ import "sort"
 
 
 
-func resolveSources (_candidate string) ([]*Source, error) {
+func resolveSources (_candidate string, _workspace string, _lookupPaths []string) ([]*Source, error) {
 	
 	_sources := make ([]*Source, 0, 128)
 	
-	_path, _stat, _error := resolveSourcePath_0 (_candidate)
+	_path, _stat, _error := resolveSourcePath_0 (_candidate, _workspace, _lookupPaths)
 	if _error != nil {
 		return nil, _error
 	}
@@ -41,8 +41,8 @@ func resolveSources (_candidate string) ([]*Source, error) {
 }
 
 
-func resolveSource (_candidate string) (*Source, error) {
-	if _path, _stat, _error := resolveSourcePath_0 (_candidate); _error == nil {
+func resolveSource (_candidate string, _workspace string, _lookupPaths []string) (*Source, error) {
+	if _path, _stat, _error := resolveSourcePath_0 (_candidate, _workspace, _lookupPaths); _error == nil {
 		return resolveSource_0 (_path, _stat)
 	} else {
 		return nil, _error
@@ -97,34 +97,38 @@ func fingerprintSource_1 (_path string, _stat os.FileInfo) (string) {
 
 
 
-func resolveSourcePath_0 (_candidate string) (string, os.FileInfo, error) {
+func resolveSourcePath_0 (_candidate string, _workspace string, _lookupPaths []string) (string, os.FileInfo, error) {
 	if _candidate != "" {
 //		logf ('d', 0x16563f01, "using candidate `%s`...", _candidate)
 		return resolveSourcePath_2 (_candidate)
 	} else {
 //		logf ('d', 0xef5420f5, "searching candidate...")
-		return resolveSourcePath_1 ()
+		return resolveSourcePath_1 (_workspace, _lookupPaths)
 	}
 }
 
 
-func resolveSourcePath_1 () (string, os.FileInfo, error) {
+func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.FileInfo, error) {
 	
-	_folders := make ([]string, 0, 128)
-	_folders = append (_folders,
-			".",
-			path.Join (".", "__"),
-			path.Join (".", ".git"),
-			path.Join (".", ".hg"),
-			path.Join (".", ".svn"),
-		)
-	for _, _folder := range _folders {
-		_folders = append (_folders, path.Join (_folder, "scripts"))
+	type folder struct {
+		path string
+		fallback bool
 	}
-	var _home string
-	if _home_0, _error := os.UserHomeDir (); _error == nil {
-		_home = _home_0
-		_folders = append (_folders, _home)
+	
+	_folders := make ([]folder, 0, 128)
+	
+	if _workspace != "" {
+		_folders = append (_folders, folder { _workspace, false })
+		for _, _subfolder := range resolveWorkspaceSubfolders {
+			_folders = append (_folders, folder { path.Join (_workspace, _subfolder), false })
+		}
+		for _, _folder := range _folders {
+			_folders = append (_folders, folder { path.Join (_folder.path, "scripts"), _folder.fallback })
+		}
+	}
+	
+	for _, _lookupPath := range _lookupPaths {
+		_folders = append (_folders, folder { _lookupPath, true })
 	}
 	
 	_files := []string {
@@ -141,11 +145,11 @@ func resolveSourcePath_1 () (string, os.FileInfo, error) {
 	_candidates := make ([]string, 0, 16)
 	
 	for _, _folder := range _folders {
-		if (_folder == _home) && (len (_candidates) > 0) {
+		if _folder.fallback && (len (_candidates) > 0) {
 			continue
 		}
 		for _, _file := range _files {
-			_path := path.Join (_folder, _file)
+			_path := path.Join (_folder.path, _file)
 			if _, _error := os.Lstat (_path); _error == nil {
 				_candidates = append (_candidates, _path)
 			} else if os.IsNotExist (_error) {
@@ -203,9 +207,9 @@ func resolveCache () (string, error) {
 
 
 
-func resolveLibrary (_candidate string, _context *Context) (LibraryStore, error) {
+func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string) (LibraryStore, error) {
 	
-	_sources, _error := resolveSources (_candidate)
+	_sources, _error := resolveSources (_candidate, _context.workspace, _lookupPaths)
 	if _error != nil {
 		return nil, _error
 	}
@@ -312,4 +316,14 @@ func checkLibraryCached (_library LibraryStore) (bool, error) {
 	}
 	return true, nil
 }
+
+
+var resolveWorkspaceSubfolders = []string {
+		"__",
+		".git",
+		".hg",
+		".svn",
+		".bzr",
+		".darcs",
+	}
 

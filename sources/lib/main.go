@@ -5,6 +5,7 @@ package zrun
 
 import "log"
 import "os"
+import "path"
 import "path/filepath"
 import "strings"
 import "syscall"
@@ -38,6 +39,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	var _librarySourcePath string
 	var _libraryCachePath string
+	var _libraryLookupPaths []string = make ([]string, 0, 128)
 	
 	var _cleanArguments []string
 	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
@@ -77,6 +79,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					_librarySourcePath = _value
 				case "ZRUN_LIBRARY_CACHE" :
 					_libraryCachePath = _value
+				case "ZRUN_WORKSPACE" :
+					_workspace = _value
 				case "ZRUN_EXECUTABLE" :
 					if _executable != _value {
 						logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
@@ -132,6 +136,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				_libraryCachePath = ""
 			} else if strings.HasPrefix (_argument, "--library-cache=") {
 				_libraryCachePath = _argument[len ("--library-cache="):]
+			} else if strings.HasPrefix (_argument, "--workspace=") {
+				_workspace = _argument[len ("--workspace="):]
 			} else {
 				return errorf (0x33555ffb, "invalid argument `%s`", _argument)
 			}
@@ -228,14 +234,33 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	if _workspace == "" {
 		if _path, _error := os.Getwd (); _error == nil {
-			if _path, _error := filepath.Abs (_path); _error == nil {
-				_workspace = _path
-			} else {
-				return _error
-			}
+			_workspace = _path
 		} else {
 			return _error
 		}
+		var _insideVcs bool
+		for _, _subfolder := range resolveWorkspaceSubfolders {
+			if _, _error := os.Lstat (path.Join (_workspace, _subfolder)); _error == nil {
+				_insideVcs = true
+				break
+			} else if os.IsNotExist (_error) {
+				// NOP
+			} else {
+				return _error
+			}
+		}
+		if !_insideVcs {
+			if _home, _error := os.UserHomeDir (); _error == nil {
+				_libraryLookupPaths = append (_libraryLookupPaths, _home)
+			} else {
+				return _error
+			}
+		}
+	}
+	if _path, _error := filepath.Abs (_workspace); _error == nil {
+		_workspace = _path
+	} else {
+		return _error
 	}
 	
 	if _terminal == "" {
@@ -272,7 +297,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			return _error
 		}
 	} else {
-		if _library_0, _error := resolveLibrary (_librarySourcePath, _context); _error == nil {
+		if _library_0, _error := resolveLibrary (_librarySourcePath, _context, _libraryLookupPaths); _error == nil {
 			_library = _library_0
 		} else {
 			return _error
