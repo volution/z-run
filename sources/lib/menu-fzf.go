@@ -13,7 +13,7 @@ import isatty "github.com/mattn/go-isatty"
 
 
 
-func fzfMain () (error) {
+func fzfMain () (*Error) {
 	
 	if len (os.Args) != 1 {
 		return errorf (0x68f8e127, "invalid arguments")

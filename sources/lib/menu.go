@@ -15,7 +15,7 @@ import isatty "github.com/mattn/go-isatty"
 
 
 
-func menuMain () (error) {
+func menuMain () (*Error) {
 	
 	if len (os.Args) != 2 {
 		return errorf (0x6b439ede, "invalid arguments")
@@ -66,7 +66,7 @@ func menuMain () (error) {
 
 
 
-func menuSelect (_inputs []string, _context *Context) ([]string, error) {
+func menuSelect (_inputs []string, _context *Context) ([]string, *Error) {
 	
 	_inputsChannel := make (chan string, 1024)
 	_outputsChannel := make (chan string, 1024)
@@ -99,7 +99,7 @@ func menuSelect (_inputs []string, _context *Context) ([]string, error) {
 }
 
 
-func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, _context *Context) (error) {
+func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, _context *Context) (*Error) {
 	
 	_hasTerminal := (_context.terminal != "") && (_context.terminal != "dumb")
 	

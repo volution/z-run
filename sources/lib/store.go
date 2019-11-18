@@ -5,12 +5,12 @@ package zrun
 
 
 type StoreOutput interface {
-	Include (_namespace string, _key string, _value interface{}) (error)
-	Commit () (error)
+	Include (_namespace string, _key string, _value interface{}) (*Error)
+	Commit () (*Error)
 }
 
 type StoreInput interface {
-	Select (_namespace string, _key string, _value interface{}) (bool, error)
-	Close () (error)
+	Select (_namespace string, _key string, _value interface{}) (bool, *Error)
+	Close () (*Error)
 }
 

@@ -20,7 +20,7 @@ type CdbStoreInput struct {
 }
 
 
-func NewCdbStoreInput (_path string) (*CdbStoreInput, error) {
+func NewCdbStoreInput (_path string) (*CdbStoreInput, *Error) {
 	if _file, _error := os.Open (_path); _error == nil {
 		defer _file.Close ()
 		if _reader, _error := cdb.NewFromMappedWithHasher (_file, nil); _error == nil {
@@ -38,7 +38,7 @@ func NewCdbStoreInput (_path string) (*CdbStoreInput, error) {
 }
 
 
-func (_store *CdbStoreInput) Select (_namespace string, _key string, _value interface{}) (bool, error) {
+func (_store *CdbStoreInput) Select (_namespace string, _key string, _value interface{}) (bool, *Error) {
 	
 	_keyBuffer := bytes.NewBuffer (nil)
 	_keyBuffer.WriteString (_namespace)
@@ -79,7 +79,7 @@ func (_store *CdbStoreInput) Select (_namespace string, _key string, _value inte
 }
 
 
-func (_store *CdbStoreInput) Close () (error) {
+func (_store *CdbStoreInput) Close () (*Error) {
 	if _error := _store.reader.Close (); _error == nil {
 		_store.reader = nil
 		return _error
@@ -98,7 +98,7 @@ type CdbStoreOutput struct {
 }
 
 
-func NewCdbStoreOutput (_path string) (*CdbStoreOutput, error) {
+func NewCdbStoreOutput (_path string) (*CdbStoreOutput, *Error) {
 	if _path == "" {
 		return nil, errorf (0x6917ab7d, "invalid path")
 	}
@@ -117,7 +117,7 @@ func NewCdbStoreOutput (_path string) (*CdbStoreOutput, error) {
 }
 
 
-func (_store *CdbStoreOutput) Include (_namespace string, _key string, _value interface{}) (error) {
+func (_store *CdbStoreOutput) Include (_namespace string, _key string, _value interface{}) (*Error) {
 	
 	_keyBuffer := bytes.NewBuffer (nil)
 	_keyBuffer.WriteString (_namespace)
@@ -143,7 +143,7 @@ func (_store *CdbStoreOutput) Include (_namespace string, _key string, _value in
 	return _store.writer.Put (_keyBuffer.Bytes (), _valueBuffer.Bytes ())
 }
 
-func (_store *CdbStoreOutput) Commit () (error) {
+func (_store *CdbStoreOutput) Commit () (*Error) {
 	if _error := _store.writer.Close (); _error != nil {
 		return _error
 	}

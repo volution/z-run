@@ -18,7 +18,7 @@ import "unicode/utf8"
 
 
 
-func parseLibrary (_sources []*Source, _environmentFingerprint string, _context *Context) (*Library, error) {
+func parseLibrary (_sources []*Source, _environmentFingerprint string, _context *Context) (*Library, *Error) {
 	
 	_library := NewLibrary ()
 	_library.EnvironmentFingerprint = _environmentFingerprint
@@ -113,7 +113,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 
 
 
-func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Context) (error) {
+func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Context) (*Error) {
 	if _, _data, _error := loadFromScriptlet (_library, "", _source, _context); _error == nil {
 		return parseFromData (_library, _data, _source.Source.Path, _context)
 	} else {
@@ -121,7 +121,7 @@ func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Contex
 	}
 }
 
-func parseFromReplacer (_library *Library, _source *Scriptlet, _context *Context) (error) {
+func parseFromReplacer (_library *Library, _source *Scriptlet, _context *Context) (*Error) {
 	if _, _data, _error := loadFromScriptlet (_library, "<shell>", _source, _context); _error == nil {
 		if utf8.Valid (_data) {
 			_source.Body = string (_data)
@@ -134,7 +134,7 @@ func parseFromReplacer (_library *Library, _source *Scriptlet, _context *Context
 	}
 }
 
-func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (error) {
+func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*Error) {
 	_labels := make ([]string, 0, 1024)
 	_matchers := strings.Split (_source.Body, "\n")
 	_scriptlets := make ([]*Scriptlet, 0, len (_library.Scriptlets))
@@ -200,7 +200,7 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (e
 
 
 
-func parseFromSource (_library *Library, _source *Source, _context *Context) (error) {
+func parseFromSource (_library *Library, _source *Source, _context *Context) (*Error) {
 	if _data, _error := loadFromSource (_library, _source, _context); _error == nil {
 		if _error := includeSource (_library, _source); _error != nil {
 			return _error
@@ -211,7 +211,7 @@ func parseFromSource (_library *Library, _source *Source, _context *Context) (er
 	}
 }
 
-func parseFromFile (_library *Library, _sourcePath string, _context *Context) (string, error) {
+func parseFromFile (_library *Library, _sourcePath string, _context *Context) (string, *Error) {
 	if _fingerprint, _data, _error := loadFromFile (_sourcePath); _error == nil {
 		if _error := parseFromData (_library, _data, _sourcePath, _context); _error == nil {
 			return _fingerprint, nil
@@ -223,7 +223,7 @@ func parseFromFile (_library *Library, _sourcePath string, _context *Context) (s
 	}
 }
 
-func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string, _context *Context) (string, error) {
+func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string, _context *Context) (string, *Error) {
 	if _fingerprint, _data, _error := loadFromStream (_stream); _error == nil {
 		if _error := parseFromData (_library, _data, _sourcePath, _context); _error == nil {
 			return _fingerprint, nil
@@ -238,7 +238,7 @@ func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string, 
 
 
 
-func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _context *Context) (error) {
+func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _context *Context) (*Error) {
 	
 	var _source string
 	if utf8.Valid (_sourceData) {
@@ -618,7 +618,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 
 
 
-func loadFromSource (_library *Library, _source *Source, _context *Context) ([]byte, error) {
+func loadFromSource (_library *Library, _source *Source, _context *Context) ([]byte, *Error) {
 	if _fingerprint, _data, _error := loadFromSource_0 (_library, _source, _context); _error == nil {
 		if _source.FingerprintData == "" {
 			_source.FingerprintData = _fingerprint
@@ -632,7 +632,7 @@ func loadFromSource (_library *Library, _source *Source, _context *Context) ([]b
 }
 
 
-func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (string, []byte, error) {
+func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (string, []byte, *Error) {
 	
 	if !_source.Executable {
 		return loadFromFile (_source.Path)
@@ -672,7 +672,7 @@ func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (s
 }
 
 
-func loadFromFile (_path string) (string, []byte, error) {
+func loadFromFile (_path string) (string, []byte, *Error) {
 	if _stream, _error := os.Open (_path); _error == nil {
 		defer _stream.Close ()
 		return loadFromStream (_stream)
@@ -682,7 +682,7 @@ func loadFromFile (_path string) (string, []byte, error) {
 }
 
 
-func loadFromStream (_stream io.Reader) (string, []byte, error) {
+func loadFromStream (_stream io.Reader) (string, []byte, *Error) {
 	if _data, _error := ioutil.ReadAll (_stream); _error == nil {
 		_fingerprint := NewFingerprinter () .Bytes (_data) .Build ()
 		return _fingerprint, _data, nil
@@ -692,7 +692,7 @@ func loadFromStream (_stream io.Reader) (string, []byte, error) {
 }
 
 
-func loadFromScriptlet (_library LibraryStore, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, error) {
+func loadFromScriptlet (_library LibraryStore, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, *Error) {
 	
 	var _command *exec.Cmd
 	var _descriptors []int
@@ -711,7 +711,7 @@ func loadFromScriptlet (_library LibraryStore, _interpreter string, _scriptlet *
 }
 
 
-func loadFromCommand (_command *exec.Cmd) (string, []byte, error) {
+func loadFromCommand (_command *exec.Cmd) (string, []byte, *Error) {
 	
 	if _command.Stderr == nil {
 		_command.Stderr = os.Stderr

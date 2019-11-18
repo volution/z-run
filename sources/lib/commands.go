@@ -16,7 +16,7 @@ import "syscall"
 
 
 
-func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
+func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context *Context) (*Error) {
 	if _labels, _error := _library.SelectLabelsAll (); _error == nil {
 		_buffer := bytes.NewBuffer (nil)
 		for _, _label := range _labels {
@@ -33,7 +33,7 @@ func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context
 
 
 
-func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
+func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Context) (*Error) {
 	_library, _ok := _library.(*Library)
 	if !_ok {
 		return errorf (0x4f480517, "only works with in-memory library store")
@@ -47,7 +47,7 @@ func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Co
 
 
 
-func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *Context) (error) {
+func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *Context) (*Error) {
 	
 	if _sources, _error := _library.SelectSources (); _error == nil {
 		if _error := _store.Include ("library-meta", "sources", _sources); _error != nil {
@@ -132,7 +132,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 }
 
 
-func doExportLibraryCdb (_library LibraryStore, _path string, _context *Context) (error) {
+func doExportLibraryCdb (_library LibraryStore, _path string, _context *Context) (*Error) {
 	if _store, _error := NewCdbStoreOutput (_path); _error == nil {
 		return doExportLibraryStore (_library, _store, _context)
 	} else {
@@ -143,7 +143,7 @@ func doExportLibraryCdb (_library LibraryStore, _path string, _context *Context)
 
 
 
-func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (error) {
+func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (*Error) {
 	
 	var _command *exec.Cmd
 	var _descriptors []int
@@ -197,7 +197,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 
 
 
-func doHandleExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+func doHandleExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 	if _error := executeScriptlet (_library, _scriptlet, _context); _error == nil {
 		return true, nil
 	} else {
@@ -206,7 +206,7 @@ func doHandleExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _co
 }
 
 
-func doHandleExportScriptletLabel (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, error) {
+func doHandleExportScriptletLabel (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, *Error) {
 	if _, _error := fmt.Fprintf (_stream, "%s\n", _scriptlet.Label); _error == nil {
 		return true, nil
 	} else {
@@ -215,7 +215,7 @@ func doHandleExportScriptletLabel (_library LibraryStore, _scriptlet *Scriptlet,
 }
 
 
-func doHandleExportScriptletBody (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, error) {
+func doHandleExportScriptletBody (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, *Error) {
 	if _body, _found, _error := _library.ResolveBodyByLabel (_scriptlet.Label); _error == nil {
 		if _found {
 			if _, _error := io.WriteString (_stream, _body); _error == nil {
@@ -232,7 +232,7 @@ func doHandleExportScriptletBody (_library LibraryStore, _scriptlet *Scriptlet, 
 }
 
 
-func doHandleExportScriptletLegacy (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, error) {
+func doHandleExportScriptletLegacy (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, *Error) {
 	if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error == nil {
 		return true, nil
 	} else {
@@ -243,10 +243,10 @@ func doHandleExportScriptletLegacy (_library LibraryStore, _scriptlet *Scriptlet
 
 
 
-type doHandler func (LibraryStore, *Scriptlet, *Context) (bool, error)
+type doHandler func (LibraryStore, *Scriptlet, *Context) (bool, *Error)
 
 
-func doHandleWithLabel (_library LibraryStore, _label string, _handler doHandler, _context *Context) (error) {
+func doHandleWithLabel (_library LibraryStore, _label string, _handler doHandler, _context *Context) (*Error) {
 	if _scriptlet, _error := _library.ResolveFullByLabel (_label); _error == nil {
 		if _scriptlet != nil {
 			if _handled, _error := _handler (_library, _scriptlet, _context); _error == nil {
@@ -269,11 +269,11 @@ func doHandleWithLabel (_library LibraryStore, _label string, _handler doHandler
 
 
 
-func doSelectHandle (_library LibraryStore, _handler doHandler, _context *Context) (error) {
+func doSelectHandle (_library LibraryStore, _handler doHandler, _context *Context) (*Error) {
 	return doSelectHandle_1 (_library, _handler, _context)
 }
 
-func doSelectHandleWithLabel (_library LibraryStore, _label string, _handler doHandler, _context *Context) (error) {
+func doSelectHandleWithLabel (_library LibraryStore, _label string, _handler doHandler, _context *Context) (*Error) {
 	if _label != "" {
 		if _handled, _error := doSelectHandle_2 (_library, _label, _handler, _context); _error == nil {
 			if _handled {
@@ -291,7 +291,7 @@ func doSelectHandleWithLabel (_library LibraryStore, _label string, _handler doH
 }
 
 
-func doSelectHandle_1 (_library LibraryStore, _handler doHandler, _context *Context) (error) {
+func doSelectHandle_1 (_library LibraryStore, _handler doHandler, _context *Context) (*Error) {
 	for {
 		if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
 			if _label != "" {
@@ -314,7 +314,7 @@ func doSelectHandle_1 (_library LibraryStore, _handler doHandler, _context *Cont
 }
 
 
-func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler, _context *Context) (bool, error) {
+func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler, _context *Context) (bool, *Error) {
 	if _scriptlet, _error := _library.ResolveFullByLabel (_label); _error == nil {
 		if _scriptlet != nil {
 			if _scriptlet.Kind == "menu" {
@@ -382,7 +382,7 @@ func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler,
 
 
 
-func doSelectScriptlet (_library LibraryStore, _label string, _context *Context) (*Scriptlet, error) {
+func doSelectScriptlet (_library LibraryStore, _label string, _context *Context) (*Scriptlet, *Error) {
 	if _label == "" {
 		if _label_0, _error := doSelectLabel_0 (_library, _context); _error == nil {
 			_label = _label_0
@@ -404,7 +404,7 @@ func doSelectScriptlet (_library LibraryStore, _label string, _context *Context)
 	}
 }
 
-func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
+func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context) (*Error) {
 	if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
 		if _label != "" {
 			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
@@ -419,7 +419,7 @@ func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context)
 	return nil
 }
 
-func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context) (error) {
+func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context) (*Error) {
 	if _labels, _error := doSelectLabels_0 (_library, _context); _error == nil {
 		if len (_labels) != 0 {
 			for _, _label := range _labels {
@@ -439,7 +439,7 @@ func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context
 
 
 
-func doSelectLabel_0 (_library LibraryStore, _context *Context) (string, error) {
+func doSelectLabel_0 (_library LibraryStore, _context *Context) (string, *Error) {
 	if _labels, _error := doSelectLabels_0 (_library, _context); _error == nil {
 		if len (_labels) == 0 {
 			return "", nil
@@ -453,7 +453,7 @@ func doSelectLabel_0 (_library LibraryStore, _context *Context) (string, error) 
 	}
 }
 
-func doSelectLabel_1 (_inputs []string, _context *Context) (string, error) {
+func doSelectLabel_1 (_inputs []string, _context *Context) (string, *Error) {
 	if _labels, _error := doSelectLabels_1 (_inputs, _context); _error == nil {
 		if len (_labels) == 0 {
 			return "", nil
@@ -468,7 +468,7 @@ func doSelectLabel_1 (_inputs []string, _context *Context) (string, error) {
 }
 
 
-func doSelectLabels_0 (_library LibraryStore, _context *Context) ([]string, error) {
+func doSelectLabels_0 (_library LibraryStore, _context *Context) ([]string, *Error) {
 	var _inputs []string
 	if _inputs_0, _error := _library.SelectLabels (); _error == nil {
 		_inputs = _inputs_0
@@ -478,7 +478,7 @@ func doSelectLabels_0 (_library LibraryStore, _context *Context) ([]string, erro
 	return doSelectLabels_1 (_inputs, _context)
 }
 
-func doSelectLabels_1 (_inputs []string, _context *Context) ([]string, error) {
+func doSelectLabels_1 (_inputs []string, _context *Context) ([]string, *Error) {
 	var _outputs []string
 	if _outputs_0, _error := menuSelect (_inputs, _context); _error == nil {
 		_outputs = _outputs_0

@@ -32,7 +32,7 @@ type Context struct {
 
 
 
-func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (error) {
+func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	var _command string
 	var _scriptlet string
@@ -320,7 +320,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if len (_cleanArguments) != 0 {
 				return errorf (0xcf8db3c0, "export:  unexpected arguments")
 			}
-			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
 				}
 			return doHandleWithLabel (_library, _scriptlet, _handler, _context)
@@ -340,7 +340,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if len (_cleanArguments) != 0 {
 				return errorf (0x2d19b1bc, "select:  unexpected arguments")
 			}
-			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletLabel (_library, _scriptlet, os.Stdout, _context)
 				}
 			if _scriptlet != "" {
@@ -353,7 +353,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if len (_cleanArguments) != 0 {
 				return errorf (0x5f573713, "select:  unexpected arguments")
 			}
-			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
 				}
 			if _scriptlet != "" {
@@ -366,7 +366,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if len (_cleanArguments) != 0 {
 				return errorf (0xe4f7e6f5, "export:  unexpected arguments")
 			}
-			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, error) {
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletLegacy (_library, _scriptlet, os.Stdout, _context)
 				}
 			if _scriptlet != "" {

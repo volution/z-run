@@ -43,7 +43,7 @@ func processEnvironment (_context *Context, _overrides map[string]string) ([]str
 
 
 
-func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string) (int, uint, uint, error) {
+func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string) (int, uint, uint, *Error) {
 	
 	var _stdin io.WriteCloser
 	if _inputsChannel != nil {
@@ -170,7 +170,7 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 
 
 
-func processExecuteGetStdout (_command *exec.Cmd) (int, []byte, error) {
+func processExecuteGetStdout (_command *exec.Cmd) (int, []byte, *Error) {
 	
 	_stdout := bytes.NewBuffer (nil)
 	_stdout.Grow (128 * 1024)

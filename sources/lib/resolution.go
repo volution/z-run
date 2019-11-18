@@ -11,7 +11,7 @@ import "sort"
 
 
 
-func resolveSources (_candidate string, _workspace string, _lookupPaths []string) ([]*Source, error) {
+func resolveSources (_candidate string, _workspace string, _lookupPaths []string) ([]*Source, *Error) {
 	
 	_sources := make ([]*Source, 0, 128)
 	
@@ -41,7 +41,7 @@ func resolveSources (_candidate string, _workspace string, _lookupPaths []string
 }
 
 
-func resolveSource (_candidate string, _workspace string, _lookupPaths []string) (*Source, error) {
+func resolveSource (_candidate string, _workspace string, _lookupPaths []string) (*Source, *Error) {
 	if _path, _stat, _error := resolveSourcePath_0 (_candidate, _workspace, _lookupPaths); _error == nil {
 		return resolveSource_0 (_path, _stat)
 	} else {
@@ -50,7 +50,7 @@ func resolveSource (_candidate string, _workspace string, _lookupPaths []string)
 }
 
 
-func resolveSource_0 (_path string, _stat os.FileInfo) (*Source, error) {
+func resolveSource_0 (_path string, _stat os.FileInfo) (*Source, *Error) {
 	_statMode := _stat.Mode ()
 	if _statMode.IsRegular () {
 		_source := & Source {
@@ -67,7 +67,7 @@ func resolveSource_0 (_path string, _stat os.FileInfo) (*Source, error) {
 
 
 
-func fingerprintSource (_path string) (*Source, error) {
+func fingerprintSource (_path string) (*Source, *Error) {
 	if _path, _stat, _error := resolveSourcePath_2 (_path); _error == nil {
 		_source := & Source {
 				Path : _path,
@@ -81,7 +81,7 @@ func fingerprintSource (_path string) (*Source, error) {
 }
 
 
-func fingerprintSource_0 (_path string) (string, error) {
+func fingerprintSource_0 (_path string) (string, *Error) {
 	if _stat, _error := os.Stat (_path); _error == nil {
 		return fingerprintSource_1 (_path, _stat), nil
 	} else {
@@ -97,7 +97,7 @@ func fingerprintSource_1 (_path string, _stat os.FileInfo) (string) {
 
 
 
-func resolveSourcePath_0 (_candidate string, _workspace string, _lookupPaths []string) (string, os.FileInfo, error) {
+func resolveSourcePath_0 (_candidate string, _workspace string, _lookupPaths []string) (string, os.FileInfo, *Error) {
 	if _candidate != "" {
 //		logf ('d', 0x16563f01, "using candidate `%s`...", _candidate)
 		return resolveSourcePath_2 (_candidate)
@@ -108,7 +108,7 @@ func resolveSourcePath_0 (_candidate string, _workspace string, _lookupPaths []s
 }
 
 
-func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.FileInfo, error) {
+func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.FileInfo, *Error) {
 	
 	type folder struct {
 		path string
@@ -170,7 +170,7 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 }
 
 
-func resolveSourcePath_2 (_path string) (string, os.FileInfo, error) {
+func resolveSourcePath_2 (_path string) (string, os.FileInfo, *Error) {
 	if _stat, _error := os.Stat (_path); _error == nil {
 		if _path, _error := filepath.Abs (_path); _error == nil {
 			return _path, _stat, nil
@@ -187,7 +187,7 @@ func resolveSourcePath_2 (_path string) (string, os.FileInfo, error) {
 
 
 
-func resolveCache () (string, error) {
+func resolveCache () (string, *Error) {
 	var _cache string
 	if _cache_0, _error := os.UserCacheDir (); _error == nil {
 		_cache = _cache_0
@@ -207,7 +207,7 @@ func resolveCache () (string, error) {
 
 
 
-func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string) (LibraryStore, error) {
+func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string) (LibraryStore, *Error) {
 	
 	_sources, _error := resolveSources (_candidate, _context.workspace, _lookupPaths)
 	if _error != nil {
@@ -280,7 +280,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 
 
 
-func resolveLibraryCached (_path string) (LibraryStore, error) {
+func resolveLibraryCached (_path string) (LibraryStore, *Error) {
 	if _store, _error := NewCdbStoreInput (_path); _error == nil {
 		if _library, _error := NewLibraryStoreInput (_store, _path); _error == nil {
 //			logf ('d', 0x63ae360d, "opened library cached at `%s`;", _cacheLibrary)
@@ -295,7 +295,7 @@ func resolveLibraryCached (_path string) (LibraryStore, error) {
 }
 
 
-func checkLibraryCached (_library LibraryStore) (bool, error) {
+func checkLibraryCached (_library LibraryStore) (bool, *Error) {
 	var _sources LibrarySources
 	if _sources_0, _error := _library.SelectSources (); _error == nil {
 		_sources = _sources_0

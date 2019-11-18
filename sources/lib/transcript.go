@@ -19,11 +19,11 @@ func logf (_slug rune, _code uint32, _format string, _arguments ... interface{})
 	log.Print (_prefix + _message + "\n")
 }
 
-func logError (_slug rune, _error error) () {
+func logError (_slug rune, _error *Error) () {
 	logErrorf (_slug, 0x55d59c80, _error, "unexpected error encountered!")
 }
 
-func logErrorf (_slug rune, _code uint32, _error error, _format string, _arguments ... interface{}) () {
+func logErrorf (_slug rune, _code uint32, _error *Error, _format string, _arguments ... interface{}) () {
 	_pid := os.Getpid ()
 	if (_format != "") || (len (_arguments) != 0) {
 		logf (_slug, _code, _format, _arguments ...)
@@ -44,15 +44,15 @@ func logErrorf (_slug rune, _code uint32, _error error, _format string, _argumen
 }
 
 
-func abortf (_code uint32, _format string, _arguments ... interface{}) (error) {
+func abortf (_code uint32, _format string, _arguments ... interface{}) (*Error) {
 	return abortErrorf (nil, _code, _format, _arguments ...)
 }
 
-func abortError (_error error) (error) {
+func abortError (_error Error) (*Error) {
 	return abortErrorf (_error, 0xe6ed2b0f, "")
 }
 
-func abortErrorf (_error error, _code uint32, _format string, _arguments ... interface{}) (error) {
+func abortErrorf (_error error, _code uint32, _format string, _arguments ... interface{}) (*Error) {
 	logErrorf ('!', _code, _error, _format, _arguments ...)
 //	logf ('!', 0xb7a5fb86, "aborting!")
 	os.Exit (1)
@@ -60,7 +60,7 @@ func abortErrorf (_error error, _code uint32, _format string, _arguments ... int
 }
 
 
-func errorf (_code uint32, _format string, _arguments ... interface{}) (error) {
+func errorf (_code uint32, _format string, _arguments ... interface{}) (*Error) {
 	_message := fmt.Sprintf (_format, _arguments ...)
 	_prefix := fmt.Sprintf ("[%08x]  ", _code)
 	return errors.New (_prefix + _message)

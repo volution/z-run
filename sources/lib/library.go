@@ -73,20 +73,20 @@ func NewLibrary () (*Library) {
 }
 
 
-func (_library *Library) SelectFingerprints () ([]string, error) {
+func (_library *Library) SelectFingerprints () ([]string, *Error) {
 	return _library.ScriptletFingerprints, nil
 }
 
-func (_library *Library) SelectLabels () ([]string, error) {
+func (_library *Library) SelectLabels () ([]string, *Error) {
 	return _library.ScriptletLabels, nil
 }
 
-func (_library *Library) SelectLabelsAll () ([]string, error) {
+func (_library *Library) SelectLabelsAll () ([]string, *Error) {
 	return _library.ScriptletLabelsAll, nil
 }
 
 
-func (_library *Library) ResolveFullByFingerprint (_fingerprint string) (*Scriptlet, error) {
+func (_library *Library) ResolveFullByFingerprint (_fingerprint string) (*Scriptlet, *Error) {
 	if _index, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
 		_scriptlet := _library.Scriptlets[_index]
 		return _scriptlet, nil
@@ -95,7 +95,7 @@ func (_library *Library) ResolveFullByFingerprint (_fingerprint string) (*Script
 	}
 }
 
-func (_library *Library) ResolveMetaByFingerprint (_fingerprint string) (*Scriptlet, error) {
+func (_library *Library) ResolveMetaByFingerprint (_fingerprint string) (*Scriptlet, *Error) {
 	if _scriptlet, _error := _library.ResolveFullByFingerprint (_fingerprint); (_error == nil) && (_scriptlet != nil) {
 		_meta := & Scriptlet {}
 		*_meta = *_scriptlet
@@ -106,7 +106,7 @@ func (_library *Library) ResolveMetaByFingerprint (_fingerprint string) (*Script
 	}
 }
 
-func (_library *Library) ResolveBodyByFingerprint (_fingerprint string) (string, bool, error) {
+func (_library *Library) ResolveBodyByFingerprint (_fingerprint string) (string, bool, *Error) {
 	if _scriptlet, _error := _library.ResolveFullByFingerprint (_fingerprint); (_error == nil) && (_scriptlet != nil) {
 		return _scriptlet.Body, true, nil
 	} else {
@@ -115,7 +115,7 @@ func (_library *Library) ResolveBodyByFingerprint (_fingerprint string) (string,
 }
 
 
-func (_library *Library) ResolveFullByLabel (_label string) (*Scriptlet, error) {
+func (_library *Library) ResolveFullByLabel (_label string) (*Scriptlet, *Error) {
 	if _index, _exists := _library.ScriptletsByLabel[_label]; _exists {
 		_scriptlet := _library.Scriptlets[_index]
 		return _scriptlet, nil
@@ -124,7 +124,7 @@ func (_library *Library) ResolveFullByLabel (_label string) (*Scriptlet, error) 
 	}
 }
 
-func (_library *Library) ResolveMetaByLabel (_label string) (*Scriptlet, error) {
+func (_library *Library) ResolveMetaByLabel (_label string) (*Scriptlet, *Error) {
 	if _scriptlet, _error := _library.ResolveFullByLabel (_label); (_error == nil) && (_scriptlet != nil) {
 		_meta := & Scriptlet {}
 		*_meta = *_scriptlet
@@ -135,7 +135,7 @@ func (_library *Library) ResolveMetaByLabel (_label string) (*Scriptlet, error) 
 	}
 }
 
-func (_library *Library) ResolveBodyByLabel (_label string) (string, bool, error) {
+func (_library *Library) ResolveBodyByLabel (_label string) (string, bool, *Error) {
 	if _scriptlet, _error := _library.ResolveFullByLabel (_label); (_error == nil) && (_scriptlet != nil) {
 		return _scriptlet.Body, true, nil
 	} else {
@@ -143,7 +143,7 @@ func (_library *Library) ResolveBodyByLabel (_label string) (string, bool, error
 	}
 }
 
-func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool, error) {
+func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool, *Error) {
 	if _scriptlet, _error := _library.ResolveFullByLabel (_label); (_error == nil) && (_scriptlet != nil) {
 		return _scriptlet.Fingerprint, true, nil
 	} else {
@@ -152,7 +152,7 @@ func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool
 }
 
 
-func (_library *Library) SelectSources () (LibrarySources, error) {
+func (_library *Library) SelectSources () (LibrarySources, *Error) {
 	return _library.Sources, nil
 }
 
@@ -162,7 +162,7 @@ func (_library *Library) Url () (string) {
 }
 
 
-func (_library *Library) Close () (error) {
+func (_library *Library) Close () (*Error) {
 	*_library = Library {}
 	return nil
 }
@@ -170,7 +170,7 @@ func (_library *Library) Close () (error) {
 
 
 
-func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
+func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 	
 	if _scriptlet.Label != strings.TrimSpace (_scriptlet.Label) {
 		return errorf (0xd8797e9e, "invalid scriptlet label `%s`", _scriptlet.Label)
@@ -227,7 +227,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (error) {
 
 
 
-func includeSource (_library *Library, _source *Source) (error) {
+func includeSource (_library *Library, _source *Source) (*Error) {
 	if _source.Path == "" {
 		return errorf (0x12bdc134, "invalid state")
 	}

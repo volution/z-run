@@ -36,7 +36,7 @@ func NewJsonStreamStoreOutput (_stream io.Writer, _closer io.Closer) (*JsonStrea
 		}
 }
 
-func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _value interface{}) (error) {
+func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _value interface{}) (*Error) {
 	_record := & JsonStoreRecord {
 			Namespace : _namespace,
 			Key : _key,
@@ -45,7 +45,7 @@ func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _v
 	return _store.encoder.Encode (_record)
 }
 
-func (_store *JsonStreamStoreOutput) Commit () (error) {
+func (_store *JsonStreamStoreOutput) Commit () (*Error) {
 	var _error error
 	if _store.closer != nil {
 		_error = _store.closer.Close ()
