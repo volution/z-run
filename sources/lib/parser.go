@@ -660,7 +660,7 @@ func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (s
 				Stdin : nil,
 				Stdout : nil,
 				Stderr : os.Stderr,
-				Dir : "",
+				Dir : _context.workspace,
 			}
 		
 		if _, _data, _error := loadFromCommand (_command); _error == nil {

@@ -7,6 +7,7 @@ import "bytes"
 import "encoding/json"
 import "fmt"
 import "io"
+import "os"
 import "os/exec"
 import "sort"
 import "strings"
@@ -160,8 +161,9 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 	}
 	
 	if _command.Dir != "" {
-		_closeDescriptors ()
-		return errorf (0xe4bab179, "invalid state")
+		if _error := os.Chdir (_command.Dir); _error != nil {
+			return errorf (0xe4bab179, "invalid state;  chdir failed:  %s", _error)
+		}
 	}
 	if _command.Stdin != nil {
 		_closeDescriptors ()

@@ -101,6 +101,7 @@ exec %d<&-
 	_interpreterEnvironment := processEnvironment (_context, map[string]string {
 			"ZRUN_EXECUTABLE" : _context.selfExecutable,
 			"ZRUN_LIBRARY_CACHE" : _library.Url (),
+			"ZRUN_WORKSPACE" : _context.workspace,
 		})
 	
 	_descriptors := []int {
@@ -111,6 +112,7 @@ exec %d<&-
 			Path : _interpreterExecutable,
 			Args : _interpreterArguments,
 			Env : _interpreterEnvironment,
+			Dir : _context.workspace,
 		}
 	
 	return _command, _descriptors, nil

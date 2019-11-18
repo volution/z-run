@@ -115,7 +115,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 			Stdin : nil,
 			Stdout : nil,
 			Stderr : os.Stderr,
-			Dir : "",
+			Dir : _context.workspace,
 		}
 	
 	_commandFzf := false
