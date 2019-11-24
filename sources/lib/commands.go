@@ -148,6 +148,15 @@ func doExportLibraryCdb (_library LibraryStore, _path string, _context *Context)
 }
 
 
+func doExportLibraryRpc (_library LibraryStore, _url string, _context *Context) (*Error) {
+	if _server, _error := NewLibraryRpcServer (_library, _url); _error == nil {
+		return _server.Serve ()
+	} else {
+		return _error
+	}
+}
+
+
 
 
 func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (*Error) {

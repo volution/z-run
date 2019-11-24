@@ -186,6 +186,10 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					case "export-library-cdb" :
 						_command = "export-library-cdb"
 						_index += 1
+					
+					case "export-library-rpc" :
+						_command = "export-library-rpc"
+						_index += 1
 				}
 			} else {
 				_scriptlet = _argument
@@ -291,10 +295,18 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	var _library LibraryStore
 	if _libraryCachePath != "" {
-		if _library_0, _error := resolveLibraryCached (_libraryCachePath); _error == nil {
-			_library = _library_0
+		if strings.HasPrefix (_libraryCachePath, "unix:") || strings.HasPrefix (_libraryCachePath, "tcp:") {
+			if _library_0, _error := NewLibraryRpcClient (_libraryCachePath); _error == nil {
+				_library = _library_0
+			} else {
+				return _error
+			}
 		} else {
-			return _error
+			if _library_0, _error := resolveLibraryCached (_libraryCachePath); _error == nil {
+				_library = _library_0
+			} else {
+				return _error
+			}
 		}
 	} else {
 		if _library_0, _error := resolveLibrary (_librarySourcePath, _context, _libraryLookupPaths); _error == nil {
@@ -403,6 +415,15 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				return errorf (0xf76f4459, "export:  expected database path")
 			}
 			return doExportLibraryCdb (_library, _cleanArguments[0], _context)
+		
+		case "export-library-rpc" :
+			if _scriptlet != "" {
+				return errorf (0x04d71684, "export:  unexpected scriptlet")
+			}
+			if len (_cleanArguments) != 1 {
+				return errorf (0xe7886d74, "export:  expected RPC url")
+			}
+			return doExportLibraryRpc (_library, _cleanArguments[0], _context)
 		
 		
 		case "" :
