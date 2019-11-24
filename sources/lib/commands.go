@@ -163,7 +163,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 	
 	var _command *exec.Cmd
 	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_library, "", _scriptlet, true, _context); _error == nil {
+	if _command_0, _descriptors_0, _error := prepareExecution (_library.Url (), "", _scriptlet, true, _context); _error == nil {
 		_command = _command_0
 		_descriptors = _descriptors_0
 	} else {
@@ -337,7 +337,7 @@ func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler,
 				for {
 					var _outputLines []string
 					if _scriptlet.Interpreter != "<menu>" {
-						if _, _outputData, _error := loadFromScriptlet (_library, "", _scriptlet, _context); _error == nil {
+						if _, _outputData, _error := loadFromScriptlet (_library.Url (), "", _scriptlet, _context); _error == nil {
 							_outputText := string (_outputData)
 							_outputText = strings.TrimSpace (_outputText)
 							if _outputText != "" {
