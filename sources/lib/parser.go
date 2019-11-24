@@ -3,6 +3,7 @@
 package zrun
 
 
+import "fmt"
 import "io"
 import "io/ioutil"
 import "os"
@@ -23,6 +24,19 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	_library := NewLibrary ()
 	_library.EnvironmentFingerprint = _environmentFingerprint
 	
+	_libraryUrl := fmt.Sprintf ("unix:@%s-%08x", _environmentFingerprint, os.Getpid ())
+	
+	var _rpc *LibraryRpcServer
+	if _rpc_0, _error := NewLibraryRpcServer (_library, _libraryUrl); _error == nil {
+		_rpc = _rpc_0
+	} else {
+		return nil, _error
+	}
+	if _error := _rpc.ServeStart (); _error != nil {
+		return nil, _error
+	}
+	defer _rpc.ServeStop ()
+	
 	for _, _source := range _sources {
 		if _error := parseFromSource (_library, _source, _context); _error != nil {
 			return nil, _error
@@ -36,14 +50,14 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 				case "executable", "generator" :
 					// NOP
 				case "generator-pending" :
-					if _error := parseFromGenerator (_library, _scriptlet, _context); _error == nil {
+					if _error := parseFromGenerator (_library, _rpc.Url (), _scriptlet, _context); _error == nil {
 						_scriptlet.Kind = "generator"
 						_found = true
 					} else {
 						return nil, _error
 					}
 				case "replacer-pending" :
-					if _error := parseFromReplacer (_library, _scriptlet, _context); _error == nil {
+					if _error := parseFromReplacer (_library, _rpc.Url (), _scriptlet, _context); _error == nil {
 						_scriptlet.Kind = "executable"
 						_found = true
 					} else {
@@ -113,16 +127,16 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 
 
 
-func parseFromGenerator (_library *Library, _source *Scriptlet, _context *Context) (*Error) {
-	if _, _data, _error := loadFromScriptlet (_library, "", _source, _context); _error == nil {
+func parseFromGenerator (_library *Library, _libraryUrl string, _source *Scriptlet, _context *Context) (*Error) {
+	if _, _data, _error := loadFromScriptlet (_libraryUrl, "", _source, _context); _error == nil {
 		return parseFromData (_library, _data, _source.Source.Path, _context)
 	} else {
 		return _error
 	}
 }
 
-func parseFromReplacer (_library *Library, _source *Scriptlet, _context *Context) (*Error) {
-	if _, _data, _error := loadFromScriptlet (_library, "<shell>", _source, _context); _error == nil {
+func parseFromReplacer (_library *Library, _libraryUrl string, _source *Scriptlet, _context *Context) (*Error) {
+	if _, _data, _error := loadFromScriptlet (_libraryUrl, "<shell>", _source, _context); _error == nil {
 		if utf8.Valid (_data) {
 			_source.Body = string (_data)
 			return nil

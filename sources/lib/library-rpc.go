@@ -65,6 +65,11 @@ func NewLibraryRpcServer (_library LibraryStore, _url string) (*LibraryRpcServer
 }
 
 
+func (_server *LibraryRpcServer) Url () (string) {
+	return _server.url
+}
+
+
 
 
 func (_server *LibraryRpcServer) Serve () (*Error) {
@@ -74,24 +79,43 @@ func (_server *LibraryRpcServer) Serve () (*Error) {
 	return nil
 }
 
+func (_server *LibraryRpcServer) ServeStart () (*Error) {
+	_server.waiter.Add (1)
+	go _server.loop ()
+	return nil
+}
+
+func (_server *LibraryRpcServer) ServeStop () (*Error) {
+	if _error := _server.listener.Close (); _error != nil {
+		return errorw (0x8748e4e6, _error)
+	}
+	_server.waiter.Wait ()
+	return nil
+}
+
 
 func (_server *LibraryRpcServer) loop () () {
+//	logf ('d', 0x205ad5d1, "begin accepting client connections...")
 	for {
-		logf ('d', 0x205ad5d1, "waiting for client connection...")
 		if _connection, _error := _server.listener.Accept (); _error == nil {
 			_server.waiter.Add (1)
 			go _server.handle (_connection)
+		} else if strings.HasSuffix (_error.Error (), ": use of closed network connection") {
+			break
 		} else {
 			logError ('w', errorw (0x2737c361, _error))
 			break
 		}
 	}
 	_server.waiter.Done ()
+//	logf ('d', 0x9ab6240d, "ended accepting client connections;")
 }
 
 
 func (_server *LibraryRpcServer) handle (_connection net.Conn) () {
+//	logf ('d', 0x1699394e, "begin handling client connection...")
 	_server.rpc.ServeConn (_connection)
+//	logf ('d', 0x9f91f3f9, "ended handling client connection;")
 	_server.waiter.Done ()
 }
 
