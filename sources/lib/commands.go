@@ -23,8 +23,11 @@ func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context
 			_buffer.WriteString (_label)
 			_buffer.WriteByte ('\n')
 		}
-		_, _error := _stream.Write (_buffer.Bytes ())
-		return errorw (0x1215e523, _error)
+		if _, _error := _stream.Write (_buffer.Bytes ()) ; _error == nil {
+			return nil
+		} else {
+			return errorw (0x1215e523, _error)
+		}
 	} else {
 		return _error
 	}

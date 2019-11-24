@@ -8,9 +8,9 @@ package zrun
 type LibraryStore interface {
 	
 	SelectFingerprints () ([]string, *Error)
-	ResolveFullByFingerprint (_label string) (*Scriptlet, *Error)
-	ResolveMetaByFingerprint (_label string) (*Scriptlet, *Error)
-	ResolveBodyByFingerprint (_label string) (string, bool, *Error)
+	ResolveFullByFingerprint (_fingerprint string) (*Scriptlet, *Error)
+	ResolveMetaByFingerprint (_fingerprint string) (*Scriptlet, *Error)
+	ResolveBodyByFingerprint (_fingerprint string) (string, bool, *Error)
 	
 	SelectLabels () ([]string, *Error)
 	SelectLabelsAll () ([]string, *Error)
