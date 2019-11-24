@@ -251,7 +251,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 				_library.Close ()
 				return nil, _error
 			}
-		} else if (_error.error != nil) && ! os.IsNotExist (_error.error) {
+		} else if (_error.Error != nil) && ! os.IsNotExist (_error.Error) {
 			return nil, _error
 		}
 	}

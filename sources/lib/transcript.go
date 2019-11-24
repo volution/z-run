@@ -11,9 +11,9 @@ import "os"
 
 
 type Error struct {
-	code uint32
-	message string
-	error error
+	Code uint32
+	Message string
+	Error error
 }
 
 
@@ -36,21 +36,21 @@ func logErrorf (_slug rune, _code uint32, _error *Error, _format string, _argume
 		logf (_slug, _code, _format, _arguments ...)
 	}
 	if _error != nil {
-		if _error.message != "" {
-			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.code, _error.message)
+		if _error.Message != "" {
+			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Message)
 		} else {
-			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.code, "unexpected error encountered!")
+			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, "unexpected error encountered!")
 		}
-		if _error.error != nil {
-			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.code, _error.error.Error ())
-			log.Printf ("[%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, _error.code, _error.error)
+		if _error.Error != nil {
+			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Error.Error ())
+			log.Printf ("[%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, _error.Code, _error.Error)
 		}
 	}
 }
 
 
 func abortError (_error *Error) (*Error) {
-	return abortErrorf (_error, _error.code, "")
+	return abortErrorf (_error, _error.Code, "")
 }
 
 func abortErrorf (_error *Error, _code uint32, _format string, _arguments ... interface{}) (*Error) {
@@ -64,9 +64,9 @@ func abortErrorf (_error *Error, _code uint32, _format string, _arguments ... in
 func errorf (_code uint32, _format string, _arguments ... interface{}) (*Error) {
 	_message := fmt.Sprintf (_format, _arguments ...)
 	return & Error {
-			code : _code,
-			message : _message,
-			error : nil,
+			Code : _code,
+			Message : _message,
+			Error : nil,
 		}
 }
 
@@ -75,9 +75,22 @@ func errorw (_code uint32, _error error) (*Error) {
 		panic (0xa4ddfd33)
 	}
 	return & Error {
-			code : _code,
-			message : "",
-			error : _error,
+			Code : _code,
+			Message : "",
+			Error : _error,
 		}
+}
+
+
+func (_error *Error) ToError () (error) {
+	var _message = _error.Message
+	if _message == "" {
+		_message = "unexpected error encountered"
+	}
+	if _error.Error != nil {
+		return fmt.Errorf ("[%08x]  %s  //  %w", _error.Code, _message, _error.Error)
+	} else {
+		return fmt.Errorf ("[%08x]  %s", _error.Code, _message)
+	}
 }
 
