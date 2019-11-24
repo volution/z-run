@@ -41,3 +41,18 @@
 
 ::== generator / 5 :: printf -- ':: generated / 5 :: printf -- %q\n' "5\n"
 
+
+<<== generator / 6
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: generator / 6 / x'
+!!
+
+<< generator / 6 / x
+	test "${#}" -eq 0
+	cat <<'EOS'
+	
+	:: generated / 6 / a :: printf -- '6-a\n'
+	
+	EOS
+!!
+
