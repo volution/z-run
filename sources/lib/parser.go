@@ -509,7 +509,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_includePath = path.Join (path.Dir (_sourcePath), _includePath)
 					
 					if !_disabled {
-						if _includeSources, _error := resolveSources (_includePath, "", nil); _error == nil {
+						if _includeSources, _error := resolveSources (_includePath, "", nil, false); _error == nil {
 							for _, _includeSource := range _includeSources {
 								if _error := parseFromSource (_library, _includeSource, _context); _error != nil {
 									return _error

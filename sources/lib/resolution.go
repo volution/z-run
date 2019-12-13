@@ -11,7 +11,7 @@ import "sort"
 
 
 
-func resolveSources (_candidate string, _workspace string, _lookupPaths []string) ([]*Source, *Error) {
+func resolveSources (_candidate string, _workspace string, _lookupPaths []string, _execMode bool) ([]*Source, *Error) {
 	
 	_sources := make ([]*Source, 0, 128)
 	
@@ -25,6 +25,9 @@ func resolveSources (_candidate string, _workspace string, _lookupPaths []string
 		
 		case _statMode.IsRegular () :
 			if _source, _error := resolveSource_0 (_path, _stat); _error == nil {
+				if _execMode {
+					_source.Executable = false
+				}
 				_sources = append (_sources, _source)
 			} else {
 				return nil, _error
@@ -207,9 +210,9 @@ func resolveCache () (string, *Error) {
 
 
 
-func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string) (LibraryStore, *Error) {
+func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string, _execMode bool) (LibraryStore, *Error) {
 	
-	_sources, _error := resolveSources (_candidate, _context.workspace, _lookupPaths)
+	_sources, _error := resolveSources (_candidate, _context.workspace, _lookupPaths, _execMode)
 	if _error != nil {
 		return nil, _error
 	}

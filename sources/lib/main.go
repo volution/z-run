@@ -47,6 +47,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	var _workspace string
 	var _cacheRoot string
 	var _terminal string
+	var _execMode bool
 	var _top bool
 	
 	_top = true
@@ -123,7 +124,12 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	for _index, _argument := range _arguments {
 		
-		if _argument == "--" {
+		if _execMode {
+			_librarySourcePath = _arguments[_index]
+			_cleanArguments = _arguments[_index + 1:]
+			break
+			
+		} else if _argument == "--" {
 			_cleanArguments = _arguments[_index + 1:]
 			break
 			
@@ -131,7 +137,13 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			if _command != "" {
 				return errorf (0xae04b5ff, "unexpected argument `%s`", _argument)
 			}
-			if strings.HasPrefix (_argument, "--library-source=") {
+			if _argument == "--exec" {
+				if _index == 0 {
+					_execMode = true
+				} else {
+					return errorf (0x12cdad05, "unexpected `--exec`")
+				}
+			} else if strings.HasPrefix (_argument, "--library-source=") {
 				_librarySourcePath = _argument[len ("--library-source="):]
 				_libraryCachePath = ""
 			} else if strings.HasPrefix (_argument, "--library-cache=") {
@@ -198,6 +210,20 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			_cleanArguments = _arguments[_index:]
 			break
 		}
+	}
+	
+	if _execMode {
+		if _librarySourcePath == "" {
+			return errorf (0xe13c6051, "invalid arguments:  expected source path")
+		}
+		if len (_cleanArguments) > 0 {
+			_scriptlet = _cleanArguments[0]
+			_cleanArguments = _cleanArguments[1:]
+			if ! strings.HasPrefix (_scriptlet, "::") {
+				_scriptlet = ":: " + _scriptlet
+			}
+		}
+		_workspace = path.Dir (_librarySourcePath)
 	}
 	
 	if _scriptlet != "" {
@@ -309,7 +335,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 		}
 	} else {
-		if _library_0, _error := resolveLibrary (_librarySourcePath, _context, _libraryLookupPaths); _error == nil {
+		if _library_0, _error := resolveLibrary (_librarySourcePath, _context, _libraryLookupPaths, _execMode); _error == nil {
 			_library = _library_0
 		} else {
 			return _error
