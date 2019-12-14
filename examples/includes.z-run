@@ -1,0 +1,6 @@
+#!/dev/null
+
+::&& hello / included (bash) :: ./hello.bash
+
+::&&.. hello / included (print) :: ./hello.txt
+

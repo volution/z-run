@@ -1,0 +1,17 @@
+#!/dev/null
+
+
+
+
+::~~ hello / one-line replacer (bash) :: cat -- ./examples/hello.bash
+
+::~~.. hello / one-line replacer (print) :: cat -- ./examples/hello.txt
+
+<<~~ hello / multi-line replacer (bash)
+	cat -- ./examples/hello.bash
+!!
+
+<<~~.. hello / multi-line replacer (print)
+	cat -- ./examples/hello.txt
+!!
+
