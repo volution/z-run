@@ -200,8 +200,10 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			_scriptlet.Kind = "executable-pending"
 		case "generator" :
 			_scriptlet.Kind = "generator-pending"
-		case "replacer" :
-			_scriptlet.Kind = "replacer-pending"
+		case "script-replacer" :
+			_scriptlet.Kind = "script-replacer-pending"
+		case "print-replacer" :
+			_scriptlet.Kind = "print-replacer-pending"
 		case "menu" :
 			_scriptlet.Kind = "menu-pending"
 		default :

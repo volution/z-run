@@ -69,9 +69,21 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 					} else {
 						return nil, _error
 					}
-				case "replacer-pending" :
+				case "script-replacer-pending", "print-replacer-pending" :
 					if _error := parseFromReplacer (_library, _rpc.Url (), _scriptlet, _context); _error == nil {
-						_scriptlet.Kind = "executable-pending"
+						switch _scriptlet.Kind {
+							case "script-replacer-pending" :
+								_scriptlet.Kind = "executable-pending"
+								_scriptlet.Interpreter = "<script>"
+							case "print-replacer-pending" :
+								_scriptlet.Kind = "executable-pending"
+								_scriptlet.Interpreter = "<print>"
+							default :
+								panic (0x6ff57d12)
+						}
+						_scriptlet.InterpreterExecutable = ""
+						_scriptlet.InterpreterArguments = nil
+						_scriptlet.InterpreterEnvironment = nil
 						_repass = true
 					} else {
 						return nil, _error
@@ -154,19 +166,19 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Context) (*Error) {
 	
 	switch _scriptlet.Kind {
-		case "executable-pending", "generator-pending", "replacer-pending" :
+		case "executable-pending", "generator-pending" :
+			switch _scriptlet.Interpreter {
+				case "<script>" :
+					// NOP
+				case "<print>" :
+					return nil
+				default :
+					return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
+			}
+		case "script-replacer-pending", "print-replacer-pending" :
 			// NOP
 		default :
 			return nil
-	}
-	
-	switch _scriptlet.Interpreter {
-		case "<script>" :
-			// NOP
-		case "<bash>", "<print>" :
-			return nil
-		default :
-			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
 	if ! strings.HasPrefix (_scriptlet.Body, "#!") {
@@ -481,10 +493,10 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_kind = "executable"
 							_interpreter = "<print>"
 						case "~~" :
-							_kind = "replacer"
+							_kind = "script-replacer"
 							_interpreter = "<script>"
 						case "~~.." :
-							_kind = "replacer"
+							_kind = "print-replacer"
 							_interpreter = "<print>"
 						case "==" :
 							_kind = "generator"
@@ -577,10 +589,10 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_kind = "executable"
 							_interpreter = "<print>"
 						case "~~" :
-							_kind = "replacer"
+							_kind = "script-replacer"
 							_interpreter = "<script>"
 						case "~~.." :
-							_kind = "replacer"
+							_kind = "print-replacer"
 							_interpreter = "<print>"
 						case "==" :
 							_kind = "generator"
