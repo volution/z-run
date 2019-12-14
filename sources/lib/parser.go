@@ -44,32 +44,50 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	}
 	
 	for {
-		_found := false
+		_repass := false
+		
 		for _, _scriptlet := range _library.Scriptlets {
 			switch _scriptlet.Kind {
-				case "executable", "generator" :
-					// NOP
+				case "executable-pending" :
+					_scriptlet.Kind = "executable"
+			}
+		}
+		
+		for _, _scriptlet := range _library.Scriptlets {
+			switch _scriptlet.Kind {
 				case "generator-pending" :
 					if _error := parseFromGenerator (_library, _rpc.Url (), _scriptlet, _context); _error == nil {
 						_scriptlet.Kind = "generator"
-						_found = true
+						_repass = true
 					} else {
 						return nil, _error
 					}
 				case "replacer-pending" :
 					if _error := parseFromReplacer (_library, _rpc.Url (), _scriptlet, _context); _error == nil {
-						_scriptlet.Kind = "executable"
-						_found = true
+						_scriptlet.Kind = "executable-pending"
+						_repass = true
 					} else {
 						return nil, _error
 					}
+			}
+		}
+		
+		if _repass {
+			continue
+		}
+		
+		for _, _scriptlet := range _library.Scriptlets {
+			switch _scriptlet.Kind {
+				case "executable", "generator" :
+					// NOP
 				case "menu-pending" :
 					// NOP
 				default :
 					return nil, errorf (0xd5f0c788, "invalid state `%s`", _scriptlet.Kind)
 			}
 		}
-		if !_found {
+		
+		if !_repass {
 			break
 		}
 	}

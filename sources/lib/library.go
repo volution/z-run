@@ -196,7 +196,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 	
 	switch _scriptlet.Kind {
 		case "executable" :
-			// NOP
+			_scriptlet.Kind = "executable-pending"
 		case "generator" :
 			_scriptlet.Kind = "generator-pending"
 		case "replacer" :
