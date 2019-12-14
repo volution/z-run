@@ -20,7 +20,9 @@
 ++<< workspace / deploy
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
-	cp -f -- ./.outputs/main-release.elf "${HOME}/.bin/z-run-0"
+	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
+	cp -f -- ./.outputs/main-release.elf "${HOME}/.bin/z-run--${_timestamp}"
+	ln -s -f -- "./z-run--${_timestamp}" "${HOME}/.bin/z-run--0000"
 !!
 
 
