@@ -13,6 +13,9 @@ type Scriptlet struct {
 	Label string `json:"label"`
 	Kind string `json:"kind"`
 	Interpreter string `json:"interpreter"`
+	InterpreterExecutable string `json:"interpreter-executable,omitempty"`
+	InterpreterArguments []string `json:"interpreter-arguments,omitempty"`
+	InterpreterEnvironment map[string]string `json:"interpreter-environment,omitempty"`
 	Body string `json:"body,omitempty"`
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
@@ -187,6 +190,9 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			// NOP
 		default :
 			return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
+	}
+	if (_scriptlet.InterpreterExecutable != "") || (_scriptlet.InterpreterArguments != nil) || (_scriptlet.InterpreterEnvironment != nil) {
+		return errorf (0x901675e8, "invalid scriptlet interpreter state")
 	}
 	
 	switch _scriptlet.Kind {

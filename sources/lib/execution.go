@@ -7,6 +7,7 @@ import "bytes"
 import "fmt"
 import "os"
 import "os/exec"
+import "strings"
 import "syscall"
 
 
@@ -25,7 +26,7 @@ func prepareExecution (_libraryUrl string, _interpreter string, _scriptlet *Scri
 	
 	switch _interpreter {
 		
-		case "<bash>" :
+		case "<exec>", "<bash>" :
 			_interpreterAllowsArguments = true
 		
 		case "<print>" :
@@ -56,6 +57,22 @@ func prepareExecution (_libraryUrl string, _interpreter string, _scriptlet *Scri
 	_interpreterScriptBuffer.Grow (128 * 1024)
 	
 	switch _interpreter {
+		
+		case "<exec>" :
+			_interpreterExecutable = _scriptlet.InterpreterExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					_scriptlet.InterpreterExecutable,
+				)
+			_interpreterArguments = append (
+					_interpreterArguments,
+					_scriptlet.InterpreterArguments ...
+				)
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<bash>" :
 			_interpreterExecutable = "/bin/bash"
@@ -126,6 +143,18 @@ exec %d<&-
 	_descriptors := []int {
 			_interpreterScriptInput,
 		}
+	
+	if strings.IndexByte (_interpreterExecutable, os.PathSeparator) < 0 {
+		if _path, _error := exec.LookPath (_interpreterExecutable); _error == nil {
+			_interpreterExecutable = _path
+		} else {
+			syscall.Close (_interpreterScriptInput)
+			_interpreterScriptOutput.Close ()
+			return nil, nil, errorw (0xd8f4497c, _error)
+		}
+	}
+	
+//	logf ('d', 0xcc6d38ba, "command: `%#v` `%#v`", _interpreterExecutable, _interpreterArguments)
 	
 	_command := & exec.Cmd {
 			Path : _interpreterExecutable,
