@@ -32,6 +32,9 @@ func prepareExecution (_libraryUrl string, _interpreter string, _scriptlet *Scri
 		case "<print>" :
 			_interpreterAllowsArguments = false
 		
+		case "<template>" :
+			_interpreterAllowsArguments = true
+		
 		case "<menu>" :
 			_interpreterAllowsArguments = false
 		
@@ -103,6 +106,15 @@ exec %d<&-
 			_interpreterArguments = append (
 					_interpreterArguments,
 					fmt.Sprintf ("[z-run:print] [%s]", _scriptlet.Label),
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
+		
+		case "<template>" :
+			_interpreterExecutable = _context.selfExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:template] [%s]", _scriptlet.Label),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)

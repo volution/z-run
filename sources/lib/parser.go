@@ -191,44 +191,64 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		return errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptlet.Label)
 	}
 	
-	_header := make ([]string, 0, 16)
-	for _, _part := range strings.Split (_scriptlet.Body[2:_headerLimit], " ") {
-		if _part == "" {
-			continue
+	_headerLine := _scriptlet.Body[2:_headerLimit]
+	_headerLine = strings.Trim (_headerLine, " ")
+	
+	if strings.HasPrefix (_headerLine, "{}") {
+		
+		_headerLine = _headerLine[2:]
+		_headerLine = strings.Trim (_headerLine, " ")
+		
+		if _headerLine != "" {
+			return errorf (0x071546cf, "invalid header for `%s` (template with arguments)", _scriptlet.Label)
 		}
-		_header = append (_header, _part)
-	}
-	if len (_header) == 0 {
-		return errorf (0x15d0485f, "invalid header for `%s` (empty)", _scriptlet.Label)
-	}
-	
-	_executable := _header[0]
-	_arguments := make ([]string, 0, len (_header) + 16)
-	
-	if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
-		_executable = _executable[1 : len (_executable) - 1]
-		switch _executable {
-			case "bash", "python", "python2", "python3", "jq" :
-				// NOP
-			default :
-				return errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptlet.Label)
+		
+		_scriptlet.Interpreter = "<template>"
+		_scriptlet.InterpreterExecutable = ""
+		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterEnvironment = nil
+		
+	} else {
+		
+		_header := make ([]string, 0, 16)
+		for _, _part := range strings.Split (_headerLine, " ") {
+			if _part == "" {
+				continue
+			}
+			_header = append (_header, _part)
 		}
-	}
-	
-	if strings.IndexByte (_executable, os.PathSeparator) >= 0 {
-		if _executable_0, _error := filepath.Abs (_executable); _error == nil {
-			_executable = _executable_0
-		} else {
-			return errorw (0xda17c780, _error)
+		if len (_header) == 0 {
+			return errorf (0x15d0485f, "invalid header for `%s` (empty)", _scriptlet.Label)
 		}
+		
+		_executable := _header[0]
+		_arguments := make ([]string, 0, len (_header) + 16)
+		
+		if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
+			_executable = _executable[1 : len (_executable) - 1]
+			switch _executable {
+				case "bash", "python", "python2", "python3", "jq" :
+					// NOP
+				default :
+					return errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptlet.Label)
+			}
+		}
+		
+		if strings.IndexByte (_executable, os.PathSeparator) >= 0 {
+			if _executable_0, _error := filepath.Abs (_executable); _error == nil {
+				_executable = _executable_0
+			} else {
+				return errorw (0xda17c780, _error)
+			}
+		}
+		
+		_arguments = append (_arguments, _header[1:] ...)
+		
+		_scriptlet.Interpreter = "<exec>"
+		_scriptlet.InterpreterExecutable = _executable
+		_scriptlet.InterpreterArguments = _arguments
+		_scriptlet.InterpreterEnvironment = nil
 	}
-	
-	_arguments = append (_arguments, _header[1:] ...)
-	
-	_scriptlet.Interpreter = "<exec>"
-	_scriptlet.InterpreterExecutable = _executable
-	_scriptlet.InterpreterArguments = _arguments
-	_scriptlet.InterpreterEnvironment = nil
 	
 	_scriptlet.Body = _scriptlet.Body[_headerLimit + 1 :]
 	

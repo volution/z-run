@@ -478,9 +478,10 @@ func Main () () {
 	
 	if strings.HasPrefix (_argument0, "[z-run:menu] ") {
 		_argument0 = "[z-run:menu]"
-	}
-	if strings.HasPrefix (_argument0, "[z-run:select] ") {
+	} else if strings.HasPrefix (_argument0, "[z-run:select] ") {
 		_argument0 = "[z-run:select]"
+	} else if strings.HasPrefix (_argument0, "[z-run:template] ") {
+		_argument0 = "[z-run:template]"
 	}
 	
 	switch _argument0 {
@@ -497,6 +498,13 @@ func Main () () {
 				panic (abortError (_error))
 			} else {
 				panic (0x2346ca3f)
+			}
+		
+		case "[z-run:template]" :
+			if _error := templateMain (); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x32241835)
 			}
 		
 		case "[z-run]" :
@@ -557,6 +565,7 @@ func Main () () {
 	
 	if _error := main_0 (_executable, _argument0, _arguments, _environment); _error == nil {
 		os.Exit (0)
+		panic (0xe0e1c1a1)
 	} else {
 		panic (abortError (_error))
 	}
