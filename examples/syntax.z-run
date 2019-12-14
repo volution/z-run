@@ -38,4 +38,5 @@
 && ./comments.z-run
 && ./generators.z-run
 && ./menus.z-run
+&& ./interpreters.z-run
 

@@ -1,0 +1,15 @@
+#!/dev/null
+
+
+<< interpreters / python
+	#! <python2>
+	import sys
+	sys.stdout.write ("hello from Python!\n")
+!!
+
+
+<< interpreters / base64
+	#! base64
+	hello from base64
+!!
+
