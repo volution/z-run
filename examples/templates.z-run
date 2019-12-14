@@ -1,0 +1,60 @@
+#!/dev/null
+
+
+<< templates / context
+	#! {{}}
+	# workspace
+	{{ .workspace }}
+	
+	# environment
+	{{ range $key, $value := .environment -}}
+	* {{ $key }}={{ $value }}
+	{{ else -}}
+	* <no-environment>
+	{{- end }}
+	# arguments
+	{{ range $_, $argument := .arguments -}}
+	* {{ $argument }}
+	{{ else -}}
+	* <no-arguments>
+	{{- end -}}
+!!
+
+<< templates / context / 2
+	#! {{}}
+	{{- ZRUN ":: templates / context" -}}
+!!
+
+<<~~.. templates / context / 3
+	#! {{}}
+	{{- ZRUN ":: templates / context" }}
+	
+	# date
+	{{ ZRUN ":: templates / input / date" -}}
+!!
+
+
+
+
+<< templates / callback
+	#! {{}}
+	{{- ZRUN ":: templates / input / date" | split "-" | join " " -}}
+	{{ ZRUN ":: templates / input / json" | hex_encode | hex_decode -}}
+	{{ ZRUN ":: templates / input / json" | base64_encode | base64_decode -}}
+	{{ ZRUN ":: templates / input / json" | json_decode | json_encode }}
+!!
+
+<<~~.. templates / callback / replacer
+	#! {{}}
+	{{- ZRUN ":: templates / input / date" -}}
+!!
+
+
+--<< templates / input / date
+	date -- '+%Y-%m-%d-%H-%M-%S'
+!!
+
+--<<.. templates / input / json
+	[ 1, 2, 3 ]
+!!
+

@@ -6,5 +6,6 @@
 && ./replacers.z-run
 && ./generators.z-run
 && ./interpreters.z-run
+&& ./templates.z-run
 && ./comments.z-run
 
