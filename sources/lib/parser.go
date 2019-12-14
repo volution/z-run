@@ -194,9 +194,9 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 	_headerLine := _scriptlet.Body[2:_headerLimit]
 	_headerLine = strings.Trim (_headerLine, " ")
 	
-	if strings.HasPrefix (_headerLine, "{}") {
+	if strings.HasPrefix (_headerLine, "{{}}") {
 		
-		_headerLine = _headerLine[2:]
+		_headerLine = _headerLine[4:]
 		_headerLine = strings.Trim (_headerLine, " ")
 		
 		if _headerLine != "" {

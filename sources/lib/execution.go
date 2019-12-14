@@ -49,6 +49,7 @@ func prepareExecution (_libraryUrl string, _interpreter string, _scriptlet *Scri
 	var _interpreterScriptInput int
 	var _interpreterScriptOutput *os.File
 	var _interpreterScriptDescriptors [2]int
+	var _interpreterScriptUnused = false
 	if _error := syscall.Pipe (_interpreterScriptDescriptors[:]); _error == nil {
 		_interpreterScriptInput = _interpreterScriptDescriptors[0]
 		_interpreterScriptOutput = os.NewFile (uintptr (_interpreterScriptDescriptors[1]), "")
@@ -114,7 +115,16 @@ exec %d<&-
 			_interpreterExecutable = _context.selfExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:template] [%s]", _scriptlet.Label),
+					"[z-run:template]",
+					fmt.Sprintf (":: %s", _scriptlet.Label),
+				)
+			_interpreterScriptUnused = true
+		
+		case "<template-raw>" :
+			_interpreterExecutable = _context.selfExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:template-raw] [%s]", _scriptlet.Label),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
@@ -132,14 +142,27 @@ exec %d<&-
 			panic (0xe95f68a0)
 	}
 	
-//	logf ('d', 0xedfcf88b, "\n----------\n%s----------\n", _interpreterScriptBuffer.Bytes ())
 	
-	if _, _error := _interpreterScriptBuffer.WriteTo (_interpreterScriptOutput); _error == nil {
-		_interpreterScriptOutput.Close ()
+	var _descriptors []int
+	if ! _interpreterScriptUnused {
+		
+//		logf ('d', 0xedfcf88b, "\n----------\n%s----------\n", _interpreterScriptBuffer.Bytes ())
+		
+		if _, _error := _interpreterScriptBuffer.WriteTo (_interpreterScriptOutput); _error == nil {
+			_interpreterScriptOutput.Close ()
+		} else {
+			syscall.Close (_interpreterScriptInput)
+			_interpreterScriptOutput.Close ()
+			return nil, nil, errorw (0xf789ed3f, _error)
+		}
+		
+		_descriptors = []int {
+				_interpreterScriptInput,
+			}
+		
 	} else {
 		syscall.Close (_interpreterScriptInput)
 		_interpreterScriptOutput.Close ()
-		return nil, nil, errorw (0xf789ed3f, _error)
 	}
 	
 	if _includeArguments {
@@ -151,10 +174,6 @@ exec %d<&-
 			"ZRUN_LIBRARY_CACHE" : _libraryUrl,
 			"ZRUN_WORKSPACE" : _context.workspace,
 		})
-	
-	_descriptors := []int {
-			_interpreterScriptInput,
-		}
 	
 	if strings.IndexByte (_interpreterExecutable, os.PathSeparator) < 0 {
 		if _path, _error := exec.LookPath (_interpreterExecutable); _error == nil {

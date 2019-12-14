@@ -161,6 +161,10 @@ func doExportLibraryRpc (_library LibraryStore, _url string, _context *Context) 
 
 func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (*Error) {
 	
+	if _scriptlet.Interpreter == "<template>" {
+		return executeTemplate (_library, _scriptlet, _context, os.Stdout)
+	}
+	
 	var _command *exec.Cmd
 	var _descriptors []int
 	if _command_0, _descriptors_0, _error := prepareExecution (_library.Url (), "", _scriptlet, true, _context); _error == nil {
