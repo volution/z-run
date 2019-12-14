@@ -181,17 +181,12 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 	if _, _exists := _library.ScriptletsByLabel[_scriptlet.Label]; _exists {
 		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
 	}
+	
 	switch _scriptlet.Interpreter {
-		case "<shell>", "<print>", "<menu>" :
+		case "<script>", "<print>", "<menu>" :
 			// NOP
 		default :
 			return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
-	}
-	
-	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Kind) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
-	
-	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
-		return nil
 	}
 	
 	switch _scriptlet.Kind {
@@ -205,6 +200,12 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			_scriptlet.Kind = "menu-pending"
 		default :
 			return errorf (0x4b8aacf2, "invalid scriptlet kind `%s`", _scriptlet.Kind)
+	}
+	
+	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Kind) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
+	
+	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
+		return nil
 	}
 	
 	_scriptlet.Index = uint (len (_library.Scriptlets))

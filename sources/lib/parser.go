@@ -47,6 +47,25 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		_repass := false
 		
 		for _, _scriptlet := range _library.Scriptlets {
+//			logf ('d', 0x6ed98b9c, "`%s` `%s` `%s`", _scriptlet.Kind, _scriptlet.Interpreter, _scriptlet.Label)
+			switch _scriptlet.Kind {
+				case "executable-pending", "generator-pending", "replacer-pending" :
+					// NOP
+				default :
+					continue
+			}
+			switch _scriptlet.Interpreter {
+				case "<script>" :
+					// NOP
+				case "<bash>", "<print>" :
+					continue
+				default :
+					return nil, errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
+			}
+			_scriptlet.Interpreter = "<bash>"
+		}
+		
+		for _, _scriptlet := range _library.Scriptlets {
 			switch _scriptlet.Kind {
 				case "executable-pending" :
 					_scriptlet.Kind = "executable"
@@ -77,6 +96,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		}
 		
 		for _, _scriptlet := range _library.Scriptlets {
+//			logf ('d', 0xd28b083f, "`%s` `%s` `%s`", _scriptlet.Kind, _scriptlet.Interpreter, _scriptlet.Label)
 			switch _scriptlet.Kind {
 				case "executable", "generator" :
 					// NOP
@@ -154,7 +174,7 @@ func parseFromGenerator (_library *Library, _libraryUrl string, _source *Scriptl
 }
 
 func parseFromReplacer (_library *Library, _libraryUrl string, _source *Scriptlet, _context *Context) (*Error) {
-	if _, _data, _error := loadFromScriptlet (_libraryUrl, "<shell>", _source, _context); _error == nil {
+	if _, _data, _error := loadFromScriptlet (_libraryUrl, _source.Interpreter, _source, _context); _error == nil {
 		if utf8.Valid (_data) {
 			_source.Body = string (_data)
 			return nil
@@ -395,23 +415,23 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					switch _prefix[2:] {
 						case "" :
 							_kind = "executable"
-							_interpreter = "<shell>"
+							_interpreter = "<script>"
 						case ".." :
 							_kind = "executable"
 							_interpreter = "<print>"
 						case "~~" :
 							_kind = "replacer"
-							_interpreter = "<shell>"
+							_interpreter = "<script>"
 						case "~~.." :
 							_kind = "replacer"
 							_interpreter = "<print>"
 						case "==" :
 							_kind = "generator"
-							_interpreter = "<shell>"
+							_interpreter = "<script>"
 							_hidden = true
 						case "&&" :
 							_kind = "executable"
-							_interpreter = "<shell>"
+							_interpreter = "<script>"
 							_include = true
 						case "&&.." :
 							_kind = "executable"
@@ -491,19 +511,19 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					switch _prefix[2:] {
 						case "" :
 							_kind = "executable"
-							_interpreter = "<shell>"
+							_interpreter = "<script>"
 						case ".." :
 							_kind = "executable"
 							_interpreter = "<print>"
 						case "~~" :
 							_kind = "replacer"
-							_interpreter = "<shell>"
+							_interpreter = "<script>"
 						case "~~.." :
 							_kind = "replacer"
 							_interpreter = "<print>"
 						case "==" :
 							_kind = "generator"
-							_interpreter = "<shell>"
+							_interpreter = "<script>"
 							_hidden = true
 						default :
 							return errorf (0xd08972fe, "invalid syntax (%d):  unknown scriptlet type | %s", _lineIndex, _line)

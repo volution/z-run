@@ -25,7 +25,7 @@ func prepareExecution (_libraryUrl string, _interpreter string, _scriptlet *Scri
 	
 	switch _interpreter {
 		
-		case "<shell>" :
+		case "<bash>" :
 			_interpreterAllowsArguments = true
 		
 		case "<print>" :
@@ -57,11 +57,11 @@ func prepareExecution (_libraryUrl string, _interpreter string, _scriptlet *Scri
 	
 	switch _interpreter {
 		
-		case "<shell>" :
+		case "<bash>" :
 			_interpreterExecutable = "/bin/bash"
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:shell] [%s]", _scriptlet.Label),
+					fmt.Sprintf ("[z-run:bash] [%s]", _scriptlet.Label),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (
