@@ -32,10 +32,10 @@ type Context struct {
 
 
 
-func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string) (*Error) {
+func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string) (*Error) {
 	
-	var _command string
-	var _scriptlet string
+	var _command string = _commandOverride
+	var _scriptlet string = _scriptletOverride
 	
 	var _librarySourcePath string
 	var _libraryCachePath string
@@ -106,7 +106,11 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				case "X_RUN_COMMANDS" :
 					_librarySourcePath = _value
 				case "X_RUN_ACTION" :
-					_command = "legacy:" + _value
+					if _command == "" {
+						_command = "legacy:" + _value
+					} else {
+						return errorf (0x1da61a22, "unexpected command `%s`", _value)
+					}
 				case "X_RUN_TERM" :
 					_terminal = _value
 				default :
@@ -124,7 +128,11 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	
 	for _index, _argument := range _arguments {
 		
-		if _execMode {
+		if _scriptlet != "" {
+			_cleanArguments = _arguments[_index:]
+			break
+			
+		} else if _execMode {
 			_librarySourcePath = _arguments[_index]
 			_cleanArguments = _arguments[_index + 1:]
 			break
@@ -480,8 +488,8 @@ func Main () () {
 		_argument0 = "[z-run:menu]"
 	} else if strings.HasPrefix (_argument0, "[z-run:select] ") {
 		_argument0 = "[z-run:select]"
-	} else if strings.HasPrefix (_argument0, "[z-run:template] ") {
-		_argument0 = "[z-run:template]"
+	} else if strings.HasPrefix (_argument0, "[z-run:template-raw] ") {
+		_argument0 = "[z-run:template-raw]"
 	}
 	
 	switch _argument0 {
@@ -500,7 +508,7 @@ func Main () () {
 				panic (0x2346ca3f)
 			}
 		
-		case "[z-run:template]" :
+		case "[z-run:template-raw]" :
 			if _error := templateMain (); _error != nil {
 				panic (abortError (_error))
 			} else {
@@ -563,7 +571,7 @@ func Main () () {
 //	logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
 //	logf ('d', 0x7a411846, "self-environment: %s", _environment)
 	
-	if _error := main_0 (_executable, _argument0, _arguments, _environment); _error == nil {
+	if _error := main_0 (_executable, _argument0, _arguments, _environment, "", ""); _error == nil {
 		os.Exit (0)
 		panic (0xe0e1c1a1)
 	} else {
