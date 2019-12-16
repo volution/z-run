@@ -227,8 +227,10 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
 			_executable = _executable[1 : len (_executable) - 1]
 			switch _executable {
-				case "bash", "python", "python2", "python3", "jq" :
+				case "bash", "python", "python2", "python3" :
 					// NOP
+				case "jq", "ninja" :
+					_arguments = append (_arguments, "-f")
 				default :
 					return errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptlet.Label)
 			}
