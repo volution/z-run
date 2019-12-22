@@ -126,7 +126,10 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 			_folders = append (_folders, folder { path.Join (_workspace, _subfolder), false })
 		}
 		for _, _folder := range _folders {
-			_folders = append (_folders, folder { path.Join (_folder.path, "scripts"), _folder.fallback })
+			_folders = append (_folders,
+					folder { path.Join (_folder.path, "scriptlets"), _folder.fallback },
+					folder { path.Join (_folder.path, "scripts"), _folder.fallback },
+				)
 		}
 	}
 	
