@@ -32,19 +32,6 @@
 	"${ZRUN[@]}" ':: go / build / main / debug'
 	test "${#}" -ge 1
 	export -n -- \
-			X_RUN \
-			X_RUN_COMMAND \
-			X_RUN_COMMANDS \
-			X_RUN_COMMANDS_CDB \
-			X_RUN_ACTION \
-			X_RUN_FILTER \
-			X_RUN_INSIDE \
-			X_RUN_TERM \
-			X_RUN_TRACE \
-			X_RUN_CLEAN \
-			X_RUN_CACHE_IDENTITY \
-	#
-	export -n -- \
 			ZRUN_LIBRARY_SOURCE \
 			ZRUN_LIBRARY_CACHE \
 			ZRUN_EXECUTABLE \
