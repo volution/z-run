@@ -32,11 +32,11 @@
 	"${ZRUN[@]}" ':: go / build / main / debug'
 	test "${#}" -ge 1
 	export -n -- \
-			ZRUN_LIBRARY_SOURCE \
-			ZRUN_LIBRARY_CACHE \
-			ZRUN_EXECUTABLE \
-			ZRUN_CACHE \
-			ZRUN_TERM \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_CACHE= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_CACHE= \
+			ZRUN_TERM= \
 	#
 	if test -n "${ZRUNDEV_USE:-}" ; then
 		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE}"
