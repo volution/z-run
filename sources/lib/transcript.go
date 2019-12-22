@@ -63,22 +63,32 @@ func abortErrorf (_error *Error, _code uint32, _format string, _arguments ... in
 
 func errorf (_code uint32, _format string, _arguments ... interface{}) (*Error) {
 	_message := fmt.Sprintf (_format, _arguments ...)
-	return & Error {
+	_error_0 := & Error {
 			Code : _code,
 			Message : _message,
 			Error : nil,
 		}
+	return returnError (_error_0)
 }
 
 func errorw (_code uint32, _error error) (*Error) {
 	if _code == 0 {
 		panic (0xa4ddfd33)
 	}
-	return & Error {
+	_error_0 := & Error {
 			Code : _code,
 			Message : "",
 			Error : _error,
 		}
+	return returnError (_error_0)
+}
+
+func returnError (_error *Error) (*Error) {
+	if true {
+		return _error
+	} else {
+		panic (_error)
+	}
 }
 
 

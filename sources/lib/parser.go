@@ -47,7 +47,6 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		_repass := false
 		
 		for _, _scriptlet := range _library.Scriptlets {
-//			logf ('d', 0x6ed98b9c, "`%s` `%s` `%s`", _scriptlet.Kind, _scriptlet.Interpreter, _scriptlet.Label)
 			if _error := parseInterpreter (_library, _scriptlet, _context); _error != nil {
 				return nil, _error
 			}
@@ -113,25 +112,34 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	}
 	
 	{
+		_menus := make ([]*Scriptlet, 0, 1024)
 		for _, _scriptlet := range _library.Scriptlets {
-			switch _scriptlet.Kind {
-				case "menu-pending" :
-					if _error := parseFromMenu (_library, _scriptlet, _context); _error == nil {
-						_scriptlet.Kind = "menu"
-					} else {
-						return nil, _error
-					}
-				default :
-					// NOP
+			if _scriptlet.Kind == "menu-pending" {
+				_menus = append (_menus, _scriptlet)
 			}
+		}
+		for _, _scriptlet := range _menus {
+			if _error := parseFromMenu (_library, _scriptlet, _context); _error != nil {
+				return nil, _error
+			}
+		}
+		for _, _scriptlet := range _menus {
+			_scriptlet.Kind = "menu"
 		}
 	}
 	
 	{
 		for _, _scriptlet := range _library.Scriptlets {
 			sort.Strings (_scriptlet.Menus)
-			if len (_scriptlet.Menus) != 0 {
-				_scriptlet.Hidden = true
+			for _, _menu := range _scriptlet.Menus {
+				switch _menu[0] {
+					case '*' :
+						// NOP
+					case '+' :
+						_scriptlet.Hidden = true
+					default :
+						return nil, errorf (0x51045db3, "invalid state `%s`", _menu)
+				}
 			}
 		}
 	}
@@ -282,6 +290,9 @@ func parseFromReplacer (_library *Library, _libraryUrl string, _source *Scriptle
 }
 
 func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*Error) {
+	if _source.Kind != "menu-pending" {
+		return errorf (0x6834ac93, "invalid state")
+	}
 	_labels := make ([]string, 0, 1024)
 	_matchers := strings.Split (_source.Body, "\n")
 	_scriptlets := make ([]*Scriptlet, 0, len (_library.Scriptlets))
@@ -295,35 +306,48 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*
 		_scriptlets = append (_scriptlets, _scriptlet)
 	}
 	for _, _matcher := range _matchers {
-		if _matcher == "" {
+		if (_matcher == "") || (_matcher[0] == '#') {
 			continue
-		} else if _matcher == "*" {
-			for _, _scriptlet := range _scriptlets {
-				_labels = append (_labels, _scriptlet.Label)
-			}
-		} else if strings.HasPrefix (_matcher, "+^ ") {
-			_pattern := _matcher[3:]
-			for _, _scriptlet := range _scriptlets {
-				if strings.HasPrefix (_scriptlet.Label, _pattern) {
-					_labels = append (_labels, _scriptlet.Label)
-					_scriptlet.Menus = append (_scriptlet.Menus, _source.Label)
-				}
-			}
-		} else if strings.HasPrefix (_matcher, "~ ") {
-			var _pattern *regexp.Regexp
-			if _pattern_0, _error := regexp.Compile (_matcher[2:]); _error == nil {
-				_pattern = _pattern_0
-			} else {
-				return errorf (0xabf68b41, "invalid menu matcher `%s`", _matcher)
-			}
-			for _, _scriptlet := range _scriptlets {
-				if _pattern.MatchString (_scriptlet.Label) {
-					_labels = append (_labels, _scriptlet.Label)
-					_scriptlet.Menus = append (_scriptlet.Menus, _source.Label)
-				}
-			}
 		} else {
-			return errorf (0xa068e934, "invalid menu matcher `%s`", _matcher)
+			switch _matcher[0] {
+				case '*', '+' :
+					// NOP
+				case '^', '~' :
+					_matcher = "+" + _matcher
+				default :
+					return errorf (0x11ca1466, "invalid menu mode `%s`", _matcher)
+			}
+			_mode := _matcher[:1]
+			_matcher = _matcher[1:]
+			if _matcher == "" {
+				for _, _scriptlet := range _scriptlets {
+					_labels = append (_labels, _scriptlet.Label)
+					_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+				}
+			} else if strings.HasPrefix (_matcher, "^ ") {
+				_pattern := _matcher[2:]
+				for _, _scriptlet := range _scriptlets {
+					if strings.HasPrefix (_scriptlet.Label, _pattern) {
+						_labels = append (_labels, _scriptlet.Label)
+						_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+					}
+				}
+			} else if strings.HasPrefix (_matcher, "~ ") {
+				var _pattern *regexp.Regexp
+				if _pattern_0, _error := regexp.Compile (_matcher[2:]); _error == nil {
+					_pattern = _pattern_0
+				} else {
+					return errorf (0xabf68b41, "invalid menu matcher `%s`", _matcher)
+				}
+				for _, _scriptlet := range _scriptlets {
+					if _pattern.MatchString (_scriptlet.Label) {
+						_labels = append (_labels, _scriptlet.Label)
+						_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+					}
+				}
+			} else {
+				return errorf (0xa068e934, "invalid menu matcher `%s`", _matcher)
+			}
 		}
 	}
 	sort.Strings (_labels)
@@ -537,12 +561,15 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_interpreter = "<menu>"
 							_include = false
 							if _body == "" {
-								if (_label == "*") || (_label == "* ...") {
+								if _label == "*" {
 									_body = "*"
 								} else {
-									_body = "+^ " + _label
-									if strings.HasSuffix (_body, " ...") {
-										_body = _body[:len (_body) - 3]
+									if strings.HasSuffix (_label, " ...") {
+										_body = "+^ " + _label[:len (_label) - 4]
+									} else if strings.HasSuffix (_label, " *") {
+										_body = "*^ " + _label[:len (_label) - 2]
+									} else {
+										return errorf (0x84fa71b1, "invalid syntax (%d):  invalid menu label | %s", _lineIndex, _line)
 									}
 								}
 							}
