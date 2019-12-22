@@ -40,12 +40,14 @@
 	#
 	if test -n "${ZRUNDEV_USE:-}" ; then
 		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE}"
-		export -n -- ZRUNDEV_USE=
+	else
+		export -- ZRUN_LIBRARY_SOURCE="./examples/syntax.z-run"
 	fi
+	export -n -- ZRUNDEV_USE=
 	if test -n "${ZRUNDEV_TERM:-}" ; then
 		export -- TERM="${ZRUNDEV_TERM}"
-		export -n -- ZRUNDEV_TERM=
 	fi
+	export -n -- ZRUNDEV_TERM=
 	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
 !!
 
