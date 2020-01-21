@@ -8,4 +8,5 @@
 && ./interpreters.z-run
 && ./templates.z-run
 && ./comments.z-run
+&& ./ssh.z-run
 

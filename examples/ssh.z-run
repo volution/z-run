@@ -1,0 +1,33 @@
+#!/dev/null
+
+
+<< ssh / launch
+	test "${#}" -ge 1
+	_target="${1}"
+	shift -- 1
+	"${ZRUN[@]}" ':: ssh / sync' "${_target}"
+	exec -- "${ZRUN[@]}" ssh "${_target}" ':: ssh / remote' "${@}"
+!!
+
+<< ssh / sync
+	test "${#}" -eq 1
+	_target="${1}"
+	shift -- 1
+	exec -- rsync -i -- "${ZRUN}" "${_target}":~/.bin/z-run
+!!
+
+<< ssh / remote
+	printf -- '[ii]  host: `%s`\n' "$( exec -- hostname )" >&2
+	printf -- '[ii]  cwd: `%s`\n' "$( exec -- readlink -e -- . )" >&2
+	printf -- '[ii]  arguments count:  %d\n' "${#}" >&2
+	for _argument in "${@}" ; do
+		printf -- '[ii]  argument: `%s`\n' "${_argument}" >&2
+	done
+	_index=0
+	while test "${_index}" -lt 60 ; do
+		_index="$(( $_index + 1 ))"
+		printf '.' >&2
+		sleep -- 1s
+	done
+!!
+
