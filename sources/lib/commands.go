@@ -3,12 +3,16 @@
 package zrun
 
 
+import crand "crypto/rand"
 import "bytes"
+import "encoding/base64"
+import "encoding/hex"
 import "encoding/json"
 import "fmt"
 import "io"
 import "os"
 import "os/exec"
+import "path"
 import "sort"
 import "strings"
 import "syscall"
@@ -212,6 +216,138 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 	} else {
 		panic (0xb6dfe17e)
 	}
+}
+
+
+
+
+func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, _sshContext *SshContext, _context *Context) (bool, *Error) {
+	
+	_sshTarget := _sshContext.target
+	_sshLauncher := _sshContext.launcher
+	_sshDelegate := _sshContext.delegate
+	_sshWorkspace := _sshContext.workspace
+	_sshCache := _sshContext.cache
+	_sshTerminal := _sshContext.terminal
+	_sshLibraryLocalSocket := _sshContext.libraryLocalSocket
+	_sshLibraryRemoteSocket := _sshContext.libraryRemoteSocket
+	_sshToken := _sshContext.token
+	
+	if _sshTarget == "" {
+		return false, errorf (0xa552d948, "invalid target:  missing")
+	}
+	
+	if _sshToken == "" {
+		var _data [128 / 8]byte
+		if _read, _error := crand.Read (_data[:]); _error == nil {
+			if _read != (128 / 8) {
+				return false, errorf (0xdc5228aa, "invalid state")
+			}
+		} else {
+			return false, errorw (0xc2595acb, _error)
+		}
+		_sshToken = hex.EncodeToString (_data[:])
+	}
+	
+	if _sshLauncher == "" {
+		_sshLauncher = "ssh"
+	}
+	if strings.IndexByte (_sshLauncher, os.PathSeparator) < 0 {
+		if _path, _error := exec.LookPath (_sshLauncher); _error == nil {
+			_sshLauncher = _path
+		} else {
+			return false, errorw (0x9c296054, _error)
+		}
+	}
+	
+	if _sshDelegate == "" {
+		_sshDelegate = "z-run"
+	}
+	if fmt.Sprintf ("%+q", _sshDelegate) != ("\"" + _sshDelegate + "\"") {
+		return false, errorf (0x230a2fc4, "invalid delegate:  non ASCII")
+	}
+	if strings.ContainsAny (_sshDelegate, " !\"#$%&'()*+,:;<=>?@[\\]^`{|}~") {
+		return false, errorf (0x1e5c7a40, "invalid delegate:  contains disallowed special character")
+	}
+	
+	if _sshWorkspace == "" {
+		_sshWorkspace = "/tmp"
+	}
+	if _sshCache == "" {
+		_sshCache = "/tmp"
+	}
+	if _sshTerminal == "" {
+		_sshTerminal = _context.terminal
+	}
+	
+	if _sshLibraryLocalSocket == "" {
+		_cacheRoot := _context.cacheRoot
+		if _cacheRoot == "" {
+			if _cacheRoot_0, _error := resolveCache (); _error == nil {
+				_cacheRoot = _cacheRoot_0
+			} else {
+				return false, _error
+			}
+		}
+		_sshLibraryLocalSocket = path.Join (_cacheRoot, fmt.Sprintf ("%s-%08x.sock", _sshToken, os.Getpid ()))
+	}
+	if _sshLibraryRemoteSocket == "" {
+		_sshLibraryRemoteSocket = path.Join (_sshCache, fmt.Sprintf ("%s.sock", _sshToken))
+	}
+	
+	var _rpc *LibraryRpcServer
+	if _rpc_0, _error := NewLibraryRpcServer (_library, "unix:" + _sshLibraryLocalSocket); _error == nil {
+		_rpc = _rpc_0
+	} else {
+		return false, _error
+	}
+	if _error := _rpc.ServeStart (); _error != nil {
+		return false, _error
+	}
+	defer _rpc.ServeStop ()
+	
+	_invokeContext := & InvokeContext {
+			Library : "unix:" + _sshLibraryRemoteSocket,
+			Scriptlet : _scriptlet.Label,
+			Arguments : _context.cleanArguments,
+			Environment : nil,
+			Workspace : _sshWorkspace,
+			Cache : _sshCache,
+			Terminal : _sshTerminal,
+		}
+	
+	var _invokeContextEncoded string
+	if _data, _error := json.Marshal (_invokeContext); _error == nil {
+		_invokeContextEncoded = base64.RawURLEncoding.EncodeToString (_data)
+	} else {
+		return false, errorw (0x5bbc9bcc, _error)
+	}
+	
+	_sshArguments := make ([]string, 0, 16)
+	_sshArguments = append (_sshArguments, _sshLauncher)
+	if _sshTerminal == "" {
+		_sshArguments = append (_sshArguments, "-T")
+	}
+	_sshArguments = append (_sshArguments, "-R", _sshLibraryRemoteSocket + ":" + _sshLibraryLocalSocket)
+	_sshArguments = append (_sshArguments, "--")
+	_sshArguments = append (_sshArguments, _sshTarget)
+	_sshArguments = append (_sshArguments, "exec", _sshDelegate, "--invoke", _invokeContextEncoded)
+	
+	_sshCommand := & exec.Cmd {
+			Path : _sshLauncher,
+			Args : _sshArguments,
+			Env : nil,
+			Dir : "",
+			Stdin : os.Stdin,
+			Stdout : os.Stdout,
+			Stderr : os.Stderr,
+		}
+	
+	if _error := _sshCommand.Run (); _error != nil {
+		return false, errorw (0x881a60b5, _error)
+	}
+	
+	return true, nil
 }
 
 

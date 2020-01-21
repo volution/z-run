@@ -32,6 +32,18 @@ type Context struct {
 }
 
 
+type SshContext struct {
+	target string
+	launcher string
+	delegate string
+	workspace string
+	cache string
+	terminal string
+	libraryLocalSocket string
+	libraryRemoteSocket string
+	token string
+}
+
 type InvokeContext struct {
 	Library string `json:"library"`
 	Scriptlet string `json:"scriptlet"`
@@ -63,6 +75,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	var _execMode bool
 	var _invokeMode bool
 	var _invokeContextEncoded string
+	var _sshContext *SshContext
 	var _top bool
 	
 	_top = true
@@ -201,6 +214,11 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 						_command = "execute-scriptlet"
 						continue
 					
+					case "execute-scriptlet-ssh", "execute-ssh", "ssh" :
+						_command = "execute-scriptlet-ssh"
+						_sshContext = & SshContext {}
+						continue
+					
 					case "export-scriptlet-body", "export-body" :
 						_command = "export-scriptlet-body"
 						continue
@@ -237,10 +255,16 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 						_command = "export-library-rpc"
 						_index += 1
 				}
+				
+			} else if (_command == "execute-scriptlet-ssh") && (_sshContext.target == "") {
+				_sshContext.target = _argument
+				continue
+				
 			} else {
 				_scriptlet = _argument
 				_index += 1
 			}
+			
 			_cleanArguments = _arguments[_index:]
 			break
 		}
@@ -437,6 +461,15 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				return errorf (0x39718e70, "execute:  expected scriptlet")
 			}
 			return doHandleWithLabel (_library, _scriptlet, doHandleExecuteScriptlet, _context)
+		
+		case "execute-scriptlet-ssh" :
+			if _scriptlet == "" {
+				return errorf (0xcc3c2ea6, "execute-ssh:  expected scriptlet")
+			}
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
+					return doHandleExecuteScriptletSsh (_library, _scriptlet, _sshContext, _context)
+				}
+			return doHandleWithLabel (_library, _scriptlet, _handler, _context)
 		
 		case "export-scriptlet-body" :
 			if _scriptlet == "" {
