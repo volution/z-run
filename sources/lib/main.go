@@ -3,6 +3,8 @@
 package zrun
 
 
+import "encoding/base64"
+import "encoding/json"
 import "log"
 import "os"
 import "path"
@@ -30,6 +32,17 @@ type Context struct {
 }
 
 
+type InvokeContext struct {
+	Library string `json:"library"`
+	Scriptlet string `json:"scriptlet"`
+	Arguments []string `json:"arguments"`
+	Environment map[string]string `json:"environment"`
+	Workspace string `json:"workspace"`
+	Cache string `json:"cache"`
+	Terminal string `json:"terminal"`
+}
+
+
 
 
 func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string) (*Error) {
@@ -48,6 +61,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	var _cacheRoot string
 	var _terminal string
 	var _execMode bool
+	var _invokeMode bool
+	var _invokeContextEncoded string
 	var _top bool
 	
 	_top = true
@@ -137,6 +152,11 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			_cleanArguments = _arguments[_index + 1:]
 			break
 			
+		} else if _invokeMode {
+			_invokeContextEncoded = _arguments[_index]
+			_cleanArguments = _arguments[_index + 1:]
+			break
+			
 		} else if _argument == "--" {
 			_cleanArguments = _arguments[_index + 1:]
 			break
@@ -150,6 +170,12 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					_execMode = true
 				} else {
 					return errorf (0x12cdad05, "unexpected `--exec`")
+				}
+			} else if _argument == "--invoke" {
+				if _index == 0 {
+					_invokeMode = true
+				} else {
+					return errorf (0x03da9932, "unexpected `--invoke`")
 				}
 			} else if strings.HasPrefix (_argument, "--library-source=") {
 				_librarySourcePath = _argument[len ("--library-source="):]
@@ -224,6 +250,9 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		if _librarySourcePath == "" {
 			return errorf (0xe13c6051, "invalid arguments:  expected source path")
 		}
+		if _scriptlet != "" {
+			return errorf (0xb2b83ca4, "invalid arguments:  unexpected scriptlet")
+		}
 		if len (_cleanArguments) > 0 {
 			_scriptlet = _cleanArguments[0]
 			_cleanArguments = _cleanArguments[1:]
@@ -232,6 +261,56 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 		}
 		_workspace = path.Dir (_librarySourcePath)
+	}
+	
+	if _invokeMode {
+		if _command != "" {
+			return errorf (0x996e4c2b, "invalid arguments:  unexpected command")
+		}
+		if _scriptlet != "" {
+			return errorf (0x3344b708, "invalid arguments:  unexpected scriptlet")
+		}
+		if len (_cleanArguments) != 0 {
+			return errorf (0x71d92eec, "invalid arguments:  unexpected arguments")
+		}
+		if (_librarySourcePath != "") || (_libraryCachePath != "") || (len (_libraryLookupPaths) != 0) {
+			return errorf (0x70d72d6d, "invalid arguments:  unexpected library source, cache or lookup")
+		}
+		if _workspace != "" {
+			return errorf (0x70d37d49, "invalid arguments:  unexpected workspace")
+		}
+		if _cacheRoot != "" {
+			return errorf (0xb8216677, "invalid arguments:  unexpected cache")
+		}
+		if _terminal != "" {
+			return errorf (0xc99ea71b, "invalid arguments:  unexpected terminal")
+		}
+		if _invokeContextEncoded == "" {
+			return errorf (0xd08f059a, "invalid arguments:  expected invoke context")
+		}
+		var _context InvokeContext
+		if _data, _error := base64.RawURLEncoding.DecodeString (_invokeContextEncoded); _error == nil {
+			if _error := json.Unmarshal (_data, &_context); _error == nil {
+				// NOP
+			} else {
+				return errorw (0x29dfbd1e, _error)
+			}
+		} else {
+			return errorw (0x7c9f1ada, _error)
+		}
+		_scriptlet = _context.Scriptlet
+		if ! strings.HasPrefix (_scriptlet, "::") {
+			_scriptlet = ":: " + _scriptlet
+		}
+		_cleanArguments = _context.Arguments
+		for _name, _value := range _context.Environment {
+			_cleanEnvironment[_name] = _value
+		}
+		_libraryCachePath = _context.Library
+		_workspace = _context.Workspace
+		_cacheRoot = _context.Cache
+		_terminal = _context.Terminal
+		_top = false
 	}
 	
 	if _scriptlet != "" {
