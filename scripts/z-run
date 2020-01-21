@@ -17,12 +17,22 @@
 
 
 
-++<< workspace / deploy
+++<< workspace / deploy / local
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
 	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
 	cp -f -- ./.outputs/main-release.elf "${HOME}/.bin/z-run--${_timestamp}"
 	ln -s -f -- "./z-run--${_timestamp}" "${HOME}/.bin/z-run--0000"
+!!
+
+
+++<< workspace / deploy / remote
+	test "${#}" -eq 1
+	_target="${1}"
+	shift -- 1
+	"${ZRUN[@]}" ':: go / build / main / release'
+	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
+	rsync -i -t -p --chmod=0555 -- ./.outputs/main-release.elf "${_target}"
 !!
 
 
