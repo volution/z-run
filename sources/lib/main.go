@@ -42,6 +42,7 @@ type SshContext struct {
 	libraryLocalSocket string
 	libraryRemoteSocket string
 	token string
+	exportEnvironment []string
 }
 
 type InvokeContext struct {
@@ -75,6 +76,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 	var _execMode bool
 	var _invokeMode bool
 	var _invokeContextEncoded string
+	var _sshMode bool
 	var _sshContext *SshContext
 	var _top bool
 	
@@ -194,6 +196,14 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					return errorf (0x03da9932, "unexpected argument `--invoke` (only first)")
 				}
 				
+			} else if _argument == "--ssh" {
+				if _index == 0 {
+					_sshMode = true
+					_sshContext = & SshContext {}
+				} else {
+					return errorf (0x6a4ba0b6, "unexpected argument `--ssh` (only first)")
+				}
+				
 			} else if strings.HasPrefix (_argument, "--library-source=") {
 				_librarySourcePath = _argument[len ("--library-source="):]
 				_libraryCachePath = ""
@@ -203,6 +213,21 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				
 			} else if strings.HasPrefix (_argument, "--workspace=") {
 				_workspace = _argument[len ("--workspace="):]
+				
+			} else if strings.HasPrefix (_argument, "--ssh-") {
+				if !_sshMode {
+					return errorf (0x0e1cdc68, "unexpected argument `%s` (only with `--ssh`)", _argument)
+				}
+				if strings.HasPrefix (_argument, "--ssh-target=") {
+					_target := _argument[len ("--ssh-target="):]
+					_sshContext.target = _target
+				} else if strings.HasPrefix (_argument, "--ssh-export=") {
+					_name := _argument[len ("--ssh-export="):]
+					_sshContext.exportEnvironment = append (_sshContext.exportEnvironment, _name)
+				} else {
+					return errorf (0x33555ffb, "invalid argument `%s`", _argument)
+				}
+				
 			} else {
 				return errorf (0x33555ffb, "invalid argument `%s`", _argument)
 			}
@@ -210,6 +235,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		} else if strings.HasPrefix (_argument, "::") {
 			_scriptlet = _argument
 			
+		} else if _sshMode {
+			return errorf (0x7af6b31f, "unexpected argument `%s` (for `--ssh`)", _argument)
 			
 		} else {
 			if _command == "" {
@@ -324,6 +351,13 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 		_cacheRoot = _context.Cache
 		_terminal = _context.Terminal
 		_top = false
+	}
+	
+	if _sshMode {
+		if _command != "" {
+			return errorf (0x8937413a, "invalid arguments:  unexpected command")
+		}
+		_command = "execute-scriptlet-ssh"
 	}
 	
 	if _scriptlet != "" {

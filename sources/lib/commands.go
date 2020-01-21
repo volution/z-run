@@ -231,6 +231,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	_sshTerminal := _sshContext.terminal
 	_sshLibraryLocalSocket := _sshContext.libraryLocalSocket
 	_sshLibraryRemoteSocket := _sshContext.libraryRemoteSocket
+	_sshExportEnvironment := _sshContext.exportEnvironment
 	_sshToken := _sshContext.token
 	
 	if _sshTarget == "" {
@@ -306,11 +307,18 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	}
 	defer _rpc.ServeStop ()
 	
+	_invokeEnvironment := make (map[string]string, len (_sshExportEnvironment))
+	for _, _name := range _sshExportEnvironment {
+		if _value, _ok := _context.cleanEnvironment[_name]; _ok {
+			_invokeEnvironment[_name] = _value
+		}
+	}
+	
 	_invokeContext := & InvokeContext {
 			Library : "unix:" + _sshLibraryRemoteSocket,
 			Scriptlet : _scriptlet.Label,
 			Arguments : _context.cleanArguments,
-			Environment : nil,
+			Environment : _invokeEnvironment,
 			Workspace : _sshWorkspace,
 			Cache : _sshCache,
 			Terminal : _sshTerminal,
