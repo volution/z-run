@@ -1,12 +1,21 @@
 #!/dev/null
 
 
-<< ssh / launch
+<< ssh / launch / simple
 	test "${#}" -ge 1
 	_target="${1}"
 	shift -- 1
 	"${ZRUN[@]}" ':: ssh / sync' "${_target}"
 	exec -- "${ZRUN[@]}" ssh "${_target}" ':: ssh / remote' "${@}"
+!!
+
+<< ssh / launch / extended
+	test "${#}" -ge 1
+	_target="${1}"
+	shift -- 1
+	"${ZRUN[@]}" ':: ssh / sync' "${_target}"
+	export __TEST="${RANDOM}"
+	exec -- "${ZRUN[@]}" --ssh --ssh-target="${_target}" --ssh-export=__TEST ':: ssh / remote' "${@}"
 !!
 
 << ssh / sync
@@ -20,6 +29,7 @@
 	printf -- '[ii]  host: `%s`\n' "$( exec -- hostname )" >&2
 	printf -- '[ii]  cwd: `%s`\n' "$( exec -- readlink -e -- . )" >&2
 	printf -- '[ii]  arguments count:  %d\n' "${#}" >&2
+	printf -- '[ii]  test: `%s`\n' "${__TEST:-__none__}"
 	for _argument in "${@}" ; do
 		printf -- '[ii]  argument: `%s`\n' "${_argument}" >&2
 	done
