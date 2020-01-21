@@ -175,26 +175,32 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			break
 			
 		} else if strings.HasPrefix (_argument, "-") {
+			
 			if _command != "" {
 				return errorf (0xae04b5ff, "unexpected argument `%s`", _argument)
 			}
+			
 			if _argument == "--exec" {
 				if _index == 0 {
 					_execMode = true
 				} else {
-					return errorf (0x12cdad05, "unexpected `--exec`")
+					return errorf (0x12cdad05, "unexpected argument `--exec` (only first)")
 				}
+				
 			} else if _argument == "--invoke" {
 				if _index == 0 {
 					_invokeMode = true
 				} else {
-					return errorf (0x03da9932, "unexpected `--invoke`")
+					return errorf (0x03da9932, "unexpected argument `--invoke` (only first)")
 				}
+				
 			} else if strings.HasPrefix (_argument, "--library-source=") {
 				_librarySourcePath = _argument[len ("--library-source="):]
 				_libraryCachePath = ""
+				
 			} else if strings.HasPrefix (_argument, "--library-cache=") {
 				_libraryCachePath = _argument[len ("--library-cache="):]
+				
 			} else if strings.HasPrefix (_argument, "--workspace=") {
 				_workspace = _argument[len ("--workspace="):]
 			} else {
@@ -203,8 +209,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			
 		} else if strings.HasPrefix (_argument, "::") {
 			_scriptlet = _argument
-			_cleanArguments = _arguments[_index + 1:]
-			break
+			
 			
 		} else {
 			if _command == "" {
@@ -212,61 +217,45 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					
 					case "execute-scriptlet", "execute" :
 						_command = "execute-scriptlet"
-						continue
 					
 					case "execute-scriptlet-ssh", "execute-ssh", "ssh" :
 						_command = "execute-scriptlet-ssh"
 						_sshContext = & SshContext {}
-						continue
 					
 					case "export-scriptlet-body", "export-body" :
 						_command = "export-scriptlet-body"
-						continue
 					
 					case "select-execute-scriptlet", "select-execute" :
 						_command = "select-execute-scriptlet"
-						continue
 					
 					case "select-export-scriptlet-label", "select-label", "select" :
 						_command = "select-export-scriptlet-label"
-						continue
 					
 					case "select-export-scriptlet-body", "select-body" :
 						_command = "select-export-scriptlet-body"
-						continue
 					
 					case "export-scriptlet-labels", "export-labels", "list" :
 						_command = "export-scriptlet-labels"
-						_index += 1
 					
 					case "parse-library" :
 						_command = "parse-library"
-						_index += 1
 					
 					case "export-library-json" :
 						_command = "export-library-json"
-						_index += 1
 					
 					case "export-library-cdb" :
 						_command = "export-library-cdb"
-						_index += 1
 					
 					case "export-library-rpc" :
 						_command = "export-library-rpc"
-						_index += 1
 				}
 				
 			} else if (_command == "execute-scriptlet-ssh") && (_sshContext.target == "") {
 				_sshContext.target = _argument
-				continue
 				
 			} else {
-				_scriptlet = _argument
-				_index += 1
+				return errorf (0x6a6a6cef, "unexpected argument `%s`", _argument)
 			}
-			
-			_cleanArguments = _arguments[_index:]
-			break
 		}
 	}
 	
