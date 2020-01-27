@@ -10,6 +10,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mattn/go-shellwords v1.0.6 // indirect
 	github.com/stretchr/testify v1.3.0 // indirect
+	golang.org/x/sys v0.0.0-20191008105621-543471e840be
 )
 
 replace (

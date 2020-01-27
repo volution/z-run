@@ -17,6 +17,8 @@ import "sort"
 import "strings"
 import "syscall"
 
+import "golang.org/x/sys/unix"
+
 
 
 
@@ -335,7 +337,18 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	_sshArguments = append (_sshArguments, _sshLauncher)
 	if _sshTerminal == "" {
 		_sshArguments = append (_sshArguments, "-T")
+	} else {
+		_stdinTermios, _stdinError := unix.IoctlGetTermios (int (os.Stdin.Fd ()), unix.TCGETS)
+		_stdoutTermios, _stdoutError := unix.IoctlGetTermios (int (os.Stdout.Fd ()), unix.TCGETS)
+		_stderrTermios, _stderrError := unix.IoctlGetTermios (int (os.Stderr.Fd ()), unix.TCGETS)
+		if (_stdinError != nil) || (_stdoutError != nil) || (_stderrError != nil) {
+			// NOP
+		} else if (_stdinTermios != nil) && (_stdoutTermios != nil) && (_stderrTermios != nil) {
+//			logf ('d', 0x93bc5a69, "SSH with TTY allowed; %#v %#v %#v", _stdinTermios, _stdoutTermios, _stderrTermios)
+			_sshArguments = append (_sshArguments, "-t")
+		}
 	}
+	
 	_sshArguments = append (_sshArguments, "-R", _sshLibraryRemoteSocket + ":" + _sshLibraryLocalSocket)
 	_sshArguments = append (_sshArguments, "--")
 	_sshArguments = append (_sshArguments, _sshTarget)
