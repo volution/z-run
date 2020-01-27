@@ -6,7 +6,7 @@
 	_target="${1}"
 	shift -- 1
 	"${ZRUN[@]}" ':: ssh / sync' "${_target}"
-	exec -- "${ZRUN[@]}" ssh "${_target}" ':: ssh / remote' "${@}"
+	exec -- "${ZRUN[@]}" ssh "${_target}" ':: ssh / remote / main' "${@}"
 !!
 
 << ssh / launch / extended
@@ -15,17 +15,19 @@
 	shift -- 1
 	"${ZRUN[@]}" ':: ssh / sync' "${_target}"
 	export __TEST="${RANDOM}"
-	exec -- "${ZRUN[@]}" --ssh --ssh-target="${_target}" --ssh-export=__TEST ':: ssh / remote' "${@}"
+	exec -- "${ZRUN[@]}" --ssh --ssh-target="${_target}" --ssh-export=__TEST ':: ssh / remote / main' "${@}"
 !!
 
-<< ssh / sync
+--<< ssh / sync
 	test "${#}" -eq 1
 	_target="${1}"
 	shift -- 1
 	exec -- rsync -i -- "${ZRUN}" "${_target}":~/.bin/z-run
 !!
 
-<< ssh / remote
+--<< ssh / remote / main
+	
+	printf -- '[ii]  main:\n' >&2
 	printf -- '[ii]  host: `%s`\n' "$( exec -- hostname )" >&2
 	printf -- '[ii]  cwd: `%s`\n' "$( exec -- readlink -e -- . )" >&2
 	printf -- '[ii]  arguments count:  %d\n' "${#}" >&2
@@ -33,11 +35,40 @@
 	for _argument in "${@}" ; do
 		printf -- '[ii]  argument: `%s`\n' "${_argument}" >&2
 	done
+	while read -r -d '' -- _environment ; do
+		printf -- '[ii]  environment: `%s`\n' "${_environment}" >&2
+	done < /proc/self/environ
+	while read -r -- _output ; do
+		printf -- '[ii]  lsof: `%s`\n' "${_output}" >&2
+	done < <( exec -- lsof -p "${$}" 2>/dev/null )
+	
+	if false ; then
+		cd -- "${HOME}"
+		"${ZRUN[@]}" ':: ssh / remote / delegate'
+	fi
+	
 	_index=0
 	while test "${_index}" -lt 60 ; do
 		_index="$(( $_index + 1 ))"
 		printf '.' >&2
-		sleep -- 1s
+		sleep -- 6s
 	done
+!!
+
+<< ssh / remote / delegate
+	printf -- '[ii]  delegate:\n' >&2
+	printf -- '[ii]  host: `%s`\n' "$( exec -- hostname )" >&2
+	printf -- '[ii]  cwd: `%s`\n' "$( exec -- readlink -e -- . )" >&2
+	printf -- '[ii]  arguments count:  %d\n' "${#}" >&2
+	printf -- '[ii]  test: `%s`\n' "${__TEST:-__none__}"
+	for _argument in "${@}" ; do
+		printf -- '[ii]  argument: `%s`\n' "${_argument}" >&2
+	done
+	while read -r -d '' -- _environment ; do
+		printf -- '[ii]  environment: `%s`\n' "${_environment}" >&2
+	done < /proc/self/environ
+	while read -r -- _output ; do
+		printf -- '[ii]  lsof: `%s`\n' "${_output}" >&2
+	done < <( exec -- lsof -p "${$}" 2>/dev/null )
 !!
 
