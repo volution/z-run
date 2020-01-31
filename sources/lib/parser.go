@@ -593,6 +593,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							} else {
 								return _error
 							}
+						} else {
+							return _error
 						}
 					} else {
 						_body = _body + "\n"
