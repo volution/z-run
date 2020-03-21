@@ -7,6 +7,7 @@ import "encoding/hex"
 import "encoding/json"
 import "io"
 import "os"
+import "path"
 import "strings"
 import "text/template"
 
@@ -149,5 +150,60 @@ func templateFunctions () (map[string]interface{}) {
 					return strings.Join (_input, _separator)
 				},
 			
+			"split_lines" : func (_input string) ([]string, error) {
+					if _input == "" {
+						return []string {}, nil
+					}
+					_array := make ([]string, 0, 128)
+					_wasEmpty := false
+					for _, _line := range strings.Split (_input, "\n") {
+						if len (_line) > 0 {
+							_array = append (_array, _line)
+							_wasEmpty = false
+						} else {
+							_wasEmpty = true
+						}
+					}
+					if !_wasEmpty {
+						return nil, errorf (0x1e677d43, "expected `\n` at end of input") .ToError ()
+					}
+					return _array, nil
+				},
+			
+			"path_dirname" : func (_path string) (string) {
+					return path.Dir (_path)
+				},
+			"path_basename" : func (_path string) (string) {
+					return path.Base (_path)
+				},
+			"path_join" : func (_paths ... string) (string) {
+					return path.Join (_paths ...)
+				},
+			"path_match" : func (_pattern string, _path string) (bool, error) {
+					return path.Match (_pattern, _path)
+				},
+			"path_split" : func (_path string) ([2]string) {
+					_dirname, _basename := path.Split (_path)
+					return [2]string { _dirname, _basename }
+				},
+			"path_clean" : func (_path string) (string) {
+					return path.Clean (_path)
+				},
+			"path_extension" : func (_path string) (string) {
+					return path.Ext (_path)
+				},
+			"path_without_extension" : func (_path string) (string) {
+					_extension := path.Ext (_path)
+					if _extension == "" {
+						return _path
+					}
+					return _path[: len (_path) - len (_extension)]
+				},
+			
+			"shell_quote" : func (_input string) (string) {
+					// NOTE:  https://github.com/python/cpython/blob/3.8/Lib/shlex.py#L330
+					return `'` + strings.ReplaceAll (_input, `'`, `'\''`) + `'`
+				},
 		}
 }
+
