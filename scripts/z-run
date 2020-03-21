@@ -44,6 +44,7 @@
 	export -n -- \
 			ZRUN_LIBRARY_SOURCE= \
 			ZRUN_LIBRARY_CACHE= \
+			ZRUN_FINGERPRINT= \
 			ZRUN_EXECUTABLE= \
 			ZRUN_CACHE= \
 			ZRUN_TERM= \

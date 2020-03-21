@@ -58,3 +58,20 @@
 	[ 1, 2, 3 ]
 !!
 
+
+
+
+<<~~.. templates / fingerprint / embedded
+	#! {{}}
+	embedded: {{ ZRUN_FINGERPRINT }}
+!!
+
+<< templates / fingerprint / environment
+	printf -- 'environment: %s\n' "${ZRUN_FINGERPRINT}"
+!!
+
+<< templates / fingerprit / all
+	"${ZRUN[@]}" ':: templates / fingerprint / embedded'
+	"${ZRUN[@]}" ':: templates / fingerprint / environment'
+!!
+

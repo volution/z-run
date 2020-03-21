@@ -23,6 +23,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	
 	_library := NewLibrary ()
 	_library.EnvironmentFingerprint = _environmentFingerprint
+	_library.LibraryFingerprint = _environmentFingerprint
 	
 	_libraryUrl := fmt.Sprintf ("unix:@%s-%08x", _environmentFingerprint, os.Getpid ())
 	
@@ -38,6 +39,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	defer _rpc.ServeStop ()
 	
 	for _, _source := range _sources {
+//		logf ('d', 0x1dcfbf6a, "parsing `%s`...", _source)
 		if _error := parseFromSource (_library, _source, _context); _error != nil {
 			return nil, _error
 		}
@@ -62,14 +64,14 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		for _, _scriptlet := range _library.Scriptlets {
 			switch _scriptlet.Kind {
 				case "generator-pending" :
-					if _error := parseFromGenerator (_library, _rpc.Url (), _scriptlet, _context); _error == nil {
+					if _error := parseFromGenerator (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
 						_scriptlet.Kind = "generator"
 						_repass = true
 					} else {
 						return nil, _error
 					}
 				case "script-replacer-pending", "print-replacer-pending" :
-					if _error := parseFromReplacer (_library, _rpc.Url (), _scriptlet, _context); _error == nil {
+					if _error := parseFromReplacer (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
 						switch _scriptlet.Kind {
 							case "script-replacer-pending" :
 								_scriptlet.Kind = "executable-pending"
@@ -166,6 +168,8 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		sort.Strings (_fingerprints)
 		_library.SourcesFingerprint = NewFingerprinter () .StringsWithLen (_fingerprints) .Build ()
 	}
+	
+	_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.EnvironmentFingerprint) .StringWithLen (_library.SourcesFingerprint) .Build ()
 	
 	return _library, nil
 }
@@ -268,16 +272,16 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 
 
 
-func parseFromGenerator (_library *Library, _libraryUrl string, _source *Scriptlet, _context *Context) (*Error) {
-	if _, _data, _error := loadFromScriptlet (_libraryUrl, "", _source, _context); _error == nil {
+func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
+	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, "", _source, _context); _error == nil {
 		return parseFromData (_library, _data, _source.Source.Path, _context)
 	} else {
 		return _error
 	}
 }
 
-func parseFromReplacer (_library *Library, _libraryUrl string, _source *Scriptlet, _context *Context) (*Error) {
-	if _, _data, _error := loadFromScriptlet (_libraryUrl, _source.Interpreter, _source, _context); _error == nil {
+func parseFromReplacer (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
+	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, _source.Interpreter, _source, _context); _error == nil {
 		if utf8.Valid (_data) {
 			_source.Body = string (_data)
 			return nil
@@ -377,6 +381,7 @@ func parseFromSource (_library *Library, _source *Source, _context *Context) (*E
 		if _error := includeSource (_library, _source); _error != nil {
 			return _error
 		}
+		_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_source.FingerprintData) .Build ()
 		return parseFromData (_library, _data, _source.Path, _context)
 	} else {
 		return _error
@@ -590,6 +595,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								} else {
 									return errorf (0x16010e20, "invalid UTF-8")
 								}
+								_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_includeSource.FingerprintData) .Build ()
 							} else {
 								return _error
 							}
@@ -693,6 +699,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _error := includeSource (_library, _includeSource); _error != nil {
 								return _error
 							}
+							_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_includeSource.FingerprintData) .Build ()
 						} else {
 							return _error
 						}
@@ -869,11 +876,11 @@ func loadFromStream (_stream io.Reader) (string, []byte, *Error) {
 }
 
 
-func loadFromScriptlet (_libraryUrl string, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, *Error) {
+func loadFromScriptlet (_libraryUrl string, _libraryFingerprint string, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, *Error) {
 	
 	var _command *exec.Cmd
 	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_libraryUrl, _interpreter, _scriptlet, false, _context); _error == nil {
+	if _command_0, _descriptors_0, _error := prepareExecution (_libraryUrl, _libraryFingerprint, _interpreter, _scriptlet, false, _context); _error == nil {
 		_command = _command_0
 		_descriptors = _descriptors_0
 	} else {

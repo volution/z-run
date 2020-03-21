@@ -160,6 +160,34 @@ func (_client *LibraryRpcClient) Url () (string) {
 
 
 
+type LibraryRpc_Fingerprint_Input struct {
+}
+
+type LibraryRpc_Fingerprint_Output struct {
+	Fingerprint string
+	Error *Error
+}
+
+func (_client *LibraryRpcClient) Fingerprint () (string, *Error) {
+	_input := LibraryRpc_Fingerprint_Input {}
+	_output := LibraryRpc_Fingerprint_Output {}
+	if _error := _client.rpc.Call ("Library.Fingerprint", &_input, &_output); _error == nil {
+		return _output.Fingerprint, _output.Error
+	} else {
+		return "", errorw (0xdbfbf38a, _error)
+	}
+}
+
+func (_exports *LibraryRpcServerExports) Fingerprint (_input *LibraryRpc_Fingerprint_Input, _output *LibraryRpc_Fingerprint_Output) (error) {
+	_exports.server.mutex.RLock ()
+	defer _exports.server.mutex.RUnlock ()
+	_output.Fingerprint, _output.Error = _exports.server.library.Fingerprint ()
+	return nil
+}
+
+
+
+
 type LibraryRpc_SelectFingerprints_Input struct {
 }
 

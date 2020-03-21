@@ -45,8 +45,10 @@ type Library struct {
 	ScriptletsByLabel map[string]uint `json:"index_by_label"`
 	
 	Sources LibrarySources `json:"sources"`
+	
 	SourcesFingerprint string `json:"sources_fingerprint"`
 	EnvironmentFingerprint string `json:"environment_fingerprint"`
+	LibraryFingerprint string `json:"library_fingerprint"`
 	
 	url string
 }
@@ -162,6 +164,15 @@ func (_library *Library) SelectSources () (LibrarySources, *Error) {
 
 func (_library *Library) Url () (string) {
 	return _library.url
+}
+
+func (_library *Library) Fingerprint () (string, *Error) {
+	_fingerprint := _library.LibraryFingerprint
+	if _fingerprint != "" {
+		return _fingerprint, nil
+	} else {
+		return "", errorf (0x7c26bcc2, "invalid state")
+	}
 }
 
 

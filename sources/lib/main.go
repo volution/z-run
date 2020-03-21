@@ -122,6 +122,8 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					_cacheRoot = _value
 				case "ZRUN_TERM" :
 					_terminal = _value
+				case "ZRUN_FINGERPRINT" :
+					// FIXME:  Validate that this value actually matches given library.
 				default :
 					logf ('w', 0xafe247b0, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
 			}

@@ -63,9 +63,25 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	_source := _scriptlet.Body
 	
 	_functions := templateFunctions ()
+	
 	_functions["ZRUN"] = func (_scriptlet string, _arguments ... string) (string, error) {
 			return templateFuncZrun (_library, _context, _scriptlet, _arguments)
 		}
+	
+	_functions["ZRUN_EXECUTABLE"] = func () (string) {
+			return _context.selfExecutable
+		}
+	_functions["ZRUN_WORKSPACE"] = func () (string) {
+			return _context.workspace
+		}
+	_functions["ZRUN_FINGERPRINT"] = func () (string, error) {
+			if _fingerprint, _error := _library.Fingerprint (); _error == nil {
+				return _fingerprint, nil
+			} else {
+				return "", _error.ToError ()
+			}
+		}
+	
 	
 	_template := template.New ("z-run")
 	_template.Funcs (_functions)
@@ -96,9 +112,15 @@ func templateFuncZrun (_library LibraryStore, _context *Context, _scriptletLabel
 	if strings.HasPrefix (_scriptletLabel, ":: ") {
 		_scriptletLabel = _scriptletLabel[3:]
 	}
+	_libraryFingerprint := ""
+	if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
+		_libraryFingerprint = _libraryFingerprint_0
+	} else {
+		return "", _error.ToError ()
+	}
 	if _scriptlet, _error := _library.ResolveFullByLabel (_scriptletLabel); _error == nil {
 		if _scriptlet != nil {
-			if _, _output, _error := loadFromScriptlet (_library.Url (), "", _scriptlet, _context); _error == nil {
+			if _, _output, _error := loadFromScriptlet (_library.Url (), _libraryFingerprint, "", _scriptlet, _context); _error == nil {
 				return string (_output), nil
 			} else {
 				return "", _error.ToError ()

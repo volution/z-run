@@ -62,10 +62,20 @@ func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Co
 
 func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *Context) (*Error) {
 	
+	if _fingerprint, _error := _library.Fingerprint (); _error == nil {
+		if _error := _store.Include ("library-meta", "fingerprint", _fingerprint); _error != nil {
+			return _error
+		}
+	} else {
+		return _error
+	}
+	
 	if _sources, _error := _library.SelectSources (); _error == nil {
 		if _error := _store.Include ("library-meta", "sources", _sources); _error != nil {
 			return _error
 		}
+	} else {
+		return _error
 	}
 	
 	_fingerprints := make ([]string, 0, 1024)
@@ -105,6 +115,8 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 			}
 			_fingerprintsByLabels[_label] = _fingerprint
 			_labelsByFingerprints[_fingerprint] = _label
+		} else {
+			return _error
 		}
 		
 		if _body, _found, _error := _library.ResolveBodyByFingerprint (_fingerprintFromStore); _error == nil {
@@ -114,6 +126,8 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 			if _error := _store.Include ("scriptlets-body", _fingerprintFromStore, _body); _error != nil {
 				return _error
 			}
+		} else {
+			return _error
 		}
 	}
 	
@@ -171,9 +185,16 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 		return executeTemplate (_library, _scriptlet, _context, os.Stdout)
 	}
 	
+	var _libraryFingerprint string
+	if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
+		_libraryFingerprint = _libraryFingerprint_0
+	} else {
+		return _error
+	}
+	
 	var _command *exec.Cmd
 	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_library.Url (), "", _scriptlet, true, _context); _error == nil {
+	if _command_0, _descriptors_0, _error := prepareExecution (_library.Url (), _libraryFingerprint, "", _scriptlet, true, _context); _error == nil {
 		_command = _command_0
 		_descriptors = _descriptors_0
 	} else {
@@ -498,7 +519,13 @@ func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler,
 				for {
 					var _outputLines []string
 					if _scriptlet.Interpreter != "<menu>" {
-						if _, _outputData, _error := loadFromScriptlet (_library.Url (), "", _scriptlet, _context); _error == nil {
+						_libraryFingerprint := ""
+						if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
+							_libraryFingerprint = _libraryFingerprint_0
+						} else {
+							return false, _error
+						}
+						if _, _outputData, _error := loadFromScriptlet (_library.Url (), _libraryFingerprint, "", _scriptlet, _context); _error == nil {
 							_outputText := string (_outputData)
 							_outputText = strings.TrimSpace (_outputText)
 							if _outputText != "" {
