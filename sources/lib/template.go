@@ -60,6 +60,14 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 		return errorf (0xa18a5ca9, "invalid interpreter")
 	}
 	
+	_libraryUrl := _library.Url ()
+	_libraryFingerprint := ""
+	if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
+		_libraryFingerprint = _libraryFingerprint_0
+	} else {
+		return _error
+	}
+	
 	_source := _scriptlet.Body
 	
 	_functions := templateFunctions ()
@@ -67,19 +75,17 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	_functions["ZRUN"] = func (_scriptlet string, _arguments ... string) (string, error) {
 			return templateFuncZrun (_library, _context, _scriptlet, _arguments)
 		}
-	
 	_functions["ZRUN_EXECUTABLE"] = func () (string) {
 			return _context.selfExecutable
 		}
 	_functions["ZRUN_WORKSPACE"] = func () (string) {
 			return _context.workspace
 		}
-	_functions["ZRUN_FINGERPRINT"] = func () (string, error) {
-			if _fingerprint, _error := _library.Fingerprint (); _error == nil {
-				return _fingerprint, nil
-			} else {
-				return "", _error.ToError ()
-			}
+	_functions["ZRUN_FINGERPRINT"] = func () (string) {
+			return _libraryFingerprint
+		}
+	_functions["ZRUN_LIBRARY_CACHE"] = func () (string) {
+			return _libraryUrl
 		}
 	
 	
@@ -92,9 +98,10 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	_data := map[string]interface{} {
 			"arguments" : _context.cleanArguments,
 			"environment" : _context.cleanEnvironment,
-			"workspace" : _context.workspace,
-			"terminal" : _context.terminal,
 			"executable" : _context.selfExecutable,
+			"workspace" : _context.workspace,
+			"fingerprint" : _libraryFingerprint,
+			"terminal" : _context.terminal,
 			"library" : _library,
 		}
 	

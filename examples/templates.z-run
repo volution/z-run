@@ -5,6 +5,8 @@
 	#! {{}}
 	# workspace
 	{{ .workspace }}
+	# fingerprint
+	{{ .fingerprint }}
 	
 	# environment
 	{{ range $key, $value := .environment -}}
