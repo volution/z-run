@@ -45,90 +45,66 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		}
 	}
 	
-	_loopRepass := false
-	_loop : for {
+	_loop : for _index := 0; _index < len (_library.Scriptlets); {
 		
-		if _loopRepass {
-//			logf ('d', 0x8e3ebf4b, "parsing restart...")
-			_loopRepass = false
-		} else {
-//			logf ('d', 0x3b26e775, "parsing begin...")
+		_scriptlet := _library.Scriptlets[_index]
+		
+		switch _scriptlet.Kind {
+			case "executable-pending", "generator-pending", "script-replacer-pending", "print-replacer-pending" :
+				if _error := parseInterpreter (_library, _scriptlet, _context); _error != nil {
+					return nil, _error
+				}
+//				logf ('d', 0xb76fe00e, "parsed interpreter for `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
 		}
 		
-		for _, _scriptlet := range _library.Scriptlets {
-			switch _scriptlet.Kind {
-				case "executable-pending", "generator-pending", "script-replacer-pending", "print-replacer-pending" :
-					if _error := parseInterpreter (_library, _scriptlet, _context); _error != nil {
-						return nil, _error
+		switch _scriptlet.Kind {
+			case "executable-pending" :
+				_scriptlet.Kind = "executable"
+//				logf ('d', 0xaa6320d9, "parsed interpreter for `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
+		}
+		
+		switch _scriptlet.Kind {
+			case "generator-pending" :
+				if _error := parseFromGenerator (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
+					_scriptlet.Kind = "generator"
+//					logf ('d', 0x84787ea0, "parsed generator `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
+					continue _loop
+				} else {
+					return nil, _error
+				}
+			case "script-replacer-pending", "print-replacer-pending" :
+				if _error := parseFromReplacer (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
+					switch _scriptlet.Kind {
+						case "script-replacer-pending" :
+							_scriptlet.Kind = "executable-pending"
+							_scriptlet.Interpreter = "<detect>"
+						case "print-replacer-pending" :
+							_scriptlet.Kind = "executable-pending"
+							_scriptlet.Interpreter = "<print>"
+						default :
+							panic (0x6ff57d12)
 					}
-//					logf ('d', 0xb76fe00e, "parsed interpreter for `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
-			}
+					_scriptlet.InterpreterExecutable = ""
+					_scriptlet.InterpreterArguments = nil
+					_scriptlet.InterpreterEnvironment = nil
+//					logf ('d', 0x50ec5e25, "parsed replacer `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
+					continue _loop
+				} else {
+					return nil, _error
+				}
 		}
 		
-		for _, _scriptlet := range _library.Scriptlets {
-			switch _scriptlet.Kind {
-				case "executable-pending" :
-					_scriptlet.Kind = "executable"
-//					logf ('d', 0xaa6320d9, "parsed interpreter for `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
-			}
+//		logf ('d', 0xd28b083f, "validating `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
+		switch _scriptlet.Kind {
+			case "executable", "generator" :
+				// NOP
+			case "menu-pending" :
+				// NOP
+			default :
+				return nil, errorf (0xd5f0c788, "invalid state `%s`", _scriptlet.Kind)
 		}
 		
-		for _, _scriptlet := range _library.Scriptlets {
-//			logf ('d', 0x48dae618, "parsing `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
-			switch _scriptlet.Kind {
-				case "generator-pending" :
-					if _error := parseFromGenerator (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
-						_scriptlet.Kind = "generator"
-//						logf ('d', 0x84787ea0, "parsed generator `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
-						_loopRepass = true
-						continue _loop
-					} else {
-						return nil, _error
-					}
-				case "script-replacer-pending", "print-replacer-pending" :
-					if _error := parseFromReplacer (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
-						switch _scriptlet.Kind {
-							case "script-replacer-pending" :
-								_scriptlet.Kind = "executable-pending"
-								_scriptlet.Interpreter = "<detect>"
-							case "print-replacer-pending" :
-								_scriptlet.Kind = "executable-pending"
-								_scriptlet.Interpreter = "<print>"
-							default :
-								panic (0x6ff57d12)
-						}
-						_scriptlet.InterpreterExecutable = ""
-						_scriptlet.InterpreterArguments = nil
-						_scriptlet.InterpreterEnvironment = nil
-//						logf ('d', 0x50ec5e25, "parsed replacer `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
-						_loopRepass = true
-						continue _loop
-					} else {
-						return nil, _error
-					}
-			}
-		}
-		
-		if _loopRepass {
-			continue _loop
-		}
-		
-		for _, _scriptlet := range _library.Scriptlets {
-//			logf ('d', 0xd28b083f, "`%s` `%s` `%s`", _scriptlet.Kind, _scriptlet.Interpreter, _scriptlet.Label)
-			switch _scriptlet.Kind {
-				case "executable", "generator" :
-					// NOP
-				case "menu-pending" :
-					// NOP
-				default :
-					return nil, errorf (0xd5f0c788, "invalid state `%s`", _scriptlet.Kind)
-			}
-		}
-		
-		if !_loopRepass {
-//			logf ('d', 0x77f547fc, "parsing end;")
-			break
-		}
+		_index += 1
 	}
 	
 	{
@@ -790,6 +766,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							},
 					}
 				if _error := includeScriptlet (_library, _scriptlet); _error != nil {
+					return _error
+				}
+				if _error := parseInterpreter (_library, _scriptlet, _context); _error != nil {
 					return _error
 				}
 			}
