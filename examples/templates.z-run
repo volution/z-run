@@ -61,17 +61,35 @@
 
 
 
-<<~~.. templates / fingerprint / embedded
+<<~~.. templates / fingerprint / template / compile-time
 	#! {{}}
-	embedded: {{ ZRUN_FINGERPRINT }}
+	template-compile-time: {{ ZRUN_FINGERPRINT }}
 !!
 
-<< templates / fingerprint / environment
-	printf -- 'environment: %s\n' "${ZRUN_FINGERPRINT}"
+<< templates / fingerprint / template / execute-time
+	#! {{}}
+	template-execute-time: {{ ZRUN_FINGERPRINT }}
 !!
 
-<< templates / fingerprit / all
-	"${ZRUN[@]}" ':: templates / fingerprint / embedded'
-	"${ZRUN[@]}" ':: templates / fingerprint / environment'
+<<~~.. templates / fingerprint / script / compile-time
+	printf -- 'script-compile-time: %s %s\n' "${ZRUN_FINGERPRINT}" "$( exec -- date -Iseconds )"
+!!
+
+<< templates / fingerprint / script / execute-time
+	printf -- 'script-execute-time: %s %s\n' "${ZRUN_FINGERPRINT}" "$( exec -- date -Iseconds )"
+!!
+
+<<~~.. templates / fingerprint / all / compile-time
+	"${ZRUN[@]}" ":: templates / fingerprint / template / compile-time"
+	"${ZRUN[@]}" ":: templates / fingerprint / template / execute-time"
+	"${ZRUN[@]}" ":: templates / fingerprint / script / compile-time"
+	"${ZRUN[@]}" ":: templates / fingerprint / script / execute-time"
+!!
+
+<< templates / fingerprint / all / execute-time
+	"${ZRUN[@]}" ":: templates / fingerprint / template / compile-time"
+	"${ZRUN[@]}" ":: templates / fingerprint / template / execute-time"
+	"${ZRUN[@]}" ":: templates / fingerprint / script / compile-time"
+	"${ZRUN[@]}" ":: templates / fingerprint / script / execute-time"
 !!
 

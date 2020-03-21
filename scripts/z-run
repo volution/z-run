@@ -83,6 +83,7 @@
 :: do / use / generators :: export -- ZRUNDEV_USE=./examples/generators.z-run
 :: do / use / comments :: export -- ZRUNDEV_USE=./examples/comments.z-run
 :: do / use / menus :: export -- ZRUNDEV_USE=./examples/menus.z-run
+:: do / use / templates :: export -- ZRUNDEV_USE=./examples/templates.z-run
 
 :: do / use / term / enable :: export -- ZRUNDEV_TERM="${TERM}"
 :: do / use / term / disable :: export -- ZRUNDEV_TERM=dumb
