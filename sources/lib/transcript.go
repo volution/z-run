@@ -84,10 +84,14 @@ func errorw (_code uint32, _error error) (*Error) {
 }
 
 func returnError (_error *Error) (*Error) {
-	if true {
-		return _error
+	if _error == nil {
+		return nil
 	} else {
-		panic (_error)
+		if true {
+			return _error
+		} else {
+			panic (_error.ToError ())
+		}
 	}
 }
 

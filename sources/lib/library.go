@@ -197,7 +197,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 	}
 	
 	switch _scriptlet.Interpreter {
-		case "<script>", "<print>", "<menu>" :
+		case "<detect>", "<print>", "<menu>" :
 			// NOP
 		default :
 			return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)

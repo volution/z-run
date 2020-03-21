@@ -244,21 +244,25 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 	
 	if _context.cacheEnabled && (_context.cacheRoot != "") {
 		_cacheLibrary = path.Join (_context.cacheRoot, _environmentFingerprint + ".cdb")
-		if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
-			if _fresh, _error := checkLibraryCached (_library); _error == nil {
-				if _fresh {
-//					logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
-					return _library, nil
+		if _, _error := os.Stat (_cacheLibrary); _error == nil {
+			if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
+				if _fresh, _error := checkLibraryCached (_library); _error == nil {
+					if _fresh {
+//						logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
+						return _library, nil
+					} else {
+//						logf ('d', 0x8fc67fa1, "ignoring library cached at `%s`;", _cacheLibrary)
+						_library.Close ()
+					}
 				} else {
-//					logf ('d', 0x8fc67fa1, "ignoring library cached at `%s`;", _cacheLibrary)
 					_library.Close ()
+					return nil, _error
 				}
-			} else {
-				_library.Close ()
+			} else if (_error.Error != nil) && ! os.IsNotExist (_error.Error) {
 				return nil, _error
 			}
-		} else if (_error.Error != nil) && ! os.IsNotExist (_error.Error) {
-			return nil, _error
+		} else if ! os.IsNotExist (_error) {
+			return nil, errorw (0x19404141, _error)
 		}
 	}
 	
