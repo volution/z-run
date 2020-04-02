@@ -10,6 +10,8 @@ import "os/exec"
 import "strings"
 import "syscall"
 
+import "golang.org/x/sys/unix"
+
 
 
 
@@ -51,6 +53,9 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	var _interpreterScriptDescriptors [2]int
 	var _interpreterScriptUnused = false
 	if _error := syscall.Pipe (_interpreterScriptDescriptors[:]); _error == nil {
+		if _, _error := unix.FcntlInt (uintptr (_interpreterScriptDescriptors[1]), unix.F_SETPIPE_SZ, 1048576); _error != nil {
+			logf ('w', 0x4d3414c8, "failed increasing pipe buffer size;  ignoring!")
+		}
 		_interpreterScriptInput = _interpreterScriptDescriptors[0]
 		_interpreterScriptOutput = os.NewFile (uintptr (_interpreterScriptDescriptors[1]), "")
 	} else {
