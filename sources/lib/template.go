@@ -156,6 +156,14 @@ func templateFunctions () (map[string]interface{}) {
 					return _output, _error
 				},
 			
+			"array" : func (_inputs ... interface{}) ([]interface{}) {
+					return _inputs
+				},
+			
+			"append" : func (_array []interface{}, _inputs ... interface{}) ([]interface{}) {
+					return append (_array, _inputs...)
+				},
+			
 			"hex_encode" : func (_input string) (string) {
 					return hex.EncodeToString ([]byte (_input))
 				},
@@ -179,6 +187,25 @@ func templateFunctions () (map[string]interface{}) {
 					return strings.Join (_input, _separator)
 				},
 			
+			"replace_first" : func (_search string, _replacement string, _input string) (string) {
+					return strings.Replace (_input, _search, _replacement, 1)
+				},
+			"replace_all" : func (_search string, _replacement string, _input string) (string) {
+					return strings.ReplaceAll (_input, _search, _replacement)
+				},
+			
+			"array_join" : func (_separator string, _input_0 []interface{}) (string, error) {
+					_input := make ([]string, len (_input_0))
+					for _index, _input_0 := range _input_0 {
+						if _input_0, _ok := _input_0.(string); _ok {
+							_input[_index] = _input_0
+						} else {
+							return "", errorf (0xa2880bb1, "invalid value") .ToError ()
+						}
+					}
+					return strings.Join (_input, _separator), nil
+				},
+			
 			"split_lines" : func (_input string) ([]string, error) {
 					if _input == "" {
 						return []string {}, nil
@@ -197,6 +224,13 @@ func templateFunctions () (map[string]interface{}) {
 						return nil, errorf (0x1e677d43, "expected `\n` at end of input") .ToError ()
 					}
 					return _array, nil
+				},
+			
+			"has_prefix" : func (_prefix string, _input string) (bool) {
+					return strings.HasPrefix (_input, _prefix)
+				},
+			"has_suffix" : func (_suffix string, _input string) (bool) {
+					return strings.HasSuffix (_input, _suffix)
 				},
 			
 			"path_dirname" : func (_path string) (string) {
