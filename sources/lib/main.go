@@ -226,6 +226,9 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				} else if strings.HasPrefix (_argument, "--ssh-export=") {
 					_name := _argument[len ("--ssh-export="):]
 					_sshContext.exportEnvironment = append (_sshContext.exportEnvironment, _name)
+				} else if strings.HasPrefix (_argument, "--ssh-workspace=") {
+					_workspace := _argument[len ("--ssh-workspace="):]
+					_sshContext.workspace = _workspace
 				} else {
 					return errorf (0x33555ffb, "invalid argument `%s`", _argument)
 				}
