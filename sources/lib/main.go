@@ -134,20 +134,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
 			}
 			
-			switch _nameCanonical {
-				case "X_RUN_COMMANDS" :
-					_librarySourcePath = _value
-				case "X_RUN_ACTION" :
-					if _command == "" {
-						_command = "legacy:" + _value
-					} else {
-						return errorf (0x1da61a22, "unexpected command `%s`", _value)
-					}
-				case "X_RUN_TERM" :
-					_terminal = _value
-				default :
-					logf ('w', 0xdf61b057, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
-			}
+			logf ('w', 0xdf61b057, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
 			
 		} else if _name == "_" {
 			
@@ -265,6 +252,9 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					
 					case "select-export-scriptlet-body", "select-body" :
 						_command = "select-export-scriptlet-body"
+					
+					case "select-export-scriptlet-label-and-body" :
+						_command = "select-export-scriptlet-label-and-body"
 					
 					case "export-scriptlet-labels", "export-labels", "list" :
 						_command = "export-scriptlet-labels"
@@ -548,7 +538,7 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 				return doSelectHandle (_library, _handler, _context)
 			}
 		
-		case "legacy:output-selection-and-command" :
+		case "select-export-scriptlet-label-and-body" :
 			if len (_cleanArguments) != 0 {
 				return errorf (0xe4f7e6f5, "export:  unexpected arguments")
 			}
