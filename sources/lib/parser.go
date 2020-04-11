@@ -13,8 +13,14 @@ import "path/filepath"
 import "regexp"
 import "sort"
 import "strings"
+import "time"
 import "unicode"
 import "unicode/utf8"
+
+
+import isatty "github.com/mattn/go-isatty"
+import mpb "github.com/vbauerster/mpb/v5"
+import mpb_decor "github.com/vbauerster/mpb/v5/decor"
 
 
 
@@ -38,14 +44,48 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	}
 	defer _rpc.ServeStop ()
 	
+	var _progress_0 *mpb.Progress
+	var _progress *mpb.Bar
+	
+	if isatty.IsTerminal (os.Stderr.Fd ()) {
+		_progress_0 = mpb.New (
+				mpb.WithOutput (os.Stderr),
+				mpb.WithRefreshRate (100 * time.Millisecond),
+				mpb.WithWidth (40), // FIXME:  Detect console width!
+			)
+		_progress = _progress_0.AddBar (
+				int64 (len (_sources)),
+				mpb.PrependDecorators (
+						mpb_decor.Name ("[z-run]"),
+					),
+				mpb.AppendDecorators (
+						mpb_decor.NewPercentage ("%d", mpb_decor.WCSyncWidthR),
+					),
+				mpb.BarRemoveOnComplete (),
+			)
+	}
+	
 	for _, _source := range _sources {
-//		logf ('d', 0x1dcfbf6a, "parsing `%s`...", _source)
+//		if _path, _error := filepath.Rel (_context.workspace, _source.Path); _error == nil {
+//			logf ('s', 0x1dcfbf6a, "parsing `./%s`...", _path)
+//		} else {
+//			return nil, errorw (0xfce841bd, _error)
+//		}
 		if _error := parseFromSource (_library, _source, _context); _error != nil {
 			return nil, _error
+		}
+		if _progress != nil {
+			_progress.SetTotal (int64 (len (_sources) + len (_library.Scriptlets)), false)
+			_progress.Increment ()
 		}
 	}
 	
 	_loop : for _index := 0; _index < len (_library.Scriptlets); {
+		
+		if _progress != nil {
+			_progress.SetTotal (int64 (len (_sources) + len (_library.Scriptlets)), false)
+			_progress.SetCurrent (int64 (len (_sources) + _index))
+		}
 		
 		_scriptlet := _library.Scriptlets[_index]
 		
@@ -107,6 +147,11 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		_index += 1
 	}
 	
+	if _progress != nil {
+		_progress.SetTotal (0, true)
+	}
+	
+	
 	{
 		_menus := make ([]*Scriptlet, 0, 1024)
 		for _, _scriptlet := range _library.Scriptlets {
@@ -164,6 +209,10 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	}
 	
 	_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.EnvironmentFingerprint) .StringWithLen (_library.SourcesFingerprint) .Build ()
+	
+	if _progress != nil {
+		_progress_0.Wait ()
+	}
 	
 	return _library, nil
 }
@@ -260,7 +309,7 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 
 
 func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
-//	logf ('d', 0xf75b04b5, "parsing from generator `%s`...", _source.Label)
+//	logf ('s', 0xf75b04b5, "parsing `:: %s`...", _source.Label)
 	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, "", _source, _context); _error == nil {
 		return parseFromData (_library, _data, _source.Source.Path, _context)
 	} else {
@@ -269,7 +318,7 @@ func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerpr
 }
 
 func parseFromReplacer (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
-//	logf ('d', 0xc336e8bd, "parsing from generator `%s`...", _source.Label)
+//	logf ('s', 0xc336e8bd, "parsing `:: %s`...", _source.Label)
 	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, _source.Interpreter, _source, _context); _error == nil {
 		if utf8.Valid (_data) {
 			_source.Body = string (_data)

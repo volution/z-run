@@ -22,8 +22,12 @@ type Error struct {
 func logf (_slug rune, _code uint32, _format string, _arguments ... interface{}) () {
 	_pid := os.Getpid ()
 	_message := fmt.Sprintf (_format, _arguments ...)
-	_prefix := fmt.Sprintf ("[%08d] [%c%c] [%08x]  ", _pid, _slug, _slug, _code)
-	log.Print (_prefix + _message + "\n")
+	if _slug != 's' {
+		_prefix := fmt.Sprintf ("[z-run:%08d] [%c%c] [%08x]  ", _pid, _slug, _slug, _code)
+		log.Print (_prefix + _message + "\n")
+	} else {
+		log.Print ("[z-run]  " + _message + "\n")
+	}
 }
 
 func logError (_slug rune, _error *Error) () {
