@@ -260,6 +260,7 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 
 
 func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
+//	logf ('d', 0xf75b04b5, "parsing from generator `%s`...", _source.Label)
 	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, "", _source, _context); _error == nil {
 		return parseFromData (_library, _data, _source.Source.Path, _context)
 	} else {
@@ -268,6 +269,7 @@ func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerpr
 }
 
 func parseFromReplacer (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
+//	logf ('d', 0xc336e8bd, "parsing from generator `%s`...", _source.Label)
 	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, _source.Interpreter, _source, _context); _error == nil {
 		if utf8.Valid (_data) {
 			_source.Body = string (_data)

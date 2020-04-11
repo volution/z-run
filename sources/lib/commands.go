@@ -3,10 +3,8 @@
 package zrun
 
 
-import crand "crypto/rand"
 import "bytes"
 import "encoding/base64"
-import "encoding/hex"
 import "encoding/json"
 import "fmt"
 import "io"
@@ -262,15 +260,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	}
 	
 	if _sshToken == "" {
-		var _data [128 / 8]byte
-		if _read, _error := crand.Read (_data[:]); _error == nil {
-			if _read != (128 / 8) {
-				return false, errorf (0xdc5228aa, "invalid state")
-			}
-		} else {
-			return false, errorw (0xc2595acb, _error)
-		}
-		_sshToken = hex.EncodeToString (_data[:])
+		_sshToken = generateRandomToken ()
 	}
 	
 	if _sshLauncher == "" {
