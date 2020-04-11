@@ -22,9 +22,9 @@ func fzfMain () (*Error) {
 	if isatty.IsTerminal (os.Stdin.Fd ()) {
 		return errorf (0x34efe59c, "stdin is a TTY")
 	}
-//	if isatty.IsTerminal (os.Stdout.Fd ()) {
-//		return errorf (0xf12b8d81, "stdout is a TTY")
-//	}
+	if isatty.IsTerminal (os.Stdout.Fd ()) {
+		return errorf (0xf12b8d81, "stdout is a TTY")
+	}
 	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
 		return errorf (0x55a1298a, "stderr is not a TTY")
 	}
