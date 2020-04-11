@@ -36,7 +36,7 @@ func fzfMain () (*Error) {
 	_options.Case = fzf.CaseIgnore
 	_options.Normalize = true
 	_options.Sort = 1
-	_options.Multi = false
+	_options.Multi = 0
 	
 	_options.Theme = fzf_tui.Default16
 	_options.Theme = nil
