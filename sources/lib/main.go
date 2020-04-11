@@ -270,6 +270,9 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 					
 					case "export-library-rpc" :
 						_command = "export-library-rpc"
+					
+					case "export-fingerprint" :
+						_command = "export-fingerprint"
 				}
 				
 			} else if (_command == "execute-scriptlet-ssh") && (_sshContext.target == "") {
@@ -589,6 +592,19 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 			}
 			return doExportLibraryRpc (_library, _cleanArguments[0], _context)
 		
+		case "export-fingerprint" :
+			if _scriptlet != "" {
+				return errorf (0x3483242d, "export:  unexpected scriptlet")
+			}
+			if len (_cleanArguments) != 0 {
+				return errorf (0x2a741648, "export:  unexpected arguments")
+			}
+			if _fingerprint, _error := _library.Fingerprint (); _error == nil {
+				log.Println (_fingerprint)
+				return nil
+			} else {
+				return _error
+			}
 		
 		case "" :
 			return errorf (0x5d2a4326, "expected command")
