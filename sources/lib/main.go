@@ -58,7 +58,7 @@ type InvokeContext struct {
 
 
 
-func main_0 (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string) (*Error) {
+func Main (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string) (*Error) {
 	
 	var _command string = _commandOverride
 	var _scriptlet string = _scriptletOverride
@@ -617,9 +617,11 @@ func main_0 (_executable string, _argument0 string, _arguments []string, _enviro
 
 
 
-func Main () () {
+func PreMain () () {
+	
 	
 	log.SetFlags (0)
+	
 	
 	var _executable string
 	if _executable_0, _error := os.Executable (); _error == nil {
@@ -627,55 +629,28 @@ func Main () () {
 	} else {
 		panic (abortError (errorw (0x75f2db30, _error)))
 	}
+	if _executable_0, _error := filepath.EvalSymlinks (_executable); _error == nil {
+		_executable = _executable_0
+	} else {
+		panic (abortError (errorw (0x127e013a, _error)))
+	}
+	
 	
 	_argument0 := os.Args[0]
+	_arguments := append ([]string (nil), os.Args[1:] ...)
 	
 	if strings.HasPrefix (_argument0, "[z-run:menu] ") {
 		_argument0 = "[z-run:menu]"
 	} else if strings.HasPrefix (_argument0, "[z-run:select] ") {
 		_argument0 = "[z-run:select]"
+	} else if strings.HasPrefix (_argument0, "[z-run:print] ") {
+		_argument0 = "[z-run:print]"
+	} else if strings.HasPrefix (_argument0, "[z-run:template] ") {
+		_argument0 = "[z-run:template]"
 	} else if strings.HasPrefix (_argument0, "[z-run:template-raw] ") {
 		_argument0 = "[z-run:template-raw]"
 	}
 	
-	switch _argument0 {
-		
-		case "[z-run:menu]" :
-			if _error := menuMain (); _error != nil {
-				panic (abortError (_error))
-			} else {
-				panic (0x6b21e0ab)
-			}
-		
-		case "[z-run:select]" :
-			if _error := fzfMain (); _error != nil {
-				panic (abortError (_error))
-			} else {
-				panic (0x2346ca3f)
-			}
-		
-		case "[z-run:template-raw]" :
-			if _error := templateMain (); _error != nil {
-				panic (abortError (_error))
-			} else {
-				panic (0x32241835)
-			}
-		
-		case "[z-run]" :
-			// NOP
-		
-		default :
-			_arguments := os.Args
-			_arguments[0] = "[z-run]"
-			_environment := os.Environ ()
-			if _error := syscall.Exec (_executable, _arguments, _environment); _error != nil {
-				panic (abortError (errorw (0x05bd220d, _error)))
-			} else {
-				panic (0xe13aab5f)
-			}
-	}
-	
-	_arguments := append ([]string (nil), os.Args[1:] ...)
 	
 	_environment := make (map[string]string, 128)
 	for _, _variable := range os.Environ () {
@@ -717,7 +692,96 @@ func Main () () {
 //	logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
 //	logf ('d', 0x7a411846, "self-environment: %s", _environment)
 	
-	if _error := main_0 (_executable, _argument0, _arguments, _environment, "", ""); _error == nil {
+	
+	switch _argument0 {
+		
+		case "[z-run]" :
+			_argument0 = "[z-run]"
+		
+		case "[z-run:print]" :
+			_argument0 = "[z-run]"
+		
+		case "[z-run:template]" :
+			_argument0 = "[z-run]"
+		
+		case "[z-run:template-raw]" :
+			if _error := templateMain (_arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x32241835)
+			}
+		
+		case "[z-run:menu]" :
+			if _error := menuMain (); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x6b21e0ab)
+			}
+		
+		case "[z-run:select]" :
+			if _error := fzfMain (true); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x2346ca3f)
+			}
+		
+		case "[z-run:fzf]" :
+			if _error := fzfMain (false); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0xfae3720e)
+			}
+		
+		default :
+			if strings.HasPrefix (_argument0, "[z-run:") {
+				logf ('e', 0xf6274ed5, "invalid argument0: `%s`;  aborting!", _argument0)
+				os.Exit (1)
+			}
+			if _argument00, _error := filepath.EvalSymlinks (_argument0); (_error != nil) || (_argument00 != _executable) {
+				logf ('e', 0xf1f1a024, "invalid argument0: `%s`;  aborting!", _argument0)
+				os.Exit (1)
+			}
+	}
+	
+	
+	if (_argument0 != "[z-run]") && len (_arguments) >= 1 {
+		
+		_delegateExecutable := ""
+		_delegateArgument0 := ""
+		var _delegateArguments []string
+		var _delegateEnvironment []string
+		
+		switch _arguments[0] {
+			
+			case "--fzf" :
+				_delegateExecutable = _executable
+				_delegateArgument0 = "[z-run:fzf]"
+				_delegateArguments = _arguments[1:]
+			
+//			default :
+//				_delegateExecutable = _executable
+//				_delegateArgument0 = "[z-run]"
+//				_delegateArguments = _arguments
+		}
+		
+		if _delegateExecutable != "" {
+			
+			for _name, _value := range _environment {
+				_delegateEnvironment = append (_delegateEnvironment, _name + "=" + _value)
+			}
+			
+			_delegateArguments := append ([]string {_delegateArgument0}, _delegateArguments ...)
+			
+			if _error := syscall.Exec (_delegateExecutable, _delegateArguments, _delegateEnvironment); _error != nil {
+				panic (abortError (errorw (0x05bd220d, _error)))
+			} else {
+				panic (0xe13aab5f)
+			}
+		}
+	}
+	
+	
+	if _error := Main (_executable, _argument0, _arguments, _environment, "", ""); _error == nil {
 		os.Exit (0)
 		panic (0xe0e1c1a1)
 	} else {

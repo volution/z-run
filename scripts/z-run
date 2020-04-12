@@ -59,11 +59,11 @@
 		export -- TERM="${ZRUNDEV_TERM}"
 	fi
 	export -n -- ZRUNDEV_TERM=
-	exec -a "${1}" -- ./.outputs/main-debug.elf "${@:2}"
+	exec -a "${1:-./.outputs/main-debug.elf}" -- ./.outputs/main-debug.elf "${@:2}"
 !!
 
 << do / run
-	exec -- "${ZRUN[@]}" ':: do / run / 0' z-run "${@}"
+	exec -- "${ZRUN[@]}" ':: do / run / 0' '[z-run]' "${@}"
 !!
 
 

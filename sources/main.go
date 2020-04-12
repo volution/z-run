@@ -9,6 +9,6 @@ import zrun "github.com/cipriancraciun/z-run/lib"
 
 
 func main () () {
-	zrun.Main ()
+	zrun.PreMain ()
 }
 
