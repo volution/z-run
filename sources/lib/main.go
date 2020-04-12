@@ -736,6 +736,9 @@ func PreMain () () {
 				panic (0xfae3720e)
 			}
 		
+		case "z-run", "zrun", "_" :
+			_argument0 = _executable
+		
 		default :
 			if strings.HasPrefix (_argument0, "[z-run:") {
 				logf ('e', 0xf6274ed5, "invalid argument0: `%s`;  aborting!", _argument0)
