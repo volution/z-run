@@ -5,6 +5,7 @@ package zrun
 
 import "encoding/base64"
 import "encoding/json"
+import "fmt"
 import "log"
 import "os"
 import "path"
@@ -600,7 +601,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				return errorf (0x2a741648, "export:  unexpected arguments")
 			}
 			if _fingerprint, _error := _library.Fingerprint (); _error == nil {
-				log.Println (_fingerprint)
+				fmt.Fprintln (os.Stdout, _fingerprint)
 				return nil
 			} else {
 				return _error
@@ -744,7 +745,11 @@ func PreMain () () {
 	}
 	
 	
-	if (_argument0 != "[z-run]") && len (_arguments) >= 1 {
+	if (_argument0 != "[z-run]") && len (_arguments) == 0 {
+		
+		_argument0 = "[z-run]"
+		
+	} else if (_argument0 != "[z-run]") && len (_arguments) >= 1 {
 		
 		_delegateExecutable := ""
 		_delegateArgument0 := ""

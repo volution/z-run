@@ -16,7 +16,7 @@ import isatty "github.com/mattn/go-isatty"
 func fzfMain (_embedded bool) (*Error) {
 	
 	
-	if !_embedded {
+	if _embedded {
 		if len (os.Args) != 1 {
 			return errorf (0x68f8e127, "invalid arguments")
 		}

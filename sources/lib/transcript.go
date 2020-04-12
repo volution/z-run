@@ -23,10 +23,9 @@ func logf (_slug rune, _code uint32, _format string, _arguments ... interface{})
 	_pid := os.Getpid ()
 	_message := fmt.Sprintf (_format, _arguments ...)
 	if _slug != 's' {
-		_prefix := fmt.Sprintf ("[z-run:%08d] [%c%c] [%08x]  ", _pid, _slug, _slug, _code)
-		log.Print (_prefix + _message + "\n")
+		log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _code, _message)
 	} else {
-		log.Print ("[z-run]  " + _message + "\n")
+		log.Printf ("[z-run]  %s\n", _message)
 	}
 }
 
@@ -41,13 +40,13 @@ func logErrorf (_slug rune, _code uint32, _error *Error, _format string, _argume
 	}
 	if _error != nil {
 		if _error.Message != "" {
-			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Message)
+			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Message)
 		} else {
-			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, "unexpected error encountered!")
+			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, "unexpected error encountered!")
 		}
 		if _error.Error != nil {
-			log.Printf ("[%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Error.Error ())
-			log.Printf ("[%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, _error.Code, _error.Error)
+			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Error.Error ())
+			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, _error.Code, _error.Error)
 		}
 	}
 }
