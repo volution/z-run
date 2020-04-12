@@ -19,22 +19,6 @@ import isatty "github.com/mattn/go-isatty"
 func inputMain (_arguments []string, _environment map[string]string) (*Error) {
 	
 	
-	if isatty.IsTerminal (os.Stdout.Fd ()) {
-		return errorf (0xbddf576d, "stdout is a TTY")
-	}
-	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-		return errorf (0xf33f2d91, "stderr is not a TTY")
-	}
-	
-	// FIXME:  Make `liner` work without `stdin` or `stdout`
-	_stdout := os.Stdout
-	os.Stdin = os.Stderr
-	os.Stdout = os.Stderr
-	syscall.Stdin = int (os.Stderr.Fd ())
-	syscall.Stdout = int (os.Stderr.Fd ())
-	syscall.Stderr = int (os.Stderr.Fd ())
-	
-	
 	_message := ""
 	_prompt := ">> "
 	_sensitive := false
@@ -56,6 +40,22 @@ func inputMain (_arguments []string, _environment map[string]string) (*Error) {
 	if _flags.NArg () > 0 {
 		return errorf (0xdc26a939, "unexpected arguments")
 	}
+	
+	
+	if isatty.IsTerminal (os.Stdout.Fd ()) {
+		return errorf (0xbddf576d, "stdout is a TTY")
+	}
+	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+		return errorf (0xf33f2d91, "stderr is not a TTY")
+	}
+	
+	// FIXME:  Make `liner` work without `stdin` or `stdout`
+	_stdout := os.Stdout
+	os.Stdin = os.Stderr
+	os.Stdout = os.Stderr
+	syscall.Stdin = int (os.Stderr.Fd ())
+	syscall.Stdout = int (os.Stderr.Fd ())
+	syscall.Stderr = int (os.Stderr.Fd ())
 	
 	
 	if _message != "" {

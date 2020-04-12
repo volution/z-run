@@ -23,14 +23,35 @@ func fzfMain (_embedded bool) (*Error) {
 	}
 	
 	
-	if isatty.IsTerminal (os.Stdin.Fd ()) {
-		return errorf (0x34efe59c, "stdin is a TTY")
+	_dryrun := false
+	if !_embedded {
+		if len (os.Args) >= 2 {
+			for _, _argument := range os.Args[1:] {
+				switch _argument {
+					case "-h", "-help", "--help" :
+						_dryrun = true
+						os.Args = []string {os.Args[0], "--help"}
+						break
+					case "-v", "-version", "--version" :
+						_dryrun = true
+						os.Args = []string {os.Args[0], "--version"}
+						break
+				}
+			}
+		}
 	}
-	if isatty.IsTerminal (os.Stdout.Fd ()) {
-		return errorf (0xf12b8d81, "stdout is a TTY")
-	}
-	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-		return errorf (0x55a1298a, "stderr is not a TTY")
+	
+	
+	if !_dryrun {
+		if isatty.IsTerminal (os.Stdin.Fd ()) {
+			return errorf (0x34efe59c, "stdin is a TTY")
+		}
+		if isatty.IsTerminal (os.Stdout.Fd ()) {
+			return errorf (0xf12b8d81, "stdout is a TTY")
+		}
+		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+			return errorf (0x55a1298a, "stderr is not a TTY")
+		}
 	}
 	
 	
