@@ -13,11 +13,15 @@ import isatty "github.com/mattn/go-isatty"
 
 
 
-func fzfMain () (*Error) {
+func fzfMain (_embedded bool) (*Error) {
 	
-	if len (os.Args) != 1 {
-		return errorf (0x68f8e127, "invalid arguments")
+	
+	if !_embedded {
+		if len (os.Args) != 1 {
+			return errorf (0x68f8e127, "invalid arguments")
+		}
 	}
+	
 	
 	if isatty.IsTerminal (os.Stdin.Fd ()) {
 		return errorf (0x34efe59c, "stdin is a TTY")
@@ -29,22 +33,34 @@ func fzfMain () (*Error) {
 		return errorf (0x55a1298a, "stderr is not a TTY")
 	}
 	
-	_options := fzf.DefaultOptions ()
 	
-	_options.Fuzzy = false
-	_options.Extended = true
-	_options.Case = fzf.CaseIgnore
-	_options.Normalize = true
-	_options.Sort = 1
-	_options.Multi = 0
+	var _options *fzf.Options
 	
-	_options.Theme = fzf_tui.Default16
-	_options.Theme = nil
-	_options.Bold = false
-	_options.ClearOnExit = true
-	_options.Mouse = false
+	if _embedded {
+		
+		_options = fzf.DefaultOptions ()
+		
+		_options.Fuzzy = false
+		_options.Extended = true
+		_options.Case = fzf.CaseIgnore
+		_options.Normalize = true
+		_options.Sort = 1
+		_options.Multi = 0
+		
+		_options.Theme = fzf_tui.Default16
+		_options.Theme = nil
+		_options.Bold = false
+		_options.ClearOnExit = true
+		_options.Mouse = false
+		
+	} else {
+		
+		_options = fzf.ParseOptions ()
+		
+	}
 	
 	fzf.Run (_options, "z-run")
+	
 	panic (0x4716a580)
 }
 
