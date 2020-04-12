@@ -76,9 +76,11 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	
 	_functions := templateFunctions ()
 	
-	_functions["ZRUN"] = func (_scriptlet string, _arguments ... string) (string, error) {
+	_functions["zrun"] = func (_scriptlet string, _arguments ... string) (string, error) {
 			return templateFuncZrun (_library, _context, _scriptlet, _arguments)
 		}
+	_functions["ZRUN"] = _functions["zrun"]
+	
 	_functions["ZRUN_EXECUTABLE"] = func () (string) {
 			return _context.selfExecutable
 		}
