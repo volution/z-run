@@ -736,7 +736,7 @@ func PreMain () () {
 				panic (0xfae3720e)
 			}
 		
-		case "z-run", "zrun", "_" :
+		case "z-run", "zrun", "x-run", "xrun", "_" :
 			_argument0 = _executable
 		
 		default :
