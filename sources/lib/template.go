@@ -14,14 +14,17 @@ import "text/template"
 
 
 
-func templateMain () (*Error) {
+func templateMain (_arguments []string, _environment map[string]string) (*Error) {
 	
-	if len (os.Args) < 2 {
+	if len (_arguments) < 1 {
 		return errorf (0x47c3f9f1, "invalid arguments")
 	}
 	
+	var _sourcePath = _arguments[0]
+	_arguments = _arguments[1:]
+	
 	var _source string
-	if _stream, _error := os.Open (os.Args[1]); _error == nil {
+	if _stream, _error := os.Open (_sourcePath); _error == nil {
 		defer _stream.Close ()
 		_buffer := strings.Builder {}
 		if _, _error := io.Copy (&_buffer, _stream); _error == nil {
@@ -40,7 +43,8 @@ func templateMain () (*Error) {
 	}
 	
 	_data := map[string]interface{} {
-			"arguments" : os.Args[2:],
+			"arguments" : _arguments,
+			"environment" : _environment,
 		}
 	
 	if _error := _template.Execute (os.Stdout, _data); _error != nil {
@@ -87,7 +91,6 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	_functions["ZRUN_LIBRARY_CACHE"] = func () (string) {
 			return _libraryUrl
 		}
-	
 	
 	_template := template.New ("z-run")
 	_template.Funcs (_functions)
