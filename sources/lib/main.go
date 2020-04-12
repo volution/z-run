@@ -705,6 +705,9 @@ func PreMain () () {
 		case "[z-run:template]" :
 			_argument0 = "[z-run]"
 		
+		case "[z-run:input]" :
+			// NOP
+		
 		case "[z-run:template-raw]" :
 			if _error := templateMain (_arguments, _environment); _error != nil {
 				panic (abortError (_error))
@@ -763,6 +766,10 @@ func PreMain () () {
 				_delegateArgument0 = "[z-run:fzf]"
 				_delegateArguments = _arguments[1:]
 			
+			case "--input" :
+				_argument0 = "[z-run:input]"
+				_arguments = _arguments[1:]
+			
 //			default :
 //				_delegateExecutable = _executable
 //				_delegateArgument0 = "[z-run]"
@@ -785,6 +792,26 @@ func PreMain () () {
 		}
 	}
 	
+	
+	switch _argument0 {
+		
+		case "[z-run:input]" :
+			if _error := inputMain (_arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0xe62a9355)
+			}
+		
+		case "[z-run]" :
+			// NOP
+		
+		case _executable :
+			// NOP
+		
+		default :
+			logf ('e', 0xf965e92e, "invalid argument0: `%s`;  aborting!", _argument0)
+			os.Exit (1)
+	}
 	
 	if _error := Main (_executable, _argument0, _arguments, _environment, "", ""); _error == nil {
 		os.Exit (0)

@@ -63,7 +63,7 @@
 !!
 
 << do / run
-	exec -- "${ZRUN[@]}" ':: do / run / 0' '[z-run]' "${@}"
+	exec -- "${ZRUN[@]}" ':: do / run / 0' '' "${@}"
 !!
 
 
