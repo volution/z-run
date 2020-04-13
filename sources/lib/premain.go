@@ -98,6 +98,8 @@ func PreMain () () {
 	}
 	
 	
+	_argument0IsTool := true
+	
 	switch _argument0 {
 		
 		case "[z-run]" :
@@ -109,39 +111,23 @@ func PreMain () () {
 		case "[z-run:template]" :
 			_argument0 = "[z-run]"
 		
+		case "[z-run:template-raw]" :
+			// NOP
+		
+		case "[z-run:menu]" :
+			// NOP
+		
 		case "[z-run:input]" :
 			// NOP
 		
-		case "[z-run:template-raw]" :
-			if _error := templateMain (_arguments, _environment); _error != nil {
-				panic (abortError (_error))
-			} else {
-				panic (0x32241835)
-			}
-		
-		case "[z-run:menu]" :
-			if _error := menuMain (_arguments, _environment); _error != nil {
-				panic (abortError (_error))
-			} else {
-				panic (0x6b21e0ab)
-			}
-		
 		case "[z-run:select]" :
-			if _error := fzfMain (true, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
-			} else {
-				panic (0x2346ca3f)
-			}
+			// NOP
 		
 		case "[z-run:fzf]" :
-			if _error := fzfMain (false, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
-			} else {
-				panic (0xfae3720e)
-			}
+			// NOP
 		
 		case "z-run", "zrun", "x-run", "xrun", "_" :
-			_argument0 = _executable
+			_argument0IsTool = false
 		
 		default :
 			if strings.HasPrefix (_argument0, "[z-run:") {
@@ -152,14 +138,15 @@ func PreMain () () {
 				logf ('e', 0xf1f1a024, "invalid argument0: `%s`;  aborting!", _argument0)
 				os.Exit (1)
 			}
+			_argument0IsTool = false
 	}
 	
 	
-	if (_argument0 != "[z-run]") && len (_arguments) == 0 {
+	if !_argument0IsTool && len (_arguments) == 0 {
 		
 		_argument0 = "[z-run]"
 		
-	} else if (_argument0 != "[z-run]") && len (_arguments) >= 1 {
+	} else if !_argument0IsTool && len (_arguments) >= 1 {
 		
 		_delegateExecutable := ""
 		_delegateArgument0 := ""
@@ -177,10 +164,12 @@ func PreMain () () {
 				_argument0 = "[z-run:input]"
 				_arguments = _arguments[1:]
 			
-//			default :
-//				_delegateExecutable = _executable
-//				_delegateArgument0 = "[z-run]"
-//				_delegateArguments = _arguments
+			case "--select" :
+				_argument0 = "[z-run:select]"
+				_arguments = _arguments[1:]
+			
+			default :
+				_argument0 = "[z-run]"
 		}
 		
 		if _delegateExecutable != "" {
@@ -213,10 +202,35 @@ func PreMain () () {
 				panic (0xe62a9355)
 			}
 		
-		case "[z-run]" :
-			// NOP
+		case "[z-run:template-raw]" :
+			if _error := templateMain (_arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x32241835)
+			}
 		
-		case _executable :
+		case "[z-run:menu]" :
+			if _error := menuMain (_arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x6b21e0ab)
+			}
+		
+		case "[z-run:select]" :
+			if _error := fzfMain (true, _arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x2346ca3f)
+			}
+		
+		case "[z-run:fzf]" :
+			if _error := fzfMain (false, _arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0xfae3720e)
+			}
+		
+		case "[z-run]" :
 			// NOP
 		
 		default :
