@@ -6,6 +6,7 @@ package zrun
 import "log"
 import "os"
 import "path/filepath"
+import "sort"
 import "strings"
 import "syscall"
 import "unicode"
@@ -90,6 +91,13 @@ func PreMain () () {
 //	logf ('d', 0x7a411846, "self-environment: %s", _environment)
 	
 	
+	os.Args = append ([]string {"z-run"}, _arguments ...)
+	os.Clearenv ()
+	for _name, _value := range _environment {
+		os.Setenv (_name, _value)
+	}
+	
+	
 	switch _argument0 {
 		
 		case "[z-run]" :
@@ -112,21 +120,21 @@ func PreMain () () {
 			}
 		
 		case "[z-run:menu]" :
-			if _error := menuMain (); _error != nil {
+			if _error := menuMain (_arguments, _environment); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0x6b21e0ab)
 			}
 		
 		case "[z-run:select]" :
-			if _error := fzfMain (true); _error != nil {
+			if _error := fzfMain (true, _arguments, _environment); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0x2346ca3f)
 			}
 		
 		case "[z-run:fzf]" :
-			if _error := fzfMain (false); _error != nil {
+			if _error := fzfMain (false, _arguments, _environment); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0xfae3720e)
@@ -180,6 +188,7 @@ func PreMain () () {
 			for _name, _value := range _environment {
 				_delegateEnvironment = append (_delegateEnvironment, _name + "=" + _value)
 			}
+			sort.Strings (_delegateEnvironment)
 			
 			_delegateArguments := append ([]string {_delegateArgument0}, _delegateArguments ...)
 			
@@ -190,6 +199,9 @@ func PreMain () () {
 			}
 		}
 	}
+	
+	
+	os.Args = append ([]string {"z-run"}, _arguments ...)
 	
 	
 	switch _argument0 {

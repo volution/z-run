@@ -15,14 +15,14 @@ import isatty "github.com/mattn/go-isatty"
 
 
 
-func menuMain () (*Error) {
+func menuMain (_arguments []string, _environment map[string]string) (*Error) {
 	
-	if len (os.Args) != 2 {
+	if len (_arguments) != 1 {
 		return errorf (0x6b439ede, "invalid arguments")
 	}
 	
 	_inputs := make ([]string, 0, 1024)
-	if _stream, _error := os.Open (os.Args[1]); _error == nil {
+	if _stream, _error := os.Open (_arguments[0]); _error == nil {
 		defer _stream.Close ()
 		_reader := bufio.NewReader (_stream)
 		for {

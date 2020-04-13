@@ -13,11 +13,11 @@ import isatty "github.com/mattn/go-isatty"
 
 
 
-func fzfMain (_embedded bool) (*Error) {
+func fzfMain (_embedded bool, _arguments []string, _environment map[string]string) (*Error) {
 	
 	
 	if _embedded {
-		if len (os.Args) != 1 {
+		if len (_arguments) != 0 {
 			return errorf (0x68f8e127, "invalid arguments")
 		}
 	}
@@ -25,18 +25,16 @@ func fzfMain (_embedded bool) (*Error) {
 	
 	_dryrun := false
 	if !_embedded {
-		if len (os.Args) >= 2 {
-			for _, _argument := range os.Args[1:] {
-				switch _argument {
-					case "-h", "-help", "--help" :
-						_dryrun = true
-						os.Args = []string {os.Args[0], "--help"}
-						break
-					case "-v", "-version", "--version" :
-						_dryrun = true
-						os.Args = []string {os.Args[0], "--version"}
-						break
-				}
+		for _, _argument := range _arguments {
+			switch _argument {
+				case "-h", "-help", "--help" :
+					_dryrun = true
+					_arguments = []string {"--help"}
+					break
+				case "-v", "-version", "--version" :
+					_dryrun = true
+					_arguments = []string {"--version"}
+					break
 			}
 		}
 	}
@@ -53,6 +51,9 @@ func fzfMain (_embedded bool) (*Error) {
 			return errorf (0x55a1298a, "stderr is not a TTY")
 		}
 	}
+	
+	
+	os.Args = append ([]string {"z-run"}, _arguments ...)
 	
 	
 	var _options *fzf.Options
