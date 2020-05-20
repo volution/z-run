@@ -15,7 +15,7 @@ import "sort"
 import "strings"
 import "syscall"
 
-import "golang.org/x/sys/unix"
+import isatty "github.com/mattn/go-isatty"
 
 
 
@@ -349,12 +349,12 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	if _sshTerminal == "" {
 		_sshArguments = append (_sshArguments, "-T")
 	} else {
-		_stdinTermios, _stdinError := unix.IoctlGetTermios (int (os.Stdin.Fd ()), unix.TCGETS)
-		_stdoutTermios, _stdoutError := unix.IoctlGetTermios (int (os.Stdout.Fd ()), unix.TCGETS)
-		_stderrTermios, _stderrError := unix.IoctlGetTermios (int (os.Stderr.Fd ()), unix.TCGETS)
-		if (_stdinError != nil) || (_stdoutError != nil) || (_stderrError != nil) {
+		_stdinIsTty := isatty.IsTerminal (os.Stdin.Fd ())
+		_stdoutIsTty := isatty.IsTerminal (os.Stdout.Fd ())
+		_stderrIsTty := isatty.IsTerminal (os.Stderr.Fd ())
+		if !_stdinIsTty || !_stdoutIsTty || !_stderrIsTty {
 			// NOP
-		} else if (_stdinTermios != nil) && (_stdoutTermios != nil) && (_stderrTermios != nil) {
+		} else if _stdinIsTty && _stdoutIsTty && _stderrIsTty {
 //			logf ('d', 0x93bc5a69, "SSH with TTY allowed; %#v %#v %#v", _stdinTermios, _stdoutTermios, _stderrTermios)
 			_sshArguments = append (_sshArguments, "-t")
 		}
