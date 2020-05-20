@@ -15,10 +15,14 @@ import "sync"
 
 
 func processEnvironment (_context *Context, _overrides map[string]string) ([]string) {
+	return processEnvironment_0 (_context.selfExecutable, _context.cleanEnvironment, _overrides)
+}
+
+func processEnvironment_0 (_executable string, _environment map[string]string, _overrides map[string]string) ([]string) {
 	
-	_environmentMap := make (map[string]string, len (_context.cleanEnvironment) + len (_overrides))
+	_environmentMap := make (map[string]string, len (_environment) + len (_overrides))
 	
-	for _name, _value := range _context.cleanEnvironment {
+	for _name, _value := range _environment {
 		_environmentMap[_name] = _value
 	}
 	for _name, _value := range _overrides {
@@ -27,6 +31,11 @@ func processEnvironment (_context *Context, _overrides map[string]string) ([]str
 		} else {
 			delete (_environmentMap, _name)
 		}
+	}
+	if _executable != "" {
+		_environmentMap["ZRUN_EXECUTABLE"] = _executable
+	} else {
+		delete (_environmentMap, "ZRUN_EXECUTABLE")
 	}
 	
 	var _environmentArray []string = make ([]string, 0, len (_environmentMap))

@@ -199,7 +199,6 @@ exec %d<&-
 	}
 	
 	_interpreterEnvironment := processEnvironment (_context, map[string]string {
-			"ZRUN_EXECUTABLE" : _context.selfExecutable,
 			"ZRUN_WORKSPACE" : _context.workspace,
 			"ZRUN_LIBRARY_CACHE" : _libraryUrl,
 			"ZRUN_FINGERPRINT" : _libraryFingerprint,
