@@ -388,7 +388,6 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			logf ('w', 0xdb80c4de, "cached library path specified, but caching is disabled;  ignoring cached path!")
 			_libraryCachePath = ""
 		}
-		_cacheRoot = ""
 	}
 	
 	if _workspace == "" {

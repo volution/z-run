@@ -43,6 +43,7 @@ func NewLibraryRpcServer (_library LibraryStore, _url string) (*LibraryRpcServer
 	} else {
 		return nil, _error
 	}
+//	logf ('d', 0x49d3cc32, "listening library RPC server on `%s` / `%s`...", _network, _address)
 	var _listener net.Listener
 	if _listener_0, _error := net.Listen (_network, _address); _error == nil {
 		_listener = _listener_0
@@ -130,6 +131,7 @@ func NewLibraryRpcClient (_url string) (*LibraryRpcClient, *Error) {
 	} else {
 		return nil, _error
 	}
+//	logf ('d', 0x1afdd51f, "connecting library RPC client to `%s` / `%s`...", _network, _address)
 	var _rpc *rpc.Client
 	if _rpc_0, _error := rpc.Dial (_network, _address); _error == nil {
 		_rpc = _rpc_0
