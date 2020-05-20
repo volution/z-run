@@ -6,6 +6,7 @@ package zrun
 import "log"
 import "os"
 import "path/filepath"
+import "runtime"
 import "sort"
 import "strings"
 import "syscall"
@@ -31,6 +32,26 @@ func PreMain () () {
 		_executable = _executable_0
 	} else {
 		panic (abortError (errorw (0x127e013a, _error)))
+	}
+	
+	
+	if os.Getenv ("ZRUN_EXECUTABLE") == "" {
+		switch runtime.GOOS {
+			
+			case "linux" :
+				// NOP
+			
+			case "freebsd", "netbsd", "openbsd", "dragonfly" :
+				logf ('i', 0xc8f30933, "this tool was not tested on your OS;  please be cautions!")
+			
+			case "darwin" :
+				logf ('i', 0x77f48bd9, "this tool was not tested on your OS;  please be cautions!")
+			
+			default :
+				logf ('e', 0xcdd5f570, "this tool was not tested on your OS;  it is highly unlikely that it will work;  aborting!")
+				os.Exit (1)
+				panic (0x9c080b95)
+		}
 	}
 	
 	
