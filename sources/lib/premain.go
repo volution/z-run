@@ -41,11 +41,11 @@ func PreMain () () {
 			case "linux" :
 				// NOP
 			
+			case "darwin" :
+				// NOP
+			
 			case "freebsd", "netbsd", "openbsd", "dragonfly" :
 				logf ('i', 0xc8f30933, "this tool was not tested on your OS;  please be cautions!")
-			
-			case "darwin" :
-				logf ('i', 0x77f48bd9, "this tool was not tested on your OS;  please be cautions!")
 			
 			default :
 				logf ('e', 0xcdd5f570, "this tool was not tested on your OS;  it is highly unlikely that it will work;  aborting!")
