@@ -15,7 +15,7 @@ import isatty "github.com/mattn/go-isatty"
 
 
 
-func menuMain (_arguments []string, _environment map[string]string) (*Error) {
+func menuMain (_executable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) != 1 {
 		return errorf (0x6b439ede, "invalid arguments")
@@ -41,14 +41,14 @@ func menuMain (_arguments []string, _environment map[string]string) (*Error) {
 		}
 	}
 	
-	// FIXME:  Should refactor this!
-	_executable, _ := os.Executable ()
 	_context := & Context {
 			selfExecutable : _executable,
-			// FIXME:  Handle this!
-			cleanEnvironment : nil,
-			terminal : os.Getenv ("TERM"),
+			cleanEnvironment : _environment,
 		}
+	
+	if _terminal, _ok := _environment["TERM"]; _ok {
+		_context.terminal = _terminal
+	}
 	
 	if _outputs, _error := menuSelect (_inputs, _context); _error == nil {
 		for _, _output := range _outputs {
@@ -125,9 +125,9 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Args = []string {
 				"[z-run:select]",
 			}
-		_command.Env = []string {
-				"TERM=" + _context.terminal,
-			}
+		_command.Env = processEnvironment (_context, map[string]string {
+				"TERM" : _context.terminal,
+			})
 	} else if _path, _error := exec.LookPath ("rofi"); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
@@ -151,13 +151,13 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 	}
 	
 	if _command.Env == nil {
-		if _context.cleanEnvironment != nil {
-			_command.Env = processEnvironment (_context, nil)
-		} else {
-			// FIXME:  Handle this!
-			// _command.Env = []string {}
-		}
+		_command.Env = processEnvironment (_context, nil)
 	}
+	
+//	logf ('d', 0x5cbde167, "%v", _command.Path)
+//	logf ('d', 0x44b3328a, "%v", _command.Args[0])
+//	logf ('d', 0x3cc16861, "%v", _command.Args[1:])
+//	logf ('d', 0x8f4e574f, "%v", _command.Env)
 	
 	if _exitCode, _, _outputsCount, _error := processExecuteAndPipe (_command, _inputsChannel, _outputsChannel); _error == nil {
 		if _commandFzf {

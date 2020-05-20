@@ -210,7 +210,7 @@ func PreMain () () {
 			}
 		
 		case "[z-run:menu]" :
-			if _error := menuMain (_arguments, _environment); _error != nil {
+			if _error := menuMain (_executable, _arguments, _environment); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0x6b21e0ab)
