@@ -37,7 +37,8 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		if _cacheRoot == "" {
 			_cacheRoot = "/tmp"
 		}
-		var _socketPath = path.Join (_cacheRoot, fmt.Sprintf ("%s-%08x.sock", _environmentFingerprint, os.Getpid ()))
+		var _socketToken = generateRandomToken ()
+		var _socketPath = path.Join (_cacheRoot, fmt.Sprintf ("%s-%08x.sock", _socketToken, os.Getpid ()))
 		_libraryUrl = fmt.Sprintf ("unix:%s", _socketPath)
 	} else {
 		_libraryUrl = fmt.Sprintf ("unix:@%s-%08x", _environmentFingerprint, os.Getpid ())
