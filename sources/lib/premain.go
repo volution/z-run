@@ -7,6 +7,7 @@ import "log"
 import "os"
 import "path/filepath"
 import "runtime"
+import "runtime/debug"
 import "sort"
 import "strings"
 import "syscall"
@@ -20,6 +21,12 @@ func PreMain () () {
 	
 	
 	log.SetFlags (0)
+	
+	
+	runtime.GOMAXPROCS (1)
+	debug.SetMaxThreads (16)
+	debug.SetMaxStack (128 * 1024)
+	debug.SetGCPercent (500)
 	
 	
 	var _executable string
