@@ -61,7 +61,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	if isatty.IsTerminal (os.Stderr.Fd ()) {
 		_progress_0 = mpb.New (
 				mpb.WithOutput (os.Stderr),
-				mpb.WithRefreshRate (100 * time.Millisecond),
+				mpb.WithRefreshRate (250 * time.Millisecond),
 				mpb.WithWidth (40), // FIXME:  Detect console width!
 			)
 		_progress = _progress_0.AddBar (
@@ -86,7 +86,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 			return nil, _error
 		}
 		if _progress != nil {
-			_progress.SetTotal (int64 (len (_sources) + len (_library.Scriptlets)), false)
+			_progress.SetTotal (int64 (len (_sources) + len (_library.Scriptlets) + 1), false)
 			_progress.Increment ()
 		}
 	}
@@ -94,8 +94,8 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	_loop : for _index := 0; _index < len (_library.Scriptlets); {
 		
 		if _progress != nil {
-			_progress.SetTotal (int64 (len (_sources) + len (_library.Scriptlets)), false)
-			_progress.SetCurrent (int64 (len (_sources) + _index))
+			_progress.SetTotal (int64 (len (_sources) + len (_library.Scriptlets) + 1), false)
+			_progress.SetCurrent (int64 (len (_sources) + _index + 1))
 		}
 		
 		_scriptlet := _library.Scriptlets[_index]
@@ -159,7 +159,8 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	}
 	
 	if _progress != nil {
-		_progress.SetTotal (0, true)
+		_progress.SetTotal (int64 (len (_sources) + len (_library.Scriptlets) + 1), false)
+		_progress.SetCurrent (int64 (len (_sources) + len (_library.Scriptlets)))
 	}
 	
 	
@@ -222,7 +223,10 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.EnvironmentFingerprint) .StringWithLen (_library.SourcesFingerprint) .Build ()
 	
 	if _progress != nil {
+		_progress.SetTotal (_progress.Current () + 1, true)
+		_progress.Increment ()
 		_progress_0.Wait ()
+		os.Stderr.Sync ()
 	}
 	
 	return _library, nil
