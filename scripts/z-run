@@ -21,7 +21,7 @@
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
 	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
-	cp -f -- ./.outputs/main-release.elf "${HOME}/.bin/z-run--${_timestamp}"
+	cp -f -- ./.outputs/z-run--release.elf "${HOME}/.bin/z-run--${_timestamp}"
 	ln -s -f -- "./z-run--${_timestamp}" "${HOME}/.bin/z-run--0000"
 !!
 
@@ -32,7 +32,7 @@
 	shift -- 1
 	"${ZRUN[@]}" ':: go / build / main / release'
 	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
-	rsync -i -t -p --chmod=0555 -- ./.outputs/main-release.elf "${_target}"
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release.elf "${_target}"
 !!
 
 
@@ -59,7 +59,7 @@
 		export -- TERM="${ZRUNDEV_TERM}"
 	fi
 	export -n -- ZRUNDEV_TERM=
-	exec -a "${1:-./.outputs/main-debug.elf}" -- ./.outputs/main-debug.elf "${@:2}"
+	exec -a "${1:-./.outputs/z-run--debug.elf}" -- ./.outputs/z-run--debug.elf "${@:2}"
 !!
 
 << do / run
@@ -97,9 +97,9 @@
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
-			-o "${_outputs}/main-debug.elf" \
+			-o "${_outputs}/z-run--debug.elf" \
 			-- \
-			./main.go \
+			./cmd/z-run.go \
 	#
 !!
 
@@ -109,10 +109,10 @@
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
-			-o "${_outputs}/main-release.elf" \
+			-o "${_outputs}/z-run--release.elf" \
 			-ldflags '-s' \
 			-- \
-			./main.go \
+			./cmd/z-run.go \
 	#
 !!
 
@@ -121,12 +121,12 @@
 
 << go / execute / main / debug
 	"${ZRUN[@]}" ':: go / build / main / debug'
-	exec -- ./.outputs/main-debug.elf "${@}"
+	exec -- ./.outputs/z-run--debug.elf "${@}"
 !!
 
 << go / execute / main / release
 	"${ZRUN[@]}" ':: go / build / main / release'
-	exec -- ./.outputs/main-release.elf "${@}"
+	exec -- ./.outputs/z-run--release.elf "${@}"
 !!
 
 
