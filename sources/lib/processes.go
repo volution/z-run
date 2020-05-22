@@ -52,7 +52,7 @@ func processEnvironment_0 (_executable string, _environment map[string]string, _
 
 
 
-func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string) (int, uint, uint, *Error) {
+func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string, _ignoreMissingNewline bool) (int, uint, uint, *Error) {
 	
 	var _stdin io.WriteCloser
 	if _inputsChannel != nil {
@@ -130,7 +130,15 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 					if _line == "" {
 						break
 					} else {
-						_stdoutError = errorf (0x1bc14ac4, "expected proper line")
+						if _ignoreMissingNewline {
+//							logf ('d', 0x369ccac9, "read from stdout (without newline): `%s`", _output)
+							_outputsChannel <- _line
+							_outputsCount += 1
+							break
+						} else {
+							_stdoutError = errorf (0x1bc14ac4, "expected proper line")
+							break
+						}
 					}
 				} else {
 					_stdoutError = errorw (0xb783c8c4, _error)

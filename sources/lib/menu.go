@@ -146,6 +146,14 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-l", "16",
 				"-i",
 			}
+	} else if _path, _error := exec.LookPath ("choose"); _error == nil {
+		_command.Path = _path
+		_command.Args = []string {
+				"[z-run:select]",
+				"-n", "16",
+				"-w", "40",
+				"-s", "14",
+			}
 	} else {
 		return errorf (0xb91714f7, "unresolved `x-input`")
 	}
@@ -159,7 +167,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 //	logf ('d', 0x3cc16861, "%v", _command.Args[1:])
 //	logf ('d', 0x8f4e574f, "%v", _command.Env)
 	
-	if _exitCode, _, _outputsCount, _error := processExecuteAndPipe (_command, _inputsChannel, _outputsChannel); _error == nil {
+	if _exitCode, _, _outputsCount, _error := processExecuteAndPipe (_command, _inputsChannel, _outputsChannel, true); _error == nil {
 		if _commandFzf {
 			switch _exitCode {
 				case 0 :
