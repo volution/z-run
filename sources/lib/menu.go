@@ -128,6 +128,11 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Env = processEnvironment (_context, map[string]string {
 				"TERM" : _context.terminal,
 			})
+	} else if _path, _error := exec.LookPath ("z-run--select"); _error == nil {
+		_command.Path = _path
+		_command.Args = []string {
+				"[z-run:select]",
+			}
 	} else if _path, _error := exec.LookPath ("rofi"); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
@@ -155,7 +160,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-s", "14",
 			}
 	} else {
-		return errorf (0xb91714f7, "unresolved `x-input`")
+		return errorf (0xb91714f7, "unresolved `z-run--select`")
 	}
 	
 	if _command.Env == nil {
