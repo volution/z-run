@@ -21,7 +21,7 @@
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
 	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
-	cp -f -- ./.outputs/z-run--release.elf "${HOME}/.bin/z-run--${_timestamp}"
+	cp -f -- ./.outputs/z-run--release "${HOME}/.bin/z-run--${_timestamp}"
 	ln -s -f -- "./z-run--${_timestamp}" "${HOME}/.bin/z-run--0000"
 !!
 
@@ -31,8 +31,19 @@
 	_target="${1}"
 	shift -- 1
 	"${ZRUN[@]}" ':: go / build / main / release'
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release "${_target}"
+!!
+
+++<< workspace / deploy / publish
+	test "${#}" -eq 0
+	test -d ./.publish/
+	"${ZRUN[@]}" ':: go / build / main / release / linux'
+	"${ZRUN[@]}" ':: go / build / main / release / darwin'
 	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release.elf "${_target}"
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "./.publish/linux/z-run--${_timestamp}"
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "./.publish/darwin/z-run--${_timestamp}"
+	ln -s -T -f -- "./z-run--${_timestamp}" ./.publish/linux/z-run
+	ln -s -T -f -- "./z-run--${_timestamp}" ./.publish/darwin/z-run
 !!
 
 
@@ -59,7 +70,7 @@
 		export -- TERM="${ZRUNDEV_TERM}"
 	fi
 	export -n -- ZRUNDEV_TERM=
-	exec -a "${1:-./.outputs/z-run--debug.elf}" -- ./.outputs/z-run--debug.elf "${@:2}"
+	exec -a "${1:-./.outputs/z-run--debug}" -- ./.outputs/z-run--debug "${@:2}"
 !!
 
 << do / run
@@ -97,7 +108,7 @@
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
-			-o "${_outputs}/z-run--debug.elf" \
+			-o "${_outputs}/z-run--debug" \
 			-- \
 			./cmd/z-run.go \
 	#
@@ -106,14 +117,29 @@
 << go / build / main / release
 	test "${#}" -eq 0
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	if test -n "${GOOS:-}" ; then
+		_suffix="--${GOOS}"
+	else
+		_suffix=''
+	fi
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
-			-o "${_outputs}/z-run--release.elf" \
+			-o "${_outputs}/z-run--release${_suffix}" \
 			-ldflags '-s' \
 			-- \
 			./cmd/z-run.go \
 	#
+!!
+
+<< go / build / main / release / linux
+	export -- GOOS=linux
+	"${ZRUN[@]}" ':: go / build / main / release'
+!!
+
+<< go / build / main / release / darwin
+	export -- GOOS=darwin
+	"${ZRUN[@]}" ':: go / build / main / release'
 !!
 
 
@@ -121,12 +147,12 @@
 
 << go / execute / main / debug
 	"${ZRUN[@]}" ':: go / build / main / debug'
-	exec -- ./.outputs/z-run--debug.elf "${@}"
+	exec -- ./.outputs/z-run--debug "${@}"
 !!
 
 << go / execute / main / release
 	"${ZRUN[@]}" ':: go / build / main / release'
-	exec -- ./.outputs/z-run--release.elf "${@}"
+	exec -- ./.outputs/z-run--release "${@}"
 !!
 
 
