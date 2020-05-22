@@ -8,6 +8,7 @@ import "io"
 import "os"
 import "os/exec"
 import "strings"
+import "sync"
 
 
 import isatty "github.com/mattn/go-isatty"
@@ -72,13 +73,18 @@ func menuSelect (_inputs []string, _context *Context) ([]string, *Error) {
 	_outputsChannel := make (chan string, 1024)
 	_outputs := make ([]string, 0, 1024)
 	
+	_waiter := & sync.WaitGroup {}
+	
+	_waiter.Add (1)
 	go func () () {
 		for _, _input := range _inputs {
 			_inputsChannel <- _input
 		}
 		close (_inputsChannel)
+		_waiter.Done ()
 	} ()
 	
+	_waiter.Add (1)
 	go func () () {
 		for {
 			_output, _ok := <- _outputsChannel
@@ -88,10 +94,15 @@ func menuSelect (_inputs []string, _context *Context) ([]string, *Error) {
 				break
 			}
 		}
-		close (_outputsChannel)
+		_waiter.Done ()
 	} ()
 	
-	if _error := menuSelect_0 (_inputsChannel, _outputsChannel, _context); _error == nil {
+	_error := menuSelect_0 (_inputsChannel, _outputsChannel, _context);
+	
+	close (_outputsChannel)
+	_waiter.Wait ()
+	
+	if _error == nil {
 		return _outputs, nil
 	} else {
 		return nil, _error

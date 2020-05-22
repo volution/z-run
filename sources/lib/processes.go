@@ -131,8 +131,9 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 						break
 					} else {
 						if _ignoreMissingNewline {
+							_output := _line
 //							logf ('d', 0x369ccac9, "read from stdout (without newline): `%s`", _output)
-							_outputsChannel <- _line
+							_outputsChannel <- _output
 							_outputsCount += 1
 							break
 						} else {

@@ -293,7 +293,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 func resolveLibraryCached (_path string) (LibraryStore, *Error) {
 	if _store, _error := NewCdbStoreInput (_path); _error == nil {
 		if _library, _error := NewLibraryStoreInput (_store, _path); _error == nil {
-//			logf ('d', 0x63ae360d, "opened library cached at `%s`;", _cacheLibrary)
+//			logf ('d', 0x63ae360d, "opened library cached at `%s`;", _path)
 			return _library, nil
 		} else {
 			_store.Close ()

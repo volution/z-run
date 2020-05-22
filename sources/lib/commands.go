@@ -355,7 +355,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		if !_stdinIsTty || !_stdoutIsTty || !_stderrIsTty {
 			// NOP
 		} else if _stdinIsTty && _stdoutIsTty && _stderrIsTty {
-//			logf ('d', 0x93bc5a69, "SSH with TTY allowed; %#v %#v %#v", _stdinTermios, _stdoutTermios, _stderrTermios)
+//			logf ('d', 0x93bc5a69, "SSH with TTY allowed;")
 			_sshArguments = append (_sshArguments, "-t")
 		}
 	}
