@@ -81,6 +81,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	_labels := make ([]string, 0, 1024)
 	_labelsAll := make ([]string, 0, 1024)
 	_labelsByFingerprints := make (map[string]string, 1024)
+	_contextsFingerprints := make (map[string]bool, 16)
 	
 	var _fingerprintsFromStore []string
 	if _fingerprints_0, _error := _library.SelectFingerprints (); _error == nil {
@@ -113,6 +114,9 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 			}
 			_fingerprintsByLabels[_label] = _fingerprint
 			_labelsByFingerprints[_fingerprint] = _label
+			if _meta.ContextFingerprint != "" {
+				_contextsFingerprints[_meta.ContextFingerprint] = true
+			}
 		} else {
 			return _error
 		}
@@ -147,6 +151,20 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	}
 	if _error := _store.Include ("scriptlets-indices", "fingerprints-by-labels", _fingerprintsByLabels); _error != nil {
 		return _error
+	}
+	
+	for _contextFingerprint, _ := range _contextsFingerprints {
+		if _context, _found, _error := _library.ResolveContextByFingerprint (_contextFingerprint); _error == nil {
+			if _found && _contextFingerprint == _context.Fingerprint {
+				if _error := _store.Include ("scriptlets-contexts-by-fingerprint", _context.Fingerprint, _context); _error != nil {
+					return _error
+				}
+			} else {
+				return errorf (0x7c9d40d9, "invalid store")
+			}
+		} else {
+			return _error
+		}
 	}
 	
 	if _error := _store.Commit (); _error != nil {

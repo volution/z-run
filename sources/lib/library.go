@@ -16,6 +16,8 @@ type Scriptlet struct {
 	InterpreterExecutable string `json:"interpreter-executable,omitempty"`
 	InterpreterArguments []string `json:"interpreter-arguments,omitempty"`
 	InterpreterEnvironment map[string]string `json:"interpreter-environment,omitempty"`
+	Context *ScriptletContext `json:"-"`
+	ContextFingerprint string `json:"context,omitempty"`
 	Body string `json:"body,omitempty"`
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
@@ -28,6 +30,12 @@ type ScriptletSource struct {
 	Path string `json:"path"`
 	LineStart uint `json:"line_start"`
 	LineEnd uint `json:"line_end"`
+}
+
+type ScriptletContext struct {
+	Fingerprint string `json:"fingerprint"`
+	ExecutablePaths []string `json:"executable-paths"`
+	Environment map[string]string `json:"environment"`
 }
 
 
@@ -43,6 +51,8 @@ type Library struct {
 	ScriptletLabels []string `json:"labels"`
 	ScriptletLabelsAll []string `json:"labels"`
 	ScriptletsByLabel map[string]uint `json:"index_by_label"`
+	
+	ScriptletsContexts map[string]*ScriptletContext `json:"scriptlets-contexts"`
 	
 	Sources LibrarySources `json:"sources"`
 	
@@ -74,6 +84,7 @@ func NewLibrary () (*Library) {
 			ScriptletLabels : make ([]string, 0, 1024),
 			ScriptletLabelsAll : make ([]string, 0, 1024),
 			ScriptletsByLabel : make (map[string]uint, 1024),
+			ScriptletsContexts : make (map[string]*ScriptletContext, 16),
 		}
 }
 
@@ -153,6 +164,15 @@ func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool
 		return _scriptlet.Fingerprint, true, nil
 	} else {
 		return "", false, _error
+	}
+}
+
+
+func (_library *Library) ResolveContextByFingerprint (_fingerprint string) (*ScriptletContext, bool, *Error) {
+	if _context, _exists := _library.ScriptletsContexts[_fingerprint]; _exists {
+		return _context, true, nil
+	} else {
+		return nil, false, errorf (0x30d90869, "invalid scriptlet context fingerprint `%s`", _fingerprint)
 	}
 }
 
