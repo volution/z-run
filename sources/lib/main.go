@@ -21,10 +21,11 @@ type Context struct {
 	selfEnvironment map[string]string
 	cleanArguments []string
 	cleanEnvironment map[string]string
+	executablePaths []string
+	terminal string
 	workspace string
 	cacheRoot string
 	cacheEnabled bool
-	terminal string
 	top bool
 }
 
@@ -33,23 +34,25 @@ type SshContext struct {
 	target string
 	launcher string
 	delegate string
+	exportEnvironment []string
+	executablePaths []string
+	terminal string
 	workspace string
 	cache string
-	terminal string
 	libraryLocalSocket string
 	libraryRemoteSocket string
 	token string
-	exportEnvironment []string
 }
 
 type InvokeContext struct {
-	Library string `json:"library"`
-	Scriptlet string `json:"scriptlet"`
-	Arguments []string `json:"arguments"`
-	Environment map[string]string `json:"environment"`
-	Workspace string `json:"workspace"`
-	Cache string `json:"cache"`
-	Terminal string `json:"terminal"`
+	Library string `json:"library,omitempty"`
+	Scriptlet string `json:"scriptlet,omitempty"`
+	Arguments []string `json:"arguments,omitempty"`
+	Environment map[string]string `json:"environment,omitempty"`
+	ExecutablePaths []string `json:"executable-paths,omitempty"`
+	Terminal string `json:"terminal,omitempty"`
+	Workspace string `json:"workspace,omitempty"`
+	Cache string `json:"cache,omitempty"`
 }
 
 
@@ -67,9 +70,12 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 	var _cleanArguments []string
 	var _cleanEnvironment map[string]string = make (map[string]string, len (_environment))
 	
+	var _executablePaths []string = make ([]string, 0, 32)
+	var _terminal string
+	
 	var _workspace string
 	var _cacheRoot string
-	var _terminal string
+	
 	var _execMode bool
 	var _invokeMode bool
 	var _invokeContextEncoded string
@@ -136,6 +142,20 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		} else if _name == "_" {
 			
 			// NOTE:  For some reason `bash` always exports `_` containing the executable, thus we ignore it!
+			
+		} else if _name == "PATH" {
+			
+			for _, _path := range filepath.SplitList (_value) {
+				if _path != "" {
+					_executablePaths = append (_executablePaths, _path)
+				}
+			}
+			
+		} else if _name == "TERM" {
+			
+			if _terminal == "" {
+				_terminal = _value
+			}
 			
 		} else {
 			_cleanEnvironment[_name] = _value
@@ -210,6 +230,14 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				} else if strings.HasPrefix (_argument, "--ssh-export=") {
 					_name := _argument[len ("--ssh-export="):]
 					_sshContext.exportEnvironment = append (_sshContext.exportEnvironment, _name)
+				} else if strings.HasPrefix (_argument, "--ssh-path=") {
+					_paths := filepath.SplitList (_argument[len ("--ssh-path="):])
+					for _, _path := range _paths {
+						_sshContext.executablePaths = append (_sshContext.executablePaths, _path)
+					}
+				} else if strings.HasPrefix (_argument, "--ssh-terminal=") {
+					_terminal := _argument[len ("--ssh-terminal="):]
+					_sshContext.terminal = _terminal
 				} else if strings.HasPrefix (_argument, "--ssh-workspace=") {
 					_workspace := _argument[len ("--ssh-workspace="):]
 					_sshContext.workspace = _workspace
@@ -317,9 +345,6 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		if _cacheRoot != "" {
 			return errorf (0xb8216677, "invalid arguments:  unexpected cache")
 		}
-		if _terminal != "" {
-			return errorf (0xc99ea71b, "invalid arguments:  unexpected terminal")
-		}
 		if _invokeContextEncoded == "" {
 			return errorf (0xd08f059a, "invalid arguments:  expected invoke context")
 		}
@@ -341,10 +366,11 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		for _name, _value := range _context.Environment {
 			_cleanEnvironment[_name] = _value
 		}
+		_executablePaths = _context.ExecutablePaths
+		_terminal = _context.Terminal
 		_libraryCachePath = _context.Library
 		_workspace = _context.Workspace
 		_cacheRoot = _context.Cache
-		_terminal = _context.Terminal
 		_top = false
 	}
 	
@@ -421,9 +447,6 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		return errorw (0x9f5c1d2a, _error)
 	}
 	
-	if _terminal == "" {
-		_terminal, _ = _cleanEnvironment["TERM"]
-	}
 	if _terminal == "dumb" {
 		_terminal = ""
 	}
@@ -441,10 +464,11 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			selfEnvironment : _environment,
 			cleanArguments : _cleanArguments,
 			cleanEnvironment : _cleanEnvironment,
+			executablePaths : _executablePaths,
+			terminal : _terminal,
 			workspace : _workspace,
 			cacheRoot : _cacheRoot,
 			cacheEnabled : _cacheEnabled,
-			terminal : _terminal,
 		}
 	
 	var _library LibraryStore

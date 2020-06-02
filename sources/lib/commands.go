@@ -265,12 +265,13 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	_sshTarget := _sshContext.target
 	_sshLauncher := _sshContext.launcher
 	_sshDelegate := _sshContext.delegate
+	_sshExportEnvironment := _sshContext.exportEnvironment
+	_sshExecutablePaths := _sshContext.executablePaths
+	_sshTerminal := _sshContext.terminal
 	_sshWorkspace := _sshContext.workspace
 	_sshCache := _sshContext.cache
-	_sshTerminal := _sshContext.terminal
 	_sshLibraryLocalSocket := _sshContext.libraryLocalSocket
 	_sshLibraryRemoteSocket := _sshContext.libraryRemoteSocket
-	_sshExportEnvironment := _sshContext.exportEnvironment
 	_sshToken := _sshContext.token
 	
 	if _sshTarget == "" {
@@ -300,14 +301,42 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		return false, errorf (0x1e5c7a40, "invalid delegate:  contains disallowed special character")
 	}
 	
+	var _invokeEnvironment map[string]string
+	if _sshExportEnvironment != nil {
+		_invokeEnvironment = make (map[string]string, len (_sshExportEnvironment))
+		for _, _name := range _sshExportEnvironment {
+			if _value, _ok := _context.cleanEnvironment[_name]; _ok {
+				_invokeEnvironment[_name] = _value
+			}
+		}
+	}
+	
+	var _invokeExecutablePaths []string
+	if _sshExecutablePaths != nil {
+		_invokeExecutablePaths = make ([]string, 0, len (_sshExecutablePaths))
+		for _, _path := range _sshExecutablePaths {
+			_invokeExecutablePaths = append (_invokeExecutablePaths, _path)
+		}
+	} else {
+		_invokeExecutablePaths = []string {
+				"/usr/local/bin",
+				"/usr/local/sbin",
+				"/usr/bin",
+				"/usr/sbin",
+				"/bin",
+				"/sbin",
+			}
+	}
+	
+	if _sshTerminal == "" {
+		_sshTerminal = _context.terminal
+	}
+	
 	if _sshWorkspace == "" {
 		_sshWorkspace = "/tmp"
 	}
 	if _sshCache == "" {
 		_sshCache = "/tmp"
-	}
-	if _sshTerminal == "" {
-		_sshTerminal = _context.terminal
 	}
 	
 	if _sshLibraryLocalSocket == "" {
@@ -336,21 +365,15 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	}
 	defer _rpc.ServeStop ()
 	
-	_invokeEnvironment := make (map[string]string, len (_sshExportEnvironment))
-	for _, _name := range _sshExportEnvironment {
-		if _value, _ok := _context.cleanEnvironment[_name]; _ok {
-			_invokeEnvironment[_name] = _value
-		}
-	}
-	
 	_invokeContext := & InvokeContext {
 			Library : "unix:" + _sshLibraryRemoteSocket,
 			Scriptlet : _scriptlet.Label,
 			Arguments : _context.cleanArguments,
 			Environment : _invokeEnvironment,
+			ExecutablePaths : _invokeExecutablePaths,
+			Terminal : _sshTerminal,
 			Workspace : _sshWorkspace,
 			Cache : _sshCache,
-			Terminal : _sshTerminal,
 		}
 	
 	var _invokeContextEncoded string

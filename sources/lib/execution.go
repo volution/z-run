@@ -184,14 +184,17 @@ exec %d<&-
 		return nil, nil, _error
 	}
 	
-//	logf ('d', 0xcc6d38ba, "command: `%#v` `%#v`", _interpreterExecutable, _interpreterArguments)
-	
 	_command := & exec.Cmd {
 			Path : _interpreterExecutable,
 			Args : _interpreterArguments,
 			Env : _interpreterEnvironment_0,
 			Dir : _context.workspace,
 		}
+	
+//	logf ('d', 0xcc6d38ba, "%v", _command.Path)
+//	logf ('d', 0xdb26cbac, "%v", _command.Args[0])
+//	logf ('d', 0x7b0c717d, "%v", _command.Args[1:])
+//	logf ('d', 0xaa0b151d, "%v", _command.Env)
 	
 	return _command, _descriptors, nil
 }

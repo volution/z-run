@@ -7,6 +7,7 @@ import "bufio"
 import "io"
 import "os"
 import "os/exec"
+import "path/filepath"
 import "strings"
 import "sync"
 
@@ -47,8 +48,13 @@ func menuMain (_executable string, _arguments []string, _environment map[string]
 			cleanEnvironment : _environment,
 		}
 	
+	if _paths, _ok := _environment["PATH"]; _ok {
+		_context.executablePaths = filepath.SplitList (_paths)
+		delete (_environment, "PATH")
+	}
 	if _terminal, _ok := _environment["TERM"]; _ok {
 		_context.terminal = _terminal
+		delete (_environment, "TERM")
 	}
 	
 	if _outputs, _error := menuSelect (_inputs, _context); _error == nil {
@@ -118,8 +124,6 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
 			return errorf (0xfc026596, "stderr is not a TTY")
 		}
-	} else {
-//		return errorf (0xbdbc268d, "expected `TERM`")
 	}
 	
 	_command := & exec.Cmd {
