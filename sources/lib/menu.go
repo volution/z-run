@@ -139,12 +139,12 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Env = processEnvironment (_context, map[string]string {
 				"TERM" : _context.terminal,
 			})
-	} else if _path, _error := exec.LookPath ("z-run--select"); _error == nil {
+	} else if _path, _error := resolveExecutable ("z-run--select", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",
 			}
-	} else if _path, _error := exec.LookPath ("rofi"); _error == nil {
+	} else if _path, _error := resolveExecutable ("rofi", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",
@@ -154,7 +154,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-i",
 				"-no-custom",
 			}
-	} else if _path, _error := exec.LookPath ("dmenu"); _error == nil {
+	} else if _path, _error := resolveExecutable ("dmenu", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",
@@ -162,7 +162,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-l", "16",
 				"-i",
 			}
-	} else if _path, _error := exec.LookPath ("choose"); _error == nil {
+	} else if _path, _error := resolveExecutable ("choose", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",

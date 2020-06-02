@@ -284,12 +284,10 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	if _sshLauncher == "" {
 		_sshLauncher = "ssh"
 	}
-	if strings.IndexByte (_sshLauncher, os.PathSeparator) < 0 {
-		if _path, _error := exec.LookPath (_sshLauncher); _error == nil {
-			_sshLauncher = _path
-		} else {
-			return false, errorw (0x9c296054, _error)
-		}
+	if _sshLauncher_0, _error := resolveExecutable (_sshLauncher, _context.executablePaths); _error == nil {
+		_sshLauncher = _sshLauncher_0
+	} else {
+		return false, _error
 	}
 	
 	if _sshDelegate == "" {

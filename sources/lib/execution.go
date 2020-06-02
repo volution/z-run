@@ -176,14 +176,12 @@ exec %d<&-
 			"ZRUN_FINGERPRINT" : _libraryFingerprint,
 		})
 	
-	if strings.IndexByte (_interpreterExecutable, os.PathSeparator) < 0 {
-		if _path, _error := exec.LookPath (_interpreterExecutable); _error == nil {
-			_interpreterExecutable = _path
-		} else {
-			syscall.Close (_interpreterScriptInput)
-			_interpreterScriptOutput.Close ()
-			return nil, nil, errorw (0xd8f4497c, _error)
-		}
+	if _interpreterExecutable_0, _error := resolveExecutable (_interpreterExecutable, _context.executablePaths); _error == nil {
+		_interpreterExecutable = _interpreterExecutable_0
+	} else {
+		syscall.Close (_interpreterScriptInput)
+		_interpreterScriptOutput.Close ()
+		return nil, nil, _error
 	}
 	
 //	logf ('d', 0xcc6d38ba, "command: `%#v` `%#v`", _interpreterExecutable, _interpreterArguments)
