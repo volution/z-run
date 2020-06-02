@@ -8,16 +8,15 @@
 ::// do / run / ...
 ::// do / use / ...
 
-::// go / execute / ...
-::// go / build / ...
-::// go / dependencies / ...
+::// go / ...
 
+::// deploy / ...
 ::// workspace / ...
 
 
 
 
-++<< workspace / deploy / local
+<< deploy / local
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: go / build / main / release'
 	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
@@ -26,15 +25,24 @@
 !!
 
 
-++<< workspace / deploy / remote
+<< deploy / remote / linux
 	test "${#}" -eq 1
 	_target="${1}"
 	shift -- 1
-	"${ZRUN[@]}" ':: go / build / main / release'
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release "${_target}"
+	"${ZRUN[@]}" ':: go / build / main / release / linux'
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "${_target}"
 !!
 
-++<< workspace / deploy / publish
+<< deploy / remote / darwin
+	test "${#}" -eq 1
+	_target="${1}"
+	shift -- 1
+	"${ZRUN[@]}" ':: go / build / main / release / darwin'
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "${_target}"
+!!
+
+
+<< deploy / publish
 	test "${#}" -eq 0
 	test -d ./.publish/
 	"${ZRUN[@]}" ':: go / build / main / release / linux'
@@ -49,7 +57,7 @@
 
 
 
-<< do / run / 0
+--<< do / run / 0
 	"${ZRUN[@]}" ':: go / build / main / debug'
 	test "${#}" -ge 1
 	export -n -- \
@@ -90,11 +98,6 @@
 
 :: do / use / workspace :: export -- ZRUNDEV_USE=./.z-run
 :: do / use / syntax :: export -- ZRUNDEV_USE=./examples/syntax.z-run
-:: do / use / debug :: export -- ZRUNDEV_USE=./examples/debug.z-run
-:: do / use / generators :: export -- ZRUNDEV_USE=./examples/generators.z-run
-:: do / use / comments :: export -- ZRUNDEV_USE=./examples/comments.z-run
-:: do / use / menus :: export -- ZRUNDEV_USE=./examples/menus.z-run
-:: do / use / templates :: export -- ZRUNDEV_USE=./examples/templates.z-run
 
 :: do / use / term / enable :: export -- ZRUNDEV_TERM="${TERM}"
 :: do / use / term / disable :: export -- ZRUNDEV_TERM=dumb
