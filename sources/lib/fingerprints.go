@@ -8,6 +8,7 @@ import "encoding/binary"
 import "encoding/hex"
 import "hash"
 import "io"
+import "sort"
 
 
 
@@ -66,6 +67,21 @@ func (_fingerprinter Fingerprinter) Bytes (_value []byte) (Fingerprinter) {
 func (_fingerprinter Fingerprinter) BytesWithLen (_value []byte) (Fingerprinter) {
 	_fingerprinter.Uint64 (uint64 (len (_value)))
 	_fingerprinter.hasher.Write (_value)
+	return _fingerprinter
+}
+
+
+func (_fingerprinter Fingerprinter) StringsMap (_map map[string]string) (Fingerprinter) {
+	_keys := make ([]string, 0, len (_map))
+	for _key, _ := range _map {
+		_keys = append (_keys, _key)
+	}
+	sort.Strings (_keys)
+	for _, _key := range _keys {
+		_value := _map[_key]
+		_fingerprinter.StringWithLen (_key)
+		_fingerprinter.StringWithLen (_value)
+	}
 	return _fingerprinter
 }
 

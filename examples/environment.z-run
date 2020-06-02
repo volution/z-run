@@ -1,0 +1,12 @@
+#!/dev/null
+
+
+&&== path .
+&&== env ENV_KEY_1 value
+
+
+<<== generator / env
+	
+	printf -- '&&== env ENV_KEY_2 %s\n' "$( exec -- uuidgen -r )"
+!!
+

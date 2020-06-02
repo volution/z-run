@@ -25,11 +25,30 @@ import mpb_decor "github.com/vbauerster/mpb/v5/decor"
 
 
 
+type parseContext struct {
+	scriptletContext *ScriptletContext
+}
+
+
+
+
 func parseLibrary (_sources []*Source, _environmentFingerprint string, _context *Context) (*Library, *Error) {
+	
+	_parseContext := & parseContext {}
+	
+	_parseContext.scriptletContext = & ScriptletContext {
+			Fingerprint : generateRandomToken (),
+			ExecutablePaths : make ([]string, 0, 16),
+			Environment : make (map[string]string, 128),
+		}
 	
 	_library := NewLibrary ()
 	_library.EnvironmentFingerprint = _environmentFingerprint
 	_library.LibraryFingerprint = _environmentFingerprint
+	
+	if _error := includeScriptletContext (_library, _parseContext.scriptletContext); _error != nil {
+		return nil, _error
+	}
 	
 	_libraryUrl := ""
 	if true {
@@ -82,7 +101,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 //		} else {
 //			return nil, errorw (0xfce841bd, _error)
 //		}
-		if _error := parseFromSource (_library, _source, _context); _error != nil {
+		if _error := parseFromSource (_library, _source, _context, _parseContext); _error != nil {
 			return nil, _error
 		}
 		if _progress != nil {
@@ -116,7 +135,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		
 		switch _scriptlet.Kind {
 			case "generator-pending" :
-				if _error := parseFromGenerator (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
+				if _error := parseFromGenerator (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context, _parseContext); _error == nil {
 					_scriptlet.Kind = "generator"
 //					logf ('d', 0x84787ea0, "parsed generator `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
 					continue _loop
@@ -323,10 +342,10 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 
 
 
-func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
+func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context, _parseContext *parseContext) (*Error) {
 //	logf ('s', 0xf75b04b5, "parsing `:: %s`...", _source.Label)
 	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, "", _source, _context); _error == nil {
-		return parseFromData (_library, _data, _source.Source.Path, _context)
+		return parseFromData (_library, _data, _source.Source.Path, _context, _parseContext)
 	} else {
 		return _error
 	}
@@ -429,21 +448,21 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*
 
 
 
-func parseFromSource (_library *Library, _source *Source, _context *Context) (*Error) {
+func parseFromSource (_library *Library, _source *Source, _context *Context, _parseContext *parseContext) (*Error) {
 	if _data, _error := loadFromSource (_library, _source, _context); _error == nil {
 		if _error := includeSource (_library, _source); _error != nil {
 			return _error
 		}
 		_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_source.FingerprintData) .Build ()
-		return parseFromData (_library, _data, _source.Path, _context)
+		return parseFromData (_library, _data, _source.Path, _context, _parseContext)
 	} else {
 		return _error
 	}
 }
 
-func parseFromFile (_library *Library, _sourcePath string, _context *Context) (string, *Error) {
+func parseFromFile (_library *Library, _sourcePath string, _context *Context, _parseContext *parseContext) (string, *Error) {
 	if _fingerprint, _data, _error := loadFromFile (_sourcePath); _error == nil {
-		if _error := parseFromData (_library, _data, _sourcePath, _context); _error == nil {
+		if _error := parseFromData (_library, _data, _sourcePath, _context, _parseContext); _error == nil {
 			return _fingerprint, nil
 		} else {
 			return "", _error
@@ -453,9 +472,9 @@ func parseFromFile (_library *Library, _sourcePath string, _context *Context) (s
 	}
 }
 
-func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string, _context *Context) (string, *Error) {
+func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string, _context *Context, _parseContext *parseContext) (string, *Error) {
 	if _fingerprint, _data, _error := loadFromStream (_stream); _error == nil {
-		if _error := parseFromData (_library, _data, _sourcePath, _context); _error == nil {
+		if _error := parseFromData (_library, _data, _sourcePath, _context, _parseContext); _error == nil {
 			return _fingerprint, nil
 		} else {
 			return "", _error
@@ -468,7 +487,7 @@ func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string, 
 
 
 
-func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _context *Context) (*Error) {
+func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _context *Context, _parseContext *parseContext) (*Error) {
 	
 	var _source string
 	if utf8.Valid (_sourceData) {
@@ -733,7 +752,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					if !_disabled {
 						if _includeSources, _error := resolveSources (_includePath, "", nil, false); _error == nil {
 							for _, _includeSource := range _includeSources {
-								if _error := parseFromSource (_library, _includeSource, _context); _error != nil {
+								if _error := parseFromSource (_library, _includeSource, _context, _parseContext); _error != nil {
 									return _error
 								}
 							}
@@ -756,6 +775,57 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						} else {
 							return _error
 						}
+					}
+					
+				} else if strings.HasPrefix (_lineTrimmed, "&&== ") {
+					
+					_descriptor := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
+					_kind := _descriptor[: strings.IndexByte (_descriptor, ' ')]
+					_descriptor = _descriptor[len (_kind) + 1 :]
+					_kind = strings.TrimSpace (_kind)
+					_descriptor = strings.TrimSpace (_descriptor)
+					
+					if _kind == "" {
+						return errorf (0xed68e4c3, "invalid syntax (%d):  empty statement | %s", _lineIndex, _line)
+					}
+					
+					switch _kind {
+						
+						case "path" :
+							
+							if _descriptor == "" {
+								return errorf (0x8c2e1bf8, "invalid syntax (%d):  empty statement path descriptor | %s", _lineIndex, _line)
+							}
+							_path := path.Join (path.Dir (_sourcePath), _descriptor)
+							if _path_0, _error := filepath.Abs (_path); _error == nil {
+								_path = _path_0
+							} else {
+								return errorw (0xb007b166, _error)
+							}
+							if _stat, _error := os.Stat (_path); _error == nil {
+								if ! _stat.IsDir () {
+									return errorf (0xae85ad7e, "invalid syntax (%d):  invalid statement path value | %s", _lineIndex, _line)
+								}
+							} else {
+								return errorw (0x79069c08, _error)
+							}
+							_parseContext.scriptletContext.ExecutablePaths = append (_parseContext.scriptletContext.ExecutablePaths, _path)
+							
+						case "environment", "env" :
+							
+							if _descriptor == "" {
+								return errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
+							}
+							_descriptor := strings.SplitN (_descriptor, " ", 2)
+							_name := strings.TrimSpace (_descriptor[0])
+							_value := strings.TrimSpace (_descriptor[1])
+							if _name == "" {
+								return errorf (0x6bce31bb, "invalid syntax (%d):  empty statement environment key | %s", _lineIndex, _line)
+							}
+							if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists {
+								return errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
+							}
+							_parseContext.scriptletContext.Environment[_name] = _value
 					}
 					
 				} else if strings.HasPrefix (_lineTrimmed, "{{") {
@@ -822,6 +892,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						Label : _scriptletState.label,
 						Kind : _scriptletState.kind,
 						Interpreter : _scriptletState.interpreter,
+						Context : _parseContext.scriptletContext,
+						ContextFingerprint : _parseContext.scriptletContext.Fingerprint,
 						Visible : _scriptletState.visible,
 						Hidden : _scriptletState.hidden,
 						Body : _scriptletState.body,

@@ -27,6 +27,8 @@ func generateRandomToken () (string) {
 }
 
 
+
+
 func resolveExecutable (_executable string, _paths []string) (string, *Error) {
 	
 	// NOTE:  Based on `os.exec.LookPath` implementation:

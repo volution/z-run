@@ -216,6 +216,12 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
 	}
 	
+	if _scriptlet.ContextFingerprint != "" {
+		if _, _exists := _library.ScriptletsContexts[_scriptlet.ContextFingerprint]; !_exists {
+			return errorf (0xc9cc9f6e, "invalid scriptlet context fingerprint `%s`", _scriptlet.ContextFingerprint)
+		}
+	}
+	
 	switch _scriptlet.Interpreter {
 		case "<detect>", "<print>", "<menu>" :
 			// NOP
@@ -241,7 +247,16 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			return errorf (0x4b8aacf2, "invalid scriptlet kind `%s`", _scriptlet.Kind)
 	}
 	
-	_fingerprint := NewFingerprinter () .StringWithLen (_scriptlet.Label) .StringWithLen (_scriptlet.Kind) .StringWithLen (_scriptlet.Interpreter) .StringWithLen (_scriptlet.Body) .Build ()
+	_fingerprint := NewFingerprinter () .
+			StringWithLen (_scriptlet.Label) .
+			StringWithLen (_scriptlet.Kind) .
+			StringWithLen (_scriptlet.Interpreter) .
+			StringWithLen (_scriptlet.InterpreterExecutable) .
+			StringsWithLen (_scriptlet.InterpreterArguments) .
+			StringsMap (_scriptlet.InterpreterEnvironment) .
+			StringWithLen (_scriptlet.ContextFingerprint) .
+			StringWithLen (_scriptlet.Body) .
+			Build ()
 	
 	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
 		return nil
@@ -260,6 +275,21 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 	
 	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index
 	_library.ScriptletsByLabel[_scriptlet.Label] = _scriptlet.Index
+	
+	return nil
+}
+
+
+func includeScriptletContext (_library *Library, _context *ScriptletContext) (*Error) {
+	
+	if _context.Fingerprint == "" {
+		return errorf (0x92fc0d53, "invalid scriptlet context fingerprint `%s`", _context.Fingerprint)
+	}
+	if _, _exists := _library.ScriptletsContexts[_context.Fingerprint]; _exists {
+		return errorf (0xfe91d3ae, "invalid scriptlet context fingerprint `%s`", _context.Fingerprint)
+	}
+	
+	_library.ScriptletsContexts[_context.Fingerprint] = _context
 	
 	return nil
 }

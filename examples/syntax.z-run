@@ -1,5 +1,6 @@
 #!/dev/null
 
+&& ./environment.z-run
 && ./basic.z-run
 && ./menus.z-run
 && ./includes.z-run

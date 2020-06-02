@@ -20,10 +20,12 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	var _interpreterEnvironment map[string]string
 	var _interpreterAllowsArguments = false
 	
+	var _executablePaths []string = make ([]string, 0, 128)
+	var _environment map[string]string = make (map[string]string, 128)
+	
 	if _interpreter == "" {
 		_interpreter = _scriptlet.Interpreter
 	}
-	
 	
 	switch _interpreter {
 		
@@ -45,6 +47,12 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	
 	if _includeArguments && (len (_context.cleanArguments) > 0) && !_interpreterAllowsArguments {
 		return nil, nil, errorf (0x4ef9e048, "unexpected arguments")
+	}
+	
+	if _scriptlet.ContextFingerprint != "" {
+		if _scriptlet.Context == nil {
+			return nil, nil, errorf (0x93547e3b, "invalid store")
+		}
 	}
 	
 	var _interpreterScriptInput int
@@ -170,13 +178,27 @@ exec %d<&-
 		_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
 	}
 	
-	_interpreterEnvironment_0 := processEnvironment (_context, _interpreterEnvironment, map[string]string {
-			"ZRUN_WORKSPACE" : _context.workspace,
-			"ZRUN_LIBRARY_CACHE" : _libraryUrl,
-			"ZRUN_FINGERPRINT" : _libraryFingerprint,
-		})
+	var _scriptletEnvironment map[string]string
+	if _scriptlet.Context != nil {
+		_executablePaths = append (_executablePaths, _scriptlet.Context.ExecutablePaths ...)
+		_scriptletEnvironment = _scriptlet.Context.Environment
+	}
 	
-	if _interpreterExecutable_0, _error := resolveExecutable (_interpreterExecutable, _context.executablePaths); _error == nil {
+	_executablePaths = append (_executablePaths, _context.executablePaths ...)
+	
+	_environment["PATH"] = strings.Join (_executablePaths, string (os.PathListSeparator))
+	_environment["ZRUN_WORKSPACE"] = _context.workspace
+	_environment["ZRUN_LIBRARY_CACHE"] = _libraryUrl
+	_environment["ZRUN_FINGERPRINT"] = _libraryFingerprint
+	
+	_interpreterEnvironment_0 := processEnvironment (
+			_context,
+			_interpreterEnvironment,
+			_scriptletEnvironment,
+			_environment,
+		)
+	
+	if _interpreterExecutable_0, _error := resolveExecutable (_interpreterExecutable, _executablePaths); _error == nil {
 		_interpreterExecutable = _interpreterExecutable_0
 	} else {
 		syscall.Close (_interpreterScriptInput)
