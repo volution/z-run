@@ -17,6 +17,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	
 	var _interpreterExecutable string
 	var _interpreterArguments []string = make ([]string, 0, len (_context.cleanArguments) + 16)
+	var _interpreterEnvironment map[string]string
 	var _interpreterAllowsArguments = false
 	
 	if _interpreter == "" {
@@ -64,6 +65,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 		
 		case "<exec>" :
 			_interpreterExecutable = _scriptlet.InterpreterExecutable
+			_interpreterEnvironment = _scriptlet.InterpreterEnvironment
 			_interpreterArguments = append (
 					_interpreterArguments,
 					_scriptlet.InterpreterExecutable,
@@ -168,7 +170,7 @@ exec %d<&-
 		_interpreterArguments = append (_interpreterArguments, _context.cleanArguments ...)
 	}
 	
-	_interpreterEnvironment := processEnvironment (_context, map[string]string {
+	_interpreterEnvironment_0 := processEnvironment (_context, _interpreterEnvironment, map[string]string {
 			"ZRUN_WORKSPACE" : _context.workspace,
 			"ZRUN_LIBRARY_CACHE" : _libraryUrl,
 			"ZRUN_FINGERPRINT" : _libraryFingerprint,
@@ -189,7 +191,7 @@ exec %d<&-
 	_command := & exec.Cmd {
 			Path : _interpreterExecutable,
 			Args : _interpreterArguments,
-			Env : _interpreterEnvironment,
+			Env : _interpreterEnvironment_0,
 			Dir : _context.workspace,
 		}
 	
