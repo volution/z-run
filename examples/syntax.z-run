@@ -7,6 +7,7 @@
 && ./generators.z-run
 && ./interpreters.z-run
 && ./templates.z-run
+&& ./debug.z-run
 && ./comments.z-run
 && ./ssh.z-run
 
