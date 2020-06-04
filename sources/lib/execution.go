@@ -89,7 +89,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<bash>" :
-			_interpreterExecutable = "/bin/bash"
+			_interpreterExecutable = "bash"
 			_interpreterArguments = append (
 					_interpreterArguments,
 					fmt.Sprintf ("[z-run:bash] [%s]", _scriptlet.Label),
@@ -112,7 +112,7 @@ exec %d<&-
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<print>" :
-			_interpreterExecutable = "/bin/cat"
+			_interpreterExecutable = "cat"
 			_interpreterArguments = append (
 					_interpreterArguments,
 					fmt.Sprintf ("[z-run:print] [%s]", _scriptlet.Label),
