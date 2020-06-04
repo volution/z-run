@@ -76,3 +76,14 @@ func resolveExecutable (_executable string, _paths []string) (string, *Error) {
 	return "", errorf (0x9db5ca84, "unresolved executable `%s`", _executable)
 }
 
+
+
+
+func resolveRelativePath (_base string, _path string) (string) {
+	if ! path.IsAbs (_path) {
+		_path = path.Join (_base, _path)
+	}
+	_path = path.Clean (_path)
+	return _path
+}
+

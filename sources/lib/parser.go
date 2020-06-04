@@ -656,7 +656,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					}
 					
 					if _include {
-						_includePath := path.Join (path.Dir (_sourcePath), _body)
+						_includePath := resolveRelativePath (path.Dir (_sourcePath), _body)
 						if _includeSource, _error := resolveSource (_includePath, "", nil); _error == nil {
 							if _data, _error := loadFromSource (_library, _includeSource, _context); _error == nil {
 								if _error := includeSource (_library, _includeSource); _error != nil {
@@ -747,7 +747,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 				} else if strings.HasPrefix (_lineTrimmed, "&& ") {
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
-					_includePath = path.Join (path.Dir (_sourcePath), _includePath)
+					_includePath = resolveRelativePath (path.Dir (_sourcePath), _includePath)
 					
 					if !_disabled {
 						if _includeSources, _error := resolveSources (_includePath, "", nil, false); _error == nil {
@@ -764,7 +764,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 				} else if strings.HasPrefix (_lineTrimmed, "&&__ ") {
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
-					_includePath = path.Join (path.Dir (_sourcePath), _includePath)
+					_includePath = resolveRelativePath (path.Dir (_sourcePath), _includePath)
 					
 					if !_disabled {
 						if _includeSource, _error := fingerprintSource (_includePath); _error == nil {
@@ -796,7 +796,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _descriptor == "" {
 								return errorf (0x8c2e1bf8, "invalid syntax (%d):  empty statement path descriptor | %s", _lineIndex, _line)
 							}
-							_path := path.Join (path.Dir (_sourcePath), _descriptor)
+							_path := resolveRelativePath (path.Dir (_sourcePath), _descriptor)
 							if _path_0, _error := filepath.Abs (_path); _error == nil {
 								_path = _path_0
 							} else {
