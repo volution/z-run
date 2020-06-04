@@ -7,6 +7,6 @@
 
 <<== generator / env
 	
-	printf -- '&&== env ENV_KEY_2 %s\n' "$( exec -- uuidgen -r )"
+	printf -- '&&== env ENV_KEY_2 %s\n' "${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
 !!
 
