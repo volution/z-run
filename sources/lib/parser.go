@@ -817,6 +817,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								return errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 							}
 							_descriptor := strings.SplitN (_descriptor, " ", 2)
+							if len (_descriptor) != 2 {
+								return errorf (0xfc01ef6a, "invalid syntax (%d):  invalid statement environment descriptor | %s", _lineIndex, _line)
+							}
 							_name := strings.TrimSpace (_descriptor[0])
 							_value := strings.TrimSpace (_descriptor[1])
 							if _name == "" {
