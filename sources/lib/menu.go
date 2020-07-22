@@ -153,7 +153,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Args = []string {
 				"[z-run:select]",
 				"-dmenu",
-				"-p", "z-run",
+				"-p", "",
 				"-l", "16",
 				"-i",
 				"-no-custom",
@@ -162,7 +162,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",
-				"-p", "z-run",
+				"-p", "",
 				"-l", "16",
 				"-i",
 			}

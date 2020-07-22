@@ -62,6 +62,8 @@ func fzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 		
 		_options = fzf.DefaultOptions ()
 		
+		_options.Prompt = ": "
+		
 		_options.Fuzzy = false
 		_options.Extended = true
 		_options.Case = fzf.CaseIgnore
