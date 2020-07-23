@@ -157,6 +157,8 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-l", "16",
 				"-i",
 				"-no-custom",
+				"-matching-negate-char", "\\x0",
+				"-no-plugins",
 			}
 	} else if _path, _error := resolveExecutable ("dmenu", _context.executablePaths); _error == nil {
 		_command.Path = _path
