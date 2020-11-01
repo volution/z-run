@@ -1,6 +1,6 @@
 #!/dev/null
 
-::&& hello / included (bash) :: ./hello.bash
+::&& hello / included (bash) :: _/hello.bash
 
-::&&.. hello / included (print) :: ./hello.txt
+::&&.. hello / included (print) :: _/hello.txt
 

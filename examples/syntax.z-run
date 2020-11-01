@@ -1,14 +1,14 @@
 #!/dev/null
 
-&& ./environment.z-run
-&& ./basic.z-run
-&& ./menus.z-run
-&& ./includes.z-run
-&& ./replacers.z-run
-&& ./generators.z-run
-&& ./interpreters.z-run
-&& ./templates.z-run
-&& ./debug.z-run
-&& ./comments.z-run
-&& ./ssh.z-run
+&& _/environment.z-run
+&& _/basic.z-run
+&& _/menus.z-run
+&& _/includes.z-run
+&& _/replacers.z-run
+&& _/generators.z-run
+&& _/interpreters.z-run
+&& _/templates.z-run
+&& _/debug.z-run
+&& _/comments.z-run
+&& _/ssh.z-run
 

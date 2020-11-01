@@ -79,11 +79,26 @@ func resolveExecutable (_executable string, _paths []string) (string, *Error) {
 
 
 
-func resolveRelativePath (_base string, _path string) (string) {
-	if ! path.IsAbs (_path) {
-		_path = path.Join (_base, _path)
+func resolveRelativePath (_workspace string, _base string, _path string) (string, *Error) {
+	
+	if _path == "" {
+		// NOP
+	} else if path.IsAbs (_path) {
+		// NOP
+	} else if strings.HasPrefix (_path, "." + string (os.PathSeparator)) {
+		_path = path.Join (_workspace, _path)
+	} else if strings.HasPrefix (_path, ".." + string (os.PathSeparator)) {
+		_path = path.Join (_workspace, _path)
+	} else if strings.HasPrefix (_path, "_" + string (os.PathSeparator)) {
+		_path = path.Join (_base, _path[2:])
 	}
+	
 	_path = path.Clean (_path)
-	return _path
+	
+	if _path == "" {
+		return "", errorf (0xe971645a, "invalid empty path")
+	}
+	
+	return _path, nil
 }
 
