@@ -129,7 +129,8 @@
 			build \
 			-v \
 			-o "${_outputs}/z-run--release${_suffix}" \
-			-ldflags '-s' \
+			-tags netgo \
+			-ldflags 'all=-s' \
 			-- \
 			./cmd/z-run.go \
 	#
