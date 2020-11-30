@@ -5,7 +5,7 @@
 
 
 << python / test / log
-	#! <python*>
+	#! <python3*>
 	zrun.log_debug_enabled = True
 	zrun.log_error (0xd517385b, "this is an error message")
 	zrun.log_warning (0xb4614c33, "this is a warning message")
@@ -18,19 +18,36 @@
 	zrun.panic (0x943040e7, "panic")
 !!
 
-<< python / test / delegate / zspawn
+<< python / test / zspawn
 	#! <python3*>
-	zrun.zspawn (":: env")
+	zrun.zspawn (":: true")
+	zrun.zspawn (":: false", _panic = False)
 !!
 
-<< python / test / delegate / zexec
+<< python / test / zexec
 	#! <python3*>
-	zrun.zexec (":: env")
+	zrun.zexec (":: true")
 !!
 
-<< python / test / delegate / spawn
+<< python / test / spawn
 	#! <python3*>
 	zrun.spawn ("true")
 	zrun.spawn ("false", _panic = False)
+!!
+
+<< python / test / exec
+	#! <python3*>
+	zrun.exec ("true")
+!!
+
+<< python / test / pipeline
+	#! <python3*>
+	zrun.pipeline ([
+			zrun.cmd ("true"),
+			zrun.cmd ("sleep", "6s"),
+			zrun.cmd ("cat"),
+			zrun.cmd ("sleep", "12s"),
+			zrun.cmd ("true"),
+		])
 !!
 

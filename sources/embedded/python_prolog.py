@@ -11,6 +11,8 @@ def __zrun__inject (Z, __import__ = __import__) :
 	
 	Z.os = __import__ ("os")
 	Z.sys = __import__ ("sys")
+	Z.signal = __import__ ("signal")
+	Z.subprocess = __import__ ("subprocess")
 	Z.shutil = __import__ ("shutil")
 	Z.time = __import__ ("time")
 	
@@ -38,6 +40,10 @@ def __zrun__inject (Z, __import__ = __import__) :
 		return Z.exec_0 (_descriptor, **_options)
 	
 	@_inject
+	def __zrun__zcmd (_scriptlet, *_arguments) :
+		return Z._zexec_prepare (_scriptlet, _arguments)
+	
+	@_inject
 	def __zrun___zexec_prepare (_scriptlet, _arguments) :
 		_executable = Z.executable
 		if not _scriptlet.startswith ("::") :
@@ -59,6 +65,10 @@ def __zrun__inject (Z, __import__ = __import__) :
 	def __zrun__exec (_executable, *_arguments, **_options) :
 		_descriptor = Z._exec_prepare (_executable, _arguments)
 		return Z.exec_0 (_descriptor, **_options)
+	
+	@_inject
+	def __zrun__cmd (_scriptlet, *_arguments) :
+		return Z._exec_prepare (_scriptlet, _arguments)
 	
 	@_inject
 	def __zrun___exec_prepare (_executable, _arguments) :
@@ -95,6 +105,74 @@ def __zrun__inject (Z, __import__ = __import__) :
 		else :
 			_delegate = Z.os.execve
 		_delegate (_executable, _arguments, _environment)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __zrun__pipeline (_commands, _wait = True, _panic = True) :
+		_count = len (_commands)
+		if _count == 0 :
+			z.panic (0x1b1812d7, "pipeline empty")
+		_pipes = []
+		_pipes.append ((None, None))
+		for _index in range (_count - 1) :
+			_pipes.append (Z.os.pipe ())
+		_pipes.append ((None, None))
+		_processes = []
+		for _index in range (_count) :
+			_executable, _lookup, _arguments, _environment = _commands[_index]
+			_pipe_previous = _pipes[_index]
+			_pipe_next = _pipes[_index + 1]
+			_pipe_stdin = _pipe_previous[0]
+			_pipe_stdout = _pipe_next[1]
+			_process = Z.subprocess.Popen (
+					_arguments,
+					executable = _executable,
+					env = _environment,
+					stdin = _pipe_stdin,
+					stdout = _pipe_stdout,
+					stderr = None,
+					close_fds = False,
+					shell = False,
+				)
+			if _wait :
+				_processes.append ((_index, _process, _arguments))
+			else :
+				_processes.append (_process.pid)
+			if _pipe_stdin is not None :
+				Z.os.close (_pipe_stdin)
+			if _pipe_stdout is not None :
+				Z.os.close (_pipe_stdout)
+		if not _wait :
+			return _processes
+		_succeeded = True
+		_terminated = 0
+		if Z.python_version >= 303 :
+			_signal_handler_old = Z.signal.signal (Z.signal.SIGCHLD, lambda _1, _2 : None)
+		while True :
+			for _process in _processes :
+				if _process is None :
+					continue
+				_index, _process, _arguments = _process
+				if _terminated == (_count - 1) or not Z.python_version >= 303 :
+					_process.wait ()
+				if _process.poll () is None :
+					continue
+				_terminated += 1
+				if _process.returncode != 0 :
+					_succeeded = False
+					if _panic :
+						Z.log_warning (0x76d05a67, "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _process.returncode)
+				_processes[_index] = None
+			if _terminated == _count :
+				break
+			if Z.python_version >= 303 :
+				Z.signal.sigtimedwait ([Z.signal.SIGCHLD], 6)
+		if Z.python_version >= 303 :
+			Z.signal.signal (Z.signal.SIGCHLD, _signal_handler_old)
+		if _panic and not _succeeded :
+			Z.panic (0x1d6fad91, "pipeline failed")
+		return _succeeded
 	
 	## --------------------------------------------------------------------------------
 	
@@ -151,6 +229,8 @@ def __zrun__inject (Z, __import__ = __import__) :
 	Z.log_warning_enabled = True
 	Z.log_notice_enabled = True
 	Z.log_debug_enabled = False
+	
+	Z.python_version = Z.sys.version_info[0] * 100 + Z.sys.version_info[1]
 	
 	## --------------------------------------------------------------------------------
 	
