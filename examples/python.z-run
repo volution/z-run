@@ -12,19 +12,23 @@
 
 << python / test / prolog / 0
 	#! <python*>
+	zrun.expect_no_arguments ()
 !!
 
 << python / test / prolog / 2
 	#! <python2*>
+	zrun.expect_no_arguments ()
 !!
 
 << python / test / prolog / 3
 	#! <python3*>
+	zrun.expect_no_arguments ()
 !!
 
 
 << python / test / log
 	#! <python3*>
+	zrun.expect_no_arguments ()
 	zrun.log_debug_enabled = True
 	zrun.log_error (0xd517385b, "this is an error message")
 	zrun.log_warning (0xb4614c33, "this is a warning message")
@@ -34,33 +38,39 @@
 
 << python / test / panic
 	#! <python3*>
+	zrun.expect_no_arguments ()
 	zrun.panic (0x943040e7, "panic")
 !!
 
 << python / test / zspawn
 	#! <python3*>
+	zrun.expect_no_arguments ()
 	zrun.zspawn (":: true")
 	zrun.zspawn (":: false", _panic = False)
 !!
 
 << python / test / zexec
 	#! <python3*>
+	zrun.expect_no_arguments ()
 	zrun.zexec (":: true")
 !!
 
 << python / test / spawn
 	#! <python3*>
+	zrun.expect_no_arguments ()
 	zrun.spawn ("true")
 	zrun.spawn ("false", _panic = False)
 !!
 
 << python / test / exec
 	#! <python3*>
+	zrun.expect_no_arguments ()
 	zrun.exec ("true")
 !!
 
 << python / test / pipeline
 	#! <python3*>
+	zrun.expect_no_arguments ()
 	zrun.pipeline ([
 			zrun.cmd ("true"),
 			zrun.cmd ("sleep", "6s"),

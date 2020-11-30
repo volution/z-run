@@ -222,7 +222,40 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	
 	## --------------------------------------------------------------------------------
 	
+	@_inject
+	def __zrun__expect_no_arguments () :
+		return Z.expect_arguments (_exact = 0)
+	
+	@_inject
+	def __zrun__expect_arguments (_exact = None, _min = None, _max = None) :
+		if _exact is not None :
+			assert _min is None and _max is None, "[6ace19bf]"
+			assert _exact >= 0, "[bfdc6527]"
+		else :
+			assert _min is not None or _max is not None, "[91787dc8]"
+			assert _min is None or _min >= 0, "[19c3b0ad]"
+			assert _max is None or _max >= 0, "[236d9471]"
+			assert _min is None or _min < _max, "[e43f6498]"
+			assert _max is None or _min < _max, "[0662ca21]"
+		_actual = len (Z.arguments)
+		if _exact is not None and _actual != _exact :
+			if _exact == 0 :
+				Z.panic (0x2aa5c1b7, "invalid arguments:  expected none, received %d!", _actual)
+			else :
+				Z.panic (0x2aa5c1b7, "invalid arguments:  expected exactly %d, received %d!", _exact, _actual)
+		elif _min is not None and _actual < _min :
+			Z.panic (0x5d1441a5, "invalid arguments:  expected at least %d, received %d!", _min, _actual)
+		elif _max is not None and _actual > _max :
+			Z.panic (0x6499e7a6, "invalid arguments:  expected at most %d, received %d!", _max, _actual)
+		if _exact is not None :
+			return tuple (Z.arguments)
+		else :
+			return tuple (Z.arguments[:_min]) + tuple (list (Z.arguments[_min:]))
+	
+	## --------------------------------------------------------------------------------
+	
 	Z.pid = PY.os.getpid ()
+	Z.arguments = PY.sys.argv[1:]
 	Z.environment = PY.os.environ
 	
 	Z.executable = Z.environment["ZRUN_EXECUTABLE"]
