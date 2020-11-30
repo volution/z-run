@@ -14,12 +14,13 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	
 	## --------------------------------------------------------------------------------
 	
-	Z.os = __import__ ("os")
-	Z.sys = __import__ ("sys")
-	Z.signal = __import__ ("signal")
-	Z.subprocess = __import__ ("subprocess")
-	Z.shutil = __import__ ("shutil")
-	Z.time = __import__ ("time")
+	PY = __import__ ("types") .ModuleType ("zrun_PY")
+	PY.os = __import__ ("os")
+	PY.sys = __import__ ("sys")
+	PY.signal = __import__ ("signal")
+	PY.subprocess = __import__ ("subprocess")
+	PY.time = __import__ ("time")
+	Z.py = PY
 	
 	## --------------------------------------------------------------------------------
 	
@@ -89,26 +90,26 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	def __zrun__spawn_0 (_descriptor, _wait = True, _panic = True) :
 		_executable, _lookup, _arguments, _environment = _descriptor
 		if _lookup :
-			_delegate = Z.os.spawnvpe
+			_delegate = PY.os.spawnvpe
 		else :
-			_delegate = Z.os.spawnve
+			_delegate = PY.os.spawnve
 		if _wait :
-			_outcome = _delegate (Z.os.P_WAIT, _executable, _arguments, _environment)
+			_outcome = _delegate (PY.os.P_WAIT, _executable, _arguments, _environment)
 			if _panic and _outcome != 0 :
 				Z.panic (0x3c14b9a0, "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _outcome)
 		else :
-			_outcome = _delegate (Z.os.P_NOWAIT, _executable, _arguments, _environment)
+			_outcome = _delegate (PY.os.P_NOWAIT, _executable, _arguments, _environment)
 			if _panic and _outcome <= 0 :
-				Z.panic (0x36737d48, "spawn `%s` `%s` failed with error (%d): %s", _arguments[0], _arguments[1:], _outcome, Z.os.strerror (_outcome))
+				Z.panic (0x36737d48, "spawn `%s` `%s` failed with error (%d): %s", _arguments[0], _arguments[1:], _outcome, PY.os.strerror (_outcome))
 		return _outcome
 	
 	@_inject
 	def __zrun__exec_0 (_descriptor) :
 		_executable, _lookup, _arguments, _environment = _descriptor
 		if _lookup :
-			_delegate = Z.os.execvpe
+			_delegate = PY.os.execvpe
 		else :
-			_delegate = Z.os.execve
+			_delegate = PY.os.execve
 		_delegate (_executable, _arguments, _environment)
 	
 	## --------------------------------------------------------------------------------
@@ -121,7 +122,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 		_pipes = []
 		_pipes.append ((None, None))
 		for _index in range (_count - 1) :
-			_pipes.append (Z.os.pipe ())
+			_pipes.append (PY.os.pipe ())
 		_pipes.append ((None, None))
 		_processes = []
 		for _index in range (_count) :
@@ -130,7 +131,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 			_pipe_next = _pipes[_index + 1]
 			_pipe_stdin = _pipe_previous[0]
 			_pipe_stdout = _pipe_next[1]
-			_process = Z.subprocess.Popen (
+			_process = PY.subprocess.Popen (
 					_arguments,
 					executable = _executable,
 					env = _environment,
@@ -145,15 +146,15 @@ def __zrun__create (Z = None, __import__ = __import__) :
 			else :
 				_processes.append (_process.pid)
 			if _pipe_stdin is not None :
-				Z.os.close (_pipe_stdin)
+				PY.os.close (_pipe_stdin)
 			if _pipe_stdout is not None :
-				Z.os.close (_pipe_stdout)
+				PY.os.close (_pipe_stdout)
 		if not _wait :
 			return _processes
 		_succeeded = True
 		_terminated = 0
 		if Z.python_version >= 303 :
-			_signal_handler_old = Z.signal.signal (Z.signal.SIGCHLD, lambda _1, _2 : None)
+			_signal_handler_old = PY.signal.signal (PY.signal.SIGCHLD, lambda _1, _2 : None)
 		while True :
 			for _process in _processes :
 				if _process is None :
@@ -172,9 +173,9 @@ def __zrun__create (Z = None, __import__ = __import__) :
 			if _terminated == _count :
 				break
 			if Z.python_version >= 303 :
-				Z.signal.sigtimedwait ([Z.signal.SIGCHLD], 6)
+				PY.signal.sigtimedwait ([PY.signal.SIGCHLD], 6)
 		if Z.python_version >= 303 :
-			Z.signal.signal (Z.signal.SIGCHLD, _signal_handler_old)
+			PY.signal.signal (PY.signal.SIGCHLD, _signal_handler_old)
 		if _panic and not _succeeded :
 			Z.panic (0x1d6fad91, "pipeline failed")
 		return _succeeded
@@ -208,7 +209,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __zrun__exit (_status) :
-		Z.sys.exit (_status)
+		PY.sys.exit (_status)
 	
 	@_inject
 	def __zrun__panic (_code, _message, *_arguments) :
@@ -217,25 +218,26 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __zrun__sleep (_interval) :
-		Z.time.sleep (_interval)
+		PY.time.sleep (_interval)
 	
 	## --------------------------------------------------------------------------------
 	
-	Z.pid = Z.os.getpid ()
-	Z.environment = Z.os.environ
+	Z.pid = PY.os.getpid ()
+	Z.environment = PY.os.environ
+	
 	Z.executable = Z.environment["ZRUN_EXECUTABLE"]
 	Z.workspace = Z.environment["ZRUN_WORKSPACE"]
 	Z.fingerprint = Z.environment["ZRUN_FINGERPRINT"]
 	
-	Z.stdin = Z.sys.stdin
-	Z.stdout = Z.sys.stdout
-	Z.stderr = Z.sys.stderr
+	Z.stdin = PY.sys.stdin
+	Z.stdout = PY.sys.stdout
+	Z.stderr = PY.sys.stderr
 	
 	Z.log_warning_enabled = True
 	Z.log_notice_enabled = True
 	Z.log_debug_enabled = False
 	
-	Z.python_version = Z.sys.version_info[0] * 100 + Z.sys.version_info[1]
+	Z.python_version = PY.sys.version_info[0] * 100 + PY.sys.version_info[1]
 	
 	## --------------------------------------------------------------------------------
 	
@@ -248,8 +250,10 @@ def __zrun__create (Z = None, __import__ = __import__) :
 
 if __name__ == "__main__" :
 	
-	(lambda Z : Z.sys.modules.__setitem__ ("zrun", Z)) (__zrun__create ())
+	(lambda Z : Z.py.sys.modules.__setitem__ ("zrun", Z)) (__zrun__create ())
 	import zrun
+	sys = zrun.py.sys
+	os = zrun.py.os
 	
 else :
 	
