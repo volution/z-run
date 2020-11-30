@@ -1,0 +1,36 @@
+#!/dev/null
+
+
+::// python / test / ...
+
+
+<< python / test / log
+	#! <python*>
+	zrun.log_debug_enabled = True
+	zrun.log_error (0xd517385b, "this is an error message")
+	zrun.log_warning (0xb4614c33, "this is a warning message")
+	zrun.log_notice (0x7049cb1d, "this is a notice message")
+	zrun.log_debug (0xd8baf265, "this is a debug message")
+!!
+
+<< python / test / panic
+	#! <python*>
+	zrun.panic (0x943040e7, "panic")
+!!
+
+<< python / test / delegate / zspawn
+	#! <python3*>
+	zrun.zspawn (":: env")
+!!
+
+<< python / test / delegate / zexec
+	#! <python3*>
+	zrun.zexec (":: env")
+!!
+
+<< python / test / delegate / spawn
+	#! <python3*>
+	zrun.spawn ("true")
+	zrun.spawn ("false", _panic = False)
+!!
+

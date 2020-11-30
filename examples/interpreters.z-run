@@ -16,11 +16,6 @@
 	sys.stdout.write ("hello from Python 3!\n")
 !!
 
-<< interpreters / python / test
-	#! <python*>
-	zrun_panic (0xbccda9f7, "aborting!")
-!!
-
 
 << interpreters / jq
 	#! <jq> --null-input --raw-output

@@ -11,4 +11,5 @@
 && _/debug.z-run
 && _/comments.z-run
 && _/ssh.z-run
+&& _/python.z-run
 

@@ -107,6 +107,7 @@
 
 << go / build / main / debug
 	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: workspace / sources / embedded / build'
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
@@ -119,6 +120,7 @@
 
 << go / build / main / release
 	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: workspace / sources / embedded / build'
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	if test -n "${GOOS:-}" ; then
 		_suffix="--${GOOS}"
