@@ -81,6 +81,10 @@ func resolveExecutable (_executable string, _paths []string) (string, *Error) {
 
 func resolveRelativePath (_workspace string, _base string, _path string) (string, *Error) {
 	
+	if (_path == ".") || (_path == "..") || (_path == "_") {
+		_path = _path + "/"
+	}
+	
 	if _path == "" {
 		// NOP
 	} else if path.IsAbs (_path) {
@@ -91,12 +95,31 @@ func resolveRelativePath (_workspace string, _base string, _path string) (string
 		_path = path.Join (_workspace, _path)
 	} else if strings.HasPrefix (_path, "_" + string (os.PathSeparator)) {
 		_path = path.Join (_base, _path[2:])
+	} else {
+		return "", errorf (0x3ca0a241, "invalid path syntax: `%s`", _path)
 	}
 	
 	_path = path.Clean (_path)
 	
 	if _path == "" {
 		return "", errorf (0xe971645a, "invalid empty path")
+	}
+	
+	return _path, nil
+}
+
+
+func resolveAbsolutePath (_workspace string, _base string, _path string) (string, *Error) {
+	
+	if _path_0, _error := resolveRelativePath (_workspace, _base, _path); _error != nil {
+		return "", _error
+	} else {
+		_path = _path_0
+	}
+	if _path_0, _error := filepath.Abs (_path); _error == nil {
+		_path = _path_0
+	} else {
+		return "", errorw (0xb007b166, _error)
 	}
 	
 	return _path, nil

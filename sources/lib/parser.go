@@ -810,15 +810,10 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								return errorf (0x8c2e1bf8, "invalid syntax (%d):  empty statement path descriptor | %s", _lineIndex, _line)
 							}
 							_path := ""
-							if _path_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _descriptor); _error != nil {
+							if _path_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _descriptor); _error != nil {
 								return _error
 							} else {
 								_path = _path_0
-							}
-							if _path_0, _error := filepath.Abs (_path); _error == nil {
-								_path = _path_0
-							} else {
-								return errorw (0xb007b166, _error)
 							}
 							if _stat, _error := os.Stat (_path); _error == nil {
 								if ! _stat.IsDir () {
@@ -829,7 +824,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							}
 							_parseContext.scriptletContext.ExecutablePaths = append (_parseContext.scriptletContext.ExecutablePaths, _path)
 							
-						case "environment", "env" :
+						case "environment", "env", "environment-path", "env-path" :
 							
 							if _descriptor == "" {
 								return errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
@@ -848,6 +843,16 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							}
 							if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists {
 								return errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
+							}
+							if (_kind == "environment-path") || (_kind == "env-path") {
+								if _value == "" {
+									return errorf (0x2124d511, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
+								}
+								if _path_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _value); _error != nil {
+									return _error
+								} else {
+									_value = _path_0
+								}
 							}
 							_parseContext.scriptletContext.Environment[_name] = _value
 					}
