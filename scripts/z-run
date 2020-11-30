@@ -275,3 +275,61 @@
 	#
 !!
 
+
+
+
+<< workspace / sources / embedded / build
+	
+	test "${#}" -eq 0
+	
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python_prolog.py ./sources/lib/embedded_python_prolog.go zrun embeddedPythonProlog string
+!!
+
+
+--<< workspace / sources / embedded / process
+	
+	test "${#}" -eq 5
+	_input="${1}"
+	_output="${2}"
+	_package="${3}"
+	_variable="${4}"
+	_type="${5}"
+	shift -- 5
+	
+	test "${#}" -eq 0
+	
+	if test -e "${_output}" -a "${_input}" -ot "${_output}" ; then
+		exit -- 0
+	fi
+	
+	test -f "${_input}"
+	exec {_output_fd}>| "${_output}.tmp"
+	
+	if test "${_package}" != "" ; then
+		printf -- '\n' >&"${_output_fd}"
+		printf -- 'package %s\n' "${_package}" >&"${_output_fd}"
+		printf -- '\n' >&"${_output_fd}"
+	fi
+	
+	printf -- '\n' >&"${_output_fd}"
+	case "${_type}" in
+		( byte )
+			printf -- 'var %s []byte = ([]byte {\n' "${_variable}" >&"${_output_fd}"
+		;;
+		( string )
+			printf -- 'var %s string = string ([]byte {\n' "${_variable}" >&"${_output_fd}"
+		;;
+		( * )
+			false -- "${_type}"
+		;;
+	esac
+	
+	xxd -i -c 128 < "${_input}" \
+	| sed -r -e 's/[^,]$/\0,/' >&"${_output_fd}"
+	
+	printf -- '})\n' >&"${_output_fd}"
+	printf -- '\n' >&"${_output_fd}"
+	
+	mv -f -T -- "${_output}.tmp" "${_output}"
+!!
+
