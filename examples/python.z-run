@@ -4,6 +4,25 @@
 ::// python / test / ...
 
 
+<< python / test / prolog
+	"${ZRUN[@]}" ':: python / test / prolog / 0'
+	"${ZRUN[@]}" ':: python / test / prolog / 2'
+	"${ZRUN[@]}" ':: python / test / prolog / 3'
+!!
+
+<< python / test / prolog / 0
+	#! <python*>
+!!
+
+<< python / test / prolog / 2
+	#! <python2*>
+!!
+
+<< python / test / prolog / 3
+	#! <python3*>
+!!
+
+
 << python / test / log
 	#! <python3*>
 	zrun.log_debug_enabled = True
@@ -14,7 +33,7 @@
 !!
 
 << python / test / panic
-	#! <python*>
+	#! <python3*>
 	zrun.panic (0x943040e7, "panic")
 !!
 

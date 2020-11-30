@@ -5,7 +5,12 @@
 ################################################################################
 
 
-def __zrun__inject (Z, __import__ = __import__) :
+def __zrun__create (Z = None, __import__ = __import__) :
+	
+	## --------------------------------------------------------------------------------
+	
+	if Z is None :
+		Z = __import__ ("types") .ModuleType ("zrun")
 	
 	## --------------------------------------------------------------------------------
 	
@@ -243,13 +248,8 @@ def __zrun__inject (Z, __import__ = __import__) :
 
 if __name__ == "__main__" :
 	
-#!	import sys
-#!	import os
-	
-	def __zrun () :
-		assert False, "[c92bb585]"
-	
-	zrun = __zrun__inject (__zrun)
+	(lambda Z : Z.sys.modules.__setitem__ ("zrun", Z)) (__zrun__create ())
+	import zrun
 	
 else :
 	
