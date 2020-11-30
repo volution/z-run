@@ -29,7 +29,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	
 	switch _interpreter {
 		
-		case "<exec>", "<bash>" :
+		case "<exec>", "<bash*>", "<python*>", "<python2*>", "<python3*>" :
 			_interpreterAllowsArguments = true
 		
 		case "<print>" :
@@ -88,8 +88,8 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 				)
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
-		case "<bash>" :
-			_interpreterExecutable = "bash"
+		case "<bash*>" :
+			_interpreterExecutable = _scriptlet.InterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
 					fmt.Sprintf ("[z-run:bash] [%s]", _scriptlet.Label),
@@ -109,6 +109,30 @@ exec %d<&-
 							`'` + strings.ReplaceAll (_context.selfExecutable, `'`, `'\''`) + `'`,
 							_interpreterScriptInput,
 						))
+			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
+		
+		case "<python*>", "<python2*>", "<python3*>" :
+			_interpreterExecutable = _scriptlet.InterpreterExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:python] [%s]", _scriptlet.Label),
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (
+`#!/dev/null
+import sys
+import os
+
+def zrun () : raise Exception (("0bf229bc", "not-implemented"))
+def zrun_panic (_code, _message, **_arguments) :
+	sys.stderr.write (("[z-run:%08d] [!!] [%08x]  " % (os.getpid (), _code)) + (_message % _arguments) + "\n")
+	sys.exit (1)
+
+if __name__ != "__main__" :
+	zrun_panic (0xdd55192b, "invalid state!")
+
+`,
+						)
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<print>" :

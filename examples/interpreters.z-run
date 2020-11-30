@@ -2,9 +2,29 @@
 
 
 << interpreters / python
-	#! <python2>
-	import sys
+	#! <python*>
 	sys.stdout.write ("hello from Python!\n")
+!!
+
+<< interpreters / python2
+	#! <python2*>
+	sys.stdout.write ("hello from Python 2!\n")
+!!
+
+<< interpreters / python3
+	#! <python3*>
+	sys.stdout.write ("hello from Python 3!\n")
+!!
+
+<< interpreters / python / test
+	#! <python*>
+	zrun_panic (0xbccda9f7, "aborting!")
+!!
+
+
+<< interpreters / jq
+	#! <jq> --null-input --raw-output
+	"hello from jq"
 !!
 
 

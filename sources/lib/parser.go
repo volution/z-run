@@ -257,23 +257,27 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 	switch _scriptlet.Interpreter {
 		case "<detect>" :
 			// NOP
-		case "<print>", "<exec>", "<bash>", "<template>", "<menu>" :
+		case "<exec>", "<print>", "<template>", "<menu>" :
+			return nil
+		case "<bash*>", "<python*>", "<python2*>", "<python3*>" :
 			return nil
 		default :
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
+	_headerLine := ""
+	
 	if ! strings.HasPrefix (_scriptlet.Body, "#!") {
-		_scriptlet.Interpreter = "<bash>"
-		return nil
+		_headerLine = "<bash*>"
+	} else {
+		_headerLimit := strings.IndexByte (_scriptlet.Body, '\n')
+		if _headerLimit < 0 {
+			return errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptlet.Label)
+		}
+		_headerLine = _scriptlet.Body[2:_headerLimit]
+		_scriptlet.Body = _scriptlet.Body[_headerLimit + 1 :]
 	}
 	
-	_headerLimit := strings.IndexByte (_scriptlet.Body, '\n')
-	if _headerLimit < 0 {
-		return errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptlet.Label)
-	}
-	
-	_headerLine := _scriptlet.Body[2:_headerLimit]
 	_headerLine = strings.Trim (_headerLine, " ")
 	
 	if strings.HasPrefix (_headerLine, "{{}}") {
@@ -303,12 +307,16 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 			return errorf (0x15d0485f, "invalid header for `%s` (empty)", _scriptlet.Label)
 		}
 		
+		_interpreter := "<exec>"
 		_executable := _header[0]
 		_arguments := make ([]string, 0, len (_header) + 16)
 		
 		if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
 			_executable = _executable[1 : len (_executable) - 1]
 			switch _executable {
+				case "bash*", "python*", "python2*", "python3*" :
+					_interpreter = "<" + _executable + ">"
+					_executable = _executable[0 : len (_executable) - 1]
 				case "bash", "python", "python2", "python3" :
 					// NOP
 				case "jq", "ninja" :
@@ -328,13 +336,11 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		
 		_arguments = append (_arguments, _header[1:] ...)
 		
-		_scriptlet.Interpreter = "<exec>"
+		_scriptlet.Interpreter = _interpreter
 		_scriptlet.InterpreterExecutable = _executable
 		_scriptlet.InterpreterArguments = _arguments
 		_scriptlet.InterpreterEnvironment = nil
 	}
-	
-	_scriptlet.Body = _scriptlet.Body[_headerLimit + 1 :]
 	
 	return nil
 }
