@@ -326,8 +326,10 @@
 		;;
 	esac
 	
-	xxd -i -c 128 < "${_input}" \
-	| sed -r -e 's/[^,]$/\0,/' >&"${_output_fd}"
+	xxd -i -c 256 < "${_input}" \
+	| sed -r -e 's/[^,]$/\0,/' -e 's/ 0x0a,/\0\n /g' \
+	| grep -v -E -e '^ *$' \
+		>&"${_output_fd}"
 	
 	printf -- '})\n' >&"${_output_fd}"
 	printf -- '\n' >&"${_output_fd}"
