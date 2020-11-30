@@ -7,6 +7,8 @@
 &&== env-path ENV_KEY_4 _
 &&== env-path ENV_KEY_5 ./sources
 
+&&== env-exclude PWD OLDPWD
+
 
 <<== generator / env
 	

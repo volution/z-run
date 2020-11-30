@@ -836,9 +836,6 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								return errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 							}
 							_descriptor := strings.SplitN (_descriptor, " ", 2)
-							if len (_descriptor) == 1 {
-								_descriptor = append (_descriptor, "")
-							}
 							if len (_descriptor) != 2 {
 								return errorf (0xfc01ef6a, "invalid syntax (%d):  invalid statement environment descriptor | %s", _lineIndex, _line)
 							}
@@ -861,6 +858,21 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								}
 							}
 							_parseContext.scriptletContext.Environment[_name] = _value
+							
+						case "environment-exclude", "env-exclude" :
+							if _descriptor == "" {
+								return errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
+							}
+							_descriptor := strings.Split (_descriptor, " ")
+							for _, _name := range _descriptor {
+								if _name == "" {
+									continue
+								}
+								if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists {
+									return errorf (0x0ed5990f, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
+								}
+								_parseContext.scriptletContext.Environment[_name] = ""
+							}
 					}
 					
 				} else if strings.HasPrefix (_lineTrimmed, "{{") {
