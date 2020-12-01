@@ -80,3 +80,33 @@
 		])
 !!
 
+<< python / test / paths
+	#! <python3*>
+	assert zrun.path ("/etc") == "/etc", "[c86740bc]"
+	assert zrun.path ("//etc/.") == "/etc", "[1caa1de9]"
+	assert zrun.path (("/etc", "hosts")) == "/etc/hosts", "[b1c36167]"
+	assert zrun.path (("/etc/hosts", "/proc/self")) == "/proc/self", "[e126cddb]"
+	assert zrun.path ("/proc/self", _canonical = True) != "/proc/self", "[0909bbcb7]"
+!!
+
+<< python / test / files / stat
+	#! <python3*>
+	zrun.exists ("/etc", _panic = 0x2ebc156a)
+	zrun.not_exists ("/__none__", _panic = 0x6412700c)
+	zrun.is_folder ("/etc", _panic = 0x6f67d170)
+	zrun.is_file ("/etc/hosts", _panic = 0xf67ac126)
+	zrun.is_file_or_folder ("/etc", _panic = 0xea1ecf05)
+	zrun.is_file_or_folder ("/etc/hosts", _panic = 0xbf9c1575)
+	zrun.is_symlink ("/proc/self", _panic = 0x492a6caf)
+	zrun.is_folder ("/proc/self", _panic = 0x6746e58d)
+	zrun.is_socket ("/dev/log", _panic = 0x708c3426)
+	zrun.is_dev_block ("/dev/loop0", _panic = 0x7ac9ef0f)
+	zrun.is_dev_char ("/dev/null", _panic = 0xa8623aa9)
+	zrun.is_special ("/dev/loop0", _panic = 0x8ea394a4)
+	zrun.is_special ("/dev/null", _panic = 0x3d458181)
+	zrun.is_special ("/dev/log", _panic = 0xb3b9fb84)
+	zrun.exists ("/dev/log", _panic = 0xc83ed2ae)
+	zrun.is_file_not_empty ("/etc/hosts", _panic = 0xec23876b)
+	zrun.is_file_empty ("/proc/self/environ", _panic = 0x80a8c78c)
+!!
+

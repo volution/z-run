@@ -18,8 +18,16 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	PY.os = __import__ ("os")
 	PY.sys = __import__ ("sys")
 	PY.signal = __import__ ("signal")
+	PY.errno = __import__ ("errno")
 	PY.subprocess = __import__ ("subprocess")
 	PY.time = __import__ ("time")
+	PY.path = __import__ ("os.path")
+	PY.stat = __import__ ("stat")
+	PY.re = __import__ ("re")
+	
+	if PY.sys.version_info[0] > 2 :
+		PY.basestring = str
+	
 	Z.py = PY
 	
 	## --------------------------------------------------------------------------------
@@ -96,11 +104,11 @@ def __zrun__create (Z = None, __import__ = __import__) :
 		if _wait :
 			_outcome = _delegate (PY.os.P_WAIT, _executable, _arguments, _environment)
 			if _panic and _outcome != 0 :
-				Z.panic (0x3c14b9a0, "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _outcome)
+				Z.panic ((_panic, 0x7d3900c4), "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _outcome)
 		else :
 			_outcome = _delegate (PY.os.P_NOWAIT, _executable, _arguments, _environment)
 			if _panic and _outcome <= 0 :
-				Z.panic (0x36737d48, "spawn `%s` `%s` failed with error (%d): %s", _arguments[0], _arguments[1:], _outcome, PY.os.strerror (_outcome))
+				Z.panic ((_panic, 0x56e47a07), "spawn `%s` `%s` failed with error (%d): %s", _arguments[0], _arguments[1:], _outcome, PY.os.strerror (_outcome))
 		return _outcome
 	
 	@_inject
@@ -168,7 +176,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 				if _process.returncode != 0 :
 					_succeeded = False
 					if _panic :
-						Z.log_warning (0x76d05a67, "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _process.returncode)
+						Z.log_warning ((_panic, 0x76d05a67), "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _process.returncode)
 				_processes[_index] = None
 			if _terminated == _count :
 				break
@@ -177,7 +185,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 		if Z.python_version >= 303 :
 			PY.signal.signal (PY.signal.SIGCHLD, _signal_handler_old)
 		if _panic and not _succeeded :
-			Z.panic (0x1d6fad91, "pipeline failed")
+			Z.panic ((_panic, 0x1d6fad91), "pipeline failed")
 		return _succeeded
 	
 	## --------------------------------------------------------------------------------
@@ -213,6 +221,12 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __zrun__panic (_code, _message, *_arguments) :
+		if isinstance (_code, tuple) :
+			_code_0 = 0xee4006b2
+			for _code_0 in _code :
+				if _code_0 is not False and _code_0 is not None :
+					break
+			_code = _code_0
 		Z._log_write ('!!', _code, _message, _arguments)
 		Z.exit (1)
 	
@@ -251,6 +265,142 @@ def __zrun__create (Z = None, __import__ = __import__) :
 			return tuple (Z.arguments)
 		else :
 			return tuple (Z.arguments[:_min]) + tuple (list (Z.arguments[_min:]))
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __zrun__enforce_regex (_value, _pattern, _code = None, _message = None) :
+		if _message is None : _message = "enforcement failed"
+		_pattern = Z.regex (_pattern)
+		if not isinstance (_value, PY.basestring) :
+			if _code is None : _code = 0x00a780ed
+			Z.panic (_code, _message)
+		if _pattern.match (_value) is None :
+			if _code is None : _code = 0x9c922f7e
+			Z.panic (_code, _message)
+		return _value
+	
+	@_inject
+	def __zrun__regex (_pattern) :
+		return PY.re.compile (_pattern, PY.re.ASCII | PY.re.DOTALL)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __zrun__path (_path, _absolute = False, _canonical = False, _relative = None) :
+		if not isinstance (_path, PY.basestring) and not isinstance (_path, bytes) :
+			_path = PY.os.path.join (*_path)
+		_path = PY.os.path.normpath (_path)
+		if _path.startswith ("//") :
+			_path = "/" + _path.lstrip ("/")
+		if _absolute :
+			_path = PY.os.path.abspath (_path)
+		if _canonical :
+			_path = PY.os.path.realpath (_path)
+		if _relative is not None :
+			_path = PY.os.path.relpath (_relative)
+		return _path
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __zrun__exists (_path, _follow = True, _panic = False) :
+		_stat = Z.stat (_path, _follow)
+		if _stat is None and _panic :
+			Z.panic ((_panic, 0x383d3cc5), "file-system path does not exist `%s`", _path)
+		return _stat is not None
+	
+	@_inject
+	def __zrun__not_exists (_path, _follow = True, _panic = False) :
+		_stat = Z.stat (_path, _follow)
+		if _stat is not None and _panic :
+			Z.panic ((_panic, 0x9064abfc), "file-system path already exists `%s`", _path)
+		return _stat is None
+	
+	@_inject
+	def __zrun__is_file (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_file_empty (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size == 0), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_file_not_empty (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size > 0), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_folder (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISDIR (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_file_or_folder (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) or PY.stat.S_ISDIR (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_symlink (_path, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISLNK (_stat.st_mode)), False, _panic)
+	
+	@_inject
+	def __zrun__is_pipe (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_socket (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISSOCK (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_dev_block (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISBLK (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_dev_char (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISCHR (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun__is_special (_path, _follow = True, _panic = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode) or PY.stat.S_ISSOCK (_stat.st_mode) or PY.stat.S_ISBLK (_stat.st_mode) or PY.stat.S_ISCHR (_stat.st_mode)), _follow, _panic)
+	
+	@_inject
+	def __zrun___stat_check (_path, _check, _follow = True, _panic = False) :
+		_stat = Z.stat (_path, _follow)
+		if _stat is None :
+			if _panic :
+				Z.panic ((_panic, 0xa23c577e), "file-system path not found `%s`", _path)
+			else :
+				return None
+		if _check (_stat) :
+			return True
+		else :
+			if _panic :
+				Z.panic ((_panic, 0xfdbdc9a5), "file-system stat check failed `%s`", _path)
+			else :
+				return False
+	
+	@_inject
+	def __zrun__stat (_path, _follow = True) :
+		if _follow :
+			_delegate = PY.os.stat
+		else :
+			_delegate = PY.os.lstat
+		try :
+			_stat = _delegate (_path)
+		except OSError as _error :
+			if _error.errno == PY.errno.ENOENT :
+				_stat = None
+			else :
+				raise
+		return _stat
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __zrun__mkdir (_path, _mode = None, _recurse = False) :
+		if _mode is None : _mode = 0o777
+		if _recurse :
+			PY.os.mkdirs (_path, _mode)
+		else :
+			PY.os.mkdir (_path, _mode)
 	
 	## --------------------------------------------------------------------------------
 	
