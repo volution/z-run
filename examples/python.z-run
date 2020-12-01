@@ -118,3 +118,9 @@
 	print (os.environ["PATH"])
 	print (os.environ["NEW"])
 !!
+
+<< python / test / sleep
+	#! <python3*>
+	zrun.sleep (6)
+!!
+

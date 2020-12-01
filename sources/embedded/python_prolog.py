@@ -447,12 +447,16 @@ if __name__ == "__main__" :
 	
 	(lambda Z : Z.py.sys.modules.__setitem__ ("zrun", Z)) (__zrun__create ())
 	import zrun
+	
+	zrun.py.signal.signal (zrun.py.signal.SIGINT, (lambda _0, _1 : zrun.panic (0x6c751732, "scriptlet interrupted with SIGINT;  aborting!")))
+	zrun.py.signal.signal (zrun.py.signal.SIGTERM, (lambda _0, _1 : zrun.panic (0xb5067479, "scriptlet interrupted with SIGTERM;  aborting!")))
+	zrun.py.signal.signal (zrun.py.signal.SIGQUIT, (lambda _0, _1 : zrun.panic (0x921de146, "scriptlet interrupted with SIGQUIT;  aborting!")))
+	zrun.py.signal.signal (zrun.py.signal.SIGHUP, (lambda _0, _1 : zrun.panic (0xe2e4c7c5, "scriptlet interrupted with SIGHUP;  aborting!")))
+	zrun.py.signal.signal (zrun.py.signal.SIGPIPE, (lambda _0, _1 : zrun.panic (0xed8191f4, "scriptlet interrupted with SIGPIPE;  aborting!")))
+	zrun.py.signal.signal (zrun.py.signal.SIGABRT, (lambda _0, _1 : zrun.panic (0xd6af6d5b, "scriptlet interrupted with SIGABRT;  aborting!")))
+	
 	sys = zrun.py.sys
 	os = zrun.py.os
-	
-else :
-	
-	assert False, ("[b11458a7]  invalid module: `%s`" % __name__)
 
 
 ################################################################################
