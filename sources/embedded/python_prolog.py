@@ -5,16 +5,16 @@
 ################################################################################
 
 
-def __zrun__create (Z = None, __import__ = __import__) :
+def __Z__create (Z = None, __import__ = __import__) :
 	
 	## --------------------------------------------------------------------------------
 	
 	if Z is None :
-		Z = __import__ ("types") .ModuleType ("zrun")
+		Z = __import__ ("types") .ModuleType ("Z")
 	
 	## --------------------------------------------------------------------------------
 	
-	PY = __import__ ("types") .ModuleType ("zrun_PY")
+	PY = __import__ ("types") .ModuleType ("PY")
 	PY.os = __import__ ("os")
 	PY.sys = __import__ ("sys")
 	PY.signal = __import__ ("signal")
@@ -34,8 +34,8 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	
 	def _inject (_function) :
 		_name = _function.__name__
-		if _name.startswith ("__zrun__") :
-			_name = _name[8:]
+		if _name.startswith ("__Z__") :
+			_name = _name[5:]
 		else :
 			assert False, ("[83cec849]  invalid inject name: `%s`" % _name)
 		Z.__dict__[_name] = _function
@@ -44,21 +44,21 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__zspawn (_scriptlet, *_arguments, **_options) :
+	def __Z__zspawn (_scriptlet, *_arguments, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments)
 		return Z.spawn_0 (_descriptor, **_options)
 	
 	@_inject
-	def __zrun__zexec (_scriptlet, *_arguments, **_options) :
+	def __Z__zexec (_scriptlet, *_arguments, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments)
 		return Z.exec_0 (_descriptor, **_options)
 	
 	@_inject
-	def __zrun__zcmd (_scriptlet, *_arguments) :
+	def __Z__zcmd (_scriptlet, *_arguments) :
 		return Z._zexec_prepare (_scriptlet, _arguments)
 	
 	@_inject
-	def __zrun___zexec_prepare (_scriptlet, _arguments) :
+	def __Z___zexec_prepare (_scriptlet, _arguments) :
 		_executable = Z.executable
 		if not _scriptlet.startswith ("::") :
 			Z.panic (0xbd1641c7, "invalid scriptlet: `%s`", _scriptlet)
@@ -70,21 +70,21 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__spawn (_scriptlet, *_arguments, **_options) :
+	def __Z__spawn (_scriptlet, *_arguments, **_options) :
 		_descriptor = Z._exec_prepare (_scriptlet, _arguments)
 		return Z.spawn_0 (_descriptor, **_options)
 	
 	@_inject
-	def __zrun__exec (_executable, *_arguments, **_options) :
+	def __Z__exec (_executable, *_arguments, **_options) :
 		_descriptor = Z._exec_prepare (_executable, _arguments)
 		return Z.exec_0 (_descriptor, **_options)
 	
 	@_inject
-	def __zrun__cmd (_scriptlet, *_arguments) :
+	def __Z__cmd (_scriptlet, *_arguments) :
 		return Z._exec_prepare (_scriptlet, _arguments)
 	
 	@_inject
-	def __zrun___exec_prepare (_executable, _arguments) :
+	def __Z___exec_prepare (_executable, _arguments) :
 		_arguments_all = [_executable]
 		_arguments_all.extend (_arguments)
 		_environment = { _name : Z.environment[_name] for _name in Z.environment }
@@ -93,7 +93,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__spawn_0 (_descriptor, _wait = True, _panic = True) :
+	def __Z__spawn_0 (_descriptor, _wait = True, _panic = True) :
 		_executable, _lookup, _arguments, _environment = _descriptor
 		if _lookup :
 			_delegate = PY.os.spawnvpe
@@ -110,7 +110,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 		return _outcome
 	
 	@_inject
-	def __zrun__exec_0 (_descriptor) :
+	def __Z__exec_0 (_descriptor) :
 		_executable, _lookup, _arguments, _environment = _descriptor
 		if _lookup :
 			_delegate = PY.os.execvpe
@@ -121,10 +121,10 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__pipeline (_commands, _wait = True, _panic = True) :
+	def __Z__pipeline (_commands, _wait = True, _panic = True) :
 		_count = len (_commands)
 		if _count == 0 :
-			z.panic (0x1b1812d7, "pipeline empty")
+			Z.panic (0x1b1812d7, "pipeline empty")
 		_pipes = []
 		_pipes.append ((None, None))
 		for _index in range (_count - 1) :
@@ -189,36 +189,36 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__log_error (_code, _message, *_arguments) :
+	def __Z__log_error (_code, _message, *_arguments) :
 		Z._log_write ('ee', _code, _message, _arguments)
 	
 	@_inject
-	def __zrun__log_warning (_code, _message, *_arguments) :
+	def __Z__log_warning (_code, _message, *_arguments) :
 		if not Z.log_warning_enabled : return
 		Z._log_write ('ww', _code, _message, _arguments)
 	
 	@_inject
-	def __zrun__log_notice (_code, _message, *_arguments) :
+	def __Z__log_notice (_code, _message, *_arguments) :
 		if not Z.log_warning_enabled or not Z.log_notice_enabled : return
 		Z._log_write ('ii', _code, _message, _arguments)
 	
 	@_inject
-	def __zrun__log_debug (_code, _message, *_arguments) :
+	def __Z__log_debug (_code, _message, *_arguments) :
 		if not Z.log_warning_enabled or not Z.log_notice_enabled or not Z.log_debug_enabled : return
 		Z._log_write ('dd', _code, _message, _arguments)
 	
 	@_inject
-	def __zrun___log_write (_slug, _code, _message, _arguments) :
+	def __Z___log_write (_slug, _code, _message, _arguments) :
 		Z.stderr.write (("[z-run:%08d] [%s] [%08x]  " % (Z.pid, _slug, _code)) + (_message % _arguments) + "\n")
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__exit (_status) :
+	def __Z__exit (_status) :
 		PY.sys.exit (_status)
 	
 	@_inject
-	def __zrun__panic (_code, _message, *_arguments) :
+	def __Z__panic (_code, _message, *_arguments) :
 		if isinstance (_code, tuple) :
 			_code_0 = 0xee4006b2
 			for _code_0 in _code :
@@ -229,17 +229,17 @@ def __zrun__create (Z = None, __import__ = __import__) :
 		Z.exit (1)
 	
 	@_inject
-	def __zrun__sleep (_interval) :
+	def __Z__sleep (_interval) :
 		PY.time.sleep (_interval)
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__expect_no_arguments () :
+	def __Z__expect_no_arguments () :
 		return Z.expect_arguments (_exact = 0)
 	
 	@_inject
-	def __zrun__expect_arguments (_exact = None, _min = None, _max = None) :
+	def __Z__expect_arguments (_exact = None, _min = None, _max = None) :
 		if _exact is not None :
 			assert _min is None and _max is None, "[6ace19bf]"
 			assert _exact >= 0, "[bfdc6527]"
@@ -267,7 +267,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__enforce_regex (_value, _pattern, _code = None, _message = None) :
+	def __Z__enforce_regex (_value, _pattern, _code = None, _message = None) :
 		if _message is None : _message = "enforcement failed"
 		_pattern = Z.regex (_pattern)
 		if not isinstance (_value, PY.basestring) :
@@ -279,13 +279,13 @@ def __zrun__create (Z = None, __import__ = __import__) :
 		return _value
 	
 	@_inject
-	def __zrun__regex (_pattern) :
+	def __Z__regex (_pattern) :
 		return PY.re.compile (_pattern, PY.re.ASCII | PY.re.DOTALL)
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__path (_path, _absolute = False, _canonical = False, _relative = None) :
+	def __Z__path (_path, _absolute = False, _canonical = False, _relative = None) :
 		if not isinstance (_path, PY.basestring) and not isinstance (_path, bytes) :
 			_path = PY.os.path.join (*_path)
 		_path = PY.os.path.normpath (_path)
@@ -302,65 +302,65 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__exists (_path, _follow = True, _panic = False) :
+	def __Z__exists (_path, _follow = True, _panic = False) :
 		_stat = Z.stat (_path, _follow)
 		if _stat is None and _panic :
 			Z.panic ((_panic, 0x383d3cc5), "file-system path does not exist `%s`", _path)
 		return _stat is not None
 	
 	@_inject
-	def __zrun__not_exists (_path, _follow = True, _panic = False) :
+	def __Z__not_exists (_path, _follow = True, _panic = False) :
 		_stat = Z.stat (_path, _follow)
 		if _stat is not None and _panic :
 			Z.panic ((_panic, 0x9064abfc), "file-system path already exists `%s`", _path)
 		return _stat is None
 	
 	@_inject
-	def __zrun__is_file (_path, _follow = True, _panic = False) :
+	def __Z__is_file (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_file_empty (_path, _follow = True, _panic = False) :
+	def __Z__is_file_empty (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size == 0), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_file_not_empty (_path, _follow = True, _panic = False) :
+	def __Z__is_file_not_empty (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size > 0), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_folder (_path, _follow = True, _panic = False) :
+	def __Z__is_folder (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISDIR (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_file_or_folder (_path, _follow = True, _panic = False) :
+	def __Z__is_file_or_folder (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) or PY.stat.S_ISDIR (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_symlink (_path, _panic = False) :
+	def __Z__is_symlink (_path, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISLNK (_stat.st_mode)), False, _panic)
 	
 	@_inject
-	def __zrun__is_pipe (_path, _follow = True, _panic = False) :
+	def __Z__is_pipe (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_socket (_path, _follow = True, _panic = False) :
+	def __Z__is_socket (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISSOCK (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_dev_block (_path, _follow = True, _panic = False) :
+	def __Z__is_dev_block (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISBLK (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_dev_char (_path, _follow = True, _panic = False) :
+	def __Z__is_dev_char (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISCHR (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun__is_special (_path, _follow = True, _panic = False) :
+	def __Z__is_special (_path, _follow = True, _panic = False) :
 		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode) or PY.stat.S_ISSOCK (_stat.st_mode) or PY.stat.S_ISBLK (_stat.st_mode) or PY.stat.S_ISCHR (_stat.st_mode)), _follow, _panic)
 	
 	@_inject
-	def __zrun___stat_check (_path, _check, _follow = True, _panic = False) :
+	def __Z___stat_check (_path, _check, _follow = True, _panic = False) :
 		_stat = Z.stat (_path, _follow)
 		if _stat is None :
 			if _panic :
@@ -376,7 +376,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 				return False
 	
 	@_inject
-	def __zrun__stat (_path, _follow = True) :
+	def __Z__stat (_path, _follow = True) :
 		if _follow :
 			_delegate = PY.os.stat
 		else :
@@ -393,7 +393,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __zrun__mkdir (_path, _mode = None, _recurse = False) :
+	def __Z__mkdir (_path, _mode = None, _recurse = False) :
 		if _mode is None : _mode = 0o777
 		if _recurse :
 			PY.os.makedirs (_path, _mode, True)
@@ -445,18 +445,18 @@ def __zrun__create (Z = None, __import__ = __import__) :
 
 if __name__ == "__main__" :
 	
-	(lambda Z : Z.py.sys.modules.__setitem__ ("zrun", Z)) (__zrun__create ())
-	import zrun
+	(lambda Z : Z.py.sys.modules.__setitem__ ("Z", Z)) (__Z__create ())
+	import Z
 	
-	zrun.py.signal.signal (zrun.py.signal.SIGINT, (lambda _0, _1 : zrun.panic (0x6c751732, "scriptlet interrupted with SIGINT;  aborting!")))
-	zrun.py.signal.signal (zrun.py.signal.SIGTERM, (lambda _0, _1 : zrun.panic (0xb5067479, "scriptlet interrupted with SIGTERM;  aborting!")))
-	zrun.py.signal.signal (zrun.py.signal.SIGQUIT, (lambda _0, _1 : zrun.panic (0x921de146, "scriptlet interrupted with SIGQUIT;  aborting!")))
-	zrun.py.signal.signal (zrun.py.signal.SIGHUP, (lambda _0, _1 : zrun.panic (0xe2e4c7c5, "scriptlet interrupted with SIGHUP;  aborting!")))
-	zrun.py.signal.signal (zrun.py.signal.SIGPIPE, (lambda _0, _1 : zrun.panic (0xed8191f4, "scriptlet interrupted with SIGPIPE;  aborting!")))
-	zrun.py.signal.signal (zrun.py.signal.SIGABRT, (lambda _0, _1 : zrun.panic (0xd6af6d5b, "scriptlet interrupted with SIGABRT;  aborting!")))
+	Z.py.signal.signal (Z.py.signal.SIGINT, (lambda _0, _1 : Z.panic (0x6c751732, "scriptlet interrupted with SIGINT;  aborting!")))
+	Z.py.signal.signal (Z.py.signal.SIGTERM, (lambda _0, _1 : Z.panic (0xb5067479, "scriptlet interrupted with SIGTERM;  aborting!")))
+	Z.py.signal.signal (Z.py.signal.SIGQUIT, (lambda _0, _1 : Z.panic (0x921de146, "scriptlet interrupted with SIGQUIT;  aborting!")))
+	Z.py.signal.signal (Z.py.signal.SIGHUP, (lambda _0, _1 : Z.panic (0xe2e4c7c5, "scriptlet interrupted with SIGHUP;  aborting!")))
+	Z.py.signal.signal (Z.py.signal.SIGPIPE, (lambda _0, _1 : Z.panic (0xed8191f4, "scriptlet interrupted with SIGPIPE;  aborting!")))
+	Z.py.signal.signal (Z.py.signal.SIGABRT, (lambda _0, _1 : Z.panic (0xd6af6d5b, "scriptlet interrupted with SIGABRT;  aborting!")))
 	
-	sys = zrun.py.sys
-	os = zrun.py.os
+	sys = Z.py.sys
+	os = Z.py.os
 
 
 ################################################################################

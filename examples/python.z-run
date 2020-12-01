@@ -12,115 +12,115 @@
 
 << python / test / prolog / 0
 	#! <python*>
-	zrun.expect_no_arguments ()
+	Z.expect_no_arguments ()
 !!
 
 << python / test / prolog / 2
 	#! <python2*>
-	zrun.expect_no_arguments ()
+	Z.expect_no_arguments ()
 !!
 
 << python / test / prolog / 3
 	#! <python3*>
-	zrun.expect_no_arguments ()
+	Z.expect_no_arguments ()
 !!
 
 
 << python / test / log
 	#! <python3*>
-	zrun.expect_no_arguments ()
-	zrun.log_debug_enabled = True
-	zrun.log_error (0xd517385b, "this is an error message")
-	zrun.log_warning (0xb4614c33, "this is a warning message")
-	zrun.log_notice (0x7049cb1d, "this is a notice message")
-	zrun.log_debug (0xd8baf265, "this is a debug message")
+	Z.expect_no_arguments ()
+	Z.log_debug_enabled = True
+	Z.log_error (0xd517385b, "this is an error message")
+	Z.log_warning (0xb4614c33, "this is a warning message")
+	Z.log_notice (0x7049cb1d, "this is a notice message")
+	Z.log_debug (0xd8baf265, "this is a debug message")
 !!
 
 << python / test / panic
 	#! <python3*>
-	zrun.expect_no_arguments ()
-	zrun.panic (0x943040e7, "panic")
+	Z.expect_no_arguments ()
+	Z.panic (0x943040e7, "panic")
 !!
 
 << python / test / zspawn
 	#! <python3*>
-	zrun.expect_no_arguments ()
-	zrun.zspawn (":: true")
-	zrun.zspawn (":: false", _panic = False)
+	Z.expect_no_arguments ()
+	Z.zspawn (":: true")
+	Z.zspawn (":: false", _panic = False)
 !!
 
 << python / test / zexec
 	#! <python3*>
-	zrun.expect_no_arguments ()
-	zrun.zexec (":: true")
+	Z.expect_no_arguments ()
+	Z.zexec (":: true")
 !!
 
 << python / test / spawn
 	#! <python3*>
-	zrun.expect_no_arguments ()
-	zrun.spawn ("true")
-	zrun.spawn ("false", _panic = False)
+	Z.expect_no_arguments ()
+	Z.spawn ("true")
+	Z.spawn ("false", _panic = False)
 !!
 
 << python / test / exec
 	#! <python3*>
-	zrun.expect_no_arguments ()
-	zrun.exec ("true")
+	Z.expect_no_arguments ()
+	Z.exec ("true")
 !!
 
 << python / test / pipeline
 	#! <python3*>
-	zrun.expect_no_arguments ()
-	zrun.pipeline ([
-			zrun.cmd ("true"),
-			zrun.cmd ("sleep", "6s"),
-			zrun.cmd ("cat"),
-			zrun.cmd ("sleep", "12s"),
-			zrun.cmd ("true"),
+	Z.expect_no_arguments ()
+	Z.pipeline ([
+			Z.cmd ("true"),
+			Z.cmd ("sleep", "6s"),
+			Z.cmd ("cat"),
+			Z.cmd ("sleep", "12s"),
+			Z.cmd ("true"),
 		])
 !!
 
 << python / test / paths
 	#! <python3*>
-	assert zrun.path ("/etc") == "/etc", "[c86740bc]"
-	assert zrun.path ("//etc/.") == "/etc", "[1caa1de9]"
-	assert zrun.path (("/etc", "hosts")) == "/etc/hosts", "[b1c36167]"
-	assert zrun.path (("/etc/hosts", "/proc/self")) == "/proc/self", "[e126cddb]"
-	assert zrun.path ("/proc/self", _canonical = True) != "/proc/self", "[0909bbcb7]"
+	assert Z.path ("/etc") == "/etc", "[c86740bc]"
+	assert Z.path ("//etc/.") == "/etc", "[1caa1de9]"
+	assert Z.path (("/etc", "hosts")) == "/etc/hosts", "[b1c36167]"
+	assert Z.path (("/etc/hosts", "/proc/self")) == "/proc/self", "[e126cddb]"
+	assert Z.path ("/proc/self", _canonical = True) != "/proc/self", "[0909bbcb7]"
 !!
 
 << python / test / files / stat
 	#! <python3*>
-	zrun.exists ("/etc", _panic = 0x2ebc156a)
-	zrun.not_exists ("/__none__", _panic = 0x6412700c)
-	zrun.is_folder ("/etc", _panic = 0x6f67d170)
-	zrun.is_file ("/etc/hosts", _panic = 0xf67ac126)
-	zrun.is_file_or_folder ("/etc", _panic = 0xea1ecf05)
-	zrun.is_file_or_folder ("/etc/hosts", _panic = 0xbf9c1575)
-	zrun.is_symlink ("/proc/self", _panic = 0x492a6caf)
-	zrun.is_folder ("/proc/self", _panic = 0x6746e58d)
-	zrun.is_socket ("/dev/log", _panic = 0x708c3426)
-	zrun.is_dev_block ("/dev/loop0", _panic = 0x7ac9ef0f)
-	zrun.is_dev_char ("/dev/null", _panic = 0xa8623aa9)
-	zrun.is_special ("/dev/loop0", _panic = 0x8ea394a4)
-	zrun.is_special ("/dev/null", _panic = 0x3d458181)
-	zrun.is_special ("/dev/log", _panic = 0xb3b9fb84)
-	zrun.exists ("/dev/log", _panic = 0xc83ed2ae)
-	zrun.is_file_not_empty ("/etc/hosts", _panic = 0xec23876b)
-	zrun.is_file_empty ("/proc/self/environ", _panic = 0x80a8c78c)
+	Z.exists ("/etc", _panic = 0x2ebc156a)
+	Z.not_exists ("/__none__", _panic = 0x6412700c)
+	Z.is_folder ("/etc", _panic = 0x6f67d170)
+	Z.is_file ("/etc/hosts", _panic = 0xf67ac126)
+	Z.is_file_or_folder ("/etc", _panic = 0xea1ecf05)
+	Z.is_file_or_folder ("/etc/hosts", _panic = 0xbf9c1575)
+	Z.is_symlink ("/proc/self", _panic = 0x492a6caf)
+	Z.is_folder ("/proc/self", _panic = 0x6746e58d)
+	Z.is_socket ("/dev/log", _panic = 0x708c3426)
+	Z.is_dev_block ("/dev/loop0", _panic = 0x7ac9ef0f)
+	Z.is_dev_char ("/dev/null", _panic = 0xa8623aa9)
+	Z.is_special ("/dev/loop0", _panic = 0x8ea394a4)
+	Z.is_special ("/dev/null", _panic = 0x3d458181)
+	Z.is_special ("/dev/log", _panic = 0xb3b9fb84)
+	Z.exists ("/dev/log", _panic = 0xc83ed2ae)
+	Z.is_file_not_empty ("/etc/hosts", _panic = 0xec23876b)
+	Z.is_file_empty ("/proc/self/environ", _panic = 0x80a8c78c)
 !!
 
 << python / test / environment
 	#! <python3*>
-	print (zrun.environment.PATH)
-	zrun.environment.PATH = "/dev/null/1"
-	zrun.environment.NEW = "/dev/null/2"
+	print (Z.environment.PATH)
+	Z.environment.PATH = "/dev/null/1"
+	Z.environment.NEW = "/dev/null/2"
 	print (os.environ["PATH"])
 	print (os.environ["NEW"])
 !!
 
 << python / test / sleep
 	#! <python3*>
-	zrun.sleep (6)
+	Z.sleep (6)
 !!
 
