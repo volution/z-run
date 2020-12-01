@@ -404,9 +404,23 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	
 	## --------------------------------------------------------------------------------
 	
+	class Z_environment :
+		__str__ = PY.os.environ.__str__
+		__repr__ = PY.os.environ.__repr__
+		__getattr__ = PY.os.environ.__getitem__
+		__setattr__ = PY.os.environ.__setitem__
+		__len__ = PY.os.environ.__len__
+		__getitem__ = PY.os.environ.__getitem__
+		__setitem__ = PY.os.environ.__setitem__
+		__delitem__ = PY.os.environ.__delitem__
+		__contains__ = PY.os.environ.__contains__
+		__iter__ = PY.os.environ.__iter__
+	
+	## --------------------------------------------------------------------------------
+	
 	Z.pid = PY.os.getpid ()
-	Z.arguments = PY.sys.argv[1:]
-	Z.environment = PY.os.environ
+	Z.arguments = tuple (PY.sys.argv[1:])
+	Z.environment = Z_environment ()
 	
 	Z.executable = Z.environment["ZRUN_EXECUTABLE"]
 	Z.workspace = Z.environment["ZRUN_WORKSPACE"]

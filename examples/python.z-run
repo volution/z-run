@@ -110,3 +110,11 @@
 	zrun.is_file_empty ("/proc/self/environ", _panic = 0x80a8c78c)
 !!
 
+<< python / test / environment
+	#! <python3*>
+	print (zrun.environment.PATH)
+	zrun.environment.PATH = "/dev/null/1"
+	zrun.environment.NEW = "/dev/null/2"
+	print (os.environ["PATH"])
+	print (os.environ["NEW"])
+!!
