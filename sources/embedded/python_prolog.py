@@ -64,8 +64,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 			Z.panic (0xbd1641c7, "invalid scriptlet: `%s`", _scriptlet)
 		_arguments_all = ["[z-run]", _scriptlet]
 		_arguments_all.extend (_arguments)
-		_environment = {}
-		_environment.update (Z.environment)
+		_environment = { _name : Z.environment[_name] for _name in Z.environment }
 		return _executable, False, _arguments_all, _environment
 	
 	## --------------------------------------------------------------------------------
@@ -88,8 +87,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	def __zrun___exec_prepare (_executable, _arguments) :
 		_arguments_all = [_executable]
 		_arguments_all.extend (_arguments)
-		_environment = {}
-		_environment.update (Z.environment)
+		_environment = { _name : Z.environment[_name] for _name in Z.environment }
 		return _executable, True, _arguments_all, _environment
 	
 	## --------------------------------------------------------------------------------
@@ -176,7 +174,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 				if _process.returncode != 0 :
 					_succeeded = False
 					if _panic :
-						Z.log_warning ((_panic, 0x76d05a67), "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _process.returncode)
+						Z.log_warning (0x76d05a67, "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _process.returncode)
 				_processes[_index] = None
 			if _terminated == _count :
 				break
@@ -398,7 +396,7 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	def __zrun__mkdir (_path, _mode = None, _recurse = False) :
 		if _mode is None : _mode = 0o777
 		if _recurse :
-			PY.os.mkdirs (_path, _mode)
+			PY.os.makedirs (_path, _mode, True)
 		else :
 			PY.os.mkdir (_path, _mode)
 	
@@ -422,9 +420,9 @@ def __zrun__create (Z = None, __import__ = __import__) :
 	Z.arguments = tuple (PY.sys.argv[1:])
 	Z.environment = Z_environment ()
 	
-	Z.executable = Z.environment["ZRUN_EXECUTABLE"]
-	Z.workspace = Z.environment["ZRUN_WORKSPACE"]
-	Z.fingerprint = Z.environment["ZRUN_FINGERPRINT"]
+	Z.executable = Z.environment.ZRUN_EXECUTABLE
+	Z.workspace = Z.environment.ZRUN_WORKSPACE
+	Z.fingerprint = Z.environment.ZRUN_FINGERPRINT
 	
 	Z.stdin = PY.sys.stdin
 	Z.stdout = PY.sys.stdout
