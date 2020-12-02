@@ -112,6 +112,8 @@
 
 << python / test / environment
 	#! <python3*>
+	for _name in sorted (Z.environment.__iter__ ()) :
+		print ("%s == %s" % (_name, Z.environment[_name]))
 	print (Z.environment.PATH)
 	Z.environment.PATH = "/dev/null/1"
 	Z.environment.NEW = "/dev/null/2"

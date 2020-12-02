@@ -403,16 +403,16 @@ def __Z__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	class Z_environment :
-		def __str__ (self) : PY.os.environ.__repr__ ()
-		def __repr__ (self) : PY.os.environ.__repr__ ()
-		def __getattr__ (self, _k) : PY.os.environ.__getitem__ (_k)
-		def __setattr__ (self, _k, _v) : PY.os.environ.__setitem__ (_k, _v)
-		def __len__ (self) : PY.os.environ.__len__ ()
-		def __getitem__ (self, _k) : PY.os.environ.__getitem__ (_k)
-		def __setitem__ (self, _k, _v) : PY.os.environ.__setitem__ (_k, _v)
-		def __delitem__ (self, _k) : PY.os.environ.__delitem__ (_k)
-		def __contains__ (self, _k) : PY.os.environ.__contains__ (_k)
-		def __iter__ (self) : PY.os.environ.__iter__ ()
+		def __str__ (self) : return PY.os.environ.__repr__ ()
+		def __repr__ (self) : return PY.os.environ.__repr__ ()
+		def __getattr__ (self, _k) : return PY.os.environ.__getitem__ (_k)
+		def __setattr__ (self, _k, _v) : return PY.os.environ.__setitem__ (_k, _v)
+		def __len__ (self) : return PY.os.environ.__len__ ()
+		def __getitem__ (self, _k) : return PY.os.environ.__getitem__ (_k)
+		def __setitem__ (self, _k, _v) : return PY.os.environ.__setitem__ (_k, _v)
+		def __delitem__ (self, _k) : return PY.os.environ.__delitem__ (_k)
+		def __contains__ (self, _k) : return PY.os.environ.__contains__ (_k)
+		def __iter__ (self) : return PY.os.environ.__iter__ ()
 	
 	## --------------------------------------------------------------------------------
 	
