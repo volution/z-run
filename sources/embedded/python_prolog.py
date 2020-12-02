@@ -44,74 +44,82 @@ def __Z__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__zspawn (_scriptlet, *_arguments, **_options) :
-		_descriptor = Z._zexec_prepare (_scriptlet, _arguments)
-		return Z.spawn_0 (_descriptor, **_options)
+	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _panic = True, **_options) :
+		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
+		return Z.spawn_0 (_descriptor, _wait, _panic)
 	
 	@_inject
 	def __Z__zexec (_scriptlet, *_arguments, **_options) :
-		_descriptor = Z._zexec_prepare (_scriptlet, _arguments)
-		return Z.exec_0 (_descriptor, **_options)
+		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
+		return Z.exec_0 (_descriptor)
 	
 	@_inject
-	def __Z__zcmd (_scriptlet, *_arguments) :
-		return Z._zexec_prepare (_scriptlet, _arguments)
+	def __Z__zcmd (_scriptlet, *_arguments, **_options) :
+		return Z._zexec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___zexec_prepare (_scriptlet, _arguments) :
+	def __Z___zexec_prepare (_scriptlet, _arguments, _cd = None) :
 		_executable = Z.executable
 		if not _scriptlet.startswith ("::") :
 			Z.panic (0xbd1641c7, "invalid scriptlet: `%s`", _scriptlet)
 		_arguments_all = ["[z-run]", _scriptlet]
 		_arguments_all.extend (_arguments)
 		_environment = { _name : Z.environment[_name] for _name in Z.environment }
-		return _executable, False, _arguments_all, _environment
+		return _executable, False, _arguments_all, _environment, _cd
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn (_scriptlet, *_arguments, **_options) :
-		_descriptor = Z._exec_prepare (_scriptlet, _arguments)
-		return Z.spawn_0 (_descriptor, **_options)
+	def __Z__spawn (_scriptlet, *_arguments, _wait = True, _panic = True, **_options) :
+		_descriptor = Z._exec_prepare (_scriptlet, _arguments, **_options)
+		return Z.spawn_0 (_descriptor, _wait, _panic)
 	
 	@_inject
 	def __Z__exec (_executable, *_arguments, **_options) :
-		_descriptor = Z._exec_prepare (_executable, _arguments)
-		return Z.exec_0 (_descriptor, **_options)
+		_descriptor = Z._exec_prepare (_executable, _arguments, **_options)
+		return Z.exec_0 (_descriptor)
 	
 	@_inject
 	def __Z__cmd (_scriptlet, *_arguments) :
-		return Z._exec_prepare (_scriptlet, _arguments)
+		return Z._exec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___exec_prepare (_executable, _arguments) :
+	def __Z___exec_prepare (_executable, _arguments, _cd = None) :
 		_arguments_all = [_executable]
 		_arguments_all.extend (_arguments)
 		_environment = { _name : Z.environment[_name] for _name in Z.environment }
-		return _executable, True, _arguments_all, _environment
+		return _executable, True, _arguments_all, _environment, _cd
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
 	def __Z__spawn_0 (_descriptor, _wait = True, _panic = True) :
-		_executable, _lookup, _arguments, _environment = _descriptor
-		if _lookup :
-			_delegate = PY.os.spawnvpe
-		else :
-			_delegate = PY.os.spawnve
+		# FIXME:  Handle lookup!
+		_executable, _lookup, _arguments, _environment, _cd = _descriptor
+		_process = PY.subprocess.Popen (
+				_arguments,
+				executable = _executable,
+				env = _environment,
+				cwd = _cd,
+				stdin = None,
+				stdout = None,
+				stderr = None,
+				close_fds = False,
+				shell = False,
+			)
 		if _wait :
-			_outcome = _delegate (PY.os.P_WAIT, _executable, _arguments, _environment)
+			_outcome = _process.wait ()
 			if _panic and _outcome != 0 :
 				Z.panic ((_panic, 0x7d3900c4), "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _outcome)
 		else :
-			_outcome = _delegate (PY.os.P_NOWAIT, _executable, _arguments, _environment)
-			if _panic and _outcome <= 0 :
-				Z.panic ((_panic, 0x56e47a07), "spawn `%s` `%s` failed with error (%d): %s", _arguments[0], _arguments[1:], _outcome, PY.os.strerror (_outcome))
+			_outcome = _process.pid
 		return _outcome
 	
 	@_inject
 	def __Z__exec_0 (_descriptor) :
-		_executable, _lookup, _arguments, _environment = _descriptor
+		_executable, _lookup, _arguments, _environment, _cd = _descriptor
+		if _cd is not None :
+			os.chdir (_cd)
 		if _lookup :
 			_delegate = PY.os.execvpe
 		else :
@@ -132,7 +140,8 @@ def __Z__create (Z = None, __import__ = __import__) :
 		_pipes.append ((None, None))
 		_processes = []
 		for _index in range (_count) :
-			_executable, _lookup, _arguments, _environment = _commands[_index]
+			# FIXME:  Handle lookup!
+			_executable, _lookup, _arguments, _environment, _cd = _commands[_index]
 			_pipe_previous = _pipes[_index]
 			_pipe_next = _pipes[_index + 1]
 			_pipe_stdin = _pipe_previous[0]
@@ -141,6 +150,7 @@ def __Z__create (Z = None, __import__ = __import__) :
 					_arguments,
 					executable = _executable,
 					env = _environment,
+					cwd = _cd,
 					stdin = _pipe_stdin,
 					stdout = _pipe_stdout,
 					stderr = None,
