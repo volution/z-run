@@ -281,8 +281,12 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 	_headerLine = strings.Trim (_headerLine, " ")
 	
 	if strings.HasPrefix (_headerLine, "{{}}") {
+		_headerLine = "<template>" + _headerLine[4:]
+	}
+	
+	if strings.HasPrefix (_headerLine, "<template>") {
 		
-		_headerLine = _headerLine[4:]
+		_headerLine = _headerLine[10:]
 		_headerLine = strings.Trim (_headerLine, " ")
 		
 		if _headerLine != "" {
@@ -290,6 +294,34 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		}
 		
 		_scriptlet.Interpreter = "<template>"
+		_scriptlet.InterpreterExecutable = ""
+		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterEnvironment = nil
+		
+	} else if strings.HasPrefix (_headerLine, "<print>") {
+		
+		_headerLine = _headerLine[7:]
+		_headerLine = strings.Trim (_headerLine, " ")
+		
+		if _headerLine != "" {
+			return errorf (0x6a068d74, "invalid header for `%s` (print with arguments)", _scriptlet.Label)
+		}
+		
+		_scriptlet.Interpreter = "<print>"
+		_scriptlet.InterpreterExecutable = ""
+		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterEnvironment = nil
+		
+	} else if strings.HasPrefix (_headerLine, "<menu>") {
+		
+		_headerLine = _headerLine[6:]
+		_headerLine = strings.Trim (_headerLine, " ")
+		
+		if _headerLine != "" {
+			return errorf (0xf542516e, "invalid header for `%s` (menu with arguments)", _scriptlet.Label)
+		}
+		
+		_scriptlet.Interpreter = "<menu>"
 		_scriptlet.InterpreterExecutable = ""
 		_scriptlet.InterpreterArguments = nil
 		_scriptlet.InterpreterEnvironment = nil

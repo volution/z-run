@@ -1,6 +1,23 @@
 #!/dev/null
 
 
+<< interpreters / print
+	#! <print>
+	hello from print!
+!!
+
+<< interpreters / template
+	#! <template>
+	{{ "hello from template!" }}
+!!
+
+<< interpreters / menu
+	#! <menu>
+	menu-item-1
+	menu-item-2
+!!
+
+
 << interpreters / python
 	#! <python*>
 	sys.stdout.write ("hello from Python!\n")
