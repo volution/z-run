@@ -21,9 +21,10 @@ def __Z__create (Z = None, __import__ = __import__) :
 	PY.errno = __import__ ("errno")
 	PY.subprocess = __import__ ("subprocess")
 	PY.time = __import__ ("time")
-	PY.path = __import__ ("os.path")
 	PY.stat = __import__ ("stat")
 	PY.re = __import__ ("re")
+	
+	PY.path = PY.os.path
 	
 	if PY.sys.version_info[0] > 2 :
 		PY.basestring = str
@@ -58,14 +59,14 @@ def __Z__create (Z = None, __import__ = __import__) :
 		return Z._zexec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___zexec_prepare (_scriptlet, _arguments, _cd = None) :
+	def __Z___zexec_prepare (_scriptlet, _arguments, _chdir = None) :
 		_executable = Z.executable
 		if not _scriptlet.startswith ("::") :
 			Z.panic (0xbd1641c7, "invalid scriptlet: `%s`", _scriptlet)
 		_arguments_all = ["[z-run]", _scriptlet]
 		_arguments_all.extend (_arguments)
 		_environment = { _name : Z.environment[_name] for _name in Z.environment }
-		return _executable, False, _arguments_all, _environment, _cd
+		return _executable, False, _arguments_all, _environment, _chdir
 	
 	## --------------------------------------------------------------------------------
 	
@@ -84,23 +85,23 @@ def __Z__create (Z = None, __import__ = __import__) :
 		return Z._exec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___exec_prepare (_executable, _arguments, _cd = None) :
+	def __Z___exec_prepare (_executable, _arguments, _chdir = None) :
 		_arguments_all = [_executable]
 		_arguments_all.extend (_arguments)
 		_environment = { _name : Z.environment[_name] for _name in Z.environment }
-		return _executable, True, _arguments_all, _environment, _cd
+		return _executable, True, _arguments_all, _environment, _chdir
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
 	def __Z__spawn_0 (_descriptor, _wait = True, _panic = True) :
 		# FIXME:  Handle lookup!
-		_executable, _lookup, _arguments, _environment, _cd = _descriptor
+		_executable, _lookup, _arguments, _environment, _chdir = _descriptor
 		_process = PY.subprocess.Popen (
 				_arguments,
 				executable = _executable,
 				env = _environment,
-				cwd = _cd,
+				cwd = _chdir,
 				stdin = None,
 				stdout = None,
 				stderr = None,
@@ -117,9 +118,9 @@ def __Z__create (Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__exec_0 (_descriptor) :
-		_executable, _lookup, _arguments, _environment, _cd = _descriptor
-		if _cd is not None :
-			os.chdir (_cd)
+		_executable, _lookup, _arguments, _environment, _chdir = _descriptor
+		if _chdir is not None :
+			PY.os.chdir (_chdir)
 		if _lookup :
 			_delegate = PY.os.execvpe
 		else :
@@ -141,7 +142,7 @@ def __Z__create (Z = None, __import__ = __import__) :
 		_processes = []
 		for _index in range (_count) :
 			# FIXME:  Handle lookup!
-			_executable, _lookup, _arguments, _environment, _cd = _commands[_index]
+			_executable, _lookup, _arguments, _environment, _chdir = _commands[_index]
 			_pipe_previous = _pipes[_index]
 			_pipe_next = _pipes[_index + 1]
 			_pipe_stdin = _pipe_previous[0]
@@ -150,7 +151,7 @@ def __Z__create (Z = None, __import__ = __import__) :
 					_arguments,
 					executable = _executable,
 					env = _environment,
-					cwd = _cd,
+					cwd = _chdir,
 					stdin = _pipe_stdin,
 					stdout = _pipe_stdout,
 					stderr = None,
@@ -297,16 +298,16 @@ def __Z__create (Z = None, __import__ = __import__) :
 	@_inject
 	def __Z__path (_path, _absolute = False, _canonical = False, _relative = None) :
 		if not isinstance (_path, PY.basestring) and not isinstance (_path, bytes) :
-			_path = PY.os.path.join (*_path)
-		_path = PY.os.path.normpath (_path)
+			_path = PY.path.join (*_path)
+		_path = PY.path.normpath (_path)
 		if _path.startswith ("//") :
 			_path = "/" + _path.lstrip ("/")
 		if _absolute :
-			_path = PY.os.path.abspath (_path)
+			_path = PY.path.abspath (_path)
 		if _canonical :
-			_path = PY.os.path.realpath (_path)
+			_path = PY.path.realpath (_path)
 		if _relative is not None :
-			_path = PY.os.path.relpath (_relative)
+			_path = PY.path.relpath (_relative)
 		return _path
 	
 	## --------------------------------------------------------------------------------
@@ -409,6 +410,12 @@ def __Z__create (Z = None, __import__ = __import__) :
 			PY.os.makedirs (_path, _mode, True)
 		else :
 			PY.os.mkdir (_path, _mode)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __Z__chdir (_path) :
+		PY.os.chdir (_path)
 	
 	## --------------------------------------------------------------------------------
 	
