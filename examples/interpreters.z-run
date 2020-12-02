@@ -20,19 +20,45 @@
 
 << interpreters / python
 	#! <python*>
-	sys.stdout.write ("hello from Python!\n")
+	print ("hello from Python!")
 !!
 
 << interpreters / python2
 	#! <python2*>
-	sys.stdout.write ("hello from Python 2!\n")
+	print ("hello from Python 2!")
 !!
 
 << interpreters / python3
 	#! <python3*>
-	sys.stdout.write ("hello from Python 3!\n")
+	print ("hello from Python 3!")
 !!
 
+<< interpreters / lua
+	#! <lua>
+	print ("hello from Lua!")
+!!
+
+<< interpreters / node
+	#! <lua>
+	print ("hello from NodeJS!")
+!!
+
+<< interpreters / ruby
+	#! <ruby>
+	print "hello from Ruby!"
+!!
+
+
+<< interpreters / awk
+	#! <awk>
+	BEGIN { print "hello from awk!" }
+!!
+
+<< interpreters / make
+	#! <make>
+	hello :
+		echo "hello from make!"
+!!
 
 << interpreters / jq
 	#! <jq> --null-input --raw-output
@@ -41,7 +67,7 @@
 
 
 << interpreters / base64
-	#! base64
-	hello from base64
+	#! base64 -d
+	aGVsbG8gZnJvbSBiYXNlNjQK
 !!
 

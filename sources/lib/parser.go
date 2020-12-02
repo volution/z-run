@@ -351,7 +351,22 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 					_executable = _executable[0 : len (_executable) - 1]
 				case "bash", "python", "python2", "python3" :
 					// NOP
-				case "jq", "ninja" :
+				case "lua", "node", "perl", "ruby" :
+					// NOP
+				case "awk" :
+					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
+					_arguments = append (_arguments, "-f")
+				case "sed", "grep" :
+					// FIXME:  Make it so that it doesn't accept other arguments!
+					_arguments = append (_arguments, "-E", "-f")
+				case "jq" :
+					// FIXME:  Make it so that it doesn't accept other arguments!
+					_arguments = append (_arguments, "-f")
+				case "make" :
+					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
+					_arguments = append (_arguments, "-s", "-r", "-R", "-f")
+				case "ninja" :
+					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
 					_arguments = append (_arguments, "-f")
 				default :
 					return errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptlet.Label)
