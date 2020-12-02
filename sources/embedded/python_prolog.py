@@ -403,16 +403,16 @@ def __Z__create (Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	class Z_environment :
-		__str__ = PY.os.environ.__str__
-		__repr__ = PY.os.environ.__repr__
-		__getattr__ = PY.os.environ.__getitem__
-		__setattr__ = PY.os.environ.__setitem__
-		__len__ = PY.os.environ.__len__
-		__getitem__ = PY.os.environ.__getitem__
-		__setitem__ = PY.os.environ.__setitem__
-		__delitem__ = PY.os.environ.__delitem__
-		__contains__ = PY.os.environ.__contains__
-		__iter__ = PY.os.environ.__iter__
+		def __str__ (self) : PY.os.environ.__repr__ ()
+		def __repr__ (self) : PY.os.environ.__repr__ ()
+		def __getattr__ (self, _k) : PY.os.environ.__getitem__ (_k)
+		def __setattr__ (self, _k, _v) : PY.os.environ.__setitem__ (_k, _v)
+		def __len__ (self) : PY.os.environ.__len__ ()
+		def __getitem__ (self, _k) : PY.os.environ.__getitem__ (_k)
+		def __setitem__ (self, _k, _v) : PY.os.environ.__setitem__ (_k, _v)
+		def __delitem__ (self, _k) : PY.os.environ.__delitem__ (_k)
+		def __contains__ (self, _k) : PY.os.environ.__contains__ (_k)
+		def __iter__ (self) : PY.os.environ.__iter__ ()
 	
 	## --------------------------------------------------------------------------------
 	
