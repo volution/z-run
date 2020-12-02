@@ -351,8 +351,10 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 					_executable = _executable[0 : len (_executable) - 1]
 				case "bash", "python", "python2", "python3" :
 					// NOP
-				case "lua", "node", "perl", "ruby" :
+				case "lua", "node", "perl", "ruby", "php", "php5", "php7", "php8" :
 					// NOP
+				case "tcl" :
+					_executable = "tclsh"
 				case "awk" :
 					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
 					_arguments = append (_arguments, "-f")

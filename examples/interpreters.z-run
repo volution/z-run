@@ -48,6 +48,16 @@
 	print "hello from Ruby!"
 !!
 
+<< interpreters / php
+	#! <php>
+	<?php print ("hello from PHP!") ?>
+!!
+
+<< interpreters / tcl
+	#! <tcl>
+	puts "hello from TCL!"
+!!
+
 
 << interpreters / awk
 	#! <awk>
