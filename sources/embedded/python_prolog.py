@@ -59,13 +59,16 @@ def __Z__create (Z = None, __import__ = __import__) :
 		return Z._zexec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___zexec_prepare (_scriptlet, _arguments, _chdir = None) :
+	def __Z___zexec_prepare (_scriptlet, _arguments, _env = None, _chdir = None) :
 		_executable = Z.executable
 		if not _scriptlet.startswith ("::") :
 			Z.panic (0xbd1641c7, "invalid scriptlet: `%s`", _scriptlet)
 		_arguments_all = ["[z-run]", _scriptlet]
 		_arguments_all.extend (_arguments)
-		_environment = { _name : Z.environment[_name] for _name in Z.environment }
+		if _env is not None :
+			_environment = _env
+		else :
+			_environment = { _name : Z.environment[_name] for _name in Z.environment }
 		return _executable, False, _arguments_all, _environment, _chdir
 	
 	## --------------------------------------------------------------------------------
@@ -81,14 +84,17 @@ def __Z__create (Z = None, __import__ = __import__) :
 		return Z.exec_0 (_descriptor)
 	
 	@_inject
-	def __Z__cmd (_scriptlet, *_arguments) :
+	def __Z__cmd (_scriptlet, *_arguments, **_options) :
 		return Z._exec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___exec_prepare (_executable, _arguments, _chdir = None) :
+	def __Z___exec_prepare (_executable, _arguments, _env = None, _chdir = None) :
 		_arguments_all = [_executable]
 		_arguments_all.extend (_arguments)
-		_environment = { _name : Z.environment[_name] for _name in Z.environment }
+		if _env is not None :
+			_environment = _env
+		else :
+			_environment = { _name : Z.environment[_name] for _name in Z.environment }
 		return _executable, True, _arguments_all, _environment, _chdir
 	
 	## --------------------------------------------------------------------------------
