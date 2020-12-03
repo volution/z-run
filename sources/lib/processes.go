@@ -222,6 +222,10 @@ func processExecuteGetStdout (_command *exec.Cmd) (int, []byte, *Error) {
 	
 	_waitError := _command.Run ()
 	
+	for _, _descriptor := range _command.ExtraFiles {
+		_descriptor.Close ()
+	}
+	
 	if _waitError != nil {
 		if _command.ProcessState.Exited () {
 			if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
