@@ -12,4 +12,5 @@
 && _/comments.z-run
 && _/ssh.z-run
 && _/python.z-run
+&& _/bash.z-run
 

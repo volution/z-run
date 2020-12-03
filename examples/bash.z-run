@@ -1,0 +1,39 @@
+#!/dev/null
+
+
+<< bash / test / delegate
+	#! <bash+>
+	Z_zspawn ':: bash / test / delegate / 1'
+	Z_zexec ':: bash / test / delegate / 2'
+	Z_panic 0x9ff63cb7 'unreachable!'
+!!
+
+<< bash / test / delegate / 1
+	#! <bash+>
+	Z_log_notice 0x1da553b9 'delegate 1!'
+!!
+
+<< bash / test / delegate / 2
+	#! <bash+>
+	Z_log_notice 0x40633a0f 'delegate 2!'
+!!
+
+
+<< bash / test / log
+	#! <bash+>
+	Z_log_error 0x853924c2 'this is an error: %d' 5
+	Z_log_warning 0xffd822c5 'this is a warning: %d' 4
+	Z_log_notice 0xffd822c5 'this is a notice: %d' 3
+	Z_log_debug 0xffd822c5 'this is a debug: %d' 2
+!!
+
+<< bash / test / panic
+	#! <bash+>
+	Z_panic 0x938694ca 'testing panic!'
+!!
+
+<< bash / test / enforce
+	#! <bash+>
+	Z_enforce 0x3da4d4bc '' test -d /etc
+	Z_enforce 0x9ed48dc4 '' test -f /etc/hosts
+!!
