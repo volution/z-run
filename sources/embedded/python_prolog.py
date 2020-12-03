@@ -225,6 +225,14 @@ def __Z__create (Z = None, __import__ = __import__) :
 		Z._log_write ('dd', _code, _message, _arguments)
 	
 	@_inject
+	def __Z__log_cut (_important = True) :
+		if not Z.log_notice_enabled : return
+		if _important :
+			Z.stderr.write (("\n[z-run:%08d] [%s]  " % (Z.pid, "--")) + ("-" * 60) + "\n\n")
+		else :
+			Z.stderr.write (("[z-run:%08d] [%s]" % (Z.pid, "--")) + "\n")
+	
+	@_inject
 	def __Z___log_write (_slug, _code, _message, _arguments) :
 		Z.stderr.write (("[z-run:%08d] [%s] [%08x]  " % (Z.pid, _slug, _code)) + (_message % _arguments) + "\n")
 	
@@ -264,8 +272,8 @@ def __Z__create (Z = None, __import__ = __import__) :
 			assert _min is not None or _max is not None, "[91787dc8]"
 			assert _min is None or _min >= 0, "[19c3b0ad]"
 			assert _max is None or _max >= 0, "[236d9471]"
-			assert _min is None or _min < _max, "[e43f6498]"
-			assert _max is None or _min < _max, "[0662ca21]"
+			assert _min is None or _max is None or _min < _max, "[e43f6498]"
+			assert _max is None or _max is None or _min < _max, "[0662ca21]"
 		_actual = len (Z.arguments)
 		if _exact is not None and _actual != _exact :
 			if _exact == 0 :
@@ -279,7 +287,7 @@ def __Z__create (Z = None, __import__ = __import__) :
 		if _exact is not None :
 			return tuple (Z.arguments)
 		else :
-			return tuple (Z.arguments[:_min]) + tuple (list (Z.arguments[_min:]))
+			return tuple (Z.arguments[:_min]) + (list (Z.arguments[_min:]),)
 	
 	## --------------------------------------------------------------------------------
 	
