@@ -11,23 +11,23 @@
 !!
 
 << python / test / prolog / 0
-	#! <python*>
+	#! <python+>
 	Z.expect_no_arguments ()
 !!
 
 << python / test / prolog / 2
-	#! <python2*>
+	#! <python2+>
 	Z.expect_no_arguments ()
 !!
 
 << python / test / prolog / 3
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 !!
 
 
 << python / test / log
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.log_debug_enabled = True
 	Z.log_error (0xd517385b, "this is an error message")
@@ -37,39 +37,39 @@
 !!
 
 << python / test / panic
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.panic (0x943040e7, "panic")
 !!
 
 << python / test / zspawn
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.zspawn (":: true")
 	Z.zspawn (":: false", _panic = False)
 !!
 
 << python / test / zexec
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.zexec (":: true")
 !!
 
 << python / test / spawn
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.spawn ("true")
 	Z.spawn ("false", _panic = False)
 !!
 
 << python / test / exec
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.exec ("true")
 !!
 
 << python / test / pipeline
-	#! <python3*>
+	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.pipeline ([
 			Z.cmd ("true"),
@@ -81,7 +81,7 @@
 !!
 
 << python / test / paths
-	#! <python3*>
+	#! <python3+>
 	assert Z.path ("/etc") == "/etc", "[c86740bc]"
 	assert Z.path ("//etc/.") == "/etc", "[1caa1de9]"
 	assert Z.path (("/etc", "hosts")) == "/etc/hosts", "[b1c36167]"
@@ -90,7 +90,7 @@
 !!
 
 << python / test / files / stat
-	#! <python3*>
+	#! <python3+>
 	Z.exists ("/etc", _panic = 0x2ebc156a)
 	Z.not_exists ("/__none__", _panic = 0x6412700c)
 	Z.is_folder ("/etc", _panic = 0x6f67d170)
@@ -111,7 +111,7 @@
 !!
 
 << python / test / environment
-	#! <python3*>
+	#! <python3+>
 	for _name in sorted (Z.environment.__iter__ ()) :
 		print ("%s == %s" % (_name, Z.environment[_name]))
 	print (Z.environment.PATH)
@@ -122,7 +122,7 @@
 !!
 
 << python / test / sleep
-	#! <python3*>
+	#! <python3+>
 	Z.sleep (6)
 !!
 

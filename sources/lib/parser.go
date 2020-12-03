@@ -259,7 +259,7 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 			// NOP
 		case "<exec>", "<print>", "<template>", "<menu>" :
 			return nil
-		case "<bash*>", "<python*>", "<python2*>", "<python3*>" :
+		case "<bash+>", "<python+>", "<python2+>", "<python3+>" :
 			return nil
 		default :
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
@@ -268,7 +268,7 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 	_headerLine := ""
 	
 	if ! strings.HasPrefix (_scriptlet.Body, "#!") {
-		_headerLine = "<bash*>"
+		_headerLine = "<bash+>"
 	} else {
 		_headerLimit := strings.IndexByte (_scriptlet.Body, '\n')
 		if _headerLimit < 0 {
@@ -346,7 +346,7 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
 			_executable = _executable[1 : len (_executable) - 1]
 			switch _executable {
-				case "bash*", "python*", "python2*", "python3*" :
+				case "bash+", "python+", "python2+", "python3+" :
 					_interpreter = "<" + _executable + ">"
 					_executable = _executable[0 : len (_executable) - 1]
 				case "bash", "python", "python2", "python3" :

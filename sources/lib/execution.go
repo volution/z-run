@@ -29,7 +29,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	
 	switch _interpreter {
 		
-		case "<exec>", "<bash*>", "<python*>", "<python2*>", "<python3*>" :
+		case "<exec>", "<bash+>", "<python+>", "<python2+>", "<python3+>" :
 			_interpreterAllowsArguments = true
 		
 		case "<print>" :
@@ -88,7 +88,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 				)
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
-		case "<bash*>" :
+		case "<bash+>" :
 			_interpreterExecutable = _scriptlet.InterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
@@ -111,7 +111,7 @@ exec %d<&-
 						))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
-		case "<python*>", "<python2*>", "<python3*>" :
+		case "<python+>", "<python2+>", "<python3+>" :
 			_interpreterExecutable = _scriptlet.InterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
