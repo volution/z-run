@@ -284,6 +284,7 @@
 	
 	test "${#}" -eq 0
 	
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./sources/lib/embedded_bash_prolog.go zrun embeddedBashProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python_prolog.py ./sources/lib/embedded_python_prolog.go zrun embeddedPythonProlog string
 !!
 

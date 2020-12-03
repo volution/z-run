@@ -95,20 +95,8 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 					fmt.Sprintf ("[z-run:bash] [%s]", _scriptlet.Label),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
-			_interpreterScriptBuffer.WriteString (
-					fmt.Sprintf (
-`#!/dev/null
-set -e -E -u -o pipefail -o noclobber -o noglob +o braceexpand || exit -- 1
-trap 'printf -- "[ee] failed: %%s\n" "${BASH_COMMAND}" >&2' ERR || exit -- 1
-BASH_ARGV0='z-run'
-ZRUN=( %s )
-X_RUN=( "${ZRUN[@]}" )
-exec %d<&-
-
-`,
-							`'` + strings.ReplaceAll (_context.selfExecutable, `'`, `'\''`) + `'`,
-							_interpreterScriptInput,
-						))
+			_interpreterScriptBuffer.WriteString (embeddedBashProlog)
+//!			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<python+>", "<python2+>", "<python3+>" :
