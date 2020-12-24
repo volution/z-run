@@ -241,7 +241,7 @@
 << workspace / initialize / outputs
 	test "${#}" -eq 0
 	if test ! -d ./.outputs ; then
-		_outputs_store="${TMPDIR:-/tmp}/go--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+		_outputs_store="${TMPDIR:-/tmp}/z-run--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
 		mkdir -- "${_outputs_store}"
 		_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
 		ln -s -f -T -- "${_outputs_store}" ./.outputs
