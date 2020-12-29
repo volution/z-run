@@ -96,7 +96,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedBashProlog)
-//!			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
+			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<python+>", "<python2+>", "<python3+>" :
@@ -107,6 +107,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedPythonProlog)
+			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("Z.py.os.close (%d)\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<print>" :
