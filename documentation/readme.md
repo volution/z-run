@@ -6,8 +6,6 @@
 
 ## About
 
-This is a lightweight Go-based command-line tool that simplifies the usage of script snippets collections.
-
 (TO-BE-CONTINUED...)
 
 
