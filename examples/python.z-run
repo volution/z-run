@@ -115,6 +115,7 @@
 	for _name in sorted (Z.environment.__iter__ ()) :
 		print ("%s == %s" % (_name, Z.environment[_name]))
 	print (Z.environment.PATH)
+	print (Z.environment_or_none.NEW)
 	Z.environment.PATH = "/dev/null/1"
 	Z.environment.NEW = "/dev/null/2"
 	print (os.environ["PATH"])

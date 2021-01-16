@@ -445,11 +445,24 @@ def __Z__create (Z = None, __import__ = __import__) :
 		def __contains__ (self, _k) : return PY.os.environ.__contains__ (_k)
 		def __iter__ (self) : return PY.os.environ.__iter__ ()
 	
+	class Z_environment_or_none :
+		def __str__ (self) : return PY.os.environ.__repr__ ()
+		def __repr__ (self) : return PY.os.environ.__repr__ ()
+		def __getattr__ (self, _k) : return PY.os.environ.__getitem__ (_k) if PY.os.environ.__contains__ (_k) else None
+		def __setattr__ (self, _k, _v) : return PY.os.environ.__setitem__ (_k, _v)
+		def __len__ (self) : return PY.os.environ.__len__ ()
+		def __getitem__ (self, _k) : return PY.os.environ.__getitem__ (_k) if PY.os.environ.__contains__ (_k) else None
+		def __setitem__ (self, _k, _v) : return PY.os.environ.__setitem__ (_k, _v)
+		def __delitem__ (self, _k) : return PY.os.environ.__delitem__ (_k)
+		def __contains__ (self, _k) : return PY.os.environ.__contains__ (_k)
+		def __iter__ (self) : return PY.os.environ.__iter__ ()
+	
 	## --------------------------------------------------------------------------------
 	
 	Z.pid = PY.os.getpid ()
 	Z.arguments = tuple (PY.sys.argv[1:])
 	Z.environment = Z_environment ()
+	Z.environment_or_none = Z_environment_or_none ()
 	
 	Z.executable = Z.environment.ZRUN_EXECUTABLE
 	Z.workspace = Z.environment.ZRUN_WORKSPACE
