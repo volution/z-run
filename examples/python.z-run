@@ -127,3 +127,8 @@
 	Z.sleep (6)
 !!
 
+<< python / test / touch
+	#! <python3+>
+	Z.touch ("/tmp/x")
+!!
+

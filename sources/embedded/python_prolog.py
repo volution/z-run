@@ -482,6 +482,23 @@ def __Z__create (Z = None, __import__ = __import__) :
 		else :
 			PY.os.mkdir (_path, _mode)
 	
+	@_inject
+	def __Z__touch (_path, _mode = None, _create = True, _exclusive = None) :
+		if _mode is None : _mode = 0o666
+		_flags = PY.os.O_WRONLY | PY.os.O_NOCTTY
+		if _create :
+			_flags |= PY.os.O_CREAT
+		if _exclusive :
+			assert _create, "[89a753b5]"
+			_flags |= PY.os.O_EXCL
+		_file = PY.os.open (_path, _flags, _mode)
+		PY.os.utime (_file, None)
+		PY.os.close (_file)
+	
+	@_inject
+	def __Z__symlink (_source, _target) :
+		PY.os.symlink (_source, _target)
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
