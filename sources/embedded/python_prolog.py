@@ -348,7 +348,7 @@ def __Z__create (Z = None, __import__ = __import__) :
 		if _canonical :
 			_path = PY.path.realpath (_path)
 		if _relative is not None :
-			_path = PY.path.relpath (_relative)
+			_path = PY.path.relpath (_path, _relative)
 		return _path
 	
 	@_inject
