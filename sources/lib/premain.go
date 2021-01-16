@@ -23,7 +23,13 @@ func PreMain () () {
 	
 	if (len (os.Args) == 2) {
 		if os.Args[1] == "--version" {
-			fmt.Fprintf (os.Stdout, "| %s | %s-%s, %s, %s-%s-%s | %s, md5-%s, git-%s | %s |", "z-run", BUILD_VERSION, BUILD_NUMBER, BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER, BUILD_TIMESTAMP, BUILD_SOURCES_MD5, BUILD_GIT_HASH, os.Args[0])
+			fmt.Fprintf (os.Stdout, "* version       : %s\n", BUILD_VERSION)
+			fmt.Fprintf (os.Stdout, "* executable    : %s\n", os.Args[0])
+			fmt.Fprintf (os.Stdout, "* build target  : %s, %s-%s, %s\n", BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER)
+			fmt.Fprintf (os.Stdout, "* build number  : %s, %s\n", BUILD_NUMBER, BUILD_TIMESTAMP)
+			fmt.Fprintf (os.Stdout, "* sources md5   : %s\n", BUILD_SOURCES_MD5)
+			fmt.Fprintf (os.Stdout, "* sources git   : %s\n", BUILD_GIT_HASH)
+			fmt.Fprintf (os.Stdout, "* code & issues : %s\n", "https://github.com/cipriancraciun/z-run")
 			os.Exit (0)
 			panic (0x66203ba4)
 		}
