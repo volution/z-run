@@ -195,6 +195,19 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					return errorf (0x12cdad05, "unexpected argument `--exec` (only first)")
 				}
 				
+			} else if _argument == "--untainted" {
+				if _index == 0 {
+					_librarySourcePath = ""
+					_libraryCachePath = ""
+					_workspace = ""
+					_cacheRoot = ""
+					// FIXME:  Restore original `TERM` that might have been overriden by `ZRUN_TERM`!
+					// _terminal = ""
+					_top = true
+				} else {
+					return errorf (0x7ce36db9, "unexpected argument `--untainted` (only first)")
+				}
+				
 			} else if _argument == "--invoke" {
 				if _index == 0 {
 					_invokeMode = true
