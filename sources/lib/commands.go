@@ -195,7 +195,7 @@ func doExportLibraryRpc (_library LibraryStore, _url string, _context *Context) 
 
 
 
-func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (*Error) {
+func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool, _context *Context) (*Error) {
 	
 	if _scriptlet.Interpreter == "<template>" {
 		return executeTemplate (_library, _scriptlet, _context, os.Stdout)
@@ -249,11 +249,42 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *C
 		return errorf (0x9d640d1e, "invalid state")
 	}
 	
-	if _error := syscall.Exec (_command.Path, _command.Args, _command.Env); _error != nil {
-		_closeDescriptors ()
-		return errorw (0x99b54af1, _error)
+	if ! _fork {
+		
+		if _error := syscall.Exec (_command.Path, _command.Args, _command.Env); _error != nil {
+			_closeDescriptors ()
+			return errorw (0x99b54af1, _error)
+		} else {
+			panic (0xb6dfe17e)
+		}
+		
 	} else {
-		panic (0xb6dfe17e)
+		
+		for _, _descriptor := range _descriptors {
+			_command.ExtraFiles = append (_command.ExtraFiles, os.NewFile (uintptr (_descriptor), ""))
+		}
+		
+		_command.Stdin = os.Stdin
+		_command.Stdout = os.Stdout
+		_command.Stderr = os.Stderr
+		
+		_waitError := _command.Run ()
+		
+		_closeDescriptors ()
+		
+		if _waitError != nil {
+			if _command.ProcessState.Exited () {
+				if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
+					return errorf (0xa10d5811, "spawn `%s` failed with status `%d`", _scriptlet.Label, _exitCode)
+				} else {
+					return errorf (0x9cfebeaf, "invalid state")
+				}
+			} else {
+				return errorw (0x07b37e04, _waitError)
+			}
+		} else {
+			return nil
+		}
 	}
 }
 
@@ -426,7 +457,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 
 
 func doHandleExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
-	if _error := executeScriptlet (_library, _scriptlet, _context); _error == nil {
+	if _error := executeScriptlet (_library, _scriptlet, false, _context); _error == nil {
 		return true, nil
 	} else {
 		return false, _error
