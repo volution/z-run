@@ -4,6 +4,7 @@ package zrun
 
 
 import "bufio"
+import "fmt"
 import "io"
 import "os"
 import "os/exec"
@@ -13,6 +14,7 @@ import "sync"
 
 
 import isatty "github.com/mattn/go-isatty"
+import "github.com/eiannone/keyboard"
 
 
 
@@ -226,5 +228,67 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 	}
 	
 	return nil
+}
+
+
+
+
+func menuQuit (_context *Context) (bool, *Error) {
+	
+	if _outputs, _error := menuSelect ([]string { "quit?" }, _context); _error == nil {
+		if len (_outputs) == 0 {
+			return false, nil
+		} else if (len (_outputs) == 1) && (_outputs[0] == "quit?") {
+			return true, nil
+		} else {
+			return false, errorf (0x272fb981, "invalid outputs")
+		}
+	} else {
+		return false, _error
+	}
+}
+
+
+
+
+func menuPause (_context *Context) (bool, *Error) {
+	
+	// FIMXE:  Find a more proper implementation for this!
+	
+	_term := os.Getenv ("TERM")
+	if (_term == "dumb") || (_term == "") {
+		return false, nil
+	}
+	
+	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+		return false, nil
+	}
+	
+	fmt.Fprintf (os.Stderr, "\n---- << press return to continue... >>")
+	os.Stderr.Sync ()
+	
+	_loop : for {
+		
+		var _key keyboard.Key
+		if _, _key_0, _error := keyboard.GetSingleKey (); _error == nil {
+			_key = _key_0
+		} else {
+			fmt.Fprintf (os.Stderr, "\n\n")
+			os.Stderr.Sync ()
+			return false, errorw (0x933cd3f2, _error)
+		}
+		
+		switch _key {
+			case keyboard.KeyEnter :
+				break _loop;
+			case keyboard.KeyEsc :
+				break _loop;
+		}
+	}
+	
+	fmt.Fprintf (os.Stderr, "\r------------------------------------------------------------------------------\n\n")
+	os.Stderr.Sync ()
+	
+	return false, nil
 }
 
