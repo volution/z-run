@@ -585,7 +585,7 @@ func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler,
 							if _handled {
 								return true, nil
 							} else {
-								return false, nil
+								continue
 							}
 						} else {
 							return false, _error
