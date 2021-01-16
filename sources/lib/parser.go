@@ -898,7 +898,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							} else {
 								return errorw (0x79069c08, _error)
 							}
-							_parseContext.scriptletContext.ExecutablePaths = append (_parseContext.scriptletContext.ExecutablePaths, _path)
+							if !_disabled {
+								_parseContext.scriptletContext.ExecutablePaths = append (_parseContext.scriptletContext.ExecutablePaths, _path)
+							}
 							
 						case "environment", "env", "environment-path", "env-path" :
 							
@@ -914,7 +916,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _name == "" {
 								return errorf (0x6bce31bb, "invalid syntax (%d):  empty statement environment key | %s", _lineIndex, _line)
 							}
-							if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists {
+							if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists && !_disabled {
 								return errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
 							}
 							if (_kind == "environment-path") || (_kind == "env-path") {
@@ -927,7 +929,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 									_value = _path_0
 								}
 							}
-							_parseContext.scriptletContext.Environment[_name] = _value
+							if !_disabled {
+								_parseContext.scriptletContext.Environment[_name] = _value
+							}
 							
 						case "environment-exclude", "env-exclude" :
 							if _descriptor == "" {
@@ -938,10 +942,12 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								if _name == "" {
 									continue
 								}
-								if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists {
+								if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists && !_disabled {
 									return errorf (0x0ed5990f, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
 								}
-								_parseContext.scriptletContext.Environment[_name] = ""
+								if !_disabled {
+									_parseContext.scriptletContext.Environment[_name] = ""
+								}
 							}
 					}
 					
