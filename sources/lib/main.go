@@ -45,6 +45,7 @@ type SshContext struct {
 }
 
 type InvokeContext struct {
+	Version string `json:"version,omitempty"`
 	Library string `json:"library,omitempty"`
 	Scriptlet string `json:"scriptlet,omitempty"`
 	Arguments []string `json:"arguments,omitempty"`
@@ -374,6 +375,9 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			}
 		} else {
 			return errorw (0x7c9f1ada, _error)
+		}
+		if _context.Version != BUILD_VERSION {
+			return errorf (0xfe2f9709, "mismatched version, self `%s`, other `%s`", BUILD_VERSION, _context.Version)
 		}
 		_scriptlet = _context.Scriptlet
 		if ! strings.HasPrefix (_scriptlet, "::") {

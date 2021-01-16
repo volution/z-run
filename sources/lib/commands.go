@@ -366,6 +366,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	defer _rpc.ServeStop ()
 	
 	_invokeContext := & InvokeContext {
+			Version : BUILD_VERSION,
 			Library : "unix:" + _sshLibraryRemoteSocket,
 			Scriptlet : _scriptlet.Label,
 			Arguments : _context.cleanArguments,
