@@ -28,6 +28,14 @@ def __Z__create (Z = None, __import__ = __import__) :
 	
 	if PY.sys.version_info[0] > 2 :
 		PY.basestring = str
+		PY.str = str
+		PY.unicode = str
+		PY.bytes = bytes
+	else :
+		PY.basestring = basestring
+		PY.str = str
+		PY.unicode = unicode
+		PY.bytes = str
 	
 	Z.py = PY
 	
@@ -311,7 +319,7 @@ def __Z__create (Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__path (_path, _absolute = False, _canonical = False, _relative = None) :
-		if not isinstance (_path, PY.basestring) and not isinstance (_path, bytes) :
+		if not isinstance (_path, PY.basestring) and not isinstance (_path, PY.bytes) :
 			_path = PY.path.join (*_path)
 		_path = PY.path.normpath (_path)
 		if _path.startswith ("//") :
