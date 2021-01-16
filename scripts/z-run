@@ -112,10 +112,10 @@
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	
 	_build_target=development
-	_build_version="$( exec -- cat -- ./sources/embedded/.build/build-version.txt )"
-	_build_number="$( exec -- cat -- ./sources/embedded/.build/build-number.txt )"
-	_build_timestamp="$( exec -- cat -- ./sources/embedded/.build/build-timestamp.txt )"
-	_build_sources_md5="$( exec -- cat -- ./sources/embedded/.build/build-sources-md5.txt )"
+	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
+	_build_number="$( exec -- cat -- ./scripts/build/build-number.txt )"
+	_build_timestamp="$( exec -- cat -- ./scripts/build/build-timestamp.txt )"
+	_build_sources_md5="$( exec -- cat -- ./scripts/build/build-sources-md5.txt )"
 	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
 	
 	_tags=()
@@ -149,10 +149,10 @@
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	
 	_build_target=release
-	_build_version="$( exec -- cat -- ./sources/embedded/.build/build-version.txt )"
-	_build_number="$( exec -- cat -- ./sources/embedded/.build/build-number.txt )"
-	_build_timestamp="$( exec -- cat -- ./sources/embedded/.build/build-timestamp.txt )"
-	_build_sources_md5="$( exec -- cat -- ./sources/embedded/.build/build-sources-md5.txt )"
+	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
+	_build_number="$( exec -- cat -- ./scripts/build/build-number.txt )"
+	_build_timestamp="$( exec -- cat -- ./scripts/build/build-timestamp.txt )"
+	_build_sources_md5="$( exec -- cat -- ./scripts/build/build-sources-md5.txt )"
 	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
 	
 	_tags=(
@@ -347,7 +347,7 @@
 
 << workspace / sources / embedded / hash
 	
-	find ./sources/ -type f -not -path './sources/embedded/.build/build-*.txt' -print0 \
+	find ./sources/ -type f -print0 \
 	| xargs -0 -I {} -- md5sum -b -z -- {} \
 	| LC_ALL=C sort -z \
 	| md5sum -b \
@@ -355,18 +355,18 @@
 		>| ./.outputs/markers/build-sources-md5.tmp \
 	#
 	
-	if ! cmp -s -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/.build/build-sources-md5.txt ; then
+	if ! cmp -s -- ./.outputs/markers/build-sources-md5.tmp ./scripts/build/build-sources-md5.txt ; then
 		
-		_build_number="$( exec -- cat -- ./sources/embedded/.build/build-number.txt )"
+		_build_number="$( exec -- cat -- ./scripts/build/build-number.txt )"
 		_build_number="$(( _build_number + 1 ))"
 		_build_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
 		
-		printf -- '%d\n' "${_build_number}" >| ./sources/embedded/.build/build-number.tmp
-		mv -T -- ./sources/embedded/.build/build-number.tmp ./sources/embedded/.build/build-number.txt
-		printf -- '%s\n' "${_build_timestamp}" >| ./sources/embedded/.build/build-timestamp.tmp
-		mv -T -- ./sources/embedded/.build/build-timestamp.tmp ./sources/embedded/.build/build-timestamp.txt
+		printf -- '%d\n' "${_build_number}" >| ./scripts/build/build-number.tmp
+		mv -T -- ./scripts/build/build-number.tmp ./scripts/build/build-number.txt
+		printf -- '%s\n' "${_build_timestamp}" >| ./scripts/build/build-timestamp.tmp
+		mv -T -- ./scripts/build/build-timestamp.tmp ./scripts/build/build-timestamp.txt
 		
-		mv -T -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/.build/build-sources-md5.txt
+		mv -T -- ./.outputs/markers/build-sources-md5.tmp ./scripts/build/build-sources-md5.txt
 		
 	else
 		

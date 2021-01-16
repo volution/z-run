@@ -2,8 +2,6 @@
 .*
 !.gitignore
 
-!/sources/embedded/.build
-
 *~
 *#
 *.bak
