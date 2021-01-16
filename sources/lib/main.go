@@ -310,6 +310,9 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					case "export-library-rpc" :
 						_command = "export-library-rpc"
 					
+					case "export-library-url" :
+						_command = "export-library-url"
+					
 					case "export-fingerprint" :
 						_command = "export-fingerprint"
 				}
@@ -625,6 +628,16 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				return errorf (0xe7886d74, "export:  expected RPC url")
 			}
 			return doExportLibraryRpc (_library, _cleanArguments[0], _context)
+		
+		case "export-library-url" :
+			if _scriptlet != "" {
+				return errorf (0xff2905b6, "export:  unexpected scriptlet")
+			}
+			if len (_cleanArguments) != 0 {
+				return errorf (0x3cda6407, "export:  unexpected arguments")
+			}
+			fmt.Fprintln (os.Stdout, _library.Url ())
+			return nil
 		
 		case "export-fingerprint" :
 			if _scriptlet != "" {
