@@ -286,9 +286,10 @@ def __Z__create (Z = None, __import__ = __import__) :
 		return Z.expect_arguments (_exact = 0)
 	
 	@_inject
-	def __Z__expect_arguments (_exact = None, _min = None, _max = None) :
+	def __Z__expect_arguments (_exact = None, _min = None, _max = None, _rest = None) :
 		if _exact is not None :
 			assert _min is None and _max is None, "[6ace19bf]"
+			assert _rest is None, "[3465f981]"
 			assert _exact >= 0, "[bfdc6527]"
 		else :
 			assert _min is not None or _max is not None, "[91787dc8]"
@@ -296,6 +297,7 @@ def __Z__create (Z = None, __import__ = __import__) :
 			assert _max is None or _max >= 0, "[236d9471]"
 			assert _min is None or _max is None or _min < _max, "[e43f6498]"
 			assert _max is None or _max is None or _min < _max, "[0662ca21]"
+			assert _rest is None or _rest is True or _rest is False, "[f4353518]"
 		_actual = len (Z.arguments)
 		if _exact is not None and _actual != _exact :
 			if _exact == 0 :
@@ -309,7 +311,10 @@ def __Z__create (Z = None, __import__ = __import__) :
 		if _exact is not None :
 			return tuple (Z.arguments)
 		else :
-			return tuple (Z.arguments[:_min]) + (list (Z.arguments[_min:]),)
+			if _rest is None or _rest is True :
+				return tuple (Z.arguments[:_min]) + (list (Z.arguments[_min:]),)
+			else :
+				return tuple (Z.arguments)
 	
 	## --------------------------------------------------------------------------------
 	
