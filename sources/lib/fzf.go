@@ -72,16 +72,18 @@ func fzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 		_options.Sort = 1
 		_options.Multi = 0
 		
-		_options.Theme = fzf_tui.Default16
-		_options.Theme = nil
+		_options.Theme = fzf_tui.NoColorTheme ()
 		_options.Bold = false
 		_options.ClearOnExit = true
 		_options.Mouse = false
 		
 		// NOTE:  Replace `accept` with `accept-non-empty` action!
-		_actions := _options.Keymap[fzf_tui.CtrlM]
-		* ((*int) (unsafe.Pointer (&_actions[0]))) = 7
-		_options.Keymap[fzf_tui.DoubleClick] = _options.Keymap[fzf_tui.CtrlM]
+		for _key, _actions := range _options.Keymap {
+			if (_key.Type == fzf_tui.CtrlM) || (_key.Type == fzf_tui.DoubleClick) {
+				_action := &_actions[0]
+				* ((*int) (unsafe.Pointer (_action))) = 7
+			}
+		}
 		
 	} else {
 		
@@ -89,7 +91,7 @@ func fzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 		
 	}
 	
-	fzf.Run (_options, "z-run")
+	fzf.Run (_options, "z-run", "")
 	
 	panic (0x4716a580)
 }
