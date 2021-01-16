@@ -6,6 +6,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0 // indirect
 	github.com/colinmarc/cdb v0.0.0-20190223170904-60f317823f70
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/eiannone/keyboard v0.0.0-20200508000154-caf4b762e807
 	github.com/gdamore/tcell v1.4.0 // indirect
 	github.com/junegunn/fzf v0.0.0-20200912121432-c60ed1758315
 	github.com/kr/text v0.2.0 // indirect
