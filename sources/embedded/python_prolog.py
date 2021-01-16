@@ -332,6 +332,36 @@ def __Z__create (Z = None, __import__ = __import__) :
 			_path = PY.path.relpath (_relative)
 		return _path
 	
+	@_inject
+	def __Z__paths_append (_list, *_paths) :
+		if _list is None :
+			_list = []
+		else :
+			_list = [_path for _path in _list.split (":") if _path != ""]
+		for _path in _paths :
+			if ":" in _path :
+				Z.panic (0x1908e707, "invalid path `%s` (contains `:`)", _path)
+		_new = []
+		_new.extend (_list)
+		_new.extend (_paths)
+		_new = ":".join (_new)
+		return _new
+	
+	@_inject
+	def __Z__paths_prepend (_list, *_paths) :
+		if _list is None :
+			_list = []
+		else :
+			_list = [_path for _path in _list.split (":") if _path != ""]
+		for _path in _paths :
+			if ":" in _path :
+				Z.panic (0x1908e707, "invalid path `%s` (contains `:`)", _path)
+		_new = []
+		_new.extend (_paths)
+		_new.extend (_list)
+		_new = ":".join (_new)
+		return _new
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
