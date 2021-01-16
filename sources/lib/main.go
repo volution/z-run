@@ -288,6 +288,9 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					case "select-execute-scriptlet", "select-execute" :
 						_command = "select-execute-scriptlet"
 					
+					case "select-execute-scriptlet-loop", "select-execute-loop", "loop" :
+						_command = "select-execute-scriptlet-loop"
+					
 					case "select-export-scriptlet-label", "select-label", "select" :
 						_command = "select-export-scriptlet-label"
 					
@@ -560,6 +563,50 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				return doSelectHandleWithLabel (_library, _scriptlet, doHandleExecuteScriptlet, _context)
 			} else {
 				return doSelectHandle (_library, doHandleExecuteScriptlet, _context)
+			}
+		
+		case "select-execute-scriptlet-loop" :
+			if len (_cleanArguments) != 0 {
+				return errorf (0x2c6bb7ce, "select:  unexpected arguments")
+			}
+			for {
+				_handled := false
+				_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
+						if _error := executeScriptlet (_library, _scriptlet, true, _context); _error == nil {
+							_handled = true
+							return true, nil
+						} else {
+							return false, _error
+						}
+					}
+				if _scriptlet != "" {
+					if _error := doSelectHandleWithLabel (_library, _scriptlet, _handler, _context); _error != nil {
+						return _error
+					}
+				} else {
+					if _error := doSelectHandle (_library, _handler, _context); _error != nil {
+						return _error
+					}
+				}
+				_quit := false
+				if ! _handled {
+					if _quit_0, _error := menuQuit (_context); _error == nil {
+						_quit = _quit_0
+					} else {
+						return _error
+					}
+				} else {
+					if _quit_0, _error := menuPause (_context); _error == nil {
+						_quit = _quit_0
+					} else {
+						return _error
+					}
+				}
+				if _quit {
+					return nil
+				} else {
+					continue
+				}
 			}
 		
 		case "select-export-scriptlet-label" :
