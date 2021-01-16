@@ -3,6 +3,7 @@
 package zrun
 
 
+import "fmt"
 import "log"
 import "os"
 import "path/filepath"
@@ -18,6 +19,15 @@ import "unicode/utf8"
 
 
 func PreMain () () {
+	
+	
+	if (len (os.Args) == 2) {
+		if os.Args[1] == "--version" {
+			fmt.Fprintf (os.Stdout, "| %s | %s-%s, %s, %s-%s-%s | %s, md5-%s, git-%s | %s |", "z-run", BUILD_VERSION, BUILD_NUMBER, BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER, BUILD_TIMESTAMP, BUILD_SOURCES_MD5, BUILD_GIT_HASH, os.Args[0])
+			os.Exit (0)
+			panic (0x66203ba4)
+		}
+	}
 	
 	
 	log.SetFlags (0)

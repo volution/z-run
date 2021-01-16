@@ -106,33 +106,83 @@
 
 
 << go / build / main / debug
+	
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: workspace / sources / embedded / build'
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	
+	_build_target=development
+	_build_version="$( exec -- cat -- ./sources/embedded/.build/build-version.txt )"
+	_build_number="$( exec -- cat -- ./sources/embedded/.build/build-number.txt )"
+	_build_timestamp="$( exec -- cat -- ./sources/embedded/.build/build-timestamp.txt )"
+	_build_sources_md5="$( exec -- cat -- ./sources/embedded/.build/build-sources-md5.txt )"
+	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
+	
+	_tags=()
+	_ldflags=(
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_VERSION=${_build_version}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_NUMBER=${_build_number}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_TIMESTAMP=${_build_timestamp}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_SOURCES_MD5=${_build_sources_md5}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
+		)
+	
+	_tags="$( printf -- '%s,' "${_tags[@]}" )"
+	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
+	
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
 			-o "${_outputs}/z-run--debug" \
+			-tags "${_tags}" \
+			-ldflags "${_ldflags}" \
 			-- \
 			./cmd/z-run.go \
 	#
 !!
 
 << go / build / main / release
+	
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: workspace / sources / embedded / build'
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	
+	_build_target=release
+	_build_version="$( exec -- cat -- ./sources/embedded/.build/build-version.txt )"
+	_build_number="$( exec -- cat -- ./sources/embedded/.build/build-number.txt )"
+	_build_timestamp="$( exec -- cat -- ./sources/embedded/.build/build-timestamp.txt )"
+	_build_sources_md5="$( exec -- cat -- ./sources/embedded/.build/build-sources-md5.txt )"
+	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
+	
+	_tags=(
+			netgo
+		)
+	_ldflags=(
+			all=-s
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_VERSION=${_build_version}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_NUMBER=${_build_number}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_TIMESTAMP=${_build_timestamp}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_SOURCES_MD5=${_build_sources_md5}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
+		)
+	
+	_tags="$( printf -- '%s,' "${_tags[@]}" )"
+	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
+	
 	if test -n "${GOOS:-}" ; then
 		_suffix="--${GOOS}"
 	else
 		_suffix=''
 	fi
+	
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-v \
 			-o "${_outputs}/z-run--release${_suffix}" \
-			-tags netgo \
-			-ldflags 'all=-s' \
+			-tags "${_tags}" \
+			-ldflags "${_ldflags}" \
 			-- \
 			./cmd/z-run.go \
 	#
@@ -227,8 +277,9 @@
 	GOCACHE="${_outputs}/go/cache"
 	_gosrc="${_outputs}/go/src"
 	_gopkg="${_outputs}/go/pkg"
+	_markers="${_outputs}/markers"
 	
-	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" ; do
+	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" "${_markers}" ; do
 		if test ! -e "${_folder}" ; then
 			mkdir -- "${_folder}"
 		fi
@@ -287,7 +338,55 @@
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./sources/lib/embedded_bash_prolog.go zrun embeddedBashProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python_prolog.py ./sources/lib/embedded_python_prolog.go zrun embeddedPythonProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/go_prolog.go ./sources/lib/embedded_go_prolog.go zrun embeddedGoProlog string
+	
+	"${ZRUN[@]}" ':: workspace / sources / embedded / hash'
 !!
+
+
+
+
+<< workspace / sources / embedded / hash
+	
+	find ./sources/ -type f -not -path './sources/embedded/.build/build-*.txt' -print0 \
+	| xargs -0 -I {} -- md5sum -b -z -- {} \
+	| LC_ALL=C sort -z \
+	| md5sum -b \
+	| cut -f 1 -d ' ' \
+		>| ./.outputs/markers/build-sources-md5.tmp \
+	#
+	
+	if ! cmp -s -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/.build/build-sources-md5.txt ; then
+		
+		_build_number="$( exec -- cat -- ./sources/embedded/.build/build-number.txt )"
+		_build_number="$(( _build_number + 1 ))"
+		_build_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
+		
+		printf -- '%d\n' "${_build_number}" >| ./sources/embedded/.build/build-number.tmp
+		mv -T -- ./sources/embedded/.build/build-number.tmp ./sources/embedded/.build/build-number.txt
+		printf -- '%s\n' "${_build_timestamp}" >| ./sources/embedded/.build/build-timestamp.tmp
+		mv -T -- ./sources/embedded/.build/build-timestamp.tmp ./sources/embedded/.build/build-timestamp.txt
+		
+		mv -T -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/.build/build-sources-md5.txt
+		
+	else
+		
+		rm -- ./.outputs/markers/build-sources-md5.tmp
+	fi
+	
+	if test -e ./.git ; then
+		_git_hash="$( exec -- git rev-parse HEAD )"
+		if ! git diff --quiet || ! git diff --quiet --cached ; then
+			_git_hash+="-uncommitted"
+		fi
+	else
+		_git_hash='unknown'
+	fi
+	
+	printf -- '%s\n' "${_git_hash}" >| ./.outputs/markers/build-git-hash.tmp
+	mv -T -- ./.outputs/markers/build-git-hash.tmp ./.outputs/markers/build-git-hash.txt
+!!
+
+
 
 
 --<< workspace / sources / embedded / process
