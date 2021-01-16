@@ -4,6 +4,7 @@ package zrun
 
 
 import "os"
+import "unsafe"
 
 
 import fzf "github.com/junegunn/fzf/src"
@@ -76,6 +77,11 @@ func fzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 		_options.Bold = false
 		_options.ClearOnExit = true
 		_options.Mouse = false
+		
+		// NOTE:  Replace `accept` with `accept-non-empty` action!
+		_actions := _options.Keymap[fzf_tui.CtrlM]
+		* ((*int) (unsafe.Pointer (&_actions[0]))) = 7
+		_options.Keymap[fzf_tui.DoubleClick] = _options.Keymap[fzf_tui.CtrlM]
 		
 	} else {
 		
