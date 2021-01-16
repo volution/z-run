@@ -191,6 +191,13 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			if _argument == "--exec" {
 				if _index == 0 {
 					_execMode = true
+					_librarySourcePath = ""
+					_libraryCachePath = ""
+					_workspace = ""
+					_cacheRoot = ""
+					// FIXME:  Restore original `TERM` that might have been overriden by `ZRUN_TERM`!
+					// _terminal = ""
+					_top = true
 				} else {
 					return errorf (0x12cdad05, "unexpected argument `--exec` (only first)")
 				}
