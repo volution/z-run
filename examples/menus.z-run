@@ -22,3 +22,7 @@
 ++::// menu / empty / b :: ~ d319ce16
 --::// menu / empty / c :: ~ 97a5a2e9
 
+<<// menus
+	*~ ^menu / .*$
+!!
+
