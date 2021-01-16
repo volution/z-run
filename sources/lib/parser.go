@@ -257,7 +257,7 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 	switch _scriptlet.Interpreter {
 		case "<detect>" :
 			// NOP
-		case "<exec>", "<print>", "<template>", "<menu>" :
+		case "<exec>", "<print>", "<template>", "<menu>", "<go>", "<go+>" :
 			return nil
 		case "<bash+>", "<python+>", "<python2+>", "<python3+>" :
 			return nil
@@ -322,6 +322,27 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		}
 		
 		_scriptlet.Interpreter = "<menu>"
+		_scriptlet.InterpreterExecutable = ""
+		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterEnvironment = nil
+		
+	} else if strings.HasPrefix (_headerLine, "<go>") || strings.HasPrefix (_headerLine, "<go+>") {
+		
+		_interpreter := ""
+		if strings.HasPrefix (_headerLine, "<go>") {
+			_interpreter = "<go>"
+			_headerLine = _headerLine[4:]
+		} else {
+			_interpreter = "<go+>"
+			_headerLine = _headerLine[5:]
+		}
+		_headerLine = strings.Trim (_headerLine, " ")
+		
+		if _headerLine != "" {
+			return errorf (0x80bc049a, "invalid header for `%s` (go with arguments)", _scriptlet.Label)
+		}
+		
+		_scriptlet.Interpreter = _interpreter
 		_scriptlet.InterpreterExecutable = ""
 		_scriptlet.InterpreterArguments = nil
 		_scriptlet.InterpreterEnvironment = nil

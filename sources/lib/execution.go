@@ -5,8 +5,10 @@ package zrun
 
 import "bytes"
 import "fmt"
+import "io/ioutil"
 import "os"
 import "os/exec"
+import "path"
 import "strings"
 import "syscall"
 
@@ -40,6 +42,9 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 		
 		case "<menu>" :
 			_interpreterAllowsArguments = false
+		
+		case "<go>", "<go+>" :
+			_interpreterAllowsArguments = true
 		
 		default :
 			return nil, nil, errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _interpreter, _scriptlet.Label)
@@ -125,6 +130,107 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 					_interpreterArguments,
 					"[z-run:template]",
 					fmt.Sprintf (":: %s", _scriptlet.Label),
+				)
+			_interpreterScriptUnused = true
+		
+		case "<go>", "<go+>" :
+			
+			_goFingerprint := _scriptlet.Fingerprint
+			_goSource := path.Join (_context.cacheRoot, _goFingerprint + ".go")
+			_goExecutable := path.Join (_context.cacheRoot, _goFingerprint + ".exec")
+			
+			if _, _error := os.Stat (_goExecutable); _error == nil {
+				// PASS
+			} else if os.IsNotExist (_error) {
+				
+				_interpreterScriptBuffer.WriteString ("package main\n");
+				if _interpreter == "<go+>" {
+					_lines := strings.Split (_scriptlet.Body, "\n")
+					for _index, _line := range _lines {
+						if strings.HasPrefix (_line, "import ") {
+							_interpreterScriptBuffer.WriteString (_line)
+							_interpreterScriptBuffer.WriteString ("\n")
+						} else {
+							_lines = _lines[_index:]
+							break
+						}
+					}
+					_interpreterScriptBuffer.WriteString (embeddedGoProlog)
+					_interpreterScriptBuffer.WriteString ("\nfunc main () () {\n")
+					for _, _line := range _lines {
+						_interpreterScriptBuffer.WriteString (_line)
+						_interpreterScriptBuffer.WriteString ("\n")
+					}
+					_interpreterScriptBuffer.WriteString ("\n}\n")
+				} else {
+					_interpreterScriptBuffer.WriteString (_scriptlet.Body)
+				}
+				
+				_goSourceTmp := path.Join (_context.cacheRoot, generateRandomToken () + ".tmp")
+				if _error := ioutil.WriteFile (_goSourceTmp, _interpreterScriptBuffer.Bytes (), 0600); _error != nil {
+					return nil, nil, errorw (0x55976c12, _error)
+				}
+				if _error := os.Rename (_goSourceTmp, _goSource); _error != nil {
+					return nil, nil, errorw (0x5367f11a, _error)
+				}
+				
+				_goExecutableTmp := path.Join (_context.cacheRoot, generateRandomToken () + ".tmp")
+				
+				_goRoot := path.Join (_context.cacheRoot, "go")
+				_goCache := path.Join (_goRoot, "cache")
+				_goTmp := path.Join (_goRoot, "tmp")
+				for _, _mkdirPath := range []string { _goRoot, _goCache, _goTmp } {
+					if _error := os.Mkdir (_mkdirPath, 0700); _error != nil && ! os.IsExist (_error) {
+						return nil, nil, errorw (0x5097b00d, _error)
+					}
+				}
+				
+				_goExec := ""
+				if _goExec_0, _error := resolveExecutable ("go", _context.executablePaths); _error == nil {
+					_goExec = _goExec_0
+				} else {
+					return nil, nil, _error
+				}
+				
+				_goBuild := & exec.Cmd {
+						Path : _goExec,
+						Args : []string {
+								_goExec, "build",
+								"-o", _goExecutableTmp,
+								"-ldflags", "-s -w",
+								"--",
+								_goSource,
+							},
+						Dir : _goRoot,
+						Env : []string {
+								"GO111MODULE=off",
+								"GOPATH=" + _goRoot,
+								"GOCACHE=" + _goCache,
+								"GOTMPDIR=" + _goTmp,
+								"TMPDIR=" + _goTmp,
+							},
+						Stdin : nil,
+						Stdout : nil,
+						Stderr : os.Stderr,
+					}
+				
+				if _error := _goBuild.Run (); _error == nil {
+					if _error := os.Rename (_goExecutableTmp, _goExecutable); _error != nil {
+						return nil, nil, errorw (0xbeffd67b, _error)
+					}
+				} else {
+					_ = os.Remove (_goExecutableTmp)
+					return nil, nil, errorw (0x72eb9cad, _error)
+				}
+				
+			} else {
+				return nil, nil, errorw (0x46248f88, _error)
+			}
+			
+			_interpreterExecutable = _goExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:go] [%s]", _scriptlet.Label),
 				)
 			_interpreterScriptUnused = true
 		
