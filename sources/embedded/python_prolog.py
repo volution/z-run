@@ -67,16 +67,23 @@ def __Z__create (Z = None, __import__ = __import__) :
 		return Z._zexec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___zexec_prepare (_scriptlet, _arguments, _env = None, _chdir = None) :
+	def __Z___zexec_prepare (_scriptlet, _arguments, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None) :
 		_executable = Z.executable
 		if not _scriptlet.startswith ("::") :
 			Z.panic (0xbd1641c7, "invalid scriptlet: `%s`", _scriptlet)
 		_arguments_all = ["[z-run]", _scriptlet]
 		_arguments_all.extend (_arguments)
 		if _env is not None :
-			_environment = _env
+			_environment = { _name : _env[_name] for _name in _env }
 		else :
 			_environment = { _name : Z.environment[_name] for _name in Z.environment }
+		if _env_overrides is not None :
+			for _name in _env_overrides :
+				_environment[_name] = _env_overrides[_name]
+		if _path is not None :
+			_environment["PATH"] = _path
+		if _path_prepend is not None :
+			_environment["PATH"] = Z.paths_prepend (_environment.get ("PATH"), *_path_prepend)
 		return _executable, False, _arguments_all, _environment, _chdir
 	
 	## --------------------------------------------------------------------------------
@@ -96,13 +103,20 @@ def __Z__create (Z = None, __import__ = __import__) :
 		return Z._exec_prepare (_scriptlet, _arguments, **_options)
 	
 	@_inject
-	def __Z___exec_prepare (_executable, _arguments, _env = None, _chdir = None) :
+	def __Z___exec_prepare (_executable, _arguments, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None) :
 		_arguments_all = [_executable]
 		_arguments_all.extend (_arguments)
 		if _env is not None :
-			_environment = _env
+			_environment = { _name : _env[_name] for _name in _env }
 		else :
 			_environment = { _name : Z.environment[_name] for _name in Z.environment }
+		if _env_overrides is not None :
+			for _name in _env_overrides :
+				_environment[_name] = _env_overrides[_name]
+		if _path is not None :
+			_environment["PATH"] = _path
+		if _path_prepend is not None :
+			_environment["PATH"] = Z.paths_prepend (_environment.get ("PATH"), *_path_prepend)
 		return _executable, True, _arguments_all, _environment, _chdir
 	
 	## --------------------------------------------------------------------------------
