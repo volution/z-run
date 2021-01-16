@@ -476,6 +476,14 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*
 					_labels = append (_labels, _scriptlet.Label)
 					_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
 				}
+			} else if strings.HasPrefix (_matcher, "= ") {
+				_pattern := _matcher[2:]
+				for _, _scriptlet := range _scriptlets {
+					if _scriptlet.Label == _pattern {
+						_labels = append (_labels, _scriptlet.Label)
+						_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+					}
+				}
 			} else if strings.HasPrefix (_matcher, "^ ") {
 				_pattern := _matcher[2:]
 				for _, _scriptlet := range _scriptlets {
@@ -777,6 +785,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						strings.HasPrefix (_lineTrimmed, "<<.. ") ||
 						strings.HasPrefix (_lineTrimmed, "<<~~ ") ||
 						strings.HasPrefix (_lineTrimmed, "<<~~.. ") ||
+						strings.HasPrefix (_lineTrimmed, "<<// ") ||
 						strings.HasPrefix (_lineTrimmed, "<<== ") {
 					
 					_prefix := _lineTrimmed[: strings.IndexByte (_lineTrimmed, ' ')]
@@ -809,6 +818,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							_kind = "generator"
 							_interpreter = "<detect>"
 							_hidden = true
+						case "//" :
+							_kind = "menu"
+							_interpreter = "<menu>"
 						default :
 							return errorf (0xd08972fe, "invalid syntax (%d):  unknown scriptlet type | %s", _lineIndex, _line)
 					}
