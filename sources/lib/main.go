@@ -272,6 +272,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			
 		} else {
 			if _command == "" {
+				
 				switch _argument {
 					
 					case "execute-scriptlet", "execute" :
@@ -316,6 +317,9 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					
 					case "export-fingerprint" :
 						_command = "export-fingerprint"
+					
+					default :
+						return errorf (0x63de47f8, "unexpected argument `%s`", _argument)
 				}
 				
 			} else if (_command == "execute-scriptlet-ssh") && (_sshContext.target == "") {
@@ -514,6 +518,8 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			return _error
 		}
 	}
+	
+//	logf ('d', 0x66e8b16d, "%v `%s` `%s` %d %v", _top, _command, _scriptlet, len (_cleanArguments), _cleanArguments)
 	
 	switch _command {
 		
