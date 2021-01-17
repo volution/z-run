@@ -338,6 +338,7 @@
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./sources/lib/embedded_bash_prolog.go zrun embeddedBashProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python_prolog.py ./sources/lib/embedded_python_prolog.go zrun embeddedPythonProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/go_prolog.go ./sources/lib/embedded_go_prolog.go zrun embeddedGoProlog string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./documentation/manual/z-run.1.txt ./sources/lib/embedded_manual_txt.go zrun embeddedManualTxt string
 	
 	"${ZRUN[@]}" ':: workspace / sources / embedded / hash'
 !!

@@ -24,7 +24,13 @@ A "library" is just a collection of many such "scriptlets" that are bundled toge
 \fBz\-run\fR \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ]
 .
 .br
-\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fB<command>\fR [ \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ] ] \fBz\-run\fR \fB\-\-version\fR
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fB<command>\fR [ \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ] ]
+.
+.br
+\fBz\-run\fR \fB\-\-version\fR
+.
+.br
+\fBz\-run\fR \fB\-\-help\fR
 .
 .SS "Advanced modes"
 \fBz\-run\fR \fB\-\-exec\fR \fB<library>\fR [ \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ] ]
@@ -35,18 +41,14 @@ A "library" is just a collection of many such "scriptlets" that are bundled toge
 .br
 \fBz\-run\fR \fB\-\-invoke\fR \fB<invoke\-payload>\fR
 .
-.br
-.
 .SS "Input mode"
 \fBz\-run\fR \fB\-\-select\fR
 .
 .br
-\fBz\-run\fR \fB\-\-input\fR [ \fB\-\-message=<message>\fR ] [ \fB\-\-prompt=<prompt>\fR ] [ \fB\-\-sensitive\fR ]
+\fBz\-run\fR \fB\-\-input\fR [ \.\.\. ]
 .
 .br
 \fBz\-run\fR \fB\-\-fzf\fR [ \.\.\. ]
-.
-.br
 .
 .SH "ARGUMENTS"
 \fB<command>\fR
@@ -283,6 +285,12 @@ optionally allows any of the flags accepted by \fBfzf(1)\fR; similar to \fB\-\-s
 .
 .P
 writes to \fB/dev/stdout\fR a series of lines describing the version, executable, build related, and other miscellaneous information; the output format is likely to change in the future;
+.
+.P
+\fBz\-run\fR \fB\-\-version\fR
+.
+.P
+writes to \fB/dev/stdout\fR a copy of this manual;
 .
 .SH "FLAGS"
 \fB\-\-untainted\fR

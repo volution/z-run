@@ -25,20 +25,21 @@ or (sometimes for more complex scenarios) multiple, files.
 
 `z-run` <br/>
 `z-run` `<scriptlet>` [ `<argument>` ... ] <br/>
-`z-run` [ `<flag>` ... ] `<command>` [ `<scriptlet>` [ `<argument>` ... ] ]
-`z-run` `--version`
+`z-run` [ `<flag>` ... ] `<command>` [ `<scriptlet>` [ `<argument>` ... ] ] <br/>
+`z-run` `--version` <br/>
+`z-run` `--help`
 
 ### Advanced modes
 
 `z-run` `--exec` `<library>` [ `<scriptlet>` [ `<argument>` ... ] ] <br/>
 `z-run` `--ssh` [ `<flag>` ... ] `<scriptlet>` [ `<argument>` ... ] <br/>
-`z-run` `--invoke` `<invoke-payload>` <br/>
+`z-run` `--invoke` `<invoke-payload>`
 
 ### Input mode
 
 `z-run` `--select` <br/>
-`z-run` `--input` [ `--message=<message>` ] [ `--prompt=<prompt>` ] [ `--sensitive` ] <br/>
-`z-run` `--fzf` [ ... ] <br/>
+`z-run` `--input` [ ... ] <br/>
+`z-run` `--fzf` [ ... ]
 
 
 
@@ -294,6 +295,10 @@ or (sometimes for more complex scenarios) multiple, files.
 
   writes to `/dev/stdout` a series of lines describing the version, executable, build related, and other miscellaneous information;
   the output format is likely to change in the future;
+
+`z-run` `--version`
+
+  writes to `/dev/stdout` a copy of this manual;
 
 
 

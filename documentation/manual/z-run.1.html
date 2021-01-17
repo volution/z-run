@@ -93,20 +93,21 @@ or (sometimes for more complex scenarios) multiple, files.</p>
 
 <p><code>z-run</code> <br />
 <code>z-run</code> <code>&lt;scriptlet></code> [ <code>&lt;argument></code> ... ] <br />
-<code>z-run</code> [ <code>&lt;flag></code> ... ] <code>&lt;command></code> [ <code>&lt;scriptlet></code> [ <code>&lt;argument></code> ... ] ]
-<code>z-run</code> <code>--version</code></p>
+<code>z-run</code> [ <code>&lt;flag></code> ... ] <code>&lt;command></code> [ <code>&lt;scriptlet></code> [ <code>&lt;argument></code> ... ] ] <br />
+<code>z-run</code> <code>--version</code> <br />
+<code>z-run</code> <code>--help</code></p>
 
 <h3 id="Advanced-modes">Advanced modes</h3>
 
 <p><code>z-run</code> <code>--exec</code> <code>&lt;library></code> [ <code>&lt;scriptlet></code> [ <code>&lt;argument></code> ... ] ] <br />
 <code>z-run</code> <code>--ssh</code> [ <code>&lt;flag></code> ... ] <code>&lt;scriptlet></code> [ <code>&lt;argument></code> ... ] <br />
-<code>z-run</code> <code>--invoke</code> <code>&lt;invoke-payload></code> <br /></p>
+<code>z-run</code> <code>--invoke</code> <code>&lt;invoke-payload></code></p>
 
 <h3 id="Input-mode">Input mode</h3>
 
 <p><code>z-run</code> <code>--select</code> <br />
-<code>z-run</code> <code>--input</code> [ <code>--message=&lt;message></code> ] [ <code>--prompt=&lt;prompt></code> ] [ <code>--sensitive</code> ] <br />
-<code>z-run</code> <code>--fzf</code> [ ... ] <br /></p>
+<code>z-run</code> <code>--input</code> [ ... ] <br />
+<code>z-run</code> <code>--fzf</code> [ ... ]</p>
 
 <h2 id="ARGUMENTS">ARGUMENTS</h2>
 
@@ -327,6 +328,10 @@ or (sometimes for more complex scenarios) multiple, files.</p>
 
 <p>  writes to <code>/dev/stdout</code> a series of lines describing the version, executable, build related, and other miscellaneous information;
   the output format is likely to change in the future;</p>
+
+<p><code>z-run</code> <code>--version</code></p>
+
+<p>  writes to <code>/dev/stdout</code> a copy of this manual;</p>
 
 <h2 id="FLAGS">FLAGS</h2>
 

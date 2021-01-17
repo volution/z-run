@@ -22,7 +22,7 @@ func PreMain () () {
 	
 	
 	if (len (os.Args) == 2) {
-		if os.Args[1] == "--version" {
+		if (os.Args[1] == "--version") || (os.Args[1] == "-v") {
 			fmt.Fprintf (os.Stdout, "* version       : %s\n", BUILD_VERSION)
 			fmt.Fprintf (os.Stdout, "* executable    : %s\n", os.Args[0])
 			fmt.Fprintf (os.Stdout, "* build target  : %s, %s-%s, %s\n", BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER)
@@ -32,6 +32,10 @@ func PreMain () () {
 			fmt.Fprintf (os.Stdout, "* code & issues : %s\n", "https://github.com/cipriancraciun/z-run")
 			os.Exit (0)
 			panic (0x66203ba4)
+		} else if (os.Args[1] == "--help") || (os.Args[1] == "-h") {
+			fmt.Fprint (os.Stdout, embeddedManualTxt)
+			os.Exit (0)
+			panic (0xec70ce24)
 		}
 	}
 	
