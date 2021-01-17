@@ -212,6 +212,10 @@ func PreMain () () {
 				_argument0 = "[z-run:select]"
 				_arguments = _arguments[1:]
 			
+			case "--template" :
+				_argument0 = "[z-run:template-raw]"
+				_arguments = _arguments[1:]
+			
 			default :
 				_argument0 = "[z-run]"
 		}
