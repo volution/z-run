@@ -318,8 +318,8 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					case "export-library-url" :
 						_command = "export-library-url"
 					
-					case "export-fingerprint" :
-						_command = "export-fingerprint"
+					case "export-library-fingerprint" :
+						_command = "export-library-fingerprint"
 					
 					default :
 						return errorf (0x63de47f8, "unexpected argument `%s`", _argument)
@@ -327,6 +327,10 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				
 			} else if (_command == "execute-scriptlet-ssh") && (_sshContext.target == "") {
 				_sshContext.target = _argument
+				
+			} else if (_command == "export-library-json") || (_command == "export-library-cdb") || (_command == "export-library-rpc") {
+				_cleanArguments = _arguments[_index:]
+				break
 				
 			} else {
 				return errorf (0x6a6a6cef, "unexpected argument `%s`", _argument)
@@ -696,7 +700,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			fmt.Fprintln (os.Stdout, _library.Url ())
 			return nil
 		
-		case "export-fingerprint" :
+		case "export-library-fingerprint" :
 			if _scriptlet != "" {
 				return errorf (0x3483242d, "export:  unexpected scriptlet")
 			}
