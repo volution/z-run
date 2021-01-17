@@ -1,0 +1,472 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "Z\-RUN" "1" "January 2021" "" ""
+.
+.SH "NAME"
+\fBz\-run\fR \- lightweight scripts library tool
+.
+.SH "DESCRIPTION"
+\fBz\-run\fR is a lightweight and portable tool that allows one to create and execute a library of scripts\.
+.
+.P
+A "script", or "scriptlet" how it\'s named in the case of \fBz\-run\fR, is nothing more than an usual Bash, Python, Ruby, NodeJS, or any other interpreted language, script\. Basically one can just take the contents of a normal script file, and use it as the body of a scriptlet\.
+.
+.P
+A "library" is just a collection of many such "scriptlets" that are bundled together in (usually) one, or (sometimes for more complex scenarios) multiple, files\.
+.
+.SH "SYNOPSIS"
+.
+.SS "Basic modes"
+\fBz\-run\fR
+.
+.br
+\fBz\-run\fR \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ]
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fB<command>\fR [ \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ] ] \fBz\-run\fR \fB\-\-version\fR
+.
+.SS "Advanced modes"
+\fBz\-run\fR \fB\-\-exec\fR \fB<library>\fR [ \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ] ]
+.
+.br
+\fBz\-run\fR \fB\-\-ssh\fR [ \fB<flag>\fR \.\.\. ] \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ]
+.
+.br
+\fBz\-run\fR \fB\-\-invoke\fR \fB<invoke\-payload>\fR
+.
+.br
+.
+.SS "Input mode"
+\fBz\-run\fR \fB\-\-select\fR
+.
+.br
+\fBz\-run\fR \fB\-\-input\fR [ \fB\-\-message=<message>\fR ] [ \fB\-\-prompt=<prompt>\fR ] [ \fB\-\-sensitive\fR ]
+.
+.br
+\fBz\-run\fR \fB\-\-fzf\fR [ \.\.\. ]
+.
+.br
+.
+.SH "ARGUMENTS"
+\fB<command>\fR
+.
+.P
+the name of a built\-in \fBz\-run\fR command; it is always a word (made of letters or digits), or multiple words joined by hyphen (\fB\'\-\'\fR); (see bellow for details;)
+.
+.P
+\fB<scriptlet>\fR
+.
+.P
+the label of the scriptlet within the library; it always starts with two colons \fB\'::\'\fR, then optionally followed by spaces, while the rest should match the label of an existing scriptlet; they never contain control characters (e\.g\. \fB\'\e0\'\fR, \fB\'\et\'\fR, \fB\'\en\'\fR, etc\.), but they might contain any other UTF\-8 characters; (obviously shell quoting or escaping is required if spaces are used;) (e\.g\. \fB\':: scriptlet\'\fR;)
+.
+.P
+\fB<argument>\fR
+.
+.P
+in case of commands that execute the scriptlet, the arguments passed to the scriptlet, they are never inspected or interpreted by \fBz\-run\fR; in case of other commands, they might have a different meaning; (regardless the case, any \fBz\-run\fR flag should come before the scriptlet;)
+.
+.P
+\fB<flag>\fR
+.
+.P
+the name of a built\-in \fBz\-run\fR flag; it always starts with \fB\-\-\fR and is followed by a word (made of letters or digits), or multiple words joined by a hyphen; if it takes a value it should be immediately followed by an \fB=\fR and the given value; (i\.e\. flag values are part of the flag argument, like \fB\-\-flag=value\fR, and not like \fB\-\-flag value\fR;) any flags must appear before the \fB<command>\fR and \fB<scriptlet>\fR;
+.
+.P
+\fB<rpc\-target>\fR
+.
+.P
+a TCP or UNIX domain socket that will be used to export or use the library over the \fBz\-run\fR specific RPC; it is either \fBtcp:<ip\-address>:<port>\fR, \fBtcp:<dns>:<port>\fR, \fBunix:<path>\fR, or \fBunix:@<token>\fR; (the last form is only supported on Linux, and represents an abstract UNIX domain socket;)
+.
+.P
+\fB<ssh\-target>\fR
+.
+.P
+usually \fBuser@machine\fR or just \fBmachine\fR that identifies the SSH target;
+.
+.P
+\fB<argument\-0>\fR
+.
+.P
+(i\.e\. the first argument in \fBmain (argv)\fR) must always be the actual executable path (either absolute or relative), or alternatively \fBz\-run\fR (or a few other aliases); other values are internally used by \fBz\-run\fR itself;
+.
+.SH "COMMANDS"
+.
+.SS "Scriptlet execution commands"
+\fBexecute\-scriptlet\fR, \fBexecute\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexecute\-scriptlet\fR \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ]
+.
+.P
+expects a mandatory \fB<scriptlet>\fR, plus optional scriptlet \fB<arguments>\fR; executes the specified scriptlet, on the local machine; passes any specified arguments to the scriptlet;
+.
+.P
+\fBexecute\-scriptlet\-ssh\fR, \fBexecute\-ssh\fR, \fBssh\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexecute\-scriptlet\-ssh\fR \fB<ssh\-target>\fR \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ]
+.
+.P
+expects a \fB<ssh\-target>\fR, a mandatory \fB<scriptlet>\fR, plus optional scriptlet \fB<arguments>\fR; executes the specified scriptlet, on the remote machine designated by the SSH target (usually \fBuser@machine\fR); passes any specified arguments to the scriptlet;
+.
+.P
+\fBselect\-execute\-scriptlet\fR, \fBselect\-execute\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-execute\-scriptlet\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-execute\-scriptlet\fR \fB<scriptlet>\fR
+.
+.P
+expects an optional \fB<scriptlet>\fR, but no other arguments; if no scriptlet is specified, it presents a menu of all the scriptlets in the library, and allows the user to choose one; executes the scriptlet (either specified or selected), on the local machine; no arguments are passed to the scriptlet; usually if scriptlet is specified, it is a sub\-menu that is presented instead of the entire library;
+.
+.P
+\fBselect\-execute\-scriptlet\-loop\fR, \fBselect\-execute\-loop\fR, \fBloop\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-execute\-scriptlet\-loop\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-execute\-scriptlet\-loop\fR \fB<scriptlet>\fR
+.
+.P
+expects an optional \fB<scriptlet>\fR, but no other arguments; similar to the \fBselect\-execute\-scriptlet\fR command, but it will execute in a loop, presenting a menu, executing the scriptlet, pausing after the execution, and looping until the user exits the main menu;
+.
+.SS "Scriptlet related commands"
+\fBexport\-scriptlet\-labels\fR, \fBexport\-labels\fR, \fBlist\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-scriptlet\-labels\fR
+.
+.P
+expects no arguments or scriptlet; writes to \fB/dev/stdout\fR the labels of all the scriptlets in the library, one item per line, without the \fB\'::\'\fR prefix; (as mentioned bellow, scriptlet labels can\'t contain control characters, including \fB\'\en\'\fR;)
+.
+.P
+\fBexport\-scriptlet\-body\fR, \fBexport\-body\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-scriptlet\-body\fR \fB<scriptlet>\fR
+.
+.P
+expects a mandatory \fB<scriptlet>\fR, but no other arguments; writes to \fB/dev/stdout\fR the body of the specified scriptlet; (as mentioned bellow, scriptlet bodies should be UTF\-8 compliant, but might not be;)
+.
+.P
+\fBselect\-export\-scriptlet\-label\fR, \fBselect\-label\fR, \fBselect\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-export\-scriptlet\-label\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-export\-scriptlet\-label\fR \fB<scriptlet>\fR
+.
+.P
+expects an optional \fB<scriptlet>\fR, but no other arguments; similar to the \fBselect\-execute\-scriptlet\fR command, but it will write to \fB/dev/stdout\fR the label of the specified scriptlet, without the \fB\'::\'\fR prefix, followed by \fB\'\en\fR\';
+.
+.P
+\fBselect\-export\-scriptlet\-body\fR, \fBselect\-body\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-export\-scriptlet\-body\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-export\-scriptlet\-body\fR \fB<scriptlet>\fR
+.
+.P
+expects an optional \fB<scriptlet>\fR, but no other arguments; similar to the \fBselect\-execute\-scriptlet\fR command, but it will write to \fB/dev/stdout\fR the body of the specified scriptlet, followed by \fB\'\en\'\fR;
+.
+.P
+\fBselect\-export\-scriptlet\-label\-and\-body\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-export\-scriptlet\-label\-and\-body\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBselect\-export\-scriptlet\-label\-and\-body\fR \fB<scriptlet>\fR
+.
+.P
+expects an optional \fB<scriptlet>\fR, but no other arguments; similar to the \fBselect\-execute\-scriptlet\fR command, but it will write to \fB/dev/stdout\fR the label of the specified scriptlet, with the \fB\'::\'\fR prefix, followed by \fB\'\en\'\fR, and then followed by the body of the specified scriptlet, followed by \fB\'\en\'\fR;
+.
+.SS "Library related commands"
+\fBexport\-library\-json\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-library\-json\fR
+.
+.P
+expects no arguments; writes to \fB/dev/stdout\fR a series of JSON objects that represents the key\-value store that backs the library; it uses pretty\-printing, thus one JSON object will span over multiple lines; the outer serialization format (i\.e\. \fBnamespace\fR, \fBkey\fR and \fBvalue\fR) is unlikely to change in the future; the inner serialization format (i\.e\. \fBnamespace\fR values, \fBkey\fR and \fBvalue\fR contents) might change in the future;
+.
+.P
+\fBexport\-library\-cdb\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-library\-cdb\fR \fB<cdb\-path>\fR
+.
+.P
+expects a single \fB<cdb\-path>\fR, but no other arguments or scriptlet; writes to the specified file path the CDB database that represents the key\-value store that backs the library;
+.
+.P
+\fBexport\-library\-rpc\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-library\-cdb\fR \fB<rpc\-target>\fR
+.
+.P
+expects a single \fB<rpc\-target>\fR, but no other arguments or scriptlet; listens to specified target for \fBz\-run\fR specific RPC, that exports the library to remote clients;
+.
+.P
+\fBexport\-library\-url\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-library\-url\fR
+.
+.P
+expects no arguments or scriptlet; writes to \fB/dev/stdout\fR a line suitable for using it as value for the \fB\-\-library\-cache\fR flag; currently it is either a CDB database file \fB<path>\fR or \fB<rpc\-target>\fR; \fBhowever it should always be treated as an opaque value\fR, containing any ASCII character, except control characters, as it might change in future versions;
+.
+.P
+\fBexport\-library\-fingerprint\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-library\-fingerprint\fR
+.
+.P
+expects no arguments or scriptlet; writes to \fB/dev/stdout\fR a line containing the fingerprint of the current library version; currently it is an hex\-encoded hash; \fBhowever it should always be treated as an opaque value\fR, containing any ASCII character, except control characters, as it might change in future versions;
+.
+.P
+\fBparse\-library\fR
+.
+.br
+\fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBparse\-library\fR
+.
+.P
+expects no arguments or scriptlet; writes to \fB/dev/stdout\fR a single JSON object that represents the internal serialization of the library object; it uses pretty\-printing, thus the JSON object will span over multiple lines; the serialization format is likely to change in the future;
+.
+.SS "Advanced modes"
+\fBz\-run\fR \fB\-\-exec\fR \fB<source\-path>\fR [ \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ] ]
+.
+.P
+expects a library \fB<source\-path>\fR, an optional \fB<scriptlet>\fR and scriptlet \fB<arguments>\fR; it behaves similarly with the \fBexecute\-scriptlet\fR command; it enables one to write executable \fBz\-run\fR scripts by using the \fB#!/usr/bin/env \-S z\-run \-\-exec\fR header;
+.
+.P
+\fBz\-run\fR \fB\-\-ssh\fR [ \fB<ssh\-flag>\fR | \fB<flag>\fR \.\.\. ] \fB<scriptlet>\fR [ \fB<argument>\fR \.\.\. ]
+.
+.P
+expects a mandatory \fB<scriptlet>\fR, plus optional scriptlet \fB<arguments>\fR; similar to the \fBexecute\-scriptlet\-ssh\fR command, however it allows certain SSH specific arguments as discussed bellow;
+.
+.P
+\fBz\-run\fR \fB\-\-invoke\fR \fB<invoke\-payload>\fR
+.
+.P
+expects a mandatory \fB<invoke\-payload>\fR argument, no other flags, arguments or scriptlet; the payload contains encoded all the necessary flags, scriptlet and scriptlet arguments; it behaves \fBexecute\-scriptlet\fR command, however it allows one to easily execute \fBz\-run\fR over SSH without bothering with \fBssh\fR and \fBsh\fR command quoting and escaping; the serialization format is likely to change in the future;
+.
+.SS "Input modes"
+\fBz\-run\fR \fB\-\-select\fR
+.
+.P
+expects no arguments; reads from \fB/dev/stdin\fR a list of strings (mandatory compliant with UTF\-8), presents a menu to the user, and if anything is selected it writes it to \fB/dev/stdout\fR followed by \fB\'\en\'\fR; it expects (and checks) that both \fB/dev/stdin\fR and \fB/dev/stdout\fR are non\-TTY; (i\.e\. they must be redirected to a file, pipe, or socket;) it expects (and checks) that \fB/dev/stderr\fR is a TTY, and thus requires an usual \fBTERM\fR value; it uses an embedded variant of the \fBfzf(1)\fR tool, disregardin any \fBfzf\fR specific flags or environment variables; (but this should be treated as an implementation detail, and not relied upon;)
+.
+.P
+\fBz\-run\fR \fB\-\-input\fR [ \fB\-\-message=<message>\fR ] [ \fB\-\-prompt=<prompt>\fR ] [ \fB\-\-sensitive\fR ]
+.
+.P
+optionally allows any of the flags above; writes to \fB/dev/stderr\fR the \fB<message>\fR followed by \fB\'\en\'\fR; writes to \fB/dev/stderr\fR the \fB<prompt>\fR, or by default \fB\'>> \'\fR; if \fB\-\-sensitive\fR is specified, it disables input echo; reads from \fB/dev/stderr\fR a single line (up to the first \fB\'\en\'\fR), that it then writes to \fB/dev/stdout\fR; all values (message, prompt, and input) must be compliant with UTF\-8; it expects (and checks) that \fB/dev/stdout\fR is non\-TTY; (i\.e\. it must be redirected to a file, pipe or socket;) it expects (and checks) that \fB/dev/stderr\fR is a TTY, and thus requires an usual \fBTERM\fR value;
+.
+.P
+\fBz\-run\fR \fB\-\-fzf\fR [ \.\.\. ]
+.
+.P
+optionally allows any of the flags accepted by \fBfzf(1)\fR; similar to \fB\-\-select\fR, however it allows customizing \fBfzf(1)\fR through \fBfzf\fR specific flags and environment variables; it expects (and checks) that both \fB/dev/stdin\fR and \fB/dev/stdout\fR are non\-TTY; (i\.e\. they must be redirected to a file, pipe, or socket;) it expects (and checks) that \fB/dev/stderr\fR is a TTY, and thus requires an usual \fBTERM\fR value;
+.
+.SS "Miscellaneous"
+\fBz\-run\fR \fB\-\-version\fR
+.
+.P
+writes to \fB/dev/stdout\fR a series of lines describing the version, executable, build related, and other miscellaneous information; the output format is likely to change in the future;
+.
+.SH "FLAGS"
+\fB\-\-untainted\fR
+.
+.P
+if \fBz\-run\fR is invoked within the context of \fBz\-run\fR execution, disregard the context, and treat this invocation as a new separate context; \fBmust appear as the first flag;\fR (the same applies in \fB\-\-exec\fR mode, which implies \fB\-\-untainted\fR;)
+.
+.P
+\fB\-\-exec\fR, \fB\-\-ssh\fR, and \fB\-\-invoke\fR
+.
+.P
+these trigger the advanced execution modes described in the sections above; \fBmust appear as the first flag;\fR
+.
+.P
+\fB\-\-select\fR, \fB\-\-input\fR, and \fB\-\-fzf\fR
+.
+.P
+these trigger the input execution modes described in the sections above; \fBmust appear as the first flag;\fR
+.
+.P
+\fB\-\-library\-source=<source\-path>\fR
+.
+.P
+specifies a library \fB<source\-path>\fR, that overrides the default library source detection mecanism;
+.
+.P
+\fB\-\-library\-cache=<cache\-url>\fR
+.
+.P
+specifies a library \fB<cache\-url>\fR, either a \fB<cdb\-path>\fR or a \fB<rpc\-target>\fR; specifying both \fB\-\-library\-source=\.\.\.\fR and \fB\-\-library\-cache=\.\.\.\fR is not allowed;
+.
+.P
+\fB\-\-workspace=<path>\fR
+.
+.P
+specifies a folder that \fBz\-run\fR switches to before executing; (if no \fB\-\-library\-source=\.\.\.\fR or \fB\-\-library\-cache=\.\.\.\fR is specified, the default library source detection mecanism uses this folder as the root;)
+.
+.P
+\fB\-\-ssh\-target=<ssh\-target>\fR
+.
+.P
+\fBonly in SSH mode;\fR specifies the SSH target;
+.
+.P
+\fB\-\-ssh\-workspace=<path>\fR
+.
+.P
+\fBonly in SSH mode;\fR specifies a path on the remote machine that \fBz\-run\fR switches to before executing;
+.
+.P
+\fB\-\-ssh\-export=<name>\fR
+.
+.P
+\fBonly in SSH mode;\fR specifies an environment variable name that is exported on the remote machine;
+.
+.P
+\fB\-\-ssh\-path=<path>\fR
+.
+.P
+\fBonly in SSH mode;\fR specifies a value that is appended to the \fBPATH\fR environment variable on the remote machine;
+.
+.P
+\fB\-\-ssh\-terminal=<terminal>\fR
+.
+.P
+\fBonly in SSH mode;\fR specifies a value that overrides the \fBTERM\fR environment variable on the remote machine;
+.
+.SH "ENVIRONMENT"
+\fBZRUN_LIBRARY_SOURCE\fR
+.
+.P
+an alternative to the \fB\-\-library\-source=\.\.\.\fR flag; never exported inside scriptlet execution;
+.
+.P
+\fBZRUN_LIBRARY_CACHE\fR
+.
+.P
+an alternative to the \fB\-\-library\-cache=\.\.\.\fR flag; always exported inside the scriptlet execution environment; (never unset it explicitly;)
+.
+.P
+\fBZRUN_WORKSPACE\fR
+.
+.P
+an alternative to the \fB\-\-workspace=\.\.\.\fR flag; always exported inside the scriptlet execution environment; (never unset it explicitly;)
+.
+.P
+\fBZRUN_EXECUTABLE\fR
+.
+.P
+always exported inside the scriptlet execution environment; (never unset it explicitly;)
+.
+.P
+\fBZRUN_FINGERPRINT\fR
+.
+.P
+always exported inside the scriptlet execution environment; (never unset it explicitly;)
+.
+.P
+\fBZRUN_CACHE\fR
+.
+.P
+an alternative folder to the default \fB$HOME/\.cache/z\-run\fR, where various files (and pipes, sockets, etc\.) are created; (if explicitly specified, it is exported in the scriptlet execution environment;)
+.
+.P
+\fBZRUN_TERM\fR
+.
+.P
+an alternative to the default \fB$TERM\fR environment variable; (if explicitly specified, it is exported in the scriptlet execution environment;)
+.
+.SH "LIBRARY"
+.
+.SS "Library source resolution"
+\fBTBD\fR
+.
+.SS "Library source syntax"
+\fBTBD\fR
+.
+.SS "Library directives"
+\fBTBD\fR
+.
+.SS "Scriptlet bodies"
+\fBTBD\fR
+.
+.SS "Scriptlet interpreters"
+\fBTBD\fR
+.
+.SH "NOTES"
+.
+.SS "Why <code>z\-run</code> vs classical scripts?"
+What sets \fBz\-run\fR aside from a "classical" scripts is:
+.
+.IP "\(bu" 4
+first it allows one to easily mix multiple languages; for example one can easily write a Bash script that chains together a Python, Ruby and another Bash script, all within the same file; (with classical scripts one would have had to create multiple files, one for each language, and explicitly invoke them via the interpreter;)
+.
+.IP "\(bu" 4
+it allows one to easily bundle together unrelated scripts; for example say one uses \fBz\-run\fR to aid in the development process, then one could bundle together scripts related to compiling, testing, deploying, and other single\-shot shortcuts in the same file; (again, with classical scripts, one would have usually put each of these in separate files, or by using \fBcase\fR or \fBfunction\fR try to manage them inside a reduced set of files;)
+.
+.IP "\(bu" 4
+it allows one to easily invoke scriptlets from within the same library, without caring what language they are written in, or where their source code is stored; (with classical scripts one has to take care of getting the paths to other scripts right, especially when running from a different folder than the original one;)
+.
+.IP "" 0
+.
+.P
+However \fBz\-run\fR takes it a step further by offering the following functionalities:
+.
+.IP "\(bu" 4
+environment variables management \-\- by allowing certain environment variables to be overriden, removed or appended (like in the case of \fB$PATH\fR); (with classical scripts one has to manage these by themselves, resort to various "envdir" tools, or interact with shell magic;)
+.
+.IP "\(bu" 4
+hierarchical menus \-\- by simply calling \fBz\-run\fR without any arguments, it presents one with a selectable menu of all the scriptlets in the library, and after one selects a scriptlet it executes it; moreover one can group various scriptlets under other sub\-menus, thus allowing arbitrary nesting and navigation; (when used from a terminal, \fBz\-run\fR uses and embedded \fBfzf\fR\-based UI; when used from outside a terminal, \fBz\-run\fR tries to use \fBz\-run\-\-select\fR (any system), \fBrofi\fR or \fBdmenu\fR (under Linux and BSD\'s) or \fBchoose\fR (under OSX);)
+.
+.IP "\(bu" 4
+SSH\-based remote execution \-\- one can easily execute a given scriptlet on a remote server without having to previously copy anything there; moreover once the scriptlet is executing on the remote server, it can invoke other scriptlets from the library that are also to be executed remotely; (the only requirement is having \fBz\-run\fR installed on the remote machine;)
+.
+.IP "\(bu" 4
+scriptlets generation \-\- one can easily write a scriptlet that generates \fBz\-run\fR compliant source, thus generating other scriptlets based on arbitrary criteria; (for example one could write a scriptlet, that generates other scriptlets specific for each file in a given folder;)
+.
+.IP "\(bu" 4
+library compiling \-\- one can easily create a single file that contains the entire library, which can then be moved and used in another place;
+.
+.IP "\(bu" 4
+Go\-based templates \-\- that are useful especially in generating other scriptlets;
+.
+.IP "" 0
+.
+.SS "Caching"
+\fBz\-run\fR is designed to support thousands (and in extreme cases tens of thousands) of scriptlets, especially when scriptlet generation is used\.
+.
+.P
+Therefore \fBz\-run\fR has built\-in optimizations to cache the library contents (without any regeneration) unless any of the following conditions are met:
+.
+.IP "\(bu" 4
+any of the files that comprise the source code of the library are changed; (based both on file timestamps and contents hashing;)
+.
+.IP "\(bu" 4
+any of the environment variables change;
+.
+.IP "\(bu" 4
+a different version of \fBz\-run\fR is installed; (this covers both upgrading and downgrading;)
+.
+.IP "" 0
+.
+.P
+However once a scriptlet is executed, it and any other invoked scriptlets will use exactly the same cached library contents\. Thus it is safe to change the source code of the library, while a scriptlet is executing\.
+.
+.SH "EXAMPLES"
+\fBTBD\fR
