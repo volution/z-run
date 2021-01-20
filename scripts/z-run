@@ -48,14 +48,14 @@
 	"${ZRUN[@]}" ':: go / build / main / release / linux'
 	"${ZRUN[@]}" ':: go / build / main / release / darwin'
 	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
-	if test -e "./.publish/linux/z-run--${_build_version}" -o -e "./.publish/darwin/z-run--${_build_version}" ; then
+	if test -e "./.publish/linux/z-run--linux--v${_build_version}" -o -e "./.publish/darwin/z-run--darwin--v${_build_version}" ; then
 		printf -- '[ee]  release already exists!\n' >&2
 		exit -- 1
 	fi
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "./.publish/linux/z-run--${_build_version}"
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "./.publish/darwin/z-run--${_build_version}"
-	ln -s -T -f -- "./z-run--${_build_version}" ./.publish/linux/z-run
-	ln -s -T -f -- "./z-run--${_build_version}" ./.publish/darwin/z-run
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "./.publish/linux/z-run--linux--v${_build_version}"
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "./.publish/darwin/z-run--darwin--v${_build_version}"
+	ln -s -T -f -- "./z-run--linux--v${_build_version}" ./.publish/linux/z-run
+	ln -s -T -f -- "./z-run--darwin--v${_build_version}" ./.publish/darwin/z-run
 !!
 
 
