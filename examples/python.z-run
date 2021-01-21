@@ -13,7 +13,10 @@
 	"${ZRUN[@]}" ':: python / test / zexec'
 	"${ZRUN[@]}" ':: python / test / spawn'
 	"${ZRUN[@]}" ':: python / test / exec'
+	"${ZRUN[@]}" ':: python / test / redirects' 2> /dev/null
 	"${ZRUN[@]}" ':: python / test / pipeline'
+	"${ZRUN[@]}" ':: python / test / wait'
+	"${ZRUN[@]}" ':: python / test / pipes'
 	"${ZRUN[@]}" ':: python / test / paths'
 	"${ZRUN[@]}" ':: python / test / stat'
 	"${ZRUN[@]}" ':: python / test / touch'
@@ -86,6 +89,24 @@
 	Z.exec ("true")
 !!
 
+<< python / test / redirects
+	#! <python3+>
+	Z.expect_no_arguments ()
+	Z.log_cut ()
+	Z.spawn ("true", _stdin = Z.fd_open_null (), _fd_close = True)
+	Z.spawn ("true", _stdout = Z.fd_open_null (), _fd_close = True)
+	Z.spawn ("true", _stderr = Z.fd_open_null (), _fd_close = True)
+	Z.spawn ("true", _stdin = Z.fd_open_null (), _stdout = Z.fd_open_null (), _stderr = Z.fd_open_null (), _fd_close = True)
+	Z.spawn ("cat", _stdin = Z.fd_open_for_read ("/etc/hosts"), _stdout = Z.fd_open_null (), _fd_close = True)
+	Z.log_cut ()
+	Z.spawn ("lsof", "-p", "%d" % Z.pid, _stdin = Z.fd_open_null (), _stderr = Z.fd_open_null (), _stdout = Z.fd_clone (Z.stderr), _fd_close = True)
+	Z.log_cut ()
+	Z.spawn ("lsof", "-c", "lsof", _stdin = Z.fd_open_null (), _stderr = Z.fd_open_null (), _stdout = Z.fd_clone (Z.stderr), _fd_close = True)
+	Z.log_cut ()
+	Z.spawn ("lsof", "-c", "lsof", _stdin = Z.fd_open_null (), _stderr = Z.fd_open_null (), _stdout = Z.fd_clone (Z.stderr), _fd_close = True)
+	Z.log_cut ()
+!!
+
 << python / test / pipeline
 	#! <python3+>
 	Z.expect_no_arguments ()
@@ -98,8 +119,32 @@
 		])
 !!
 
+<< python / test / wait
+	#! <python3+>
+	Z.expect_no_arguments ()
+	_pid = Z.spawn ("true", _wait = False)
+	assert 0 == Z.process_wait (_pid, _panic = False)
+	_pid = Z.spawn ("false", _wait = False)
+	assert 1 == Z.process_wait (_pid, _panic = False)
+	_pid = Z.spawn ("sleep", "6s", _wait = False)
+	Z.process_terminate (_pid, _wait = False)
+	assert -Z.py.signal.SIGTERM == Z.process_wait (_pid, _panic = False)
+	_pid = Z.spawn ("sleep", "6s", _wait = False)
+	Z.process_kill (_pid, _wait = False)
+	assert -Z.py.signal.SIGKILL == Z.process_wait (_pid, _panic = False)
+!!
+
+<< python / test / pipes
+	#! <python3+>
+	Z.expect_no_arguments ()
+	_input, _output = Z.fd_open_pipes ()
+	Z.fd_close (_input)
+	Z.fd_close (_output)
+!!
+
 << python / test / paths
 	#! <python3+>
+	Z.expect_no_arguments ()
 	assert Z.path ("/etc") == "/etc", "[c86740bc]"
 	assert Z.path ("//etc/.") == "/etc", "[1caa1de9]"
 	assert Z.path (("/etc", "hosts")) == "/etc/hosts", "[b1c36167]"
@@ -109,6 +154,7 @@
 
 << python / test / stat
 	#! <python3+>
+	Z.expect_no_arguments ()
 	Z.exists ("/etc", _panic = 0x2ebc156a)
 	Z.not_exists ("/__none__", _panic = 0x6412700c)
 	Z.is_folder ("/etc", _panic = 0x6f67d170)
@@ -130,6 +176,7 @@
 
 << python / test / environment
 	#! <python3+>
+	Z.expect_no_arguments ()
 	for _name in sorted (Z.environment.__iter__ ()) :
 		print ("%s == %s" % (_name, Z.environment[_name]))
 	print (Z.environment.PATH)
@@ -142,11 +189,13 @@
 
 << python / test / sleep
 	#! <python3+>
+	Z.expect_no_arguments ()
 	Z.sleep (0.1)
 !!
 
 << python / test / touch
 	#! <python3+>
+	Z.expect_no_arguments ()
 	Z.touch ("/tmp/x")
 !!
 
