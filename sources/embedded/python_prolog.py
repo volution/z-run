@@ -644,6 +644,28 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.os.close (_file)
 	
 	@_inject
+	def __Z__is_fd (_file, *, _panic = None) :
+		if _file is None :
+			if _panic :
+				Z.panic ((_panic, 0x3c3ff99e), "invalid file descriptor (none)")
+			return False
+		elif isinstance (_file, PY.builtins.int) :
+			if _file >= 0 :
+				return True
+			else :
+				Z.panic (0xf42752f0, "invalid file descriptor (negative)")
+		elif isinstance (_file, PY.io.IOBase) :
+			try :
+				_file.fileno ()
+				return True
+			except OSError as _error :
+				Z.panic (0x7f97a33f, "invalid file descriptor (not supported): %r  //  %s", _error)
+		else :
+			if _panic :
+				Z.panic ((_panic, 0xe0d78a09), "invalid file (unknown): %r", _file)
+			return False
+	
+	@_inject
 	def __Z___fd (_file) :
 		if _file is None :
 			_fd = None
