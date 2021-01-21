@@ -193,6 +193,53 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_files = None
 		return _executable, _lookup, _arguments, _environment, _chdir, _files
 	
+	@_inject
+	def __Z__process_wait (_pid, *, _panic = None) :
+		_pid_0 = Z._pid (_pid)
+		_pid, _outcome = PY.os.waitpid (_pid_0, 0)
+		if PY.os.WIFEXITED (_outcome) :
+			_outcome = PY.os.WEXITSTATUS (_outcome)
+		elif PY.os.WIFSIGNALED (_outcome) :
+			_outcome = 0 - PY.os.WTERMSIG (_outcome)
+		else :
+			Z.panic (0xb4179b04, "waiting `%s` failed with unknown outcome: %r", _pid, _outcome)
+		if _panic and _outcome != 0 :
+			Z.panic ((_panic, 0xc0e8ec5d), "waiting `%s` failed with status: %d", _pid, _outcome)
+		if _pid == _pid_0 :
+			return _outcome
+		else :
+			return _pid, _outcome
+	
+	@_inject
+	def __Z__process_signal (_pid, _signal, *, _wait = False, _panic = None) :
+		_pid = Z._pid (_pid)
+		PY.os.kill (_pid, _signal)
+		if _wait :
+			return Z.process_wait (_pid, _panic = _panic)
+	
+	@_inject
+	def __Z__process_terminate (_pid, *, _wait = False, _panic = None) :
+		return Z.process_signal (_pid, PY.signal.SIGTERM)
+	
+	@_inject
+	def __Z__process_kill (_pid, *, _wait = False, _panic = None) :
+		return Z.process_signal (_pid, PY.signal.SIGKILL)
+	
+	@_inject
+	def __Z___pid (_process) :
+		if _process is None :
+			_pid = None
+		elif isinstance (_process, PY.builtins.int) :
+			if _process >= 1 :
+				_pid = _process
+			else :
+				Z.panic (0x1fe23810, "invalid process id (negative)")
+		elif isinstance (_process, PY.subprocess.Popen) :
+			_pid = _process.pid
+		else :
+			Z.panic (0x3960636f, "invalid process id (unknown): %r", _pid)
+		return _pid
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
