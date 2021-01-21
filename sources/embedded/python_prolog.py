@@ -309,12 +309,15 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if not Z.log_notice_enabled : return
 		if _important :
 			Z.stderr.write (("\n[z-run:%08d] [%s]  " % (Z.pid, "--")) + ("-" * 60) + "\n\n")
+			Z.stderr.flush ()
 		else :
 			Z.stderr.write (("[z-run:%08d] [%s]" % (Z.pid, "--")) + "\n")
+			Z.stderr.flush ()
 	
 	@_inject
 	def __Z___log_write (_slug, _code, _message, _arguments) :
 		Z.stderr.write (("[z-run:%08d] [%s] [%08x]  " % (Z.pid, _slug, _code)) + (_message % _arguments) + "\n")
+		Z.stderr.flush ()
 	
 	## --------------------------------------------------------------------------------
 	
