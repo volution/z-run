@@ -546,6 +546,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_flags = PY.os.O_WRONLY | PY.os.O_NOCTTY
 		if _create :
 			_flags |= PY.os.O_CREAT
+			if _exclusive is None :
+				_exclusive = True
+		else :
+			assert not _exclusive, "[eae26c74]"
 		if _exclusive :
 			assert _create, "[89a753b5]"
 			_flags |= PY.os.O_EXCL
@@ -556,6 +560,95 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z__symlink (_source, _target) :
 		PY.os.symlink (_source, _target)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __Z__open_for_read (_path, *, _close_on_exec = True, _panic = True) :
+		_flags = PY.os.O_RDONLY | PY.os.O_NOCTTY
+		if _close_on_exec :
+			_flags |= PY.os.O_CLOEXEC
+		try :
+			_file = PY.os.open (_path, _flags)
+		except OSError as _error :
+			if _error.errno == PY.errno.ENOENT :
+				if _panic :
+					Z.panic ((_panic, 0x9ca19f87), "open `%s` failed:  does not exist")
+			else :
+				raise
+		return _file
+	
+	@_inject
+	def __Z__open_for_write (_path, *, _mode = None, _create = True, _exclusive = None, _read = False, _append = False, _truncate = False, _close_on_exec = True, _panic = True) :
+		if _mode is None : _mode = 0o666
+		_flags = PY.os.O_WRONLY | PY.os.O_NOCTTY
+		if _create :
+			_flags |= PY.os.O_CREAT
+			if _exclusive is None :
+				_exclusive = True
+		else :
+			assert not _exclusive, "[0617f007]"
+		if _exclusive :
+			assert _create, "[45af3e8d]"
+			_flags |= PY.os.O_EXCL
+		if _read :
+			_flags |= PY.os.O_RDWR
+		if _append :
+			_flags |= PY.os.O_APPEND
+		if _truncate :
+			_flags |= PY.os.O_TRUNC
+		if _close_on_exec :
+			_flags |= PY.os.O_CLOEXEC
+		try :
+			_file = PY.os.open (_path, _flags, _mode)
+		except OSError as _error :
+			if _error.errno == PY.errno.ENOENT :
+				if _panic :
+					Z.panic ((_panic, 0x008389df), "open `%s` failed:  does not exist")
+			elif _error.errno == PY.errno.EEXIST :
+				if _panic :
+					Z.panic ((_panic, 0x37020d90), "open `%s` failed:  already exists")
+			else :
+				raise
+		return _file
+	
+	@_inject
+	def __Z__open_null (*, _close_on_exec = True) :
+		_flags = PY.os.O_RDWR | PY.os.O_NOCTTY
+		if _close_on_exec :
+			_flags |= PY.os.O_CLOEXEC
+		_file = PY.os.open (PY.os.devnull, _flags)
+		return _file
+	
+	@_inject
+	def __Z__open_clone (_file, *, _close_on_exec = True) :
+		_file = Z._fd (_file)
+		if _close_on_exec :
+			_command = PY.fcntl.F_DUPFD_CLOEXEC
+		else :
+			_command = PY.fcntl.F_DUPFD
+		_file = PY.fcntl.fcntl (_file, _command, 3)
+	
+	@_inject
+	def __Z__close (_file) :
+		PY.os.close (_file)
+	
+	@_inject
+	def __Z___fd (_file) :
+		if _file is None :
+			return None
+		elif isinstance (_file, PY.builtins.int) :
+			if _file >= 0 :
+				return _file
+			else :
+				Z.panic (0x4327e646, "invalid file descriptor (negative)")
+		elif isinstance (_file, PY.io.IOBase) :
+			try :
+				return _file.fileno ()
+			except OSError as _error :
+				Z.panic (0x32026a93, "invalid file descriptor (not supported): %r  //  %s", _error)
+		else :
+			Z.panic (0xe0d78a09, "invalid file (unknown): %r", _file)
 	
 	## --------------------------------------------------------------------------------
 	
