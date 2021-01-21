@@ -22,6 +22,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.subprocess = __import__ ("subprocess")
 	PY.time = __import__ ("time")
 	PY.stat = __import__ ("stat")
+	PY.fcntl = __import__ ("fcntl")
+	PY.io = __import__ ("io")
 	PY.re = __import__ ("re")
 	
 	PY.path = PY.os.path
@@ -31,11 +33,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.str = str
 		PY.unicode = str
 		PY.bytes = bytes
+		PY.builtins = __import__ ("builtins")
 	else :
 		PY.basestring = basestring
 		PY.str = str
 		PY.unicode = unicode
 		PY.bytes = str
+		PY.builtins = __builtins__
 	
 	Z.py = PY
 	
