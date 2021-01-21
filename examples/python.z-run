@@ -4,6 +4,24 @@
 ::// python / test / ...
 
 
+++<< python / test / all
+	# "${ZRUN[@]}" ':: python / test / prolog'
+	"${ZRUN[@]}" ':: python / test / prolog / 3'
+	"${ZRUN[@]}" ':: python / test / log' 2> /dev/null
+	"${ZRUN[@]}" ':: python / test / panic' 2> /dev/null || true
+	"${ZRUN[@]}" ':: python / test / zspawn'
+	"${ZRUN[@]}" ':: python / test / zexec'
+	"${ZRUN[@]}" ':: python / test / spawn'
+	"${ZRUN[@]}" ':: python / test / exec'
+	"${ZRUN[@]}" ':: python / test / pipeline'
+	"${ZRUN[@]}" ':: python / test / paths'
+	"${ZRUN[@]}" ':: python / test / stat'
+	"${ZRUN[@]}" ':: python / test / touch'
+	"${ZRUN[@]}" ':: python / test / environment' > /dev/null
+	"${ZRUN[@]}" ':: python / test / sleep'
+!!
+
+
 << python / test / prolog
 	"${ZRUN[@]}" ':: python / test / prolog / 0'
 	"${ZRUN[@]}" ':: python / test / prolog / 2'
@@ -73,9 +91,9 @@
 	Z.expect_no_arguments ()
 	Z.pipeline ([
 			Z.cmd ("true"),
-			Z.cmd ("sleep", "6s"),
+			Z.cmd ("sleep", "0.1s"),
 			Z.cmd ("cat"),
-			Z.cmd ("sleep", "12s"),
+			Z.cmd ("sleep", "0.2s"),
 			Z.cmd ("true"),
 		])
 !!
@@ -89,7 +107,7 @@
 	assert Z.path ("/proc/self", _canonical = True) != "/proc/self", "[0909bbcb7]"
 !!
 
-<< python / test / files / stat
+<< python / test / stat
 	#! <python3+>
 	Z.exists ("/etc", _panic = 0x2ebc156a)
 	Z.not_exists ("/__none__", _panic = 0x6412700c)
@@ -100,9 +118,9 @@
 	Z.is_symlink ("/proc/self", _panic = 0x492a6caf)
 	Z.is_folder ("/proc/self", _panic = 0x6746e58d)
 	Z.is_socket ("/dev/log", _panic = 0x708c3426)
-	Z.is_dev_block ("/dev/loop0", _panic = 0x7ac9ef0f)
+	Z.is_dev_block ("/dev/sda", _panic = 0x7ac9ef0f)
 	Z.is_dev_char ("/dev/null", _panic = 0xa8623aa9)
-	Z.is_special ("/dev/loop0", _panic = 0x8ea394a4)
+	Z.is_special ("/dev/sda", _panic = 0x8ea394a4)
 	Z.is_special ("/dev/null", _panic = 0x3d458181)
 	Z.is_special ("/dev/log", _panic = 0xb3b9fb84)
 	Z.exists ("/dev/log", _panic = 0xc83ed2ae)
@@ -124,7 +142,7 @@
 
 << python / test / sleep
 	#! <python3+>
-	Z.sleep (6)
+	Z.sleep (0.1)
 !!
 
 << python / test / touch
