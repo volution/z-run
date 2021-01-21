@@ -368,9 +368,20 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 			_executable = _executable[1 : len (_executable) - 1]
 			switch _executable {
 				case "bash+", "python+", "python2+", "python3+" :
+					if _executable == "python+" {
+						_executable = "python3+"
+					}
 					_interpreter = "<" + _executable + ">"
 					_executable = _executable[0 : len (_executable) - 1]
-				case "bash", "python", "python2", "python3" :
+					switch _executable {
+						case "python2" :
+							_executable = "python2.7"
+					//	case "python3" :
+					//		_executable = "python3.6"
+					}
+				case "bash" :
+					// NOP
+				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9" :
 					// NOP
 				case "lua", "node", "perl", "ruby", "php", "php5", "php7", "php8" :
 					// NOP
