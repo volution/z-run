@@ -671,6 +671,16 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _file
 	
 	@_inject
+	def __Z__fd_open_pipes (*, _non_blocking = False, _close_on_exec = True) :
+		_flags = 0
+		if _non_blocking :
+			_flags |= PY.os.O_NONBLOCK
+		if _close_on_exec :
+			_flags |= PY.os.O_CLOEXEC
+		_input, _output = PY.os.pipe2 (_flags)
+		return _input, _output
+	
+	@_inject
 	def __Z__fd_clone (_file, *, _close_on_exec = True) :
 		_file = Z._fd (_file)
 		if _close_on_exec :
@@ -709,7 +719,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				Z.panic (0x7f97a33f, "invalid file descriptor (not supported): %r  //  %s", _error)
 		else :
 			if _panic :
-				Z.panic ((_panic, 0xe0d78a09), "invalid file (unknown): %r", _file)
+				Z.panic ((_panic, 0xe0d78a09), "invalid file descriptor (unknown): %r", _file)
 			return False
 	
 	@_inject
@@ -727,7 +737,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			except OSError as _error :
 				Z.panic (0x32026a93, "invalid file descriptor (not supported): %r  //  %s", _error)
 		else :
-			Z.panic (0xe0d78a09, "invalid file (unknown): %r", _file)
+			Z.panic (0xe0d78a09, "invalid file descriptor (unknown): %r", _file)
 		return _fd
 	
 	## --------------------------------------------------------------------------------
