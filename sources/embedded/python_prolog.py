@@ -57,14 +57,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _panic = True, **_options) :
+	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _files_close = False, _panic = True, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _panic = _panic)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _files_close = _files_close, _panic = _panic)
 	
 	@_inject
-	def __Z__zexec (_scriptlet, *_arguments, **_options) :
+	def __Z__zexec (_scriptlet, *_arguments, _files_close = True, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
-		return Z.exec_0 (_descriptor)
+		return Z.exec_0 (_descriptor, _files_close = _files_close)
 	
 	@_inject
 	def __Z__zcmd (_scriptlet, *_arguments, **_options) :
@@ -82,14 +82,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn (_scriptlet, *_arguments, _wait = True, _panic = True, **_options) :
+	def __Z__spawn (_scriptlet, *_arguments, _wait = True, _files_close = False, _panic = True, **_options) :
 		_descriptor = Z._exec_prepare (_scriptlet, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _panic = _panic)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _files_close = _files_close, _panic = _panic)
 	
 	@_inject
-	def __Z__exec (_executable, *_arguments, **_options) :
+	def __Z__exec (_executable, *_arguments, _files_close = True, **_options) :
 		_descriptor = Z._exec_prepare (_executable, _arguments, **_options)
-		return Z.exec_0 (_descriptor)
+		return Z.exec_0 (_descriptor, _files_close = _files_close)
 	
 	@_inject
 	def __Z__cmd (_scriptlet, *_arguments, **_options) :
@@ -104,20 +104,36 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn_0 (_descriptor, *, _wait = True, _panic = True) :
+	def __Z__spawn_0 (_descriptor, *, _wait = True, _files_close = False, _panic = True) :
 		# FIXME:  Handle lookup!
-		_executable, _lookup, _arguments, _environment, _chdir = _descriptor
+		_executable, _lookup, _arguments, _environment, _chdir, _files = _descriptor
+		if _files is not None :
+			_stdin, _stdout, _stderr = _files
+			_stdin = Z._fd (_stdin)
+			_stdout = Z._fd (_stdout)
+			_stderr = Z._fd (_stderr)
+		else :
+			_stdin = None
+			_stdout = None
+			_stderr = None
 		_process = PY.subprocess.Popen (
 				_arguments,
 				executable = _executable,
 				env = _environment,
 				cwd = _chdir,
-				stdin = None,
-				stdout = None,
-				stderr = None,
+				stdin = _stdin,
+				stdout = _stdout,
+				stderr = _stderr,
 				close_fds = False,
 				shell = False,
 			)
+		if _files_close :
+			if _stdin is not None :
+				PY.os.close (_stdin)
+			if _stdout is not None :
+				PY.os.close (_stdout)
+			if _stderr is not None :
+				PY.os.close (_stderr)
 		if _wait :
 			_outcome = _process.wait ()
 			if _panic and _outcome != 0 :
@@ -127,18 +143,39 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _outcome
 	
 	@_inject
-	def __Z__exec_0 (_descriptor) :
-		_executable, _lookup, _arguments, _environment, _chdir = _descriptor
+	def __Z__exec_0 (_descriptor, *, _files_close = True) :
+		_executable, _lookup, _arguments, _environment, _chdir, _files = _descriptor
 		if _chdir is not None :
 			PY.os.chdir (_chdir)
 		if _lookup :
 			_delegate = PY.os.execvpe
 		else :
 			_delegate = PY.os.execve
+		if _files is not None :
+			_stdin, _stdout, _stderr = _files
+			_stdin = Z._fd (_stdin)
+			_stdout = Z._fd (_stdout)
+			_stderr = Z._fd (_stderr)
+		else :
+			_stdin = None
+			_stdout = None
+			_stderr = None
+		if _stdin is not None :
+			PY.os.dup2 (_stdin, 0, True)
+			if _files_close :
+				PY.os.close (_stdin)
+		if _stdout is not None :
+			PY.os.dup2 (_stdout, 1, True)
+			if _files_close :
+				PY.os.close (_stdout)
+		if _stderr is not None :
+			PY.os.dup2 (_stderr, 2, True)
+			if _files_close :
+				PY.os.close (_stderr)
 		_delegate (_executable, _arguments, _environment)
 	
 	@_inject
-	def __Z___exec_prepare_0 (_executable, _lookup, _arguments, *, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None) :
+	def __Z___exec_prepare_0 (_executable, _lookup, _arguments, *, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _stdin = None, _stdout = None, _stderr = None) :
 		if _env is not None :
 			_environment = { _name : _env[_name] for _name in _env }
 		else :
@@ -150,12 +187,16 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_environment["PATH"] = _path
 		if _path_prepend is not None :
 			_environment["PATH"] = Z.paths_prepend (_environment.get ("PATH"), *_path_prepend)
-		return _executable, _lookup, _arguments, _environment, _chdir
+		if _stdin is not None or _stdout is not None or _stderr is not None :
+			_files = (_stdin, _stdout, _stderr)
+		else :
+			_files = None
+		return _executable, _lookup, _arguments, _environment, _chdir, _files
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__pipeline (_commands, *, _wait = True, _panic = True) :
+	def __Z__pipeline (_commands, *, _wait = True, _files_close = False, _panic = True) :
 		_count = len (_commands)
 		if _count == 0 :
 			Z.panic (0x1b1812d7, "pipeline empty")
@@ -167,19 +208,32 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_processes = []
 		for _index in range (_count) :
 			# FIXME:  Handle lookup!
-			_executable, _lookup, _arguments, _environment, _chdir = _commands[_index]
+			_executable, _lookup, _arguments, _environment, _chdir, _files = _commands[_index]
+			if _files is not None :
+				_stdin, _stdout, _stderr = _files
+				_stdin = Z._fd (_stdin)
+				_stdout = Z._fd (_stdout)
+				_stderr = Z._fd (_stderr)
+			else :
+				_stdin = None
+				_stdout = None
+				_stderr = None
 			_pipe_previous = _pipes[_index]
 			_pipe_next = _pipes[_index + 1]
 			_pipe_stdin = _pipe_previous[0]
 			_pipe_stdout = _pipe_next[1]
+			if _stdin is not None and _pipe_stdin is not None :
+				Z.panic (0xd2333746, "stdin unexpected")
+			if _stdout is not None and _pipe_stdout is not None :
+				Z.panic (0xf9ec0dff, "stdout unexpected")
 			_process = PY.subprocess.Popen (
 					_arguments,
 					executable = _executable,
 					env = _environment,
 					cwd = _chdir,
-					stdin = _pipe_stdin,
-					stdout = _pipe_stdout,
-					stderr = None,
+					stdin = _stdin if _stdin is not None else _pipe_stdin,
+					stdout = _stdout if _stdout is not None else _pipe_stdout,
+					stderr = _stderr,
 					close_fds = False,
 					shell = False,
 				)
@@ -187,6 +241,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				_processes.append ((_index, _process, _arguments))
 			else :
 				_processes.append (_process.pid)
+			if _files_close :
+				if _stdin is not None :
+					PY.os.close (_stdin)
+				if _stdout is not None :
+					PY.os.close (_stdout)
+				if _stderr is not None :
+					PY.os.close (_stderr)
 			if _pipe_stdin is not None :
 				PY.os.close (_pipe_stdin)
 			if _pipe_stdout is not None :
