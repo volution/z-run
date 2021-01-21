@@ -550,7 +550,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if _create :
 			_flags |= PY.os.O_CREAT
 			if _exclusive is None :
-				_exclusive = True
+				_exclusive = False
 		else :
 			assert not _exclusive, "[eae26c74]"
 		if _exclusive :
