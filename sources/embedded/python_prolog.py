@@ -57,14 +57,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _files_close = False, _panic = True, **_options) :
+	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _fd_close = False, _panic = True, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _files_close = _files_close, _panic = _panic)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _fd_close = _fd_close, _panic = _panic)
 	
 	@_inject
-	def __Z__zexec (_scriptlet, *_arguments, _files_close = True, **_options) :
+	def __Z__zexec (_scriptlet, *_arguments, _fd_close = True, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
-		return Z.exec_0 (_descriptor, _files_close = _files_close)
+		return Z.exec_0 (_descriptor, _fd_close = _fd_close)
 	
 	@_inject
 	def __Z__zcmd (_scriptlet, *_arguments, **_options) :
@@ -82,14 +82,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn (_scriptlet, *_arguments, _wait = True, _files_close = False, _panic = True, **_options) :
+	def __Z__spawn (_scriptlet, *_arguments, _wait = True, _fd_close = False, _panic = True, **_options) :
 		_descriptor = Z._exec_prepare (_scriptlet, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _files_close = _files_close, _panic = _panic)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _fd_close = _fd_close, _panic = _panic)
 	
 	@_inject
-	def __Z__exec (_executable, *_arguments, _files_close = True, **_options) :
+	def __Z__exec (_executable, *_arguments, _fd_close = True, **_options) :
 		_descriptor = Z._exec_prepare (_executable, _arguments, **_options)
-		return Z.exec_0 (_descriptor, _files_close = _files_close)
+		return Z.exec_0 (_descriptor, _fd_close = _fd_close)
 	
 	@_inject
 	def __Z__cmd (_scriptlet, *_arguments, **_options) :
@@ -104,7 +104,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn_0 (_descriptor, *, _wait = True, _files_close = False, _panic = True) :
+	def __Z__spawn_0 (_descriptor, *, _wait = True, _fd_close = False, _panic = True) :
 		# FIXME:  Handle lookup!
 		_executable, _lookup, _arguments, _environment, _chdir, _files = _descriptor
 		if _files is not None :
@@ -127,7 +127,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				close_fds = False,
 				shell = False,
 			)
-		if _files_close :
+		if _fd_close :
 			if _stdin is not None :
 				PY.os.close (_stdin)
 			if _stdout is not None :
@@ -143,7 +143,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _outcome
 	
 	@_inject
-	def __Z__exec_0 (_descriptor, *, _files_close = True) :
+	def __Z__exec_0 (_descriptor, *, _fd_close = True) :
 		_executable, _lookup, _arguments, _environment, _chdir, _files = _descriptor
 		if _chdir is not None :
 			PY.os.chdir (_chdir)
@@ -162,15 +162,15 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_stderr = None
 		if _stdin is not None :
 			PY.os.dup2 (_stdin, 0, True)
-			if _files_close :
+			if _fd_close :
 				PY.os.close (_stdin)
 		if _stdout is not None :
 			PY.os.dup2 (_stdout, 1, True)
-			if _files_close :
+			if _fd_close :
 				PY.os.close (_stdout)
 		if _stderr is not None :
 			PY.os.dup2 (_stderr, 2, True)
-			if _files_close :
+			if _fd_close :
 				PY.os.close (_stderr)
 		_delegate (_executable, _arguments, _environment)
 	
@@ -196,7 +196,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__pipeline (_commands, *, _wait = True, _files_close = False, _panic = True) :
+	def __Z__pipeline (_commands, *, _wait = True, _fd_close = False, _panic = True) :
 		_count = len (_commands)
 		if _count == 0 :
 			Z.panic (0x1b1812d7, "pipeline empty")
@@ -241,7 +241,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				_processes.append ((_index, _process, _arguments))
 			else :
 				_processes.append (_process.pid)
-			if _files_close :
+			if _fd_close :
 				if _stdin is not None :
 					PY.os.close (_stdin)
 				if _stdout is not None :
@@ -567,7 +567,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__open_for_read (_path, *, _close_on_exec = True, _panic = True) :
+	def __Z__fd_open_for_read (_path, *, _close_on_exec = True, _panic = True) :
 		_flags = PY.os.O_RDONLY | PY.os.O_NOCTTY
 		if _close_on_exec :
 			_flags |= PY.os.O_CLOEXEC
@@ -582,7 +582,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _file
 	
 	@_inject
-	def __Z__open_for_write (_path, *, _mode = None, _create = True, _exclusive = None, _read = False, _append = False, _truncate = False, _close_on_exec = True, _panic = True) :
+	def __Z__fd_open_for_write (_path, *, _mode = None, _create = True, _exclusive = None, _read = False, _append = False, _truncate = False, _close_on_exec = True, _panic = True) :
 		if _mode is None : _mode = 0o666
 		_flags = PY.os.O_WRONLY | PY.os.O_NOCTTY
 		if _create :
@@ -616,7 +616,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _file
 	
 	@_inject
-	def __Z__open_null (*, _close_on_exec = True) :
+	def __Z__fd_open_null (*, _close_on_exec = True) :
 		_flags = PY.os.O_RDWR | PY.os.O_NOCTTY
 		if _close_on_exec :
 			_flags |= PY.os.O_CLOEXEC
@@ -624,7 +624,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _file
 	
 	@_inject
-	def __Z__open_clone (_file, *, _close_on_exec = True) :
+	def __Z__fd_clone (_file, *, _close_on_exec = True) :
 		_file = Z._fd (_file)
 		if _close_on_exec :
 			_command = PY.fcntl.F_DUPFD_CLOEXEC
@@ -633,7 +633,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_file = PY.fcntl.fcntl (_file, _command, 3)
 	
 	@_inject
-	def __Z__close (_file) :
+	def __Z__fd_flush (_file) :
+		_file = Z._fd (_file)
+		PY.os.fsync (_file)
+	
+	@_inject
+	def __Z__fd_close (_file) :
+		_file = Z._fd (_file)
 		PY.os.close (_file)
 	
 	@_inject
