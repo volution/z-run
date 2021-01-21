@@ -162,15 +162,15 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_stderr = None
 		if _stdin is not None :
 			PY.os.dup2 (_stdin, 0, True)
-			if _fd_close :
+			if _fd_close and _stdin != 0 :
 				PY.os.close (_stdin)
 		if _stdout is not None :
 			PY.os.dup2 (_stdout, 1, True)
-			if _fd_close :
+			if _fd_close and _stdout != 1 :
 				PY.os.close (_stdout)
 		if _stderr is not None :
 			PY.os.dup2 (_stderr, 2, True)
-			if _fd_close :
+			if _fd_close and _stderr != 2 :
 				PY.os.close (_stderr)
 		_delegate (_executable, _arguments, _environment)
 	
@@ -630,7 +630,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_command = PY.fcntl.F_DUPFD_CLOEXEC
 		else :
 			_command = PY.fcntl.F_DUPFD
-		_file = PY.fcntl.fcntl (_file, _command, 3)
+		_fd = PY.fcntl.fcntl (_file, _command, 3)
+		return _fd
 	
 	@_inject
 	def __Z__fd_flush (_file) :
@@ -645,19 +646,20 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z___fd (_file) :
 		if _file is None :
-			return None
+			_fd = None
 		elif isinstance (_file, PY.builtins.int) :
 			if _file >= 0 :
-				return _file
+				_fd = _file
 			else :
 				Z.panic (0x4327e646, "invalid file descriptor (negative)")
 		elif isinstance (_file, PY.io.IOBase) :
 			try :
-				return _file.fileno ()
+				_fd = _file.fileno ()
 			except OSError as _error :
 				Z.panic (0x32026a93, "invalid file descriptor (not supported): %r  //  %s", _error)
 		else :
 			Z.panic (0xe0d78a09, "invalid file (unknown): %r", _file)
+		return _fd
 	
 	## --------------------------------------------------------------------------------
 	
