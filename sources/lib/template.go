@@ -8,6 +8,7 @@ import "encoding/json"
 import "io"
 import "os"
 import "path"
+import "strconv"
 import "strings"
 import "text/template"
 
@@ -271,6 +272,16 @@ func templateFunctions () (map[string]interface{}) {
 			"shell_quote" : func (_input string) (string) {
 					// NOTE:  https://github.com/python/cpython/blob/3.8/Lib/shlex.py#L330
 					return `'` + strings.ReplaceAll (_input, `'`, `'\''`) + `'`
+				},
+			
+			"python_quote" : func (_input string) (string) {
+					// NOTE:  https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals
+					return strconv.QuoteToASCII (_input)
+				},
+			
+			"go_quote" : func (_input string) (string) {
+					// NOTE:  https://golang.org/ref/spec#String_literals
+					return strconv.QuoteToASCII (_input)
 				},
 		}
 }
