@@ -5,6 +5,7 @@ package zrun
 import "encoding/base64"
 import "encoding/hex"
 import "encoding/json"
+import "fmt"
 import "io"
 import "os"
 import "path"
@@ -152,6 +153,10 @@ func templateFuncZrun (_library LibraryStore, _context *Context, _scriptletLabel
 func templateFunctions () (map[string]interface{}) {
 	return map[string]interface{} {
 			
+			
+			// --------------------------------------------------------------------------------
+			
+			
 			"json_encode" : func (_input interface{}) (string, error) {
 					_output, _error := json.Marshal (_input)
 					return string (_output), _error
@@ -160,14 +165,6 @@ func templateFunctions () (map[string]interface{}) {
 					var _output interface{}
 					_error := json.Unmarshal ([]byte (_input), &_output)
 					return _output, _error
-				},
-			
-			"array" : func (_inputs ... interface{}) ([]interface{}) {
-					return _inputs
-				},
-			
-			"append" : func (_array []interface{}, _inputs ... interface{}) ([]interface{}) {
-					return append (_array, _inputs...)
 				},
 			
 			"hex_encode" : func (_input string) (string) {
@@ -186,18 +183,135 @@ func templateFunctions () (map[string]interface{}) {
 					return string (_output), _error
 				},
 			
-			"split" : func (_separator string, _input string) ([]string) {
-					return strings.Split (_input, _separator)
+			
+			// --------------------------------------------------------------------------------
+			
+			
+			"atoi" : func (_input string) (int, error) {
+					_output, _error := strconv.Atoi (_input)
+					return _output, _error
 				},
-			"join" : func (_separator string, _input []string) (string) {
-					return strings.Join (_input, _separator)
+			"itoa" : func (_input int) (string) {
+					return strconv.Itoa (_input)
 				},
 			
-			"replace_first" : func (_search string, _replacement string, _input string) (string) {
-					return strings.Replace (_input, _search, _replacement, 1)
+			"int_parse" : func (_base int, _input string) (int, error) {
+					_output, _error := strconv.ParseInt (_input, _base, 32)
+					return int (_output), _error
 				},
-			"replace_all" : func (_search string, _replacement string, _input string) (string) {
-					return strings.ReplaceAll (_input, _search, _replacement)
+			"int_format" : func (_base int, _input int) (string) {
+					return strconv.FormatInt (int64 (_input), _base)
+				},
+			"uint_parse" : func (_base int, _input string) (uint, error) {
+					_output, _error := strconv.ParseUint (_input, _base, 32)
+					return uint (_output), _error
+				},
+			"uint_format" : func (_base int, _input uint) (string) {
+					return strconv.FormatUint (uint64 (_input), _base)
+				},
+			
+			"int8_parse" : func (_base int, _input string) (int8, error) {
+					_output, _error := strconv.ParseInt (_input, _base, 8)
+					return int8 (_output), _error
+				},
+			"int8_format" : func (_base int, _input int8) (string) {
+					return strconv.FormatInt (int64 (_input), _base)
+				},
+			"uint8_parse" : func (_base int, _input string) (uint8, error) {
+					_output, _error := strconv.ParseUint (_input, _base, 8)
+					return uint8 (_output), _error
+				},
+			"uint8_format" : func (_base int, _input uint8) (string) {
+					return strconv.FormatUint (uint64 (_input), _base)
+				},
+			
+			"int16_parse" : func (_base int, _input string) (int16, error) {
+					_output, _error := strconv.ParseInt (_input, _base, 16)
+					return int16 (_output), _error
+				},
+			"int16_format" : func (_base int, _input int16) (string) {
+					return strconv.FormatInt (int64 (_input), _base)
+				},
+			"uint16_parse" : func (_base int, _input string) (uint16, error) {
+					_output, _error := strconv.ParseUint (_input, _base, 16)
+					return uint16 (_output), _error
+				},
+			"uint16_format" : func (_base int, _input uint16) (string) {
+					return strconv.FormatUint (uint64 (_input), _base)
+				},
+			
+			"int32_parse" : func (_base int, _input string) (int32, error) {
+					_output, _error := strconv.ParseInt (_input, _base, 32)
+					return int32 (_output), _error
+				},
+			"int32_format" : func (_base int, _input int32) (string) {
+					return strconv.FormatInt (int64 (_input), _base)
+				},
+			"uint32_parse" : func (_base int, _input string) (uint32, error) {
+					_output, _error := strconv.ParseUint (_input, _base, 32)
+					return uint32 (_output), _error
+				},
+			"uint32_format" : func (_base int, _input uint32) (string) {
+					return strconv.FormatUint (uint64 (_input), _base)
+				},
+			
+			"int64_parse" : func (_base int, _input string) (int64, error) {
+					_output, _error := strconv.ParseInt (_input, _base, 64)
+					return int64 (_output), _error
+				},
+			"int64_format" : func (_base int, _input int64) (string) {
+					return strconv.FormatInt (int64 (_input), _base)
+				},
+			"uint64_parse" : func (_base int, _input string) (uint64, error) {
+					_output, _error := strconv.ParseUint (_input, _base, 64)
+					return uint64 (_output), _error
+				},
+			"uint64_format" : func (_base int, _input uint64) (string) {
+					return strconv.FormatUint (uint64 (_input), _base)
+				},
+			
+			"float32_parse" : func (_input string) (float32, error) {
+					_output, _error := strconv.ParseFloat (_input, 32)
+					return float32 (_output), _error
+				},
+			"float32_format" : func (_input float32) (string) {
+					return strconv.FormatFloat (float64 (_input), 'f', -1, 32)
+				},
+			
+			"float64_parse" : func (_input string) (float64, error) {
+					_output, _error := strconv.ParseFloat (_input, 64)
+					return _output, _error
+				},
+			"float64_format" : func (_input float64) (string) {
+					return strconv.FormatFloat (_input, 'f', -1, 64)
+				},
+			
+			"bool_parse" : func (_input string) (bool, error) {
+					_output, _error := strconv.ParseBool (_input)
+					return _output, _error
+				},
+			"bool_format" : func (_input bool) (string) {
+					return strconv.FormatBool (_input)
+				},
+			
+			
+			// --------------------------------------------------------------------------------
+			
+			
+			"format" : func (_format string, _arguments ... interface{}) (string) {
+					return fmt.Sprintf (_format, _arguments...)
+				},
+			
+			
+			// --------------------------------------------------------------------------------
+			
+			
+			"array" : func (_inputs ... interface{}) ([]interface{}) {
+					return _inputs
+				},
+			
+			"array_append" : func (_array []interface{}, _inputs ... interface{}) ([]interface{}) {
+					return append (_array, _inputs...)
 				},
 			
 			"array_join" : func (_separator string, _input_0 []interface{}) (string, error) {
@@ -212,32 +326,103 @@ func templateFunctions () (map[string]interface{}) {
 					return strings.Join (_input, _separator), nil
 				},
 			
-			"split_lines" : func (_input string) ([]string, error) {
-					if _input == "" {
-						return []string {}, nil
-					}
-					_array := make ([]string, 0, 128)
-					_wasEmpty := false
-					for _, _line := range strings.Split (_input, "\n") {
-						if len (_line) > 0 {
-							_array = append (_array, _line)
-							_wasEmpty = false
-						} else {
-							_wasEmpty = true
-						}
-					}
-					if !_wasEmpty {
-						return nil, errorf (0x1e677d43, "expected `\n` at end of input") .ToError ()
-					}
-					return _array, nil
+			
+			// --------------------------------------------------------------------------------
+			
+			
+			"join" : func (_separator string, _input []string) (string) {
+					return strings.Join (_input, _separator)
 				},
 			
+			"split_all" : func (_separator string, _input string) ([]string) {
+					return strings.Split (_input, _separator)
+				},
+			"split_first" : func (_separator string, _input string) ([]string) {
+					return strings.SplitN (_input, _separator, 2)
+				},
+			"split_first_n" : func (_separator string, _input string, _count int) ([]string) {
+					return strings.SplitN (_input, _separator, _count)
+				},
+			
+			"replace_all" : func (_search string, _replacement string, _input string) (string) {
+					return strings.ReplaceAll (_input, _search, _replacement)
+				},
+			"replace_first" : func (_search string, _replacement string, _input string) (string) {
+					return strings.Replace (_input, _search, _replacement, 1)
+				},
+			"replace_first_n" : func (_search string, _replacement string, _input string, _count int) (string) {
+					return strings.Replace (_input, _search, _replacement, _count)
+				},
+			
+			"contains" : func (_string string, _input string) (bool) {
+					return strings.Contains (_input, _string)
+				},
+			"contains_any" : func (_characters string, _input string) (bool) {
+					return strings.ContainsAny (_input, _characters)
+				},
 			"has_prefix" : func (_prefix string, _input string) (bool) {
 					return strings.HasPrefix (_input, _prefix)
 				},
 			"has_suffix" : func (_suffix string, _input string) (bool) {
 					return strings.HasSuffix (_input, _suffix)
 				},
+			"first_index_of" : func (_string string, _input string) (int) {
+					return strings.Index (_input, _string)
+				},
+			"first_index_of_any" : func (_characters string, _input string) (int) {
+					return strings.IndexAny (_input, _characters)
+				},
+			"last_index_of" : func (_string string, _input string) (int) {
+					return strings.LastIndex (_input, _string)
+				},
+			"last_index_of_any" : func (_characters string, _input string) (int) {
+					return strings.LastIndex (_input, _characters)
+				},
+			"count_of" : func (_string string, _input string) (int) {
+					return strings.Count (_input, _string)
+				},
+			
+			"repeat" : func (_count int, _input string) (string) {
+					return strings.Repeat (_input, _count)
+				},
+			"trim_prefix" : func (_prefix string, _input string) (string) {
+					return strings.TrimPrefix (_input, _prefix)
+				},
+			"trim_suffix" : func (_suffix string, _input string) (string) {
+					return strings.TrimSuffix (_input, _suffix)
+				},
+			"trim_space" : func (_input string) (string) {
+					return strings.TrimSpace (_input)
+				},
+			"trim_any" : func (_characters string, _input string) (string) {
+					return strings.Trim (_input, _characters)
+				},
+			"trim_prefix_any" : func (_characters string, _input string) (string) {
+					return strings.TrimLeft (_input, _characters)
+				},
+			"trim_suffix_any" : func (_characters string, _input string) (string) {
+					return strings.TrimRight (_input, _characters)
+				},
+			
+			"to_lower_ascii" : func (_input string) (string) {
+					return strings.ToLower (_input)
+				},
+			"to_upper_ascii" : func (_input string) (string) {
+					return strings.ToUpper (_input)
+				},
+			"to_lower" : func (_input string) (string) {
+					return strings.ToLowerSpecial (nil, _input)
+				},
+			"to_upper" : func (_input string) (string) {
+					return strings.ToUpperSpecial (nil, _input)
+				},
+			"to_utf8" : func (_input string) (string) {
+					return strings.ToValidUTF8 (_input, "\ufffd")
+				},
+			
+			
+			// --------------------------------------------------------------------------------
+			
 			
 			"path_dirname" : func (_path string) (string) {
 					return path.Dir (_path)
@@ -269,6 +454,74 @@ func templateFunctions () (map[string]interface{}) {
 					return _path[: len (_path) - len (_extension)]
 				},
 			
+			
+			// --------------------------------------------------------------------------------
+			
+			
+			"split_lines" : func (_input string) ([]string, error) {
+					if _input == "" {
+						return []string {}, nil
+					}
+					_array := make ([]string, 0, 128)
+					_wasEmpty := false
+					for _, _line := range strings.Split (_input, "\n") {
+						if len (_line) > 0 {
+							_array = append (_array, _line)
+							_wasEmpty = false
+						} else {
+							_wasEmpty = true
+						}
+					}
+					if !_wasEmpty {
+						return nil, errorf (0x1e677d43, "expected `\\n` at end of input") .ToError ()
+					}
+					return _array, nil
+				},
+			
+			"join_lines" : func (_input []string) (string) {
+					if len (_input) > 0 {
+						return strings.Join (_input, "\n") + "\n"
+					} else {
+						return ""
+					}
+				},
+			
+			
+			// --------------------------------------------------------------------------------
+			
+			
+			"split_nulls" : func (_input string) ([]string, error) {
+					if _input == "" {
+						return []string {}, nil
+					}
+					_array := make ([]string, 0, 128)
+					_wasEmpty := false
+					for _, _line := range strings.Split (_input, "\x00") {
+						if len (_line) > 0 {
+							_array = append (_array, _line)
+							_wasEmpty = false
+						} else {
+							_wasEmpty = true
+						}
+					}
+					if !_wasEmpty {
+						return nil, errorf (0x88a1e3db, "expected `\\0` at end of input") .ToError ()
+					}
+					return _array, nil
+				},
+			
+			"join_nulls" : func (_input []string) (string) {
+					if len (_input) > 0 {
+						return strings.Join (_input, "\x00") + "\x00"
+					} else {
+						return ""
+					}
+				},
+			
+			
+			// --------------------------------------------------------------------------------
+			
+			
 			"shell_quote" : func (_input string) (string) {
 					// NOTE:  https://github.com/python/cpython/blob/3.8/Lib/shlex.py#L330
 					return `'` + strings.ReplaceAll (_input, `'`, `'\''`) + `'`
@@ -283,6 +536,9 @@ func templateFunctions () (map[string]interface{}) {
 					// NOTE:  https://golang.org/ref/spec#String_literals
 					return strconv.QuoteToASCII (_input)
 				},
+			
+			
+			// --------------------------------------------------------------------------------
 		}
 }
 
