@@ -856,8 +856,20 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _data
 	
 	@_inject
-	def __Z__file_write (_path, _data, *, _json = None, _mode = None, _create = True, _exclusive = None, _append = False, _truncate = False, _panic = True) :
-		_fd = Z.fd_open_for_write (_path, _create = _create, _exclusive = _exclusive, _append = _append, _truncate = _truncate, _panic = _panic)
+	def __Z__file_write (_path, _data, *, _json = None, _mode = None, _replace = None, _create = None, _exclusive = None, _append = None, _truncate = None, _panic = True) :
+		if _create is None and _replace is None :
+			_replace = True
+		elif _replace is not None :
+			assert _create is None and _exclusive is None and _append is None and _truncate is None, "[349cbb39]"
+		elif _create is not None :
+			assert _replace is None, "[8357ff43]"
+			if _exclusive is None :
+				_exclusive = True
+		if _replace :
+			_path_temporary = Z.path_temporary_for (_path)
+			_fd = Z.fd_open_for_write (_path_temporary, _mode = _mode, _create = True, _exclusive = True, _panic = _panic)
+		else :
+			_fd = Z.fd_open_for_write (_path, _mode = _mode, _create = _create, _exclusive = _exclusive, _append = _append, _truncate = _truncate, _panic = _panic)
 		if _fd is None :
 			return False
 		if _json :
@@ -876,6 +888,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_offset = PY.os.write (_fd, _buffer)
 			_buffer = _buffer[_offset:]
 		PY.os.close (_fd)
+		if _replace :
+			Z.rename (_path_temporary, _path)
 		return True
 	
 	## --------------------------------------------------------------------------------
