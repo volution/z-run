@@ -680,6 +680,25 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	def __Z__path_matches (_path, _pattern) :
 		return PY.fnmatch.fnmatch (_path, _pattern)
 	
+	@_inject
+	def __Z__path_temporary_for (_path, **_options) :
+		_dirname, _basename = PY.path.split (_path)
+		return Z.path_temporary_in (_dirname, _basename, **_options)
+	
+	@_inject
+	def __Z__path_temporary_in (_path, _name, *, _prefix = ".tmp.", _infix = ".", _suffix = "", _token = 8, _pid = True) :
+		if _path is None :
+			_path = Z.environment_or_none.TMPDIR
+		if _path is None :
+			_path = "/tmp"
+		_name = _name.strip (".")
+		if _name == "" or "/" in _name :
+			Z.panic (0x9fbff49a, "invalid path")
+		_token = Z.random_token (_token)
+		_name = _prefix + (str (Z.pid) + "-" if _pid else "") + _token + _infix + _name + _suffix
+		_path = PY.path.join (_path, _name)
+		return _path
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
