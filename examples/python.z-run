@@ -71,7 +71,7 @@
 	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.zspawn (":: true")
-	Z.zspawn (":: false", _panic = False)
+	Z.zspawn (":: false", enforce = False)
 !!
 
 << python / test / zexec
@@ -84,7 +84,7 @@
 	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.spawn ("true")
-	Z.spawn ("false", _panic = False)
+	Z.spawn ("false", enforce = False)
 !!
 
 << python / test / exec
@@ -97,17 +97,17 @@
 	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.log_cut ()
-	Z.spawn ("true", _stdin = Z.fd_open_null (), _fd_close = True)
-	Z.spawn ("true", _stdout = Z.fd_open_null (), _fd_close = True)
-	Z.spawn ("true", _stderr = Z.fd_open_null (), _fd_close = True)
-	Z.spawn ("true", _stdin = Z.fd_open_null (), _stdout = Z.fd_open_null (), _stderr = Z.fd_open_null (), _fd_close = True)
-	Z.spawn ("cat", _stdin = Z.fd_open_for_read ("/etc/hosts"), _stdout = Z.fd_open_null (), _fd_close = True)
+	Z.spawn ("true", stdin = Z.fd_open_null (), fd_close = True)
+	Z.spawn ("true", stdout = Z.fd_open_null (), fd_close = True)
+	Z.spawn ("true", stderr = Z.fd_open_null (), fd_close = True)
+	Z.spawn ("true", stdin = Z.fd_open_null (), stdout = Z.fd_open_null (), stderr = Z.fd_open_null (), fd_close = True)
+	Z.spawn ("cat", stdin = Z.fd_open_for_read ("/etc/hosts"), stdout = Z.fd_open_null (), fd_close = True)
 	Z.log_cut ()
-	Z.spawn ("lsof", "-p", "%d" % Z.pid, _stdin = Z.fd_open_null (), _stderr = Z.fd_open_null (), _stdout = Z.fd_clone (Z.stderr), _fd_close = True)
+	Z.spawn ("lsof", "-p", "%d" % Z.pid, stdin = Z.fd_open_null (), stderr = Z.fd_open_null (), stdout = Z.fd_clone (Z.stderr), fd_close = True)
 	Z.log_cut ()
-	Z.spawn ("lsof", "-c", "lsof", _stdin = Z.fd_open_null (), _stderr = Z.fd_open_null (), _stdout = Z.fd_clone (Z.stderr), _fd_close = True)
+	Z.spawn ("lsof", "-c", "lsof", stdin = Z.fd_open_null (), stderr = Z.fd_open_null (), stdout = Z.fd_clone (Z.stderr), fd_close = True)
 	Z.log_cut ()
-	Z.spawn ("lsof", "-c", "lsof", _stdin = Z.fd_open_null (), _stderr = Z.fd_open_null (), _stdout = Z.fd_clone (Z.stderr), _fd_close = True)
+	Z.spawn ("lsof", "-c", "lsof", stdin = Z.fd_open_null (), stderr = Z.fd_open_null (), stdout = Z.fd_clone (Z.stderr), fd_close = True)
 	Z.log_cut ()
 !!
 
@@ -126,32 +126,32 @@
 << python / test / wait
 	#! <python3+>
 	Z.expect_no_arguments ()
-	_pid = Z.spawn ("true", _wait = False)
-	assert 0 == Z.process_wait (_pid, _panic = False)
-	_pid = Z.spawn ("false", _wait = False)
-	assert 1 == Z.process_wait (_pid, _panic = False)
-	_pid = Z.spawn ("sleep", "6s", _wait = False)
-	Z.process_terminate (_pid, _wait = False)
-	assert -Z.py.signal.SIGTERM == Z.process_wait (_pid, _panic = False)
-	_pid = Z.spawn ("sleep", "6s", _wait = False)
-	Z.process_kill (_pid, _wait = False)
-	assert -Z.py.signal.SIGKILL == Z.process_wait (_pid, _panic = False)
+	_pid = Z.spawn ("true", wait = False)
+	assert 0 == Z.process_wait (_pid, enforce = False)
+	_pid = Z.spawn ("false", wait = False)
+	assert 1 == Z.process_wait (_pid, enforce = False)
+	_pid = Z.spawn ("sleep", "6s", wait = False)
+	Z.process_terminate (_pid, wait = False)
+	assert -Z.py.signal.SIGTERM == Z.process_wait (_pid, enforce = False)
+	_pid = Z.spawn ("sleep", "6s", wait = False)
+	Z.process_kill (_pid, wait = False)
+	assert -Z.py.signal.SIGKILL == Z.process_wait (_pid, enforce = False)
 !!
 
 << python / test / communicate
 	#! <python3+>
 	Z.expect_no_arguments ()
-	_output = Z.spawn ("echo", "abc", _stdout_data = True)
+	_output = Z.spawn ("echo", "abc", stdout_data = True)
 	assert _output == "abc\n"
-	_output = Z.spawn ("echo", "abc", _stdout_data = str)
+	_output = Z.spawn ("echo", "abc", stdout_data = str)
 	assert _output == "abc\n"
-	_output = Z.spawn ("echo", "abc", _stdout_data = bytes)
+	_output = Z.spawn ("echo", "abc", stdout_data = bytes)
 	assert _output == b"abc\n"
-	_output = Z.spawn ("cat", _stdin_data = "abc\n", _stdout_data = str)
+	_output = Z.spawn ("cat", stdin_data = "abc\n", stdout_data = str)
 	assert _output == "abc\n"
 	_output = Z.spawn_capture ("echo", "abc")
 	assert _output == "abc\n"
-	_output = Z.spawn_capture ("echo", "{}", _json = True)
+	_output = Z.spawn_capture ("echo", "{}", json = True)
 	assert _output == {}
 !!
 
@@ -170,7 +170,7 @@
 	assert Z.path ("//etc/.") == "/etc", "[1caa1de9]"
 	assert Z.path (("/etc", "hosts")) == "/etc/hosts", "[b1c36167]"
 	assert Z.path (("/etc/hosts", "/proc/self")) == "/proc/self", "[e126cddb]"
-	assert Z.path ("/proc/self", _canonical = True) != "/proc/self", "[0909bbcb7]"
+	assert Z.path ("/proc/self", canonical = True) != "/proc/self", "[0909bbcb7]"
 !!
 
 << python / test / paths / split
@@ -200,23 +200,23 @@
 << python / test / stat
 	#! <python3+>
 	Z.expect_no_arguments ()
-	Z.exists ("/etc", _panic = 0x2ebc156a)
-	Z.not_exists ("/__none__", _panic = 0x6412700c)
-	Z.is_folder ("/etc", _panic = 0x6f67d170)
-	Z.is_file ("/etc/hosts", _panic = 0xf67ac126)
-	Z.is_file_or_folder ("/etc", _panic = 0xea1ecf05)
-	Z.is_file_or_folder ("/etc/hosts", _panic = 0xbf9c1575)
-	Z.is_symlink ("/proc/self", _panic = 0x492a6caf)
-	Z.is_folder ("/proc/self", _panic = 0x6746e58d)
-	Z.is_socket ("/dev/log", _panic = 0x708c3426)
-	Z.is_dev_block ("/dev/sda", _panic = 0x7ac9ef0f)
-	Z.is_dev_char ("/dev/null", _panic = 0xa8623aa9)
-	Z.is_special ("/dev/sda", _panic = 0x8ea394a4)
-	Z.is_special ("/dev/null", _panic = 0x3d458181)
-	Z.is_special ("/dev/log", _panic = 0xb3b9fb84)
-	Z.exists ("/dev/log", _panic = 0xc83ed2ae)
-	Z.is_file_not_empty ("/etc/hosts", _panic = 0xec23876b)
-	Z.is_file_empty ("/proc/self/environ", _panic = 0x80a8c78c)
+	Z.exists ("/etc", enforce = 0x2ebc156a)
+	Z.not_exists ("/__none__", enforce = 0x6412700c)
+	Z.is_folder ("/etc", enforce = 0x6f67d170)
+	Z.is_file ("/etc/hosts", enforce = 0xf67ac126)
+	Z.is_file_or_folder ("/etc", enforce = 0xea1ecf05)
+	Z.is_file_or_folder ("/etc/hosts", enforce = 0xbf9c1575)
+	Z.is_symlink ("/proc/self", enforce = 0x492a6caf)
+	Z.is_folder ("/proc/self", enforce = 0x6746e58d)
+	Z.is_socket ("/dev/log", enforce = 0x708c3426)
+	Z.is_dev_block ("/dev/sda", enforce = 0x7ac9ef0f)
+	Z.is_dev_char ("/dev/null", enforce = 0xa8623aa9)
+	Z.is_special ("/dev/sda", enforce = 0x8ea394a4)
+	Z.is_special ("/dev/null", enforce = 0x3d458181)
+	Z.is_special ("/dev/log", enforce = 0xb3b9fb84)
+	Z.exists ("/dev/log", enforce = 0xc83ed2ae)
+	Z.is_file_not_empty ("/etc/hosts", enforce = 0xec23876b)
+	Z.is_file_empty ("/proc/self/environ", enforce = 0x80a8c78c)
 !!
 
 << python / test / environment
@@ -251,11 +251,11 @@
 	Z.file_write ("/tmp/z-run-python-tests--files", '{"a":"%s"}' % _token)
 	_output = Z.file_read ("/tmp/z-run-python-tests--files")
 	assert _output == '{"a":"%s"}' % _token
-	_output = Z.file_read ("/tmp/z-run-python-tests--files", _json = True)
+	_output = Z.file_read ("/tmp/z-run-python-tests--files", json = True)
 	assert _output == {"a":_token}
 	_token = Z.random_token (128)
-	Z.file_write ("/tmp/z-run-python-tests--files", {"a":_token}, _json = True)
-	_output = Z.file_read ("/tmp/z-run-python-tests--files", _json = True)
+	Z.file_write ("/tmp/z-run-python-tests--files", {"a":_token}, json = True)
+	_output = Z.file_read ("/tmp/z-run-python-tests--files", json = True)
 	assert _output == {"a":_token}
 !!
 
@@ -282,8 +282,8 @@
 		assert Z.random_range (0, 256) <= 256
 		assert Z.random_range (0, 256, 5) % 5 == 0
 		assert Z.random_select ([0, 1, 2]) in [0, 1, 2]
-		assert len (Z.random_sample ([0, 1, 2, 3], 2, _repeats = False)) == 2
-		assert len (Z.random_sample ([0, 1, 2, 3], 8, _repeats = True)) == 8
+		assert len (Z.random_sample ([0, 1, 2, 3], 2, repeats = False)) == 2
+		assert len (Z.random_sample ([0, 1, 2, 3], 8, repeats = True)) == 8
 		assert len (Z.random_shuffle ([0, 1, 2, 3])) == 4
 !!
 
