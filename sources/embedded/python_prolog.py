@@ -65,13 +65,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _panic = True, **_options) :
+	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _enforce = True, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _panic = _panic)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
 	
 	@_inject
 	def __Z__zspawn_capture (_scriptlet, *_arguments, **_options) :
-		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _panic = True)
+		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _enforce = True)
 		return Z._spawn_capture_output (_output, **_options)
 	
 	@_inject
@@ -95,13 +95,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn (_executable, *_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _panic = True, **_options) :
+	def __Z__spawn (_executable, *_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _enforce = True, **_options) :
 		_descriptor = Z._exec_prepare (_executable, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _panic = _panic)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
 	
 	@_inject
 	def __Z__spawn_capture (_executable, *_arguments, **_options) :
-		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _panic = True)
+		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _enforce = True)
 		return Z._spawn_capture_output (_output, **_options)
 	
 	@_inject
@@ -122,7 +122,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn_0 (_descriptor, *, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _panic = True) :
+	def __Z__spawn_0 (_descriptor, *, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _enforce = True) :
 		# FIXME:  Handle lookup!
 		_executable, _lookup, _arguments, _environment, _chdir, _files = _descriptor
 		if _files is not None :
@@ -214,16 +214,16 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			else :
 				_process.wait ()
 			_outcome = _process.returncode
-			if _panic and _outcome != 0 :
-				Z.panic ((_panic, 0x7d3900c4), "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _outcome)
+			if _enforce and _outcome != 0 :
+				Z.panic ((_enforce, 0x7d3900c4), "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _outcome)
 			if _should_communicate :
 				if _stderr_data is not None :
-					if _panic :
+					if _enforce :
 						_outcome = (_stdout_data, _stderr_data)
 					else :
 						_outcome = (_outcome, _stdout_data, _stderr_data)
 				else :
-					if _panic :
+					if _enforce :
 						_outcome = _stdout_data
 					else :
 						_outcome = (_outcome, _stdout_data)
@@ -283,7 +283,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _executable, _lookup, _arguments, _environment, _chdir, _files
 	
 	@_inject
-	def __Z__process_wait (_pid, *, _panic = None) :
+	def __Z__process_wait (_pid, *, _enforce = None) :
 		_pid_0 = Z._pid (_pid)
 		_pid, _outcome = PY.os.waitpid (_pid_0, 0)
 		if PY.os.WIFEXITED (_outcome) :
@@ -292,26 +292,26 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_outcome = 0 - PY.os.WTERMSIG (_outcome)
 		else :
 			Z.panic (0xb4179b04, "waiting `%s` failed with unknown outcome: %r", _pid, _outcome)
-		if _panic and _outcome != 0 :
-			Z.panic ((_panic, 0xc0e8ec5d), "waiting `%s` failed with status: %d", _pid, _outcome)
+		if _enforce and _outcome != 0 :
+			Z.panic ((_enforce, 0xc0e8ec5d), "waiting `%s` failed with status: %d", _pid, _outcome)
 		if _pid == _pid_0 :
 			return _outcome
 		else :
 			return _pid, _outcome
 	
 	@_inject
-	def __Z__process_signal (_pid, _signal, *, _wait = False, _panic = None) :
+	def __Z__process_signal (_pid, _signal, *, _wait = False, _enforce = None) :
 		_pid = Z._pid (_pid)
 		PY.os.kill (_pid, _signal)
 		if _wait :
-			return Z.process_wait (_pid, _panic = _panic)
+			return Z.process_wait (_pid, _enforce = _enforce)
 	
 	@_inject
-	def __Z__process_terminate (_pid, *, _wait = False, _panic = None) :
+	def __Z__process_terminate (_pid, *, _wait = False, _enforce = None) :
 		return Z.process_signal (_pid, PY.signal.SIGTERM)
 	
 	@_inject
-	def __Z__process_kill (_pid, *, _wait = False, _panic = None) :
+	def __Z__process_kill (_pid, *, _wait = False, _enforce = None) :
 		return Z.process_signal (_pid, PY.signal.SIGKILL)
 	
 	@_inject
@@ -369,7 +369,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__pipeline (_commands, *, _wait = True, _fd_close = False, _panic = True) :
+	def __Z__pipeline (_commands, *, _wait = True, _fd_close = False, _enforce = True) :
 		_count = len (_commands)
 		if _count == 0 :
 			Z.panic (0x1b1812d7, "pipeline empty")
@@ -443,7 +443,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				_terminated += 1
 				if _process.returncode != 0 :
 					_succeeded = False
-					if _panic :
+					if _enforce :
 						Z.log_warning (0x76d05a67, "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _process.returncode)
 				_processes[_index] = None
 			if _terminated == _count :
@@ -452,8 +452,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				PY.signal.sigtimedwait ([PY.signal.SIGCHLD], 6)
 		if Z.python_version >= 303 :
 			PY.signal.signal (PY.signal.SIGCHLD, _signal_handler_old)
-		if _panic and not _succeeded :
-			Z.panic ((_panic, 0x1d6fad91), "pipeline failed")
+		if _enforce and not _succeeded :
+			Z.panic ((_enforce, 0x1d6fad91), "pipeline failed")
 		return _succeeded
 	
 	## --------------------------------------------------------------------------------
@@ -706,76 +706,76 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__exists (_path, *, _follow = True, _panic = False) :
+	def __Z__exists (_path, *, _follow = True, _enforce = False) :
 		_stat = Z.stat (_path, _follow = _follow)
-		if _stat is None and _panic :
-			Z.panic ((_panic, 0x383d3cc5), "file-system path does not exist `%s`", _path)
+		if _stat is None and _enforce :
+			Z.panic ((_enforce, 0x383d3cc5), "file-system path does not exist `%s`", _path)
 		return _stat is not None
 	
 	@_inject
-	def __Z__not_exists (_path, *, _follow = True, _panic = False) :
+	def __Z__not_exists (_path, *, _follow = True, _enforce = False) :
 		_stat = Z.stat (_path, _follow = _follow)
-		if _stat is not None and _panic :
-			Z.panic ((_panic, 0x9064abfc), "file-system path already exists `%s`", _path)
+		if _stat is not None and _enforce :
+			Z.panic ((_enforce, 0x9064abfc), "file-system path already exists `%s`", _path)
 		return _stat is None
 	
 	@_inject
-	def __Z__is_file (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_file (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_file_empty (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size == 0), _follow = _follow, _panic = _panic)
+	def __Z__is_file_empty (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size == 0), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_file_not_empty (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size > 0), _follow = _follow, _panic = _panic)
+	def __Z__is_file_not_empty (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size > 0), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_folder (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_folder (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_file_or_folder (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) or PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_file_or_folder (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) or PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_symlink (_path, *, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISLNK (_stat.st_mode)), _follow = False, _panic = _panic)
+	def __Z__is_symlink (_path, *, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISLNK (_stat.st_mode)), _follow = False, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_pipe (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_pipe (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_socket (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISSOCK (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_socket (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISSOCK (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_dev_block (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISBLK (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_dev_block (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISBLK (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_dev_char (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_dev_char (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z__is_special (_path, *, _follow = True, _panic = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode) or PY.stat.S_ISSOCK (_stat.st_mode) or PY.stat.S_ISBLK (_stat.st_mode) or PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _panic = _panic)
+	def __Z__is_special (_path, *, _follow = True, _enforce = False) :
+		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode) or PY.stat.S_ISSOCK (_stat.st_mode) or PY.stat.S_ISBLK (_stat.st_mode) or PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z___stat_check (_path, _check, *, _follow = True, _panic = False) :
+	def __Z___stat_check (_path, _check, *, _follow = True, _enforce = False) :
 		_stat = Z.stat (_path, _follow = _follow)
 		if _stat is None :
-			if _panic :
-				Z.panic ((_panic, 0xa23c577e), "file-system path not found `%s`", _path)
+			if _enforce :
+				Z.panic ((_enforce, 0xa23c577e), "file-system path not found `%s`", _path)
 			else :
 				return None
 		if _check (_stat) :
 			return True
 		else :
-			if _panic :
-				Z.panic ((_panic, 0xfdbdc9a5), "file-system stat check failed `%s`", _path)
+			if _enforce :
+				Z.panic ((_enforce, 0xfdbdc9a5), "file-system stat check failed `%s`", _path)
 			else :
 				return False
 	
@@ -830,8 +830,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.os.symlink (_source, _target)
 	
 	@_inject
-	def __Z__file_read (_path, *, _data = None, _json = None, _panic = True) :
-		_fd = Z.fd_open_for_read (_path, _panic = _panic)
+	def __Z__file_read (_path, *, _data = None, _json = None, _enforce = True) :
+		_fd = Z.fd_open_for_read (_path, _enforce = _enforce)
 		if _fd is None :
 			return None
 		_buffers = []
@@ -860,7 +860,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _data
 	
 	@_inject
-	def __Z__file_write (_path, _data, *, _json = None, _mode = None, _replace = None, _create = None, _exclusive = None, _append = None, _truncate = None, _panic = True) :
+	def __Z__file_write (_path, _data, *, _json = None, _mode = None, _replace = None, _create = None, _exclusive = None, _append = None, _truncate = None, _enforce = True) :
 		if _create is None and _replace is None :
 			_replace = True
 		elif _replace is not None :
@@ -871,9 +871,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				_exclusive = True
 		if _replace :
 			_path_temporary = Z.path_temporary_for (_path)
-			_fd = Z.fd_open_for_write (_path_temporary, _mode = _mode, _create = True, _exclusive = True, _panic = _panic)
+			_fd = Z.fd_open_for_write (_path_temporary, _mode = _mode, _create = True, _exclusive = True, _enforce = _enforce)
 		else :
-			_fd = Z.fd_open_for_write (_path, _mode = _mode, _create = _create, _exclusive = _exclusive, _append = _append, _truncate = _truncate, _panic = _panic)
+			_fd = Z.fd_open_for_write (_path, _mode = _mode, _create = _create, _exclusive = _exclusive, _append = _append, _truncate = _truncate, _enforce = _enforce)
 		if _fd is None :
 			return False
 		if _json :
@@ -899,7 +899,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__fd_open_for_read (_path, *, _close_on_exec = True, _panic = True) :
+	def __Z__fd_open_for_read (_path, *, _close_on_exec = True, _enforce = True) :
 		_flags = PY.os.O_RDONLY | PY.os.O_NOCTTY
 		if _close_on_exec :
 			_flags |= PY.os.O_CLOEXEC
@@ -907,14 +907,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_file = PY.os.open (_path, _flags)
 		except OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
-				if _panic :
-					Z.panic ((_panic, 0x9ca19f87), "open `%s` failed:  does not exist", _path)
+				if _enforce :
+					Z.panic ((_enforce, 0x9ca19f87), "open `%s` failed:  does not exist", _path)
 			else :
 				raise
 		return _file
 	
 	@_inject
-	def __Z__fd_open_for_write (_path, *, _mode = None, _create = True, _exclusive = None, _read = False, _append = False, _truncate = False, _close_on_exec = True, _panic = True) :
+	def __Z__fd_open_for_write (_path, *, _mode = None, _create = True, _exclusive = None, _read = False, _append = False, _truncate = False, _close_on_exec = True, _enforce = True) :
 		if _mode is None : _mode = 0o666
 		_flags = PY.os.O_WRONLY | PY.os.O_NOCTTY
 		if _create :
@@ -938,11 +938,11 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_file = PY.os.open (_path, _flags, _mode)
 		except OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
-				if _panic :
-					Z.panic ((_panic, 0x008389df), "open `%s` failed:  does not exist", _path)
+				if _enforce :
+					Z.panic ((_enforce, 0x008389df), "open `%s` failed:  does not exist", _path)
 			elif _error.errno == PY.errno.EEXIST :
-				if _panic :
-					Z.panic ((_panic, 0x37020d90), "open `%s` failed:  already exists", _path)
+				if _enforce :
+					Z.panic ((_enforce, 0x37020d90), "open `%s` failed:  already exists", _path)
 			else :
 				raise
 		return _file
@@ -986,10 +986,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.os.close (_file)
 	
 	@_inject
-	def __Z__is_fd (_file, *, _panic = None) :
+	def __Z__is_fd (_file, *, _enforce = None) :
 		if _file is None :
-			if _panic :
-				Z.panic ((_panic, 0x3c3ff99e), "invalid file descriptor (none)")
+			if _enforce :
+				Z.panic ((_enforce, 0x3c3ff99e), "invalid file descriptor (none)")
 			return False
 		elif isinstance (_file, PY.builtins.int) :
 			if _file >= 0 :
@@ -1003,8 +1003,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			except OSError as _error :
 				Z.panic (0x7f97a33f, "invalid file descriptor (not supported): %r  //  %s", _error)
 		else :
-			if _panic :
-				Z.panic ((_panic, 0xe0d78a09), "invalid file descriptor (unknown): %r", _file)
+			if _enforce :
+				Z.panic ((_enforce, 0xe0d78a09), "invalid file descriptor (unknown): %r", _file)
 			return False
 	
 	@_inject
