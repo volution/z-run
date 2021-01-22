@@ -26,6 +26,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.io = __import__ ("io")
 	PY.re = __import__ ("re")
 	PY.json = __import__ ("json")
+	PY.fnmatch = __import__ ("fnmatch")
 	
 	PY.path = PY.os.path
 	
@@ -578,15 +579,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	def __Z__path (_path, *, _absolute = False, _canonical = False, _relative = None) :
 		if not isinstance (_path, PY.basestring) and not isinstance (_path, PY.bytes) :
 			_path = PY.path.join (*_path)
-		_path = PY.path.normpath (_path)
-		if _path.startswith ("//") :
-			_path = "/" + _path.lstrip ("/")
+		_path = Z.path_normalize (_path)
 		if _absolute :
-			_path = PY.path.abspath (_path)
+			_path = Z.path_absolute (_path)
 		if _canonical :
-			_path = PY.path.realpath (_path)
+			_path = Z.path_canonical (_path)
 		if _relative is not None :
-			_path = PY.path.relpath (_path, _relative)
+			_path = Z.path_relative (_path, _relative)
 		return _path
 	
 	@_inject
@@ -618,6 +617,66 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_new.extend (_list)
 		_new = ":".join (_new)
 		return _new
+	
+	@_inject
+	def __Z__path_normalize (_path) :
+		_path = PY.path.normpath (_path)
+		if _path.startswith ("//") :
+			_path = "/" + _path.lstrip ("/")
+		return _path
+	
+	@_inject
+	def __Z__path_dirname (_path) :
+		return PY.path.dirname (_path)
+	
+	@_inject
+	def __Z__path_basename (_path) :
+		return PY.path.basename (_path)
+	
+	@_inject
+	def __Z__path_canonical (_path) :
+		return PY.path.realpath (_path)
+	
+	@_inject
+	def __Z__path_absolute (_path) :
+		return PY.path.abspath (_path)
+	
+	@_inject
+	def __Z__path_relative (_path) :
+		return PY.path.relpath (_path, _relative)
+	
+	@_inject
+	def __Z__path_split (_path) :
+		_components = []
+		_dirname = Z.path_normalize (_path)
+		while _dirname != "" :
+			_dirname, _basename = PY.path.split (_dirname)
+			if _basename != "" :
+				_components.append (_basename)
+			if _dirname == "/" :
+				_components.append (_dirname)
+				_dirname = ""
+		_components = _components.reverse ()
+		_components = tuple (_components)
+		return _components
+	
+	@_inject
+	def __Z__path_extension (_path) :
+		_path, _extension = PY.path.splitext (_path)
+		if _extension != "" :
+			_extension = _extension[1:]
+		else :
+			_extension = None
+		return _extension
+	
+	@_inject
+	def __Z__path_without_extension (_path) :
+		_path, _extension = PY.path.splitext (_path)
+		return _path
+	
+	@_inject
+	def __Z__path_matches (_path, _pattern) :
+		return PY.fnmatch.fnmatch (_path, _pattern)
 	
 	## --------------------------------------------------------------------------------
 	
