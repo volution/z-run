@@ -27,6 +27,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.re = __import__ ("re")
 	PY.json = __import__ ("json")
 	PY.fnmatch = __import__ ("fnmatch")
+	PY.random = __import__ ("random") .SystemRandom ()
+	PY.binascii = __import__ ("binascii")
 	
 	PY.path = PY.os.path
 	
@@ -991,6 +993,54 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z__chdir (_path) :
 		PY.os.chdir (_path)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __Z__random_bytes (_bytes) :
+		if _bytes == 0 :
+			return b""
+		return PY.os.urandom (_bytes)
+	
+	@_inject
+	def __Z__random_token (_bytes) :
+		if _bytes == 0 :
+			return ""
+		_data = Z.random_bytes (_bytes)
+		_data = PY.binascii.b2a_hex (_data)
+		_data = _data.decode ("ascii")
+		return _data
+	
+	@_inject
+	def __Z__random_integer (_bits) :
+		if _bits == 0 :
+			return 0
+		return PY.random.getrandbits (_bits)
+	
+	@_inject
+	def __Z__random_range (_start, _stop, _step = 1) :
+		return PY.random.randrange (_start, _stop, _step)
+	
+	@_inject
+	def __Z__random_float (_a, _b) :
+		return PY.random.uniform (_a, _b)
+	
+	@_inject
+	def __Z__random_select (_sequence) :
+		return PY.random.choice (_sequence)
+	
+	@_inject
+	def __Z__random_sample (_sequence, _count, *, _repeats = False) :
+		if not _repeats :
+			return PY.random.sample (_sequence, _count)
+		else :
+			return PY.random.choices (_sequence, k = _count)
+	
+	@_inject
+	def __Z__random_shuffle (_sequence) :
+		_sequence = list (_sequence)
+		PY.random.shuffle (_sequence)
+		return _sequence
 	
 	## --------------------------------------------------------------------------------
 	
