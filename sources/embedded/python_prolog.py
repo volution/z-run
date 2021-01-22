@@ -546,6 +546,17 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
+	def __Z__enforce (_condition, *, _code = None, _message = None) :
+		if _message is None : _message = "enforcement failed"
+		if not isinstance (_condition, PY.builtins.bool) :
+			if _code is None : _code = 0x97ee7cf1
+			Z.panic (_code, _message)
+		if not _condition :
+			if _code is None : _code = 0x0e36cc55
+			Z.panic (_code, _message)
+		return _condition
+	
+	@_inject
 	def __Z__enforce_regex (_value, _pattern, *, _code = None, _message = None) :
 		if _message is None : _message = "enforcement failed"
 		_pattern = Z.regex (_pattern)
