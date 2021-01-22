@@ -16,6 +16,7 @@
 	"${ZRUN[@]}" ':: python / test / redirects' 2> /dev/null
 	"${ZRUN[@]}" ':: python / test / pipeline'
 	"${ZRUN[@]}" ':: python / test / wait'
+	"${ZRUN[@]}" ':: python / test / communicate'
 	"${ZRUN[@]}" ':: python / test / pipes'
 	"${ZRUN[@]}" ':: python / test / paths'
 	"${ZRUN[@]}" ':: python / test / stat'
@@ -132,6 +133,23 @@
 	_pid = Z.spawn ("sleep", "6s", _wait = False)
 	Z.process_kill (_pid, _wait = False)
 	assert -Z.py.signal.SIGKILL == Z.process_wait (_pid, _panic = False)
+!!
+
+<< python / test / communicate
+	#! <python3+>
+	Z.expect_no_arguments ()
+	_output = Z.spawn ("echo", "abc", _stdout_data = True)
+	assert _output == "abc\n"
+	_output = Z.spawn ("echo", "abc", _stdout_data = str)
+	assert _output == "abc\n"
+	_output = Z.spawn ("echo", "abc", _stdout_data = bytes)
+	assert _output == b"abc\n"
+	_output = Z.spawn ("cat", _stdin_data = "abc\n", _stdout_data = str)
+	assert _output == "abc\n"
+	_output = Z.spawn_capture ("echo", "abc")
+	assert _output == "abc\n"
+	_output = Z.spawn_capture ("echo", "{}", _json = True)
+	assert _output == {}
 !!
 
 << python / test / pipes
