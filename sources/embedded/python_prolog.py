@@ -738,8 +738,65 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.os.close (_file)
 	
 	@_inject
+	def __Z__rename (_source, _target) :
+		PY.os.rename (_source, _target)
+	
+	@_inject
 	def __Z__symlink (_source, _target) :
 		PY.os.symlink (_source, _target)
+	
+	@_inject
+	def __Z__file_read (_path, *, _data = None, _json = None, _panic = True) :
+		_fd = Z.fd_open_for_read (_path, _panic = _panic)
+		if _fd is None :
+			return None
+		_buffers = []
+		while True :
+			_buffer = PY.os.read (_fd, 1024 * 1024)
+			if len (_buffer) == 0 :
+				break
+			_buffers.append (_buffer)
+		PY.os.close (_fd)
+		if _json :
+			assert _data is None, "[be2949cc]"
+		if _data is None or _data is PY.unicode :
+			_buffers = [_buffer.decode ("utf-8") for _buffer in _buffers]
+			_buffers = u"".join (_buffers)
+		elif _data is PY.str :
+			_buffers = [_buffer.decode ("ascii") for _buffer in _buffers]
+			_buffers = "".join (_buffers)
+		elif _data is PY.bytes :
+			_buffers = "".join (_buffers)
+		else :
+			Z.panic (0x764fba9e, "invalid data type")
+		if _json :
+			_data = PY.json.loads (_buffers)
+		else :
+			_data = _buffers
+		return _data
+	
+	@_inject
+	def __Z__file_write (_path, _data, *, _json = None, _mode = None, _create = True, _exclusive = None, _append = False, _truncate = False, _panic = True) :
+		_fd = Z.fd_open_for_write (_path, _create = _create, _exclusive = _exclusive, _append = _append, _truncate = _truncate, _panic = _panic)
+		if _fd is None :
+			return False
+		if _json :
+			_data = PY.json.dumps (_data)
+		if _data is None :
+			_buffer = b""
+		elif isinstance (_data, PY.unicode) :
+			_buffer = _data.encode ("utf-8")
+		elif isinstance (_data, PY.str) :
+			_buffer = _data.encode ("ascii")
+		elif isinstance (_data, PY.bytes) :
+			_buffer = _data
+		else :
+			Z.panic (0x5fbb8542, "invalid data type")
+		while len (_buffer) > 0 :
+			_offset = PY.os.write (_fd, _buffer)
+			_buffer = _buffer[_offset:]
+		PY.os.close (_fd)
+		return True
 	
 	## --------------------------------------------------------------------------------
 	
@@ -753,7 +810,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		except OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
 				if _panic :
-					Z.panic ((_panic, 0x9ca19f87), "open `%s` failed:  does not exist")
+					Z.panic ((_panic, 0x9ca19f87), "open `%s` failed:  does not exist", _path)
 			else :
 				raise
 		return _file
@@ -784,10 +841,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		except OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
 				if _panic :
-					Z.panic ((_panic, 0x008389df), "open `%s` failed:  does not exist")
+					Z.panic ((_panic, 0x008389df), "open `%s` failed:  does not exist", _path)
 			elif _error.errno == PY.errno.EEXIST :
 				if _panic :
-					Z.panic ((_panic, 0x37020d90), "open `%s` failed:  already exists")
+					Z.panic ((_panic, 0x37020d90), "open `%s` failed:  already exists", _path)
 			else :
 				raise
 		return _file
