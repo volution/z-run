@@ -55,8 +55,12 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_name = _name[5:]
 		else :
 			assert False, ("[83cec849]  invalid inject name: `%s`" % _name)
-		Z.__dict__[_name] = _function
-		return _function
+		def _wrapper (*_arguments_list, **_arguments_map) :
+			_arguments_map = {("_" + _name if _name[0] != "_" else _name) : _value for _name, _value in _arguments_map.items ()}
+			return _function (*_arguments_list, **_arguments_map)
+		_wrapper.__name__ = "Z." + _name
+		Z.__dict__[_name] = _wrapper
+		return None
 	
 	## --------------------------------------------------------------------------------
 	
