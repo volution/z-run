@@ -25,6 +25,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.fcntl = __import__ ("fcntl")
 	PY.io = __import__ ("io")
 	PY.re = __import__ ("re")
+	PY.json = __import__ ("json")
 	
 	PY.path = PY.os.path
 	
@@ -57,9 +58,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _fd_close = False, _panic = True, **_options) :
+	def __Z__zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _panic = True, **_options) :
 		_descriptor = Z._zexec_prepare (_scriptlet, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _fd_close = _fd_close, _panic = _panic)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _panic = _panic)
+	
+	@_inject
+	def __Z__zspawn_capture (_scriptlet, *_arguments, **_options) :
+		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _panic = True)
+		return Z._spawn_capture_output (_output, **_options)
 	
 	@_inject
 	def __Z__zexec (_scriptlet, *_arguments, _fd_close = True, **_options) :
@@ -82,9 +88,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn (_scriptlet, *_arguments, _wait = True, _fd_close = False, _panic = True, **_options) :
-		_descriptor = Z._exec_prepare (_scriptlet, _arguments, **_options)
-		return Z.spawn_0 (_descriptor, _wait = _wait, _fd_close = _fd_close, _panic = _panic)
+	def __Z__spawn (_executable, *_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _panic = True, **_options) :
+		_descriptor = Z._exec_prepare (_executable, _arguments, **_options)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _panic = _panic)
+	
+	@_inject
+	def __Z__spawn_capture (_executable, *_arguments, **_options) :
+		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _panic = True)
+		return Z._spawn_capture_output (_output, **_options)
 	
 	@_inject
 	def __Z__exec (_executable, *_arguments, _fd_close = True, **_options) :
@@ -92,8 +103,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return Z.exec_0 (_descriptor, _fd_close = _fd_close)
 	
 	@_inject
-	def __Z__cmd (_scriptlet, *_arguments, **_options) :
-		return Z._exec_prepare (_scriptlet, _arguments, **_options)
+	def __Z__cmd (_executable, *_arguments, **_options) :
+		return Z._exec_prepare (_executable, _arguments, **_options)
 	
 	@_inject
 	def __Z___exec_prepare (_executable, _arguments, **_options) :
@@ -104,7 +115,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__spawn_0 (_descriptor, *, _wait = True, _fd_close = False, _panic = True) :
+	def __Z__spawn_0 (_descriptor, *, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _panic = True) :
 		# FIXME:  Handle lookup!
 		_executable, _lookup, _arguments, _environment, _chdir, _files = _descriptor
 		if _files is not None :
@@ -116,6 +127,44 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_stdin = None
 			_stdout = None
 			_stderr = None
+		_should_communicate = False
+		if _stdin_data is not None :
+			if _stdin is not None :
+				Z.panic (0x5fcf5035, "stdin unexpected")
+			if _stdin_data is False :
+				_stdin = PY.subprocess.DEVNULL
+				_stdin_data = None
+			elif isinstance (_stdin_data, PY.basestring) or isinstance (_stdin_data, PY.bytes) :
+				if isinstance (_stdin_data, PY.basestring) :
+					_stdin_data = _stdin_data.encode ("utf-8")
+				_stdin = PY.subprocess.PIPE
+				_should_communicate = True
+			else :
+				Z.panic (0x5566ac86, "stdin data invalid")
+		if _stdout_data is not None :
+			if _stdout is not None :
+				Z.panic (0xab0c2481, "stdout unexpected")
+			if _stdout_data is False :
+				_stdout = PY.subprocess.DEVNULL
+				_stdout_data = None
+			elif _stdout_data is True or _stdout_data is PY.str or _stdout_data is PY.unicode or _stdout_data is PY.bytes :
+				_stdout = PY.subprocess.PIPE
+				_should_communicate = True
+			else :
+				Z.panic (0xff42dc1e, "stdout data invalid")
+		if _stderr_data is not None :
+			if _stderr is not None :
+				Z.panic (0xa42d1da3, "stderr unexpected")
+			if _stderr_data is False :
+				_stderr = PY.subprocess.DEVNULL
+				_stderr_data = None
+			elif _stderr_data is True or _stderr_data is PY.str or _stderr_data is PY.unicode or _stderr_data is PY.bytes :
+				_stderr = PY.subprocess.PIPE
+				_should_communicate = True
+			else :
+				Z.panic (0x2d0ed281, "stderr data invalid")
+		if _should_communicate and not _wait :
+			Z.panic (0xe20e7d58, "data arguments require waiting")
 		_process = PY.subprocess.Popen (
 				_arguments,
 				executable = _executable,
@@ -135,9 +184,42 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _stderr is not None :
 				PY.os.close (_stderr)
 		if _wait :
-			_outcome = _process.wait ()
+			if _should_communicate :
+				_stdout_data_0, _stderr_data_0 = _process.communicate (_stdin_data)
+				if _stdout_data is True or _stdout_data is PY.unicode :
+					_stdout_data_0 = _stdout_data_0.decode ("utf-8")
+				elif _stdout_data is PY.str :
+					_stdout_data_0 = _stdout_data_0.decode ("ascii")
+				elif _stdout_data is PY.bytes :
+					pass
+				elif _stdout_data is not None :
+					Z.panic (0x70227d93, "invalid state")
+				if _stderr_data is True or _stderr_data is PY.unicode :
+					_stderr_data_0 = _stderr_data_0.decode ("utf-8")
+				elif _stderr_data is PY.str :
+					_stderr_data_0 = _stderr_data_0.decode ("ascii")
+				elif _stderr_data is PY.bytes :
+					pass
+				elif _stderr_data is not None :
+					Z.panic (0x07342d09, "invalid state")
+				_stdout_data = _stdout_data_0
+				_stderr_data = _stderr_data_0
+			else :
+				_process.wait ()
+			_outcome = _process.returncode
 			if _panic and _outcome != 0 :
 				Z.panic ((_panic, 0x7d3900c4), "spawn `%s` `%s` failed with status: %d", _arguments[0], _arguments[1:], _outcome)
+			if _should_communicate :
+				if _stderr_data is not None :
+					if _panic :
+						_outcome = (_stdout_data, _stderr_data)
+					else :
+						_outcome = (_outcome, _stdout_data, _stderr_data)
+				else :
+					if _panic :
+						_outcome = _stdout_data
+					else :
+						_outcome = (_outcome, _stdout_data)
 		else :
 			_outcome = _process.pid
 		return _outcome
@@ -239,6 +321,43 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		else :
 			Z.panic (0x3960636f, "invalid process id (unknown): %r", _pid)
 		return _pid
+	
+	@_inject
+	def __Z___spawn_capture_output (_output, *, _line = False, _lines = False, _separator = None, _json = False) :
+		if _line or _lines :
+			if _separator is None :
+				_separator = "\n"
+			else :
+				assert _separator != "", "[357b50e2]"
+		if _line :
+			assert not _lines, "[cefc2173]"
+			if _output == "" :
+				_output = None
+			else :
+				if _output[: 0 - len (_separator)] == _separator :
+					_output = _output[: 0 - len (_separator)]
+				_output = _output.split (_separator)
+				if len (_output) == 1 or (len (_output) == 2 and _output[1] == "") :
+					_output = _output[0]
+				else :
+					Z.panic (0x5a1b7a79, "output is made of multiple lines")
+			if _json :
+				_output = PY.json.loads (_output)
+		elif _lines :
+			assert not _line, "[ddd9a8bc]"
+			if _output == "" :
+				_output = None
+			else :
+				if _output[: 0 - len (_separator)] == _separator :
+					_output = _output[: 0 - len (_separator)]
+				_output = _output.split (_separator)
+			if _json :
+				_output = [PY.json.loads (_output) for _output in _output]
+		elif _json :
+			_output = PY.json.loads (_output)
+		else :
+			pass
+		return _output
 	
 	## --------------------------------------------------------------------------------
 	
