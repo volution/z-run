@@ -142,7 +142,6 @@
 	
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
-			-v \
 			-o "${_outputs}/z-run--debug" \
 			-tags "${_tags}" \
 			-ldflags "${_ldflags}" \
@@ -188,7 +187,6 @@
 	
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
-			-v \
 			-o "${_outputs}/z-run--release${_suffix}" \
 			-tags "${_tags}" \
 			-ldflags "${_ldflags}" \
