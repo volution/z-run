@@ -18,9 +18,9 @@
 
 << deploy / local
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: go / build / main / release'
+	"${ZRUN[@]}" ':: deploy / release'
 	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
-	cp -f -- ./.outputs/z-run--release "${HOME}/.bin/z-run--${_timestamp}"
+	cp -f -- ./.outputs/z-run--release--linux "${HOME}/.bin/z-run--${_timestamp}"
 	ln -s -f -- "./z-run--${_timestamp}" "${HOME}/.bin/z-run--0000"
 !!
 
@@ -29,7 +29,7 @@
 	test "${#}" -eq 1
 	_target="${1}"
 	shift -- 1
-	"${ZRUN[@]}" ':: go / build / main / release / linux'
+	"${ZRUN[@]}" ':: deploy / release'
 	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "${_target}"
 !!
 
@@ -37,7 +37,7 @@
 	test "${#}" -eq 1
 	_target="${1}"
 	shift -- 1
-	"${ZRUN[@]}" ':: go / build / main / release / darwin'
+	"${ZRUN[@]}" ':: deploy / release'
 	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "${_target}"
 !!
 
@@ -45,8 +45,7 @@
 << deploy / publish
 	test "${#}" -eq 0
 	test -d ./.publish/
-	"${ZRUN[@]}" ':: go / build / main / release / linux'
-	"${ZRUN[@]}" ':: go / build / main / release / darwin'
+	"${ZRUN[@]}" ':: deploy / release'
 	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
 	if test -e "./.publish/linux/z-run--linux--v${_build_version}" -o -e "./.publish/darwin/z-run--darwin--v${_build_version}" ; then
 		printf -- '[ee]  release already exists!\n' >&2
@@ -56,6 +55,12 @@
 	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "./.publish/darwin/z-run--darwin--v${_build_version}"
 	ln -s -T -f -- "./z-run--linux--v${_build_version}" ./.publish/linux/z-run
 	ln -s -T -f -- "./z-run--darwin--v${_build_version}" ./.publish/darwin/z-run
+!!
+
+<< deploy / release
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: go / build / main / release / linux'
+	"${ZRUN[@]}" ':: go / build / main / release / darwin'
 !!
 
 
@@ -442,4 +447,9 @@
 	
 	mv -f -T -- "${_output}.tmp" "${_output}"
 !!
+
+
+
+
+&&?? ./.git/.local.z-run
 
