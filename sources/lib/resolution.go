@@ -304,7 +304,7 @@ func resolveLibraryCached (_path string) (LibraryStore, *Error) {
 
 func checkLibraryCached (_library LibraryStore) (bool, *Error) {
 	var _sources LibrarySources
-	if _sources_0, _error := _library.SelectSources (); _error == nil {
+	if _sources_0, _error := _library.SelectLibrarySources (); _error == nil {
 		_sources = _sources_0
 	} else {
 		return false, _error

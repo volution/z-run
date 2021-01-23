@@ -526,6 +526,16 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		}
 	}
 	
+	if _top {
+		if _libraryContext, _error := _library.SelectLibraryContext (); _error == nil {
+			if (_libraryContext.SelfExecutable != "") && (_libraryContext.SelfExecutable != _context.selfExecutable) {
+				PreMainReExecute (_libraryContext.SelfExecutable)
+			}
+		} else {
+			return _error
+		}
+	}
+	
 //	logf ('d', 0x66e8b16d, "%v `%s` `%s` %d %v", _top, _command, _scriptlet, len (_cleanArguments), _cleanArguments)
 	
 	switch _command {

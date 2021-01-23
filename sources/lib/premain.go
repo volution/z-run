@@ -49,6 +49,9 @@ func PreMain () () {
 	debug.SetGCPercent (500)
 	
 	
+	_preMainContext := & PreMainContext {}
+	
+	
 	var _executable string
 	if _executable_0, _error := os.Executable (); _error == nil {
 		_executable = _executable_0
@@ -60,6 +63,8 @@ func PreMain () () {
 	} else {
 		panic (abortError (errorw (0x127e013a, _error)))
 	}
+	
+	_preMainContext.Executable = _executable
 	
 	
 	if os.Getenv ("ZRUN_EXECUTABLE") == "" {
@@ -85,6 +90,8 @@ func PreMain () () {
 	_argument0 := os.Args[0]
 	_arguments := append ([]string (nil), os.Args[1:] ...)
 	
+	_preMainContext.Arguments = append ([]string (nil), os.Args ...)
+	
 	if strings.HasPrefix (_argument0, "[z-run:menu] ") {
 		_argument0 = "[z-run:menu]"
 	} else if strings.HasPrefix (_argument0, "[z-run:select] ") {
@@ -99,7 +106,10 @@ func PreMain () () {
 	
 	
 	_environment := make (map[string]string, 128)
+	_preMainContext.Environment = make ([]string, 0, 128)
 	for _, _variable := range os.Environ () {
+		_preMainContext.Environment = append (_preMainContext.Environment, _variable)
+		
 		if _splitIndex := strings.IndexByte (_variable, '='); _splitIndex >= 0 {
 			
 			_name := _variable[:_splitIndex]
@@ -138,6 +148,7 @@ func PreMain () () {
 //	logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
 //	logf ('d', 0x7a411846, "self-environment: %s", _environment)
 	
+	PreMainContextGlobal = _preMainContext
 	
 	os.Args = append ([]string {"z-run"}, _arguments ...)
 	os.Clearenv ()
@@ -296,5 +307,32 @@ func PreMain () () {
 	} else {
 		panic (abortError (_error))
 	}
+}
+
+
+
+
+type PreMainContext struct {
+	Executable string
+	Arguments []string
+	Environment []string
+}
+
+var PreMainContextGlobal *PreMainContext = nil
+
+
+
+
+func PreMainReExecute (_executable string) (*Error) {
+	if PreMainContextGlobal == nil {
+		return errorf (0x3d126cd2, "can't switch `z-run`")
+	}
+//	logf ('i', 0x91038b92, "switching `z-run` to: `%s`...", _executable)
+	_error := syscall.Exec (
+			_executable,
+			PreMainContextGlobal.Arguments,
+			PreMainContextGlobal.Environment,
+		)
+	return errorw (0x3d993836, _error)
 }
 

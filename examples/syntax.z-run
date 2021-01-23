@@ -1,5 +1,7 @@
 #!/dev/null
 
+&&== z-run ./.outputs/z-run--debug
+
 && _/environment.z-run
 && _/basic.z-run
 && _/menus.z-run

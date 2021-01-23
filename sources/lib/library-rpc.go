@@ -517,28 +517,56 @@ func (_exports *LibraryRpcServerExports) ResolveContextByFingerprint (_input *Li
 
 
 
-type LibraryRpc_SelectSources_Input struct {
+type LibraryRpc_SelectLibrarySources_Input struct {
 }
 
-type LibraryRpc_SelectSources_Output struct {
+type LibraryRpc_SelectLibrarySources_Output struct {
 	Sources LibrarySources
 	Error *Error
 }
 
-func (_client *LibraryRpcClient) SelectSources () (LibrarySources, *Error) {
-	_input := LibraryRpc_SelectSources_Input {}
-	_output := LibraryRpc_SelectSources_Output {}
-	if _error := _client.rpc.Call ("Library.SelectSources", &_input, &_output); _error == nil {
+func (_client *LibraryRpcClient) SelectLibrarySources () (LibrarySources, *Error) {
+	_input := LibraryRpc_SelectLibrarySources_Input {}
+	_output := LibraryRpc_SelectLibrarySources_Output {}
+	if _error := _client.rpc.Call ("Library.SelectLibrarySources", &_input, &_output); _error == nil {
 		return _output.Sources, _output.Error
 	} else {
 		return nil, errorw (0x607c2934, _error)
 	}
 }
 
-func (_exports *LibraryRpcServerExports) SelectSources (_input *LibraryRpc_SelectSources_Input, _output *LibraryRpc_SelectSources_Output) (error) {
+func (_exports *LibraryRpcServerExports) SelectLibrarySources (_input *LibraryRpc_SelectLibrarySources_Input, _output *LibraryRpc_SelectLibrarySources_Output) (error) {
 	_exports.server.mutex.RLock ()
 	defer _exports.server.mutex.RUnlock ()
-	_output.Sources, _output.Error = _exports.server.library.SelectSources ()
+	_output.Sources, _output.Error = _exports.server.library.SelectLibrarySources ()
+	return nil
+}
+
+
+
+
+type LibraryRpc_SelectLibraryContext_Input struct {
+}
+
+type LibraryRpc_SelectLibraryContext_Output struct {
+	Context *LibraryContext
+	Error *Error
+}
+
+func (_client *LibraryRpcClient) SelectLibraryContext () (*LibraryContext, *Error) {
+	_input := LibraryRpc_SelectLibraryContext_Input {}
+	_output := LibraryRpc_SelectLibraryContext_Output {}
+	if _error := _client.rpc.Call ("Library.SelectLibraryContext", &_input, &_output); _error == nil {
+		return _output.Context, _output.Error
+	} else {
+		return nil, errorw (0x4ec2bf5a, _error)
+	}
+}
+
+func (_exports *LibraryRpcServerExports) SelectLibraryContext (_input *LibraryRpc_SelectLibraryContext_Input, _output *LibraryRpc_SelectLibraryContext_Output) (error) {
+	_exports.server.mutex.RLock ()
+	defer _exports.server.mutex.RUnlock ()
+	_output.Context, _output.Error = _exports.server.library.SelectLibraryContext ()
 	return nil
 }
 

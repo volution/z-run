@@ -68,8 +68,16 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 		return _error
 	}
 	
-	if _sources, _error := _library.SelectSources (); _error == nil {
-		if _error := _store.Include ("library-meta", "sources", _sources); _error != nil {
+	if _sources, _error := _library.SelectLibrarySources (); _error == nil {
+		if _error := _store.Include ("library-meta", "library-sources", _sources); _error != nil {
+			return _error
+		}
+	} else {
+		return _error
+	}
+	
+	if _context, _error := _library.SelectLibraryContext (); _error == nil {
+		if _error := _store.Include ("library-meta", "library-context", _context); _error != nil {
 			return _error
 		}
 	} else {

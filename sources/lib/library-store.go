@@ -21,7 +21,9 @@ type LibraryStore interface {
 	
 	ResolveContextByFingerprint (_fingerprint string) (*ScriptletContext, bool, *Error)
 	
-	SelectSources () (LibrarySources, *Error)
+	SelectLibrarySources () (LibrarySources, *Error)
+	SelectLibraryContext () (*LibraryContext, *Error)
+	
 	Fingerprint () (string, *Error)
 	
 	Url () (string)
@@ -207,13 +209,26 @@ func (_library *LibraryStoreInput) ResolveContextByFingerprint (_fingerprint str
 }
 
 
-func (_library *LibraryStoreInput) SelectSources () (LibrarySources, *Error) {
+func (_library *LibraryStoreInput) SelectLibrarySources () (LibrarySources, *Error) {
 	var _value LibrarySources
-	if _found, _error := _library.store.Select ("library-meta", "sources", &_value); _error == nil {
+	if _found, _error := _library.store.Select ("library-meta", "library-sources", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
 			return nil, errorf (0x2986327f, "invalid store")
+		}
+	} else {
+		return nil, _error
+	}
+}
+
+func (_library *LibraryStoreInput) SelectLibraryContext () (*LibraryContext, *Error) {
+	var _value *LibraryContext
+	if _found, _error := _library.store.Select ("library-meta", "library-context", &_value); _error == nil {
+		if _found {
+			return _value, nil
+		} else {
+			return nil, errorf (0x2986327f, "9ddd4b2a store")
 		}
 	} else {
 		return nil, _error

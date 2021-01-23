@@ -230,9 +230,9 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	}
 	
 	{
-		sort.Sort (_library.Sources)
-		_fingerprints := make ([]string, 0, len (_library.Sources))
-		for _, _source := range _library.Sources {
+		sort.Sort (_library.LibrarySources)
+		_fingerprints := make ([]string, 0, len (_library.LibrarySources))
+		for _, _source := range _library.LibrarySources {
 			_fingerprints = append (_fingerprints, _source.FingerprintData)
 		}
 		sort.Strings (_fingerprints)
@@ -976,6 +976,52 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 									_parseContext.scriptletContext.Environment[_name] = ""
 								}
 							}
+						
+						case "z-run" :
+							if _descriptor == "" {
+								return errorf (0x2abc5316, "invalid syntax (%d):  empty statement `z-run` executable descriptor | %s", _lineIndex, _line)
+							}
+							_newExecutable := ""
+							if _newExecutable_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _descriptor); _error == nil {
+								_newExecutable = _newExecutable_0
+							} else {
+								return _error
+							}
+							if _newExecutable_0, _error := filepath.EvalSymlinks (_newExecutable); _error == nil {
+								_newExecutable = _newExecutable_0
+							} else {
+								return errorw (0x349ba402, _error)
+							}
+							var _statNewExecutable os.FileInfo
+							if _stat_0, _error := os.Stat (_newExecutable); _error == nil {
+								if ! _stat_0.Mode () .IsRegular () {
+									return errorf (0x60329e98, "invalid syntax (%d):  invalid statement `z-run` executable path (not a file) | %s", _lineIndex, _line)
+								}
+								_statNewExecutable = _stat_0
+							} else {
+								return errorw (0xc9b0eb17, _error)
+							}
+							var _statSelfExecutable os.FileInfo
+							if _stat_0, _error := os.Stat (_context.selfExecutable); _error == nil {
+								_statSelfExecutable = _stat_0
+							} else {
+								return errorw (0x4266df29, _error)
+							}
+							if !_disabled {
+								if ! os.SameFile (_statNewExecutable, _statSelfExecutable) {
+									// FIXME:  A better solution would be nice!
+									return PreMainReExecute (_newExecutable)
+								} else {
+									if _library.LibraryContext.SelfExecutable == "" {
+										_library.LibraryContext.SelfExecutable = _newExecutable
+									} else if _library.LibraryContext.SelfExecutable != _newExecutable {
+										return errorf (0xf0be06d3, "invalid state (%d):  mismatched `z-run` executable | %s", _lineIndex, _line)
+									}
+								}
+							}
+						
+						default :
+							return errorf (0xd901dd89, "invalid syntax (%d):  invalid statement | %s", _lineIndex, _line)
 					}
 					
 				} else if strings.HasPrefix (_lineTrimmed, "{{") {

@@ -28,8 +28,8 @@ type Scriptlet struct {
 
 type ScriptletSource struct {
 	Path string `json:"path"`
-	LineStart uint `json:"line_start"`
-	LineEnd uint `json:"line_end"`
+	LineStart uint `json:"line-start"`
+	LineEnd uint `json:"line-end"`
 }
 
 type ScriptletContext struct {
@@ -46,21 +46,29 @@ type Library struct {
 	Scriptlets LibraryScriptlets `json:"scriptlets"`
 	
 	ScriptletFingerprints []string `json:"fingerprints"`
-	ScriptletsByFingerprint map[string]uint `json:"index_by_fingerprint"`
+	ScriptletsByFingerprint map[string]uint `json:"index-by-fingerprint"`
 	
 	ScriptletLabels []string `json:"labels"`
 	ScriptletLabelsAll []string `json:"labels"`
-	ScriptletsByLabel map[string]uint `json:"index_by_label"`
+	ScriptletsByLabel map[string]uint `json:"index-by-label"`
 	
 	ScriptletsContexts map[string]*ScriptletContext `json:"scriptlets-contexts"`
 	
-	Sources LibrarySources `json:"sources"`
+	LibrarySources LibrarySources `json:"library-sources"`
+	LibraryContext *LibraryContext `json:"library-context"`
 	
-	SourcesFingerprint string `json:"sources_fingerprint"`
-	EnvironmentFingerprint string `json:"environment_fingerprint"`
-	LibraryFingerprint string `json:"library_fingerprint"`
+	SourcesFingerprint string `json:"sources-fingerprint"`
+	EnvironmentFingerprint string `json:"environment-fingerprint"`
+	LibraryFingerprint string `json:"library-fingerprint"`
 	
 	url string
+}
+
+
+
+
+type LibraryContext struct {
+	SelfExecutable string `json:"self-executable"`
 }
 
 
@@ -69,8 +77,8 @@ type Library struct {
 type Source struct {
 	Path string `json:"path"`
 	Executable bool `json:"executable"`
-	FingerprintMeta string `json:"fingerprint_meta"`
-	FingerprintData string `json:"fingerprint_data"`
+	FingerprintMeta string `json:"fingerprint-meta"`
+	FingerprintData string `json:"fingerprint-data"`
 }
 
 
@@ -85,6 +93,7 @@ func NewLibrary () (*Library) {
 			ScriptletLabelsAll : make ([]string, 0, 1024),
 			ScriptletsByLabel : make (map[string]uint, 1024),
 			ScriptletsContexts : make (map[string]*ScriptletContext, 16),
+			LibraryContext : & LibraryContext {},
 		}
 }
 
@@ -177,8 +186,12 @@ func (_library *Library) ResolveContextByFingerprint (_fingerprint string) (*Scr
 }
 
 
-func (_library *Library) SelectSources () (LibrarySources, *Error) {
-	return _library.Sources, nil
+func (_library *Library) SelectLibrarySources () (LibrarySources, *Error) {
+	return _library.LibrarySources, nil
+}
+
+func (_library *Library) SelectLibraryContext () (*LibraryContext, *Error) {
+	return _library.LibraryContext, nil
 }
 
 
@@ -307,7 +320,7 @@ func includeSource (_library *Library, _source *Source) (*Error) {
 //	if _source.FingerprintData == "" {
 //		return errorf (0x401d0c16, "invalid state")
 //	}
-	for _, _existing := range _library.Sources {
+	for _, _existing := range _library.LibrarySources {
 		if _existing.Path == _source.Path {
 			return errorf (0xf01b93ea, "invalid state")
 		}
@@ -318,7 +331,7 @@ func includeSource (_library *Library, _source *Source) (*Error) {
 			return errorf (0x00fb18a1, "invalid state %#v %#v", _existing, _source)
 		}
 	}
-	_library.Sources = append (_library.Sources, _source)
+	_library.LibrarySources = append (_library.LibrarySources, _source)
 	return nil
 }
 
