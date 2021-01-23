@@ -736,7 +736,6 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						case "//" :
 							_kind = "menu"
 							_interpreter = "<menu>"
-							_include = false
 							if _body == "" {
 								if _label == "*" {
 									_body = "*"
@@ -852,7 +851,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					
 					_state = SCRIPTLET_BODY
 					
-				} else if strings.HasPrefix (_lineTrimmed, "&& ") {
+				} else if strings.HasPrefix (_lineTrimmed, "&& ") || strings.HasPrefix (_lineTrimmed, "&&?? ") {
+					
+					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&?? ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
 					if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
@@ -869,11 +870,15 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								}
 							}
 						} else {
-							return _error
+							if !_ignoreError {
+								return _error
+							}
 						}
 					}
 					
-				} else if strings.HasPrefix (_lineTrimmed, "&&__ ") {
+				} else if strings.HasPrefix (_lineTrimmed, "&&__ ") || strings.HasPrefix (_lineTrimmed, "&&??__ ") {
+					
+					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&??__ ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
 					if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
@@ -889,7 +894,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							}
 							_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_includeSource.FingerprintData) .Build ()
 						} else {
-							return _error
+							if !_ignoreError {
+								return _error
+							}
 						}
 					}
 					

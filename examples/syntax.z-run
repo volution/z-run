@@ -16,3 +16,11 @@
 && _/python.z-run
 && _/bash.z-run
 
+
+&&?? _/does-not-exist
+&&?? ./tmp/does-not-exist
+&&?? ../tmp/does-not-exist
+&&?? /tmp/does-not-exist
+
+&&??__ _/does-not-exist
+
