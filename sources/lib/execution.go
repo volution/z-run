@@ -111,7 +111,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 					fmt.Sprintf ("[z-run:python3] [%s]", _scriptlet.Label),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
-			_interpreterScriptBuffer.WriteString (embeddedPythonProlog)
+			_interpreterScriptBuffer.WriteString (embeddedPython3Prolog)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("Z.py.os.close (%d)\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
