@@ -80,11 +80,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			except :
 				_error = PY.sys.exc_info ()
 				_traceback_error = PY.traceback.extract_tb (_error[2])
-				_traceback_error.pop (0)
 				_traceback_caller = PY.traceback.extract_stack ()
-				_traceback_caller.pop (-1)
 				_error = _error[1]
-				Z.panic_with_traceback (0x63468d09, _error, _traceback_error, _traceback_caller)
+				Z._panic_with_traceback (0x63468d09, _error, _traceback_error, _traceback_caller)
 		_function.__name__ = "Z." + _name
 		__Z__wrapper.__name__ = "Z." + _name
 		Z.__dict__[_name] = __Z__wrapper
@@ -532,7 +530,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		Z.exit (1)
 	
 	@_inject
-	def __Z__panic_with_traceback (_code, _error, _traceback_error, _traceback_caller) :
+	def __Z___panic_with_excepthook (_error_type, _error, _traceback) :
+		_traceback_error = PY.traceback.extract_tb (_traceback)
+		_traceback_caller = []
+		Z._panic_with_traceback (0x338a0a5b, _error, _traceback_error, _traceback_caller)
+	
+	@_inject
+	def __Z___panic_with_traceback (_code, _error, _traceback_error, _traceback_caller) :
 		
 		_code = Z._panic_code (_code)
 		Z._log_write ("!!", _code, "unexpected error encountered:", ())
@@ -557,7 +561,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 					_position = "<python3+> @ %d" % (_line)
 			else :
 				_position = "`%s` @ %d" % (_file, _line)
-			Z._log_write ("!!", _code, "  [%s]  %-20s | %s", (_tag, _context, _position))
+			Z._log_write ("!!", _code, "  [%s]  %-30s | %s", (_tag, _context, _position))
 		
 		for _traceback_frame in PY.reversed (_traceback_error) :
 			_traceback_frame_log ("raised", _traceback_frame)
@@ -594,6 +598,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_traceback_frame = PY.traceback.extract_stack () [0]
 		Z._scriptlet_begin_file = _traceback_frame.filename
 		Z._scriptlet_begin_line = _traceback_frame.lineno
+		PY.sys.excepthook = Z._panic_with_excepthook
 	
 	## --------------------------------------------------------------------------------
 	
