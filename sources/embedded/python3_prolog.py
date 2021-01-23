@@ -40,6 +40,18 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.bytes = PY.builtins.bytes
 	PY.str = PY.builtins.str
 	
+	PY.int = PY.builtins.int
+	PY.float = PY.builtins.float
+	
+	PY.tuple = PY.builtins.tuple
+	PY.list = PY.builtins.list
+	PY.dict = PY.builtins.dict
+	PY.range = PY.builtins.range
+	PY.len = PY.builtins.len
+	
+	PY.isinstance = PY.builtins.isinstance
+	PY.OSError = PY.builtins.OSError
+	
 	## --------------------------------------------------------------------------------
 	
 	if Z is None :
@@ -71,7 +83,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__zspawn_capture (_scriptlet, *_arguments, **_options) :
-		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _enforce = True)
+		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = False, _stdout_data = PY.str, _enforce = True)
 		return Z._spawn_capture_output (_output, **_options)
 	
 	@_inject
@@ -101,7 +113,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__spawn_capture (_executable, *_arguments, **_options) :
-		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = False, _stdout_data = str, _enforce = True)
+		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = False, _stdout_data = PY.str, _enforce = True)
 		return Z._spawn_capture_output (_output, **_options)
 	
 	@_inject
@@ -141,8 +153,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _stdin_data is False :
 				_stdin = PY.subprocess.DEVNULL
 				_stdin_data = None
-			elif isinstance (_stdin_data, PY.str) or isinstance (_stdin_data, PY.bytes) :
-				if isinstance (_stdin_data, PY.str) :
+			elif PY.isinstance (_stdin_data, PY.str) or PY.isinstance (_stdin_data, PY.bytes) :
+				if PY.isinstance (_stdin_data, PY.str) :
 					_stdin_data = _stdin_data.encode ("utf-8")
 				_stdin = PY.subprocess.PIPE
 				_should_communicate = True
@@ -314,12 +326,12 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	def __Z___pid (_process) :
 		if _process is None :
 			_pid = None
-		elif isinstance (_process, PY.builtins.int) :
+		elif PY.isinstance (_process, PY.builtins.int) :
 			if _process >= 1 :
 				_pid = _process
 			else :
 				Z.panic (0x1fe23810, "invalid process id (negative)")
-		elif isinstance (_process, PY.subprocess.Popen) :
+		elif PY.isinstance (_process, PY.subprocess.Popen) :
 			_pid = _process.pid
 		else :
 			Z.panic (0x3960636f, "invalid process id (unknown): %r", _pid)
@@ -337,10 +349,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _output == "" :
 				_output = None
 			else :
-				if _output[: 0 - len (_separator)] == _separator :
-					_output = _output[: 0 - len (_separator)]
+				if _output[: 0 - PY.len (_separator)] == _separator :
+					_output = _output[: 0 - PY.len (_separator)]
 				_output = _output.split (_separator)
-				if len (_output) == 1 or (len (_output) == 2 and _output[1] == "") :
+				if PY.len (_output) == 1 or (PY.len (_output) == 2 and _output[1] == "") :
 					_output = _output[0]
 				else :
 					Z.panic (0x5a1b7a79, "output is made of multiple lines")
@@ -351,8 +363,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _output == "" :
 				_output = None
 			else :
-				if _output[: 0 - len (_separator)] == _separator :
-					_output = _output[: 0 - len (_separator)]
+				if _output[: 0 - PY.len (_separator)] == _separator :
+					_output = _output[: 0 - PY.len (_separator)]
 				_output = _output.split (_separator)
 			if _json :
 				_output = [PY.json.loads (_output) for _output in _output]
@@ -366,16 +378,16 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__pipeline (_commands, *, _wait = True, _fd_close = False, _enforce = True) :
-		_count = len (_commands)
+		_count = PY.len (_commands)
 		if _count == 0 :
 			Z.panic (0x1b1812d7, "pipeline empty")
 		_pipes = []
 		_pipes.append ((None, None))
-		for _index in range (_count - 1) :
+		for _index in PY.range (_count - 1) :
 			_pipes.append (PY.os.pipe ())
 		_pipes.append ((None, None))
 		_processes = []
-		for _index in range (_count) :
+		for _index in PY.range (_count) :
 			# FIXME:  Handle lookup!
 			_executable, _lookup, _arguments, _environment, _chdir, _files = _commands[_index]
 			if _files is not None :
@@ -493,7 +505,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__panic (_code, _message, *_arguments) :
-		if isinstance (_code, tuple) :
+		if PY.isinstance (_code, PY.tuple) :
 			_code_0 = 0xee4006b2
 			for _code_0 in _code :
 				if _code_0 is not False and _code_0 is not None :
@@ -525,7 +537,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			assert _min is None or _max is None or _min < _max, "[e43f6498]"
 			assert _max is None or _max is None or _min < _max, "[0662ca21]"
 			assert _rest is None or _rest is True or _rest is False, "[f4353518]"
-		_actual = len (Z.arguments)
+		_actual = PY.len (Z.arguments)
 		if _exact is not None and _actual != _exact :
 			if _exact == 0 :
 				Z.panic (0x2aa5c1b7, "invalid arguments:  expected none, received %d!", _actual)
@@ -536,19 +548,19 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		elif _max is not None and _actual > _max :
 			Z.panic (0x6499e7a6, "invalid arguments:  expected at most %d, received %d!", _max, _actual)
 		if _exact is not None :
-			return tuple (Z.arguments)
+			return PY.tuple (Z.arguments)
 		else :
 			if _rest is None or _rest is True :
-				return tuple (Z.arguments[:_min]) + (list (Z.arguments[_min:]),)
+				return PY.tuple (Z.arguments[:_min]) + (PY.list (Z.arguments[_min:]),)
 			else :
-				return tuple (Z.arguments)
+				return PY.tuple (Z.arguments)
 	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
 	def __Z__enforce (_condition, *, _code = None, _message = None) :
 		if _message is None : _message = "enforcement failed"
-		if not isinstance (_condition, PY.builtins.bool) :
+		if not PY.isinstance (_condition, PY.builtins.bool) :
 			if _code is None : _code = 0x97ee7cf1
 			Z.panic (_code, _message)
 		if not _condition :
@@ -560,7 +572,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	def __Z__enforce_regex (_value, _pattern, *, _code = None, _message = None) :
 		if _message is None : _message = "enforcement failed"
 		_pattern = Z.regex (_pattern)
-		if not isinstance (_value, PY.str) :
+		if not PY.isinstance (_value, PY.str) :
 			if _code is None : _code = 0x00a780ed
 			Z.panic (_code, _message)
 		if _pattern.match (_value) is None :
@@ -576,7 +588,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__path (_path, *, _absolute = False, _canonical = False, _relative = None) :
-		if not isinstance (_path, PY.str) and not isinstance (_path, PY.bytes) :
+		if not PY.isinstance (_path, PY.str) and not PY.isinstance (_path, PY.bytes) :
 			_path = PY.path.join (*_path)
 		_path = Z.path_normalize (_path)
 		if _absolute :
@@ -656,7 +668,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				_components.append (_dirname)
 				_dirname = ""
 		_components = _components.reverse ()
-		_components = tuple (_components)
+		_components = PY.tuple (_components)
 		return _components
 	
 	@_inject
@@ -692,7 +704,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if _name == "" or "/" in _name :
 			Z.panic (0x9fbff49a, "invalid path")
 		_token = Z.random_token (_token)
-		_name = _prefix + (str (Z.pid) + "-" if _pid else "") + _token + _infix + _name + _suffix
+		_name = _prefix + (PY.str (Z.pid) + "-" if _pid else "") + _token + _infix + _name + _suffix
 		_path = PY.path.join (_path, _name)
 		return _path
 	
@@ -780,7 +792,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_delegate = PY.os.lstat
 		try :
 			_stat = _delegate (_path)
-		except OSError as _error :
+		except PY.OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
 				_stat = None
 			else :
@@ -830,7 +842,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_buffers = []
 		while True :
 			_buffer = PY.os.read (_fd, 1024 * 1024)
-			if len (_buffer) == 0 :
+			if PY.len (_buffer) == 0 :
 				break
 			_buffers.append (_buffer)
 		PY.os.close (_fd)
@@ -870,13 +882,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_data = PY.json.dumps (_data)
 		if _data is None :
 			_buffer = b""
-		elif isinstance (_data, PY.str) :
+		elif PY.isinstance (_data, PY.str) :
 			_buffer = _data.encode ("utf-8")
-		elif isinstance (_data, PY.bytes) :
+		elif PY.isinstance (_data, PY.bytes) :
 			_buffer = _data
 		else :
 			Z.panic (0x5fbb8542, "invalid data type")
-		while len (_buffer) > 0 :
+		while PY.len (_buffer) > 0 :
 			_offset = PY.os.write (_fd, _buffer)
 			_buffer = _buffer[_offset:]
 		PY.os.close (_fd)
@@ -893,7 +905,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_flags |= PY.os.O_CLOEXEC
 		try :
 			_file = PY.os.open (_path, _flags)
-		except OSError as _error :
+		except PY.OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
 				if _enforce :
 					Z.panic ((_enforce, 0x9ca19f87), "open `%s` failed:  does not exist", _path)
@@ -924,7 +936,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_flags |= PY.os.O_CLOEXEC
 		try :
 			_file = PY.os.open (_path, _flags, _mode)
-		except OSError as _error :
+		except PY.OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
 				if _enforce :
 					Z.panic ((_enforce, 0x008389df), "open `%s` failed:  does not exist", _path)
@@ -979,16 +991,16 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _enforce :
 				Z.panic ((_enforce, 0x3c3ff99e), "invalid file descriptor (none)")
 			return False
-		elif isinstance (_file, PY.builtins.int) :
+		elif PY.isinstance (_file, PY.builtins.int) :
 			if _file >= 0 :
 				return True
 			else :
 				Z.panic (0xf42752f0, "invalid file descriptor (negative)")
-		elif isinstance (_file, PY.io.IOBase) :
+		elif PY.isinstance (_file, PY.io.IOBase) :
 			try :
 				_file.fileno ()
 				return True
-			except OSError as _error :
+			except PY.OSError as _error :
 				Z.panic (0x7f97a33f, "invalid file descriptor (not supported): %r  //  %s", _error)
 		else :
 			if _enforce :
@@ -999,15 +1011,15 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	def __Z___fd (_file) :
 		if _file is None :
 			_fd = None
-		elif isinstance (_file, PY.builtins.int) :
+		elif PY.isinstance (_file, PY.builtins.int) :
 			if _file >= 0 :
 				_fd = _file
 			else :
 				Z.panic (0x4327e646, "invalid file descriptor (negative)")
-		elif isinstance (_file, PY.io.IOBase) :
+		elif PY.isinstance (_file, PY.io.IOBase) :
 			try :
 				_fd = _file.fileno ()
-			except OSError as _error :
+			except PY.OSError as _error :
 				Z.panic (0x32026a93, "invalid file descriptor (not supported): %r  //  %s", _error)
 		else :
 			Z.panic (0xe0d78a09, "invalid file descriptor (unknown): %r", _file)
@@ -1063,7 +1075,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__random_shuffle (_sequence) :
-		_sequence = list (_sequence)
+		_sequence = PY.list (_sequence)
 		PY.random.shuffle (_sequence)
 		return _sequence
 	
@@ -1096,7 +1108,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	Z.pid = PY.os.getpid ()
-	Z.arguments = tuple (PY.sys.argv[1:])
+	Z.arguments = PY.tuple (PY.sys.argv[1:])
 	Z.environment = Z_environment ()
 	Z.environment_or_none = Z_environment_or_none ()
 	
