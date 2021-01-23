@@ -367,12 +367,16 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
 			_executable = _executable[1 : len (_executable) - 1]
 			switch _executable {
-				case "bash+", "python+", "python2+", "python3+" :
+				case "bash+" :
+					_interpreter = "<" + _executable + ">"
+					_executable = _executable[0 : len (_executable) - 1]
+				case "python+", "python2+", "python3+" :
 					if _executable == "python+" {
 						_executable = "python3+"
 					}
 					_interpreter = "<" + _executable + ">"
 					_executable = _executable[0 : len (_executable) - 1]
+					_arguments = append (_arguments, "-E", "-s", "-S", "-u", "-O", "-O", "--")
 					switch _executable {
 						case "python2" :
 							_executable = "python2.7"
