@@ -9,41 +9,41 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	## --------------------------------------------------------------------------------
 	
-	if Z is None :
-		Z = __import__ ("types") .ModuleType ("Z")
+	PY = __import__ ("types") .ModuleType ("PY")
+	PY.sys = __import__ ("sys")
+	
+	if PY.sys.version_info[0] != 3 or PY.sys.version_info[1] < 6 :
+		PY.sys.stderr.write ("[z-run] [!!] [68c3c553]  requires Python3.6+;  aborting!\n")
+		PY.sys.stderr.flush ()
+		PY.sys.exit (1)
 	
 	## --------------------------------------------------------------------------------
 	
-	PY = __import__ ("types") .ModuleType ("PY")
-	PY.os = __import__ ("os")
-	PY.sys = __import__ ("sys")
-	PY.signal = __import__ ("signal")
+	PY.binascii = __import__ ("binascii")
+	PY.builtins = __import__ ("builtins")
 	PY.errno = __import__ ("errno")
+	PY.fcntl = __import__ ("fcntl")
+	PY.fnmatch = __import__ ("fnmatch")
+	PY.io = __import__ ("io")
+	PY.json = __import__ ("json")
+	PY.os = __import__ ("os")
+	PY.random = __import__ ("random") .SystemRandom ()
+	PY.re = __import__ ("re")
+	PY.signal = __import__ ("signal")
+	PY.stat = __import__ ("stat")
 	PY.subprocess = __import__ ("subprocess")
 	PY.time = __import__ ("time")
-	PY.stat = __import__ ("stat")
-	PY.fcntl = __import__ ("fcntl")
-	PY.io = __import__ ("io")
-	PY.re = __import__ ("re")
-	PY.json = __import__ ("json")
-	PY.fnmatch = __import__ ("fnmatch")
-	PY.random = __import__ ("random") .SystemRandom ()
-	PY.binascii = __import__ ("binascii")
+	PY.types = __import__ ("types")
 	
 	PY.path = PY.os.path
 	
-	if PY.sys.version_info[0] > 2 :
-		PY.basestring = str
-		PY.str = str
-		PY.unicode = str
-		PY.bytes = bytes
-		PY.builtins = __import__ ("builtins")
-	else :
-		PY.basestring = basestring
-		PY.str = str
-		PY.unicode = unicode
-		PY.bytes = str
-		PY.builtins = __builtins__
+	PY.bytes = PY.builtins.bytes
+	PY.str = PY.builtins.str
+	
+	## --------------------------------------------------------------------------------
+	
+	if Z is None :
+		Z = __import__ ("types") .ModuleType ("Z")
 	
 	Z.py = PY
 	
@@ -141,8 +141,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _stdin_data is False :
 				_stdin = PY.subprocess.DEVNULL
 				_stdin_data = None
-			elif isinstance (_stdin_data, PY.basestring) or isinstance (_stdin_data, PY.bytes) :
-				if isinstance (_stdin_data, PY.basestring) :
+			elif isinstance (_stdin_data, PY.str) or isinstance (_stdin_data, PY.bytes) :
+				if isinstance (_stdin_data, PY.str) :
 					_stdin_data = _stdin_data.encode ("utf-8")
 				_stdin = PY.subprocess.PIPE
 				_should_communicate = True
@@ -154,7 +154,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _stdout_data is False :
 				_stdout = PY.subprocess.DEVNULL
 				_stdout_data = None
-			elif _stdout_data is True or _stdout_data is PY.str or _stdout_data is PY.unicode or _stdout_data is PY.bytes :
+			elif _stdout_data is True or _stdout_data is PY.str or _stdout_data is PY.bytes :
 				_stdout = PY.subprocess.PIPE
 				_should_communicate = True
 			else :
@@ -165,7 +165,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _stderr_data is False :
 				_stderr = PY.subprocess.DEVNULL
 				_stderr_data = None
-			elif _stderr_data is True or _stderr_data is PY.str or _stderr_data is PY.unicode or _stderr_data is PY.bytes :
+			elif _stderr_data is True or _stderr_data is PY.str or _stderr_data is PY.bytes :
 				_stderr = PY.subprocess.PIPE
 				_should_communicate = True
 			else :
@@ -193,18 +193,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if _wait :
 			if _should_communicate :
 				_stdout_data_0, _stderr_data_0 = _process.communicate (_stdin_data)
-				if _stdout_data is True or _stdout_data is PY.unicode :
+				if _stdout_data is True or _stdout_data is PY.str :
 					_stdout_data_0 = _stdout_data_0.decode ("utf-8")
-				elif _stdout_data is PY.str :
-					_stdout_data_0 = _stdout_data_0.decode ("ascii")
 				elif _stdout_data is PY.bytes :
 					pass
 				elif _stdout_data is not None :
 					Z.panic (0x70227d93, "invalid state")
-				if _stderr_data is True or _stderr_data is PY.unicode :
+				if _stderr_data is True or _stderr_data is PY.str :
 					_stderr_data_0 = _stderr_data_0.decode ("utf-8")
-				elif _stderr_data is PY.str :
-					_stderr_data_0 = _stderr_data_0.decode ("ascii")
 				elif _stderr_data is PY.bytes :
 					pass
 				elif _stderr_data is not None :
@@ -429,14 +425,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			return _processes
 		_succeeded = True
 		_terminated = 0
-		if Z.python_version >= 303 :
-			_signal_handler_old = PY.signal.signal (PY.signal.SIGCHLD, lambda _1, _2 : None)
+		_signal_handler_old = PY.signal.signal (PY.signal.SIGCHLD, lambda _1, _2 : None)
 		while True :
 			for _process in _processes :
 				if _process is None :
 					continue
 				_index, _process, _arguments = _process
-				if _terminated == (_count - 1) or not Z.python_version >= 303 :
+				if _terminated == (_count - 1) :
 					_process.wait ()
 				if _process.poll () is None :
 					continue
@@ -448,10 +443,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				_processes[_index] = None
 			if _terminated == _count :
 				break
-			if Z.python_version >= 303 :
-				PY.signal.sigtimedwait ([PY.signal.SIGCHLD], 6)
-		if Z.python_version >= 303 :
-			PY.signal.signal (PY.signal.SIGCHLD, _signal_handler_old)
+			PY.signal.sigtimedwait ([PY.signal.SIGCHLD], 6)
+		PY.signal.signal (PY.signal.SIGCHLD, _signal_handler_old)
 		if _enforce and not _succeeded :
 			Z.panic ((_enforce, 0x1d6fad91), "pipeline failed")
 		return _succeeded
@@ -567,7 +560,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	def __Z__enforce_regex (_value, _pattern, *, _code = None, _message = None) :
 		if _message is None : _message = "enforcement failed"
 		_pattern = Z.regex (_pattern)
-		if not isinstance (_value, PY.basestring) :
+		if not isinstance (_value, PY.str) :
 			if _code is None : _code = 0x00a780ed
 			Z.panic (_code, _message)
 		if _pattern.match (_value) is None :
@@ -583,7 +576,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__path (_path, *, _absolute = False, _canonical = False, _relative = None) :
-		if not isinstance (_path, PY.basestring) and not isinstance (_path, PY.bytes) :
+		if not isinstance (_path, PY.str) and not isinstance (_path, PY.bytes) :
 			_path = PY.path.join (*_path)
 		_path = Z.path_normalize (_path)
 		if _absolute :
@@ -843,12 +836,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.os.close (_fd)
 		if _json :
 			assert _data is None, "[be2949cc]"
-		if _data is None or _data is PY.unicode :
+		if _data is None or _data is PY.str :
 			_buffers = [_buffer.decode ("utf-8") for _buffer in _buffers]
 			_buffers = u"".join (_buffers)
-		elif _data is PY.str :
-			_buffers = [_buffer.decode ("ascii") for _buffer in _buffers]
-			_buffers = "".join (_buffers)
 		elif _data is PY.bytes :
 			_buffers = "".join (_buffers)
 		else :
@@ -880,10 +870,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_data = PY.json.dumps (_data)
 		if _data is None :
 			_buffer = b""
-		elif isinstance (_data, PY.unicode) :
-			_buffer = _data.encode ("utf-8")
 		elif isinstance (_data, PY.str) :
-			_buffer = _data.encode ("ascii")
+			_buffer = _data.encode ("utf-8")
 		elif isinstance (_data, PY.bytes) :
 			_buffer = _data
 		else :
@@ -1045,7 +1033,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			return ""
 		_data = Z.random_bytes (_bytes)
 		_data = PY.binascii.b2a_hex (_data)
-		_data = _data.decode ("ascii")
+		_data = _data.decode ("utf-8")
 		return _data
 	
 	@_inject
