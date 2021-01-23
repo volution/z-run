@@ -31,7 +31,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	
 	switch _interpreter {
 		
-		case "<exec>", "<bash+>", "<python+>", "<python2+>", "<python3+>" :
+		case "<exec>", "<bash+>", "<python3+>" :
 			_interpreterAllowsArguments = true
 		
 		case "<print>" :
@@ -104,11 +104,11 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
-		case "<python+>", "<python2+>", "<python3+>" :
+		case "<python3+>" :
 			_interpreterExecutable = _scriptlet.InterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:python] [%s]", _scriptlet.Label),
+					fmt.Sprintf ("[z-run:python3] [%s]", _scriptlet.Label),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedPythonProlog)

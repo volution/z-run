@@ -259,7 +259,7 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 			// NOP
 		case "<exec>", "<print>", "<template>", "<menu>", "<go>", "<go+>" :
 			return nil
-		case "<bash+>", "<python+>", "<python2+>", "<python3+>" :
+		case "<bash+>", "<python3+>" :
 			return nil
 		default :
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
@@ -370,19 +370,10 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 				case "bash+" :
 					_interpreter = "<" + _executable + ">"
 					_executable = _executable[0 : len (_executable) - 1]
-				case "python+", "python2+", "python3+" :
-					if _executable == "python+" {
-						_executable = "python3+"
-					}
+				case "python3+" :
 					_interpreter = "<" + _executable + ">"
 					_executable = _executable[0 : len (_executable) - 1]
 					_arguments = append (_arguments, "-E", "-s", "-S", "-u", "-O", "-O", "--")
-					switch _executable {
-						case "python2" :
-							_executable = "python2.7"
-					//	case "python3" :
-					//		_executable = "python3.6"
-					}
 				case "bash" :
 					// NOP
 				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9" :

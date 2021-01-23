@@ -5,8 +5,7 @@
 
 
 ++<< python / test / all
-	# "${ZRUN[@]}" ':: python / test / prolog'
-	"${ZRUN[@]}" ':: python / test / prolog / 3'
+	"${ZRUN[@]}" ':: python / test / prolog'
 	"${ZRUN[@]}" ':: python / test / log' 2> /dev/null
 	"${ZRUN[@]}" ':: python / test / panic' 2> /dev/null || true
 	"${ZRUN[@]}" ':: python / test / zspawn'
@@ -30,22 +29,6 @@
 
 
 << python / test / prolog
-	"${ZRUN[@]}" ':: python / test / prolog / 0'
-	"${ZRUN[@]}" ':: python / test / prolog / 2'
-	"${ZRUN[@]}" ':: python / test / prolog / 3'
-!!
-
-<< python / test / prolog / 0
-	#! <python+>
-	Z.expect_no_arguments ()
-!!
-
-<< python / test / prolog / 2
-	#! <python2+>
-	Z.expect_no_arguments ()
-!!
-
-<< python / test / prolog / 3
 	#! <python3+>
 	Z.expect_no_arguments ()
 !!
