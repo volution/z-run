@@ -6,6 +6,7 @@
 
 ++<< python / test / all
 	"${ZRUN[@]}" ':: python / test / prolog'
+	"${ZRUN[@]}" ':: python / test / exit'
 	"${ZRUN[@]}" ':: python / test / log' 2> /dev/null
 	"${ZRUN[@]}" ':: python / test / panic' 2> /dev/null || true
 	"${ZRUN[@]}" ':: python / test / zspawn'
@@ -33,6 +34,11 @@
 	Z.expect_no_arguments ()
 !!
 
+<< python / test / exit
+	#! <python3+>
+	Z.expect_no_arguments ()
+	Z.exit (0)
+!!
 
 << python / test / log
 	#! <python3+>
@@ -245,8 +251,8 @@
 << python / test / random
 	#! <python3+>
 	Z.expect_no_arguments ()
-	assert isinstance (Z.random_bytes (0), Z.py.bytes)
-	assert isinstance (Z.random_token (0), Z.py.str)
+	assert isinstance (Z.random_bytes (0), bytes)
+	assert isinstance (Z.random_token (0), str)
 	assert isinstance (Z.random_integer (0), int)
 	assert isinstance (Z.random_float (0, 1), float)
 	assert isinstance (Z.random_range (0, 1), int)
@@ -268,5 +274,32 @@
 		assert len (Z.random_sample ([0, 1, 2, 3], 2, repeats = False)) == 2
 		assert len (Z.random_sample ([0, 1, 2, 3], 8, repeats = True)) == 8
 		assert len (Z.random_shuffle ([0, 1, 2, 3])) == 4
+!!
+
+<< python / test / raise / internal
+	#! <python3+>
+	Z.expect_no_arguments ()
+	def x () : y ()
+	def y () : z ()
+	def z () : Z.random_token (-1)
+	x ()
+!!
+
+<< python / test / raise / external
+	#! <python3+>
+	Z.expect_no_arguments ()
+	def x () : y ()
+	def y () : z ()
+	def z () : raise Exception ()
+	x ()
+!!
+
+<< python / test / raise / assert
+	#! <python3+>
+	Z.expect_no_arguments ()
+	def x () : y ()
+	def y () : z ()
+	def z () : assert False
+	x ()
 !!
 
