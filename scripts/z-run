@@ -438,7 +438,10 @@
 	esac
 	
 	xxd -i -c 256 < "${_input}" \
-	| sed -r -e 's/[^,]$/\0,/' -e 's/ 0x0a,/\0\n /g' \
+	| sed -r -e 's/^ +//' -e 's/[^,]$/\0,/' \
+	| tr '\n' ' ' \
+	| sed -r -e 's/ 0x0a,/\0\n/g' \
+	| sed -r -e 's/^ */  /g' \
 	| grep -v -E -e '^ *$' \
 		>&"${_output_fd}"
 	
@@ -451,5 +454,5 @@
 
 
 
-&&?? ./.git/.local.z-run
+&&?? _/.local.z-run
 
