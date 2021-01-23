@@ -10,6 +10,7 @@ import "os"
 import "os/exec"
 import "path"
 import "strings"
+import "strconv"
 import "syscall"
 
 
@@ -112,7 +113,14 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedPython3Prolog)
-			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("Z.py.os.close (%d)\n", _interpreterScriptInput))
+			_interpreterScriptBuffer.WriteString (fmt.Sprintf (
+					"Z._scriptlet_begin_from_fd (%d, %s, %s, %d, %d)\n",
+					_interpreterScriptInput,
+					strconv.QuoteToASCII (_scriptlet.Label),
+					strconv.QuoteToASCII (_scriptlet.Source.Path),
+					_scriptlet.Source.LineStart,
+					_scriptlet.Source.LineEnd,
+				))
 			_interpreterScriptBuffer.WriteString (_scriptlet.Body)
 		
 		case "<print>" :

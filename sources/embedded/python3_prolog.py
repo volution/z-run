@@ -33,6 +33,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.stat = __import__ ("stat")
 	PY.subprocess = __import__ ("subprocess")
 	PY.time = __import__ ("time")
+	PY.traceback = __import__ ("traceback")
 	PY.types = __import__ ("types")
 	
 	PY.path = PY.os.path
@@ -48,9 +49,12 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.dict = PY.builtins.dict
 	PY.range = PY.builtins.range
 	PY.len = PY.builtins.len
+	PY.sorted = PY.builtins.sorted
+	PY.reversed = PY.builtins.reversed
 	
 	PY.isinstance = PY.builtins.isinstance
 	PY.OSError = PY.builtins.OSError
+	PY.SystemExit = PY.builtins.SystemExit
 	
 	## --------------------------------------------------------------------------------
 	
@@ -67,11 +71,23 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_name = _name[5:]
 		else :
 			assert False, ("[83cec849]  invalid inject name: `%s`" % _name)
-		def _wrapper (*_arguments_list, **_arguments_map) :
+		def __Z__wrapper (*_arguments_list, **_arguments_map) :
 			_arguments_map = {("_" + _name if _name[0] != "_" else _name) : _value for _name, _value in _arguments_map.items ()}
-			return _function (*_arguments_list, **_arguments_map)
-		_wrapper.__name__ = "Z." + _name
-		Z.__dict__[_name] = _wrapper
+			try :
+				return _function (*_arguments_list, **_arguments_map)
+			except PY.SystemExit :
+				raise
+			except :
+				_error = PY.sys.exc_info ()
+				_traceback_error = PY.traceback.extract_tb (_error[2])
+				_traceback_error.pop (0)
+				_traceback_caller = PY.traceback.extract_stack ()
+				_traceback_caller.pop (-1)
+				_error = _error[1]
+				Z.panic_with_traceback (0x63468d09, _error, _traceback_error, _traceback_caller)
+		_function.__name__ = "Z." + _name
+		__Z__wrapper.__name__ = "Z." + _name
+		Z.__dict__[_name] = __Z__wrapper
 		return None
 	
 	## --------------------------------------------------------------------------------
@@ -465,22 +481,22 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__log_error (_code, _message, *_arguments) :
-		Z._log_write ('ee', _code, _message, _arguments)
+		Z._log_write ("ee", _code, _message, _arguments)
 	
 	@_inject
 	def __Z__log_warning (_code, _message, *_arguments) :
 		if not Z.log_warning_enabled : return
-		Z._log_write ('ww', _code, _message, _arguments)
+		Z._log_write ("ww", _code, _message, _arguments)
 	
 	@_inject
 	def __Z__log_notice (_code, _message, *_arguments) :
 		if not Z.log_warning_enabled or not Z.log_notice_enabled : return
-		Z._log_write ('ii', _code, _message, _arguments)
+		Z._log_write ("ii", _code, _message, _arguments)
 	
 	@_inject
 	def __Z__log_debug (_code, _message, *_arguments) :
 		if not Z.log_warning_enabled or not Z.log_notice_enabled or not Z.log_debug_enabled : return
-		Z._log_write ('dd', _code, _message, _arguments)
+		Z._log_write ("dd", _code, _message, _arguments)
 	
 	@_inject
 	def __Z__log_cut (*, _important = True) :
@@ -504,19 +520,80 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.sys.exit (_status)
 	
 	@_inject
+	def __Z__sleep (_interval) :
+		PY.time.sleep (_interval)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
 	def __Z__panic (_code, _message, *_arguments) :
-		if PY.isinstance (_code, PY.tuple) :
-			_code_0 = 0xee4006b2
-			for _code_0 in _code :
-				if _code_0 is not False and _code_0 is not None :
-					break
-			_code = _code_0
-		Z._log_write ('!!', _code, _message, _arguments)
+		_code = Z._panic_code (_code)
+		Z._log_write ("!!", _code, _message, _arguments)
 		Z.exit (1)
 	
 	@_inject
-	def __Z__sleep (_interval) :
-		PY.time.sleep (_interval)
+	def __Z__panic_with_traceback (_code, _error, _traceback_error, _traceback_caller) :
+		
+		_code = Z._panic_code (_code)
+		Z._log_write ("!!", _code, "unexpected error encountered:", ())
+		Z._log_write ("!!", _code, "  %r", (_error,))
+		
+		def _traceback_frame_log (_tag, _frame) :
+			_file = _frame.filename
+			_line = _frame.lineno
+			_context = _frame.name
+			if _file == Z._scriptlet_begin_file :
+				if _context == "<module>" :
+					_context = "<scriptlet>"
+				elif _context == "__Z__wrapper" :
+					return
+				elif _context.startswith ("__Z__") :
+					_context = "Z." + _context[5:]
+				if _line > Z._scriptlet_begin_line :
+					_line -= Z._scriptlet_begin_line
+					_line += Z._scriptlet_source_line_start + 1
+					_position = "`:: %s` @ %d @ `%s`" % (Z._scriptlet_label, _line, Z._scriptlet_source_path)
+				else :
+					_position = "<python3+> @ %d" % (_line)
+			else :
+				_position = "`%s` @ %d" % (_file, _line)
+			Z._log_write ("!!", _code, "  [%s]  %-20s | %s", (_tag, _context, _position))
+		
+		for _traceback_frame in PY.reversed (_traceback_error) :
+			_traceback_frame_log ("raised", _traceback_frame)
+		for _traceback_frame in PY.reversed (_traceback_caller) :
+			_traceback_frame_log ("caller", _traceback_frame)
+		
+		Z.panic (_code, "aborting!")
+	
+	@_inject
+	def __Z___panic_code (_code) :
+		_code_fallback = 0xee4006b2
+		if PY.isinstance (_code, PY.int) :
+			pass
+		elif _code is None :
+			_code = _code_fallback
+		elif PY.isinstance (_code, PY.tuple) :
+			_code_0 = _code_fallback
+			for _code_0 in _code :
+				if PY.isinstance (_code, PY.int) :
+					break
+				_code_0 = _code_fallback
+			_code = _code_0
+		else :
+			_code = _code_fallback
+		return _code
+	
+	@_inject
+	def __Z___scriptlet_begin_from_fd (_fd, _label, _source_path, _source_line_start, _source_line_end) :
+		PY.os.close (_fd)
+		Z._scriptlet_label = _label
+		Z._scriptlet_source_path = _source_path
+		Z._scriptlet_source_line_start = _source_line_start
+		Z._scriptlet_source_line_end = _source_line_end
+		_traceback_frame = PY.traceback.extract_stack () [0]
+		Z._scriptlet_begin_file = _traceback_frame.filename
+		Z._scriptlet_begin_line = _traceback_frame.lineno
 	
 	## --------------------------------------------------------------------------------
 	
