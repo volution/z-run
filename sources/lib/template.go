@@ -16,7 +16,7 @@ import "text/template"
 
 
 
-func templateMain (_arguments []string, _environment map[string]string) (*Error) {
+func templateMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) < 1 {
 		return errorf (0x47c3f9f1, "invalid arguments")
@@ -25,32 +25,26 @@ func templateMain (_arguments []string, _environment map[string]string) (*Error)
 	var _sourcePath = _arguments[0]
 	_arguments = _arguments[1:]
 	
-	var _source string
-	if _stream, _error := os.Open (_sourcePath); _error == nil {
-		defer _stream.Close ()
-		_buffer := strings.Builder {}
-		if _, _error := io.Copy (&_buffer, _stream); _error == nil {
-			_source = _buffer.String ()
-		} else {
-			return errorw (0x693128fe, _error)
-		}
+	var _sourceBody string
+	if _, _data, _error := loadFromFile (_sourcePath); _error == nil {
+		_sourceBody = string (_data)
+	} else {
+		return _error
 	}
 	
-	_functions := templateFunctions ()
-	
-	_template := template.New ("z-run")
-	_template.Funcs (_functions)
-	if _, _error := _template.Parse (_source); _error != nil {
-		return errorw (0xfd33768b, _error)
-	}
-	
-	_data := map[string]interface{} {
-			"arguments" : _arguments,
-			"environment" : _environment,
-		}
-	
-	if _error := _template.Execute (os.Stdout, _data); _error != nil {
-		return errorw (0x23ce8919, _error)
+	_error := executeTemplate_0 (
+			_sourceBody,
+			_arguments,
+			_environment,
+			_selfExecutable,
+			"",
+			"",
+			"",
+			nil,
+			os.Stdout,
+		)
+	if _error != nil {
+		return _error
 	}
 	
 	os.Exit (0)
@@ -74,27 +68,44 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 		return _error
 	}
 	
-	_source := _scriptlet.Body
+	_extraFunctions := make (map[string]interface{}, 16)
 	
-	_functions := templateFunctions ()
-	
-	_functions["zrun"] = func (_scriptlet string, _arguments ... string) (string, error) {
+	_extraFunctions["zrun"] = func (_scriptlet string, _arguments ... string) (string, error) {
 			return templateFuncZrun (_library, _context, _scriptlet, _arguments)
 		}
-	_functions["ZRUN"] = _functions["zrun"]
 	
-	_functions["ZRUN_EXECUTABLE"] = func () (string) {
-			return _context.selfExecutable
-		}
-	_functions["ZRUN_WORKSPACE"] = func () (string) {
-			return _context.workspace
-		}
-	_functions["ZRUN_LIBRARY_FINGERPRINT"] = func () (string) {
-			return _libraryFingerprint
-		}
-	_functions["ZRUN_LIBRARY_URL"] = func () (string) {
-			return _libraryUrl
-		}
+	return executeTemplate_0 (
+			_scriptlet.Body,
+			_context.cleanArguments,
+			_context.cleanEnvironment,
+			_context.selfExecutable,
+			_context.workspace,
+			_libraryUrl,
+			_libraryFingerprint,
+			_extraFunctions,
+			_output,
+		)
+}
+
+
+
+
+func executeTemplate_0 (
+			_source string,
+			_arguments []string,
+			_environment map[string]string,
+			_selfExecutable string,
+			_workspace string,
+			_libraryUrl string,
+			_libraryFingerprint string,
+			_extraFunctions map[string]interface{},
+			_output io.Writer,
+		) (*Error) {
+	
+	_functions := templateFunctions ()
+	for _name, _function := range _extraFunctions {
+		_functions[_name] = _function
+	}
 	
 	_template := template.New ("z-run")
 	_template.Funcs (_functions)
@@ -103,13 +114,12 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	}
 	
 	_data := map[string]interface{} {
-			"arguments" : _context.cleanArguments,
-			"environment" : _context.cleanEnvironment,
-			"executable" : _context.selfExecutable,
-			"workspace" : _context.workspace,
-			"fingerprint" : _libraryFingerprint,
-			"terminal" : _context.terminal,
-			"library" : _library,
+			"arguments" : _arguments,
+			"environment" : _environment,
+			"ZRUN_EXECUTABLE" : _selfExecutable,
+			"ZRUN_WORKSPACE" : _workspace,
+			"ZRUN_LIBRARY_URL" : _libraryUrl,
+			"ZRUN_LIBRARY_FINGERPRINT" : _libraryFingerprint,
 		}
 	
 	if _error := _template.Execute (_output, _data); _error != nil {

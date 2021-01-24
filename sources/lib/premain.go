@@ -294,7 +294,7 @@ func PreMain () () {
 			}
 		
 		case "[z-run:template-raw]" :
-			if _error := templateMain (_arguments, _environment); _error != nil {
+			if _error := templateMain (_executable, _arguments, _environment); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0x32241835)
