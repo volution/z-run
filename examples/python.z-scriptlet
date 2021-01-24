@@ -1,0 +1,8 @@
+#!/usr/bin/env -S z-run --scriptlet-exec
+#! <python3+>
+
+Z.expect_no_arguments ()
+
+for _name in sorted (Z.environment.__iter__ ()) :
+	print ("%s == %s" % (_name, Z.environment[_name]))
+

@@ -1,0 +1,5 @@
+#!/usr/bin/env -S z-run --scriptlet-exec
+#! <go+>
+
+Z.LogNotice (0x9ae8f4fd, "hello from Go!")
+
