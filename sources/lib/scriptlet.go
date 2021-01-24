@@ -64,9 +64,15 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 		return _error
 	}
 	
-	_cacheRoot, _errorCache := resolveCache ()
-	if _errorCache != nil {
-		return _errorCache
+	var _cacheRoot string
+	if _path, _ok := _environment["ZRUN_CACHE"]; _ok {
+		_cacheRoot = _path
+	} else {
+		if _path, _error := resolveCache (); _error == nil {
+			_cacheRoot = _path
+		} else {
+			return _error
+		}
 	}
 	
 	_executablePaths := make ([]string, 0, 32)
