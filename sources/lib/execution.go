@@ -268,6 +268,24 @@ func prepareExecution_0 (
 				)
 			_interpreterScriptUnused = true
 		
+		case "<template-raw>" :
+			_interpreterExecutable = _selfExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:template-raw] [%s]", _scriptletLabel),
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (_scriptletBody)
+		
+		case "<menu>" :
+			_interpreterExecutable = _selfExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:menu] [%s]", _scriptletLabel),
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (_scriptletBody)
+		
 		case "<go>", "<go+>" :
 			
 			_goFingerprint := _scriptletFingerprint
@@ -368,24 +386,6 @@ func prepareExecution_0 (
 					fmt.Sprintf ("[z-run:go] [%s]", _scriptletLabel),
 				)
 			_interpreterScriptUnused = true
-		
-		case "<template-raw>" :
-			_interpreterExecutable = _selfExecutable
-			_interpreterArguments = append (
-					_interpreterArguments,
-					fmt.Sprintf ("[z-run:template-raw] [%s]", _scriptletLabel),
-					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
-				)
-			_interpreterScriptBuffer.WriteString (_scriptletBody)
-		
-		case "<menu>" :
-			_interpreterExecutable = _selfExecutable
-			_interpreterArguments = append (
-					_interpreterArguments,
-					fmt.Sprintf ("[z-run:menu] [%s]", _scriptletLabel),
-					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
-				)
-			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
 		default :
 			return nil, nil, errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _interpreter, _scriptletLabel)
