@@ -184,7 +184,15 @@ func prepareExecution_0 (
 	var _interpreterScriptOutput *os.File
 	var _interpreterScriptUnused = false
 	
-	if _interpreterScriptInput_0, _interpreterScriptOutput_0, _error := createPipe (len (_scriptletBody), _contextCacheRoot); _error == nil {
+	_interpreterPrologOverhead := 0
+	switch _interpreter {
+		case "<bash+>" :
+			_interpreterPrologOverhead = len (embeddedBashProlog) + 128
+		case "<python3+>" :
+			_interpreterPrologOverhead = len (embeddedPython3Prolog) + 2048
+	}
+	
+	if _interpreterScriptInput_0, _interpreterScriptOutput_0, _error := createPipe (len (_scriptletBody) + _interpreterPrologOverhead, _contextCacheRoot); _error == nil {
 		_interpreterScriptInput = _interpreterScriptInput_0
 		_interpreterScriptOutput = _interpreterScriptOutput_0
 	} else {

@@ -23,9 +23,11 @@ func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 	var _interpreterScriptOutput *os.File
 	var _interpreterScriptDescriptors [2]int
 	
-	if _size < (1 * 1024 * 1024 - 128 * 1024) {
+	var _maxPipeSize = 1 * 1024 * 1024
+	
+	if _size <= _maxPipeSize {
 		if _error := syscall.Pipe (_interpreterScriptDescriptors[:]); _error == nil {
-			if _, _error := unix.FcntlInt (uintptr (_interpreterScriptDescriptors[1]), unix.F_SETPIPE_SZ, 1 * 1024 * 1024); _error != nil {
+			if _, _error := unix.FcntlInt (uintptr (_interpreterScriptDescriptors[1]), unix.F_SETPIPE_SZ, _maxPipeSize); _error != nil {
 				logf ('w', 0x4d3414c8, "failed increasing pipe buffer size;  ignoring!")
 			}
 			_interpreterScriptInput = _interpreterScriptDescriptors[0]
