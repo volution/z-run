@@ -354,19 +354,33 @@ func prepareExecution_0 (
 	_executablePaths = append (_executablePaths, _scriptletExecutablePaths ...)
 	_executablePaths = append (_executablePaths, _contextExecutablePaths ...)
 	
-	_environment["PATH"] = strings.Join (_executablePaths, string (os.PathListSeparator))
-	_environment["ZRUN_WORKSPACE"] = _contextWorkspace
-	_environment["ZRUN_LIBRARY_CACHE"] = _libraryUrl
-	_environment["ZRUN_FINGERPRINT"] = _libraryFingerprint
+	if len (_executablePaths) > 0 {
+		_environment["PATH"] = strings.Join (_executablePaths, string (os.PathListSeparator))
+	} else {
+		_environment["PATH"] = "/dev/null"
+	}
+	
+	if _selfExecutable != "" {
+		_environment["ZRUN_EXECUTABLE"] = _selfExecutable
+	}
+	if _contextWorkspace != "" {
+		_environment["ZRUN_WORKSPACE"] = _contextWorkspace
+	}
+	if _contextCacheRoot != "" {
+		_environment["ZRUN_CACHE"] = _contextCacheRoot
+	}
+	if _libraryUrl != "" {
+		_environment["ZRUN_LIBRARY_CACHE"] = _libraryUrl
+	}
+	if _libraryFingerprint != "" {
+		_environment["ZRUN_FINGERPRINT"] = _libraryFingerprint
+	}
 	
 	_interpreterEnvironment_0 := processEnvironment_0 (
-			_selfExecutable,
 			_cleanEnvironment,
-			[]map[string]string {
-					_interpreterEnvironment,
-					_scriptletEnvironment,
-					_environment,
-				},
+			_interpreterEnvironment,
+			_scriptletEnvironment,
+			_environment,
 		)
 	
 	if _interpreterExecutable_0, _error := resolveExecutable (_interpreterExecutable, _executablePaths); _error == nil {

@@ -267,7 +267,7 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
-	_scriptletBody, _scriptletBodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "", "<bash>")
+	_scriptletBody, _scriptletBodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "", "<bash+>")
 	if _error == nil {
 		
 		_scriptlet.Body = _scriptletBody
@@ -430,6 +430,7 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 			switch _interpreterExecutable {
 				
 				case "bash" :
+					_interpreterArguments = append (_interpreterArguments)
 					_interpreterArgumentsExtraDash = false
 					_interpreterArgumentsExtraDashNow = true
 					_interpreterArgumentsExtraAllowed = true
@@ -1257,7 +1258,7 @@ func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (s
 				Args : []string {
 						"[z-run:generator]",
 					},
-				Env : processEnvironment (_context, nil),
+				Env : processEnvironment_1 (_context),
 				Stdin : nil,
 				Stdout : nil,
 				Stderr : os.Stderr,

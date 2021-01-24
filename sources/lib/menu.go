@@ -142,9 +142,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Args = []string {
 				"[z-run:select]",
 			}
-		_command.Env = processEnvironment (_context, map[string]string {
-				"TERM" : _context.terminal,
-			})
+		_command.Env = processEnvironment_1 (_context)
 	} else if _path, _error := resolveExecutable ("z-run--select", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
@@ -181,7 +179,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 	}
 	
 	if _command.Env == nil {
-		_command.Env = processEnvironment (_context, nil)
+		_command.Env = processEnvironment_1 (_context)
 	}
 	
 //	logf ('d', 0x5cbde167, "%v", _command.Path)
