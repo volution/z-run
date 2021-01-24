@@ -396,7 +396,7 @@ or (sometimes for more complex scenarios) multiple, files.
 
   always exported inside the scriptlet execution environment;  (never unset it explicitly;)
 
-`ZRUN_FINGERPRINT`
+`ZRUN_LIBRARY_FINGERPRINT`
 
   always exported inside the scriptlet execution environment;  (never unset it explicitly;)
 

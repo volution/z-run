@@ -65,20 +65,20 @@
 
 <<~~.. templates / fingerprint / template / compile-time
 	#! {{}}
-	template-compile-time: {{ ZRUN_FINGERPRINT }}
+	template-compile-time: {{ ZRUN_LIBRARY_FINGERPRINT }}
 !!
 
 << templates / fingerprint / template / execute-time
 	#! {{}}
-	template-execute-time: {{ ZRUN_FINGERPRINT }}
+	template-execute-time: {{ ZRUN_LIBRARY_FINGERPRINT }}
 !!
 
 <<~~.. templates / fingerprint / script / compile-time
-	printf -- 'script-compile-time: %s %s\n' "${ZRUN_FINGERPRINT}" "$( exec -- date -Iseconds )"
+	printf -- 'script-compile-time: %s %s\n' "${ZRUN_LIBRARY_FINGERPRINT}" "$( exec -- date -Iseconds )"
 !!
 
 << templates / fingerprint / script / execute-time
-	printf -- 'script-execute-time: %s %s\n' "${ZRUN_FINGERPRINT}" "$( exec -- date -Iseconds )"
+	printf -- 'script-execute-time: %s %s\n' "${ZRUN_LIBRARY_FINGERPRINT}" "$( exec -- date -Iseconds )"
 !!
 
 <<~~.. templates / fingerprint / all / compile-time

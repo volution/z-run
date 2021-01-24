@@ -89,7 +89,7 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	_functions["ZRUN_WORKSPACE"] = func () (string) {
 			return _context.workspace
 		}
-	_functions["ZRUN_FINGERPRINT"] = func () (string) {
+	_functions["ZRUN_LIBRARY_FINGERPRINT"] = func () (string) {
 			return _libraryFingerprint
 		}
 	_functions["ZRUN_LIBRARY_CACHE"] = func () (string) {
