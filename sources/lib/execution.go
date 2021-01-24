@@ -492,9 +492,27 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 	
 	switch _scriptlet.Interpreter {
 		case "<print>" :
-			return executePrint (_library, _scriptlet, _context, os.Stdout)
+			if _error := executePrint (_library, _scriptlet, _context, os.Stdout); _error == nil {
+				if ! _fork {
+					os.Exit (0)
+					panic (0x0efeec0c)
+				} else {
+					return nil
+				}
+			} else {
+				return _error
+			}
 		case "<template>" :
-			return executeTemplate (_library, _scriptlet, _context, os.Stdout)
+			if _error := executeTemplate (_library, _scriptlet, _context, os.Stdout); _error == nil {
+				if ! _fork {
+					os.Exit (0)
+					panic (0xebdf1931)
+				} else {
+					return nil
+				}
+			} else {
+				return _error
+			}
 	}
 	
 	var _libraryFingerprint string
