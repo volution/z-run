@@ -267,7 +267,7 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
-	_scriptletBody, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body)
+	_scriptletBody, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "")
 	if _error == nil {
 		
 		_scriptlet.Body = _scriptletBody
@@ -286,7 +286,7 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 }
 
 
-func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string) (
+func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scriptletHeader string) (
 			_scriptletBody string,
 			_interpreter string,
 			_interpreterExecutable string,
@@ -299,32 +299,32 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string) (
 	
 	_scriptletBody = _scriptletBody_0
 	
-	_headerLine := ""
-	
-	if ! strings.HasPrefix (_scriptletBody, "#!") {
-		_headerLine = "<bash+>"
-	} else {
-		_headerLimit := strings.IndexByte (_scriptletBody, '\n')
-		if _headerLimit < 0 {
-			_errorReturn = errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptletLabel)
-			return
+	if _scriptletHeader == "" {
+		if ! strings.HasPrefix (_scriptletBody, "#!") {
+			_scriptletHeader = "<bash+>"
+		} else {
+			_headerLimit := strings.IndexByte (_scriptletBody, '\n')
+			if _headerLimit < 0 {
+				_errorReturn = errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptletLabel)
+				return
+			}
+			_scriptletHeader = _scriptletBody[2:_headerLimit]
+			_scriptletBody = _scriptletBody[_headerLimit + 1 :]
 		}
-		_headerLine = _scriptletBody[2:_headerLimit]
-		_scriptletBody = _scriptletBody[_headerLimit + 1 :]
 	}
 	
-	_headerLine = strings.Trim (_headerLine, " ")
+	_scriptletHeader = strings.Trim (_scriptletHeader, " ")
 	
-	if strings.HasPrefix (_headerLine, "{{}}") {
-		_headerLine = "<template>" + _headerLine[4:]
+	if strings.HasPrefix (_scriptletHeader, "{{}}") {
+		_scriptletHeader = "<template>" + _scriptletHeader[4:]
 	}
 	
-	if strings.HasPrefix (_headerLine, "<template>") {
+	if strings.HasPrefix (_scriptletHeader, "<template>") {
 		
-		_headerLine = _headerLine[10:]
-		_headerLine = strings.Trim (_headerLine, " ")
+		_scriptletHeader = _scriptletHeader[10:]
+		_scriptletHeader = strings.Trim (_scriptletHeader, " ")
 		
-		if _headerLine != "" {
+		if _scriptletHeader != "" {
 			_errorReturn = errorf (0x071546cf, "invalid header for `%s` (template with arguments)", _scriptletLabel)
 			return
 		}
@@ -336,12 +336,12 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string) (
 		_interpreterArgumentsExtraAllowed = true
 		_interpreterEnvironment = nil
 		
-	} else if strings.HasPrefix (_headerLine, "<print>") {
+	} else if strings.HasPrefix (_scriptletHeader, "<print>") {
 		
-		_headerLine = _headerLine[7:]
-		_headerLine = strings.Trim (_headerLine, " ")
+		_scriptletHeader = _scriptletHeader[7:]
+		_scriptletHeader = strings.Trim (_scriptletHeader, " ")
 		
-		if _headerLine != "" {
+		if _scriptletHeader != "" {
 			_errorReturn = errorf (0x6a068d74, "invalid header for `%s` (print with arguments)", _scriptletLabel)
 			return
 		}
@@ -353,12 +353,12 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string) (
 		_interpreterArgumentsExtraAllowed = false
 		_interpreterEnvironment = nil
 		
-	} else if strings.HasPrefix (_headerLine, "<menu>") {
+	} else if strings.HasPrefix (_scriptletHeader, "<menu>") {
 		
-		_headerLine = _headerLine[6:]
-		_headerLine = strings.Trim (_headerLine, " ")
+		_scriptletHeader = _scriptletHeader[6:]
+		_scriptletHeader = strings.Trim (_scriptletHeader, " ")
 		
-		if _headerLine != "" {
+		if _scriptletHeader != "" {
 			_errorReturn = errorf (0xf542516e, "invalid header for `%s` (menu with arguments)", _scriptletLabel)
 			return
 		}
@@ -370,18 +370,18 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string) (
 		_interpreterArgumentsExtraAllowed = false
 		_interpreterEnvironment = nil
 		
-	} else if strings.HasPrefix (_headerLine, "<go>") || strings.HasPrefix (_headerLine, "<go+>") {
+	} else if strings.HasPrefix (_scriptletHeader, "<go>") || strings.HasPrefix (_scriptletHeader, "<go+>") {
 		
-		if strings.HasPrefix (_headerLine, "<go>") {
+		if strings.HasPrefix (_scriptletHeader, "<go>") {
 			_interpreter = "<go>"
-			_headerLine = _headerLine[4:]
+			_scriptletHeader = _scriptletHeader[4:]
 		} else {
 			_interpreter = "<go+>"
-			_headerLine = _headerLine[5:]
+			_scriptletHeader = _scriptletHeader[5:]
 		}
-		_headerLine = strings.Trim (_headerLine, " ")
+		_scriptletHeader = strings.Trim (_scriptletHeader, " ")
 		
-		if _headerLine != "" {
+		if _scriptletHeader != "" {
 			_errorReturn = errorf (0x80bc049a, "invalid header for `%s` (go with arguments)", _scriptletLabel)
 			return
 		}
@@ -396,7 +396,7 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string) (
 	} else {
 		
 		_header := make ([]string, 0, 16)
-		for _, _part := range strings.Split (_headerLine, " ") {
+		for _, _part := range strings.Split (_scriptletHeader, " ") {
 			if _part == "" {
 				continue
 			}
