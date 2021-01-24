@@ -16,6 +16,57 @@ import "text/template"
 
 
 
+func printMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
+	
+	if len (_arguments) != 1 {
+		return errorf (0xbc2c2406, "invalid arguments")
+	}
+	
+	var _sourcePath = _arguments[0]
+	
+	var _sourceBody string
+	if _, _data, _error := loadFromFile (_sourcePath); _error == nil {
+		_sourceBody = string (_data)
+	} else {
+		return _error
+	}
+	
+	_error := executePrint_0 (_sourceBody, os.Stdout)
+	if _error != nil {
+		return _error
+	}
+	
+	os.Exit (0)
+	panic (0x3889ef57)
+}
+
+
+func executePrint (_library LibraryStore, _scriptlet *Scriptlet, _context *Context, _output io.Writer) (*Error) {
+	
+	if _scriptlet.Interpreter != "<print>" {
+		return errorf (0x43c4a524, "invalid interpreter")
+	}
+	
+	if len (_context.cleanArguments) != 0 {
+		return errorf (0x4f9e0e3b, "invalid arguments")
+	}
+	
+	return executePrint_0 (_scriptlet.Body, _output)
+}
+
+
+func executePrint_0 (_source string, _output io.Writer) (*Error) {
+	
+	if _, _error := _output.Write ([]byte (_source)); _error != nil {
+		return errorw (0x1fea6849, _error)
+	}
+	
+	return nil
+}
+
+
+
+
 func templateMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) < 1 {

@@ -225,7 +225,7 @@ func prepareExecution_0 (
 			_interpreterExecutable = _scriptletInterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:bash] [%s]", _scriptletLabel),
+					fmt.Sprintf ("[z-run:bash+] [%s]", _scriptletLabel),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedBashProlog)
@@ -236,7 +236,7 @@ func prepareExecution_0 (
 			_interpreterExecutable = _scriptletInterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:python3] [%s]", _scriptletLabel),
+					fmt.Sprintf ("[z-run:python3+] [%s]", _scriptletLabel),
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedPython3Prolog)
@@ -251,31 +251,42 @@ func prepareExecution_0 (
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
 		case "<print>" :
-			_interpreterExecutable = "cat"
-			_interpreterArguments = append (
-					_interpreterArguments,
-					fmt.Sprintf ("[z-run:print] [%s]", _scriptletLabel),
-					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
-				)
-			_interpreterScriptBuffer.WriteString (_scriptletBody)
+			if _libraryUrl != "" {
+				_interpreterExecutable = _selfExecutable
+				_interpreterArguments = append (
+						_interpreterArguments,
+						"[z-run:library]",
+						fmt.Sprintf (":: %s", _scriptletLabel),
+					)
+				_interpreterScriptUnused = true
+			} else {
+				_interpreterExecutable = _selfExecutable
+				_interpreterArguments = append (
+						_interpreterArguments,
+						fmt.Sprintf ("[z-run:print] [%s]", _scriptletLabel),
+						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+					)
+				_interpreterScriptBuffer.WriteString (_scriptletBody)
+			}
 		
 		case "<template>" :
-			_interpreterExecutable = _selfExecutable
-			_interpreterArguments = append (
-					_interpreterArguments,
-					"[z-run:template]",
-					fmt.Sprintf (":: %s", _scriptletLabel),
-				)
-			_interpreterScriptUnused = true
-		
-		case "<template-raw>" :
-			_interpreterExecutable = _selfExecutable
-			_interpreterArguments = append (
-					_interpreterArguments,
-					fmt.Sprintf ("[z-run:template-raw] [%s]", _scriptletLabel),
-					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
-				)
-			_interpreterScriptBuffer.WriteString (_scriptletBody)
+			if _libraryUrl != "" {
+				_interpreterExecutable = _selfExecutable
+				_interpreterArguments = append (
+						_interpreterArguments,
+						"[z-run:library]",
+						fmt.Sprintf (":: %s", _scriptletLabel),
+					)
+				_interpreterScriptUnused = true
+			} else {
+				_interpreterExecutable = _selfExecutable
+				_interpreterArguments = append (
+						_interpreterArguments,
+						fmt.Sprintf ("[z-run:template] [%s]", _scriptletLabel),
+						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+					)
+				_interpreterScriptBuffer.WriteString (_scriptletBody)
+			}
 		
 		case "<menu>" :
 			_interpreterExecutable = _selfExecutable
@@ -479,8 +490,11 @@ func prepareExecution_0 (
 
 func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool, _context *Context) (*Error) {
 	
-	if _scriptlet.Interpreter == "<template>" {
-		return executeTemplate (_library, _scriptlet, _context, os.Stdout)
+	switch _scriptlet.Interpreter {
+		case "<print>" :
+			return executePrint (_library, _scriptlet, _context, os.Stdout)
+		case "<template>" :
+			return executeTemplate (_library, _scriptlet, _context, os.Stdout)
 	}
 	
 	var _libraryFingerprint string

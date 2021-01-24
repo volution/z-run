@@ -94,14 +94,10 @@ func PreMain () () {
 	
 	if strings.HasPrefix (_argument0, "[z-run:menu] ") {
 		_argument0 = "[z-run:menu]"
-	} else if strings.HasPrefix (_argument0, "[z-run:select] ") {
-		_argument0 = "[z-run:select]"
 	} else if strings.HasPrefix (_argument0, "[z-run:print] ") {
 		_argument0 = "[z-run:print]"
 	} else if strings.HasPrefix (_argument0, "[z-run:template] ") {
 		_argument0 = "[z-run:template]"
-	} else if strings.HasPrefix (_argument0, "[z-run:template-raw] ") {
-		_argument0 = "[z-run:template-raw]"
 	}
 	
 	
@@ -164,16 +160,16 @@ func PreMain () () {
 		case "[z-run]" :
 			_argument0 = "[z-run]"
 		
-		case "[z-run:print]" :
+		case "[z-run:library]" :
 			_argument0 = "[z-run]"
-		
-		case "[z-run:template]" :
-			_argument0 = "[z-run]"
-		
-		case "[z-run:template-raw]" :
-			// NOP
 		
 		case "[z-run:menu]" :
+			// NOP
+		
+		case "[z-run:print]" :
+			// NOP
+		
+		case "[z-run:template]" :
 			// NOP
 		
 		case "[z-run:scriptlet]" :
@@ -241,8 +237,12 @@ func PreMain () () {
 				_argument0 = "[z-run:select]"
 				_arguments = _arguments[1:]
 			
+			case "--print" :
+				_argument0 = "[z-run:print]"
+				_arguments = _arguments[1:]
+			
 			case "--template" :
-				_argument0 = "[z-run:template-raw]"
+				_argument0 = "[z-run:template]"
 				_arguments = _arguments[1:]
 			
 			default :
@@ -293,7 +293,14 @@ func PreMain () () {
 				panic (0xe62a9355)
 			}
 		
-		case "[z-run:template-raw]" :
+		case "[z-run:print]" :
+			if _error := printMain (_executable, _arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0xf2084070)
+			}
+		
+		case "[z-run:template]" :
 			if _error := templateMain (_executable, _arguments, _environment); _error != nil {
 				panic (abortError (_error))
 			} else {

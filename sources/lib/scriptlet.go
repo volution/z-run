@@ -17,7 +17,7 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 	_path := ""
 	
 	if ! _shabang {
-		for len (_arguments) == 0 {
+		for len (_arguments) > 0 {
 			_argument := _arguments[0]
 			if strings.HasPrefix (_argument, "--label=") {
 				_label = _argument[len ("--label=") :]
