@@ -21,6 +21,7 @@ type Scriptlet struct {
 	Context *ScriptletContext `json:"-"`
 	ContextFingerprint string `json:"context,omitempty"`
 	Body string `json:"body,omitempty"`
+	BodyOffset uint `json:"body-offset,omitempty"`
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
 	Visible bool `json:"visible"`
@@ -273,6 +274,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			StringsMap (_scriptlet.InterpreterEnvironment) .
 			StringWithLen (_scriptlet.ContextFingerprint) .
 			StringWithLen (_scriptlet.Body) .
+			Uint64 (uint64 (_scriptlet.BodyOffset)) .
 			Build ()
 	
 	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {

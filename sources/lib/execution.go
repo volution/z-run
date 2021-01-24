@@ -57,7 +57,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 			_scriptlet.Body,
 			
 			_scriptlet.Source.Path,
-			_scriptlet.Source.LineStart,
+			_scriptlet.Source.LineStart + _scriptlet.BodyOffset,
 			_scriptlet.Source.LineEnd,
 			
 			_scriptletExecutablePaths,

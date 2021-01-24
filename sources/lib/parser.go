@@ -267,10 +267,11 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
-	_scriptletBody, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "")
+	_scriptletBody, _scriptletBodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "", "<bash>")
 	if _error == nil {
 		
 		_scriptlet.Body = _scriptletBody
+		_scriptlet.BodyOffset = _scriptletBodyOffset
 		_scriptlet.Interpreter = _interpreter
 		_scriptlet.InterpreterExecutable = _interpreterExecutable
 		_scriptlet.InterpreterArguments = _interpreterArguments
@@ -286,8 +287,9 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 }
 
 
-func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scriptletHeader string) (
+func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scriptletHeader string, _interpreterFallback string) (
 			_scriptletBody string,
+			_scriptletBodyOffset uint,
 			_interpreter string,
 			_interpreterExecutable string,
 			_interpreterArguments []string,
@@ -297,20 +299,27 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 			_errorReturn *Error,
 		) {
 	
-	_scriptletBody = _scriptletBody_0
-	
 	if _scriptletHeader == "" {
-		if ! strings.HasPrefix (_scriptletBody, "#!") {
-			_scriptletHeader = "<bash+>"
+		if ! strings.HasPrefix (_scriptletBody_0, "#!") {
+			if _interpreterFallback != "" {
+				_scriptletHeader = _interpreterFallback
+				_scriptletBody = _scriptletBody_0
+			} else {
+				_errorReturn = errorf (0x273c8b2e, "missing header for `%s` (`#!` not found)", _scriptletLabel)
+				return
+			}
 		} else {
-			_headerLimit := strings.IndexByte (_scriptletBody, '\n')
+			_headerLimit := strings.IndexByte (_scriptletBody_0, '\n')
 			if _headerLimit < 0 {
 				_errorReturn = errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptletLabel)
 				return
 			}
-			_scriptletHeader = _scriptletBody[2:_headerLimit]
-			_scriptletBody = _scriptletBody[_headerLimit + 1 :]
+			_scriptletHeader = _scriptletBody_0[2:_headerLimit]
+			_scriptletBody = _scriptletBody_0[_headerLimit + 1 :]
+			_scriptletBodyOffset = 1
 		}
+	} else {
+		_scriptletBody = _scriptletBody_0
 	}
 	
 	_scriptletHeader = strings.Trim (_scriptletHeader, " ")
