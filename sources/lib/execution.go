@@ -35,6 +35,11 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 		_scriptletEnvironment = _scriptlet.Context.Environment
 	}
 	
+	var _cleanArguments []string
+	if _includeArguments {
+		_cleanArguments = _context.cleanArguments
+	}
+	
 	return prepareExecution_0 (
 			
 			_libraryUrl,
@@ -43,6 +48,8 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 			_interpreter,
 			_scriptlet.InterpreterExecutable,
 			_scriptlet.InterpreterArguments,
+			_scriptlet.InterpreterArgumentsExtraDash,
+			_scriptlet.InterpreterArgumentsExtraAllowed,
 			_scriptlet.InterpreterEnvironment,
 			
 			_scriptlet.Fingerprint,
@@ -56,10 +63,8 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 			_scriptletExecutablePaths,
 			_scriptletEnvironment,
 			
-			_includeArguments,
-			
 			_context.selfExecutable,
-			_context.cleanArguments,
+			_cleanArguments,
 			_context.cleanEnvironment,
 			
 			_context.workspace,
@@ -79,6 +84,8 @@ func prepareExecution_0 (
 			_interpreter string,
 			_scriptletInterpreterExecutable string,
 			_scriptletInterpreterArguments []string,
+			_scriptletInterpreterArgumentsExtraDash bool,
+			_scriptletInterpreterArgumentsExtraAllowed bool,
 			_scriptletInterpreterEnvironment map[string]string,
 			
 			_scriptletFingerprint string,
@@ -92,8 +99,6 @@ func prepareExecution_0 (
 			_scriptletExecutablePaths []string,
 			_scriptletEnvironment map[string]string,
 			
-			_includeArguments bool,
-			
 			_selfExecutable string,
 			_cleanArguments []string,
 			_cleanEnvironment map[string]string,
@@ -102,42 +107,18 @@ func prepareExecution_0 (
 			_contextExecutablePaths []string,
 			_contextCacheRoot string,
 			
-		)
-		(*exec.Cmd, []int, *Error)
-{
+		) (*exec.Cmd, []int, *Error) {
+	
+	if (len (_cleanArguments) > 0) && ! _scriptletInterpreterArgumentsExtraAllowed {
+		return nil, nil, errorf (0x4ef9e048, "unexpected arguments")
+	}
 	
 	var _interpreterExecutable string
 	var _interpreterArguments []string = make ([]string, 0, len (_cleanArguments) + 16)
 	var _interpreterEnvironment map[string]string
-	var _interpreterAllowsArguments = false
 	
 	var _executablePaths []string = make ([]string, 0, 128)
 	var _environment map[string]string = make (map[string]string, 128)
-	
-	switch _interpreter {
-		
-		case "<exec>", "<bash+>", "<python3+>" :
-			_interpreterAllowsArguments = true
-		
-		case "<print>" :
-			_interpreterAllowsArguments = false
-		
-		case "<template>" :
-			_interpreterAllowsArguments = true
-		
-		case "<menu>" :
-			_interpreterAllowsArguments = false
-		
-		case "<go>", "<go+>" :
-			_interpreterAllowsArguments = true
-		
-		default :
-			return nil, nil, errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _interpreter, _scriptletLabel)
-	}
-	
-	if _includeArguments && (len (_cleanArguments) > 0) && !_interpreterAllowsArguments {
-		return nil, nil, errorf (0x4ef9e048, "unexpected arguments")
-	}
 	
 	var _interpreterScriptInput int
 	var _interpreterScriptOutput *os.File
@@ -339,7 +320,7 @@ func prepareExecution_0 (
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
 		default :
-			panic (0xe95f68a0)
+			return nil, nil, errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _interpreter, _scriptletLabel)
 	}
 	
 	
@@ -365,9 +346,10 @@ func prepareExecution_0 (
 		_interpreterScriptOutput.Close ()
 	}
 	
-	if _includeArguments {
-		_interpreterArguments = append (_interpreterArguments, _cleanArguments ...)
+	if _scriptletInterpreterArgumentsExtraDash {
+		_interpreterArguments = append (_interpreterArguments, "--")
 	}
+	_interpreterArguments = append (_interpreterArguments, _cleanArguments ...)
 	
 	_executablePaths = append (_executablePaths, _scriptletExecutablePaths ...)
 	_executablePaths = append (_executablePaths, _contextExecutablePaths ...)

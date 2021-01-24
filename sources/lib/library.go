@@ -15,6 +15,8 @@ type Scriptlet struct {
 	Interpreter string `json:"interpreter"`
 	InterpreterExecutable string `json:"interpreter-executable,omitempty"`
 	InterpreterArguments []string `json:"interpreter-arguments,omitempty"`
+	InterpreterArgumentsExtraDash bool `json:"interpreter-arguments-extra-dash,omitempty"`
+	InterpreterArgumentsExtraAllowed bool `json:"interpreter-arguments-extra-allowed,omitempty"`
 	InterpreterEnvironment map[string]string `json:"interpreter-environment,omitempty"`
 	Context *ScriptletContext `json:"-"`
 	ContextFingerprint string `json:"context,omitempty"`
@@ -241,7 +243,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 		default :
 			return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
 	}
-	if (_scriptlet.InterpreterExecutable != "") || (_scriptlet.InterpreterArguments != nil) || (_scriptlet.InterpreterEnvironment != nil) {
+	if (_scriptlet.InterpreterExecutable != "") || (_scriptlet.InterpreterArguments != nil) || (_scriptlet.InterpreterEnvironment != nil) || _scriptlet.InterpreterArgumentsExtraDash || _scriptlet.InterpreterArgumentsExtraAllowed {
 		return errorf (0x901675e8, "invalid scriptlet interpreter state")
 	}
 	
@@ -266,6 +268,8 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			StringWithLen (_scriptlet.Interpreter) .
 			StringWithLen (_scriptlet.InterpreterExecutable) .
 			StringsWithLen (_scriptlet.InterpreterArguments) .
+			Bool (_scriptlet.InterpreterArgumentsExtraDash) .
+			Bool (_scriptlet.InterpreterArgumentsExtraAllowed) .
 			StringsMap (_scriptlet.InterpreterEnvironment) .
 			StringWithLen (_scriptlet.ContextFingerprint) .
 			StringWithLen (_scriptlet.Body) .

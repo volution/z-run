@@ -86,6 +86,18 @@ func (_fingerprinter Fingerprinter) StringsMap (_map map[string]string) (Fingerp
 }
 
 
+func (_fingerprinter Fingerprinter) Bool (_value bool) (Fingerprinter) {
+	var _bytes [1]byte
+	if _value {
+		_bytes[0] = 1
+	} else {
+		_bytes[0] = 0
+	}
+	_fingerprinter.hasher.Write (_bytes[:])
+	return _fingerprinter
+}
+
+
 func fingerprintString (_value string) string {
 	return fingerprintBytes ([]byte (_value))
 }

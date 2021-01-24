@@ -296,6 +296,8 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_scriptlet.Interpreter = "<template>"
 		_scriptlet.InterpreterExecutable = ""
 		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterArgumentsExtraDash = false
+		_scriptlet.InterpreterArgumentsExtraAllowed = true
 		_scriptlet.InterpreterEnvironment = nil
 		
 	} else if strings.HasPrefix (_headerLine, "<print>") {
@@ -310,6 +312,8 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_scriptlet.Interpreter = "<print>"
 		_scriptlet.InterpreterExecutable = ""
 		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterArgumentsExtraDash = false
+		_scriptlet.InterpreterArgumentsExtraAllowed = false
 		_scriptlet.InterpreterEnvironment = nil
 		
 	} else if strings.HasPrefix (_headerLine, "<menu>") {
@@ -324,6 +328,8 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_scriptlet.Interpreter = "<menu>"
 		_scriptlet.InterpreterExecutable = ""
 		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterArgumentsExtraDash = false
+		_scriptlet.InterpreterArgumentsExtraAllowed = false
 		_scriptlet.InterpreterEnvironment = nil
 		
 	} else if strings.HasPrefix (_headerLine, "<go>") || strings.HasPrefix (_headerLine, "<go+>") {
@@ -345,6 +351,8 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_scriptlet.Interpreter = _interpreter
 		_scriptlet.InterpreterExecutable = ""
 		_scriptlet.InterpreterArguments = nil
+		_scriptlet.InterpreterArgumentsExtraDash = false
+		_scriptlet.InterpreterArgumentsExtraAllowed = true
 		_scriptlet.InterpreterEnvironment = nil
 		
 	} else {
@@ -363,40 +371,72 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_interpreter := "<exec>"
 		_executable := _header[0]
 		_arguments := make ([]string, 0, len (_header) + 16)
+		_argumentsExtraDash := false
+		_argumentsExtraAllowed := false
 		
 		if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
 			_executable = _executable[1 : len (_executable) - 1]
 			switch _executable {
+				
+				case "bash" :
+					_arguments = append (_arguments, "--")
+					_argumentsExtraDash = false
+					_argumentsExtraAllowed = true
+				
 				case "bash+" :
 					_interpreter = "<" + _executable + ">"
 					_executable = _executable[0 : len (_executable) - 1]
+					_arguments = append (_arguments, "--")
+					_argumentsExtraDash = false
+					_argumentsExtraAllowed = true
+				
+				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9" :
+					_arguments = append (_arguments, "-E", "-s", "-S", "-u", "-O", "-O", "--")
+					_argumentsExtraDash = false
+					_argumentsExtraAllowed = true
+				
 				case "python3+" :
 					_interpreter = "<" + _executable + ">"
 					_executable = _executable[0 : len (_executable) - 1]
 					_arguments = append (_arguments, "-E", "-s", "-S", "-u", "-O", "-O", "--")
-				case "bash" :
-					// NOP
-				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9" :
-					// NOP
+					_argumentsExtraDash = false
+					_argumentsExtraAllowed = true
+				
 				case "lua", "node", "perl", "ruby", "php", "php5", "php7", "php8" :
-					// NOP
+					_argumentsExtraDash = false // FIXME:  Verify this!
+					_argumentsExtraAllowed = true
+				
 				case "tcl" :
 					_executable = "tclsh"
+					_argumentsExtraDash = false // FIXME:  Verify this!
+					_argumentsExtraAllowed = true
+				
 				case "awk" :
 					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
 					_arguments = append (_arguments, "-f")
+					_argumentsExtraDash = true
+					_argumentsExtraAllowed = false
+				
 				case "sed", "grep" :
-					// FIXME:  Make it so that it doesn't accept other arguments!
 					_arguments = append (_arguments, "-E", "-f")
+					_argumentsExtraDash = false
+					_argumentsExtraAllowed = false
+				
 				case "jq" :
-					// FIXME:  Make it so that it doesn't accept other arguments!
 					_arguments = append (_arguments, "-f")
+					_argumentsExtraDash = false
+					_argumentsExtraAllowed = false
+				
 				case "make" :
-					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
 					_arguments = append (_arguments, "-s", "-r", "-R", "-f")
+					_argumentsExtraDash = true
+					_argumentsExtraAllowed = true
+				
 				case "ninja" :
-					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
 					_arguments = append (_arguments, "-f")
+					_argumentsExtraDash = true
+					_argumentsExtraAllowed = true
+				
 				default :
 					return errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptlet.Label)
 			}
@@ -415,6 +455,8 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_scriptlet.Interpreter = _interpreter
 		_scriptlet.InterpreterExecutable = _executable
 		_scriptlet.InterpreterArguments = _arguments
+		_scriptlet.InterpreterArgumentsExtraDash = _argumentsExtraDash
+		_scriptlet.InterpreterArgumentsExtraAllowed = _argumentsExtraAllowed
 		_scriptlet.InterpreterEnvironment = nil
 	}
 	
