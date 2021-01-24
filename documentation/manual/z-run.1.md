@@ -208,7 +208,7 @@ or (sometimes for more complex scenarios) multiple, files.
 `z-run` [ `<flag>` ... ] `export-library-url`
 
   expects no arguments or scriptlet;
-  writes to `/dev/stdout` a line suitable for using it as value for the `--library-cache` flag;
+  writes to `/dev/stdout` a line suitable for using it as value for the `--library-url` flag;
   currently it is either a CDB database file `<path>` or `<rpc-target>`;
   **however it should always be treated as an opaque value**, containing any ASCII character, except control characters, as it might change in future versions;
 
@@ -330,16 +330,16 @@ or (sometimes for more complex scenarios) multiple, files.
   specifies a library `<source-path>`, that overrides the default library source detection mecanism;
 
 
-`--library-cache=<cache-url>`
+`--library-url=<cache-url>`
 
   specifies a library `<cache-url>`, either a `<cdb-path>` or a `<rpc-target>`;
-  specifying both `--library-source=...` and `--library-cache=...` is not allowed;
+  specifying both `--library-source=...` and `--library-url=...` is not allowed;
 
 
 `--workspace=<path>`
 
   specifies a folder that `z-run` switches to before executing;
-  (if no `--library-source=...` or `--library-cache=...` is specified, the default library source detection mecanism uses this folder as the root;)
+  (if no `--library-source=...` or `--library-url=...` is specified, the default library source detection mecanism uses this folder as the root;)
 
 
 `--ssh-target=<ssh-target>`
@@ -382,9 +382,9 @@ or (sometimes for more complex scenarios) multiple, files.
   an alternative to the `--library-source=...` flag;
   never exported inside scriptlet execution;
 
-`ZRUN_LIBRARY_CACHE`
+`ZRUN_LIBRARY_URL`
 
-  an alternative to the `--library-cache=...` flag;
+  an alternative to the `--library-url=...` flag;
   always exported inside the scriptlet execution environment;  (never unset it explicitly;)
 
 `ZRUN_WORKSPACE`

@@ -71,7 +71,7 @@
 	test "${#}" -ge 1
 	export -n -- \
 			ZRUN_LIBRARY_SOURCE= \
-			ZRUN_LIBRARY_CACHE= \
+			ZRUN_LIBRARY_URL= \
 			ZRUN_LIBRARY_FINGERPRINT= \
 			ZRUN_EXECUTABLE= \
 			ZRUN_WORKSPACE= \

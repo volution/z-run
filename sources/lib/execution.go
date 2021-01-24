@@ -430,7 +430,7 @@ func prepareExecution_0 (
 		_environment["ZRUN_CACHE"] = _contextCacheRoot
 	}
 	if _libraryUrl != "" {
-		_environment["ZRUN_LIBRARY_CACHE"] = _libraryUrl
+		_environment["ZRUN_LIBRARY_URL"] = _libraryUrl
 	}
 	if _libraryFingerprint != "" {
 		_environment["ZRUN_LIBRARY_FINGERPRINT"] = _libraryFingerprint

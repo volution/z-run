@@ -254,7 +254,7 @@ or (sometimes for more complex scenarios) multiple, files.</p>
 <code>z-run</code> [ <code>&lt;flag></code> ... ] <code>export-library-url</code></p>
 
 <p>  expects no arguments or scriptlet;
-  writes to <code>/dev/stdout</code> a line suitable for using it as value for the <code>--library-cache</code> flag;
+  writes to <code>/dev/stdout</code> a line suitable for using it as value for the <code>--library-url</code> flag;
   currently it is either a CDB database file <code>&lt;path></code> or <code>&lt;rpc-target></code>;
   <strong>however it should always be treated as an opaque value</strong>, containing any ASCII character, except control characters, as it might change in future versions;</p>
 
@@ -355,15 +355,15 @@ or (sometimes for more complex scenarios) multiple, files.</p>
 
 <p>  specifies a library <code>&lt;source-path></code>, that overrides the default library source detection mecanism;</p>
 
-<p><code>--library-cache=&lt;cache-url></code></p>
+<p><code>--library-url=&lt;cache-url></code></p>
 
 <p>  specifies a library <code>&lt;cache-url></code>, either a <code>&lt;cdb-path></code> or a <code>&lt;rpc-target></code>;
-  specifying both <code>--library-source=...</code> and <code>--library-cache=...</code> is not allowed;</p>
+  specifying both <code>--library-source=...</code> and <code>--library-url=...</code> is not allowed;</p>
 
 <p><code>--workspace=&lt;path></code></p>
 
 <p>  specifies a folder that <code>z-run</code> switches to before executing;
-  (if no <code>--library-source=...</code> or <code>--library-cache=...</code> is specified, the default library source detection mecanism uses this folder as the root;)</p>
+  (if no <code>--library-source=...</code> or <code>--library-url=...</code> is specified, the default library source detection mecanism uses this folder as the root;)</p>
 
 <p><code>--ssh-target=&lt;ssh-target></code></p>
 
@@ -397,9 +397,9 @@ or (sometimes for more complex scenarios) multiple, files.</p>
 <p>  an alternative to the <code>--library-source=...</code> flag;
   never exported inside scriptlet execution;</p>
 
-<p><code>ZRUN_LIBRARY_CACHE</code></p>
+<p><code>ZRUN_LIBRARY_URL</code></p>
 
-<p>  an alternative to the <code>--library-cache=...</code> flag;
+<p>  an alternative to the <code>--library-url=...</code> flag;
   always exported inside the scriptlet execution environment;  (never unset it explicitly;)</p>
 
 <p><code>ZRUN_WORKSPACE</code></p>

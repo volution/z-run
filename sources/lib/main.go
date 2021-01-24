@@ -65,7 +65,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 	var _scriptlet string = _scriptletOverride
 	
 	var _librarySourcePath string
-	var _libraryCachePath string
+	var _libraryCacheUrl string
 	var _libraryLookupPaths []string = make ([]string, 0, 128)
 	
 	var _cleanArguments []string
@@ -113,8 +113,8 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				
 				case "ZRUN_LIBRARY_SOURCE" :
 					_librarySourcePath = _value
-				case "ZRUN_LIBRARY_CACHE" :
-					_libraryCachePath = _value
+				case "ZRUN_LIBRARY_URL" :
+					_libraryCacheUrl = _value
 				case "ZRUN_LIBRARY_FINGERPRINT" :
 					// FIXME:  Validate that this value actually matches given library.
 				
@@ -198,7 +198,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				if _index == 0 {
 					_execMode = true
 					_librarySourcePath = ""
-					_libraryCachePath = ""
+					_libraryCacheUrl = ""
 					_workspace = ""
 					_top = true
 				} else {
@@ -208,7 +208,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			} else if _argument == "--untainted" {
 				if _index == 0 {
 					_librarySourcePath = ""
-					_libraryCachePath = ""
+					_libraryCacheUrl = ""
 					_workspace = ""
 					_top = true
 				} else {
@@ -232,10 +232,10 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				
 			} else if strings.HasPrefix (_argument, "--library-source=") {
 				_librarySourcePath = _argument[len ("--library-source="):]
-				_libraryCachePath = ""
+				_libraryCacheUrl = ""
 				
-			} else if strings.HasPrefix (_argument, "--library-cache=") {
-				_libraryCachePath = _argument[len ("--library-cache="):]
+			} else if strings.HasPrefix (_argument, "--library-url=") {
+				_libraryCacheUrl = _argument[len ("--library-url="):]
 				
 			} else if strings.HasPrefix (_argument, "--workspace=") {
 				_workspace = _argument[len ("--workspace="):]
@@ -370,7 +370,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		if len (_cleanArguments) != 0 {
 			return errorf (0x71d92eec, "invalid arguments:  unexpected arguments")
 		}
-		if (_librarySourcePath != "") || (_libraryCachePath != "") || (len (_libraryLookupPaths) != 0) {
+		if (_librarySourcePath != "") || (_libraryCacheUrl != "") || (len (_libraryLookupPaths) != 0) {
 			return errorf (0x70d72d6d, "invalid arguments:  unexpected library source, cache or lookup")
 		}
 		if _workspace != "" {
@@ -405,7 +405,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		}
 		_executablePaths = _context.ExecutablePaths
 		_terminal = _context.Terminal
-		_libraryCachePath = _context.Library
+		_libraryCacheUrl = _context.Library
 		_workspace = _context.Workspace
 		_cacheRoot = _context.Cache
 		_top = false
@@ -447,9 +447,9 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			}
 		}
 	} else {
-		if _libraryCachePath != "" {
-			logf ('w', 0xdb80c4de, "cached library path specified, but caching is disabled;  ignoring cached path!")
-			_libraryCachePath = ""
+		if _libraryCacheUrl != "" {
+			logf ('w', 0xdb80c4de, "library URL specified, but caching is disabled;  ignoring cached path!")
+			_libraryCacheUrl = ""
 		}
 	}
 	
@@ -488,10 +488,10 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		_terminal = ""
 	}
 	
-	if _libraryCachePath != "" {
+	if _libraryCacheUrl != "" {
 		if _librarySourcePath != "" {
-			logf ('w', 0x1fe0b572, "cached library path specified, but also source path specified;  ignoring cached path!")
-			_libraryCachePath = ""
+			logf ('w', 0x1fe0b572, "library URL specified, but also source path specified;  ignoring cached path!")
+			_libraryCacheUrl = ""
 		}
 	}
 	
@@ -509,15 +509,15 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		}
 	
 	var _library LibraryStore
-	if _libraryCachePath != "" {
-		if strings.HasPrefix (_libraryCachePath, "unix:") || strings.HasPrefix (_libraryCachePath, "tcp:") {
-			if _library_0, _error := NewLibraryRpcClient (_libraryCachePath); _error == nil {
+	if _libraryCacheUrl != "" {
+		if strings.HasPrefix (_libraryCacheUrl, "unix:") || strings.HasPrefix (_libraryCacheUrl, "tcp:") {
+			if _library_0, _error := NewLibraryRpcClient (_libraryCacheUrl); _error == nil {
 				_library = _library_0
 			} else {
 				return _error
 			}
 		} else {
-			if _library_0, _error := resolveLibraryCached (_libraryCachePath); _error == nil {
+			if _library_0, _error := resolveLibraryCached (_libraryCacheUrl); _error == nil {
 				_library = _library_0
 			} else {
 				return _error
