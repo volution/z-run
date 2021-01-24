@@ -13,7 +13,6 @@ import "os/exec"
 import "path"
 import "sort"
 import "strings"
-import "syscall"
 
 import isatty "github.com/mattn/go-isatty"
 
@@ -197,102 +196,6 @@ func doExportLibraryRpc (_library LibraryStore, _url string, _context *Context) 
 		return _server.Serve ()
 	} else {
 		return _error
-	}
-}
-
-
-
-
-func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool, _context *Context) (*Error) {
-	
-	if _scriptlet.Interpreter == "<template>" {
-		return executeTemplate (_library, _scriptlet, _context, os.Stdout)
-	}
-	
-	var _libraryFingerprint string
-	if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
-		_libraryFingerprint = _libraryFingerprint_0
-	} else {
-		return _error
-	}
-	
-	var _command *exec.Cmd
-	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_library.Url (), _libraryFingerprint, "", _scriptlet, true, _context); _error == nil {
-		_command = _command_0
-		_descriptors = _descriptors_0
-	} else {
-		return _error
-	}
-	
-	_closeDescriptors := func () () {
-		for _, _descriptor := range _descriptors {
-			syscall.Close (_descriptor)
-		}
-	}
-	
-	if _command.Dir != "" {
-		if _error := os.Chdir (_command.Dir); _error != nil {
-			return errorw (0xe4bab179, _error)
-		}
-	}
-	if _command.Stdin != nil {
-		_closeDescriptors ()
-		return errorf (0x78cfda21, "invalid state")
-	}
-	if _command.Stdout != nil {
-		_closeDescriptors ()
-		return errorf (0xf9a9dc74, "invalid state")
-	}
-	if _command.Stderr != nil {
-		_closeDescriptors ()
-		return errorf (0xf887025f, "invalid state")
-	}
-	if _command.ExtraFiles != nil {
-		_closeDescriptors ()
-		return errorf (0x50354e63, "invalid state")
-	}
-	if (_command.Process != nil) || (_command.ProcessState != nil) {
-		_closeDescriptors ()
-		return errorf (0x9d640d1e, "invalid state")
-	}
-	
-	if ! _fork {
-		
-		if _error := syscall.Exec (_command.Path, _command.Args, _command.Env); _error != nil {
-			_closeDescriptors ()
-			return errorw (0x99b54af1, _error)
-		} else {
-			panic (0xb6dfe17e)
-		}
-		
-	} else {
-		
-		for _, _descriptor := range _descriptors {
-			_command.ExtraFiles = append (_command.ExtraFiles, os.NewFile (uintptr (_descriptor), ""))
-		}
-		
-		_command.Stdin = os.Stdin
-		_command.Stdout = os.Stdout
-		_command.Stderr = os.Stderr
-		
-		_waitError := _command.Run ()
-		
-		_closeDescriptors ()
-		
-		if _waitError != nil {
-			if _command.ProcessState.Exited () {
-				if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
-					return errorf (0xa10d5811, "spawn `%s` failed with status `%d`", _scriptlet.Label, _exitCode)
-				} else {
-					return errorf (0x9cfebeaf, "invalid state")
-				}
-			} else {
-				return errorw (0x07b37e04, _waitError)
-			}
-		} else {
-			return nil
-		}
 	}
 }
 
