@@ -50,6 +50,20 @@ function Z_zspawn () {
 	fi
 }
 
+function Z_zspawn_quiet () {
+	if test "${#}" -eq 0 ; then
+		Z_panic 0xa53618e4 'failed to spawn z-run:  missing scriptlet!'
+	fi
+	if test "${1:0:2}" != '::' ; then
+		Z_panic 0x122f147e 'failed to spawn z-run:  invalid scriptlet!'
+	fi
+	if "${ZRUN[@]}" "${@}" ; then
+		return -- 0
+	else
+		return -- "${?}"
+	fi
+}
+
 function Z_zexec () {
 	if test "${#}" -eq 0 ; then
 		Z_panic 0x83b4d099 'failed to exec z-run:  missing scriptlet!'
