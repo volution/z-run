@@ -1258,7 +1258,7 @@ func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (s
 				Args : []string {
 						"[z-run:generator]",
 					},
-				Env : processEnvironment_1 (_context),
+				Env : prepareEnvironment (_context),
 				Stdin : nil,
 				Stdout : nil,
 				Stderr : os.Stderr,

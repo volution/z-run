@@ -9,9 +9,69 @@ import "io/ioutil"
 import "os"
 import "os/exec"
 import "path"
+import "sort"
 import "strings"
 import "strconv"
 import "syscall"
+
+
+
+
+func prepareEnvironment (_context *Context, _overrides ... map[string]string) ([]string) {
+	
+	_extraEnvironment := make (map[string]string, 16)
+	
+	_extraEnvironment["ZRUN_EXECUTABLE"] = _context.selfExecutable
+	_extraEnvironment["ZRUN_WORKSPACE"] = _context.workspace
+	_extraEnvironment["ZRUN_CACHE"] = _context.cacheRoot
+	
+	if len (_context.executablePaths) > 0 {
+		_paths := strings.Join (_context.executablePaths, string (os.PathListSeparator))
+		_extraEnvironment["PATH"] = _paths
+	}
+	
+	if _context.terminal != "" {
+		_extraEnvironment["TERM"] = _context.terminal
+	}
+	
+	_overrides_0 := make ([]map[string]string, 0, 1 + len (_overrides))
+	_overrides_0 = append (_overrides_0, _extraEnvironment)
+	_overrides_0 = append (_overrides_0, _overrides ...)
+	
+	return prepareEnvironment_0 (_context.cleanEnvironment, _overrides_0 ...)
+}
+
+
+func prepareEnvironment_0 (_environment map[string]string, _overrides ... map[string]string) ([]string) {
+	
+	_environmentMap := make (map[string]string, len (_environment))
+	
+	_environmentMap["PATH"] = "/dev/null"
+	_environmentMap["TERM"] = "dumb"
+	
+	for _name, _value := range _environment {
+		_environmentMap[_name] = _value
+	}
+	for _, _overrides := range _overrides {
+		for _name, _value := range _overrides {
+			if _value != "" {
+				_environmentMap[_name] = _value
+			} else {
+				delete (_environmentMap, _name)
+			}
+		}
+	}
+	
+	var _environmentArray []string = make ([]string, 0, len (_environmentMap))
+	for _name, _value := range _environmentMap {
+		_variable := _name + "=" + _value
+		_environmentArray = append (_environmentArray, _variable)
+	}
+	
+	sort.Strings (_environmentArray)
+	
+	return _environmentArray
+}
 
 
 
@@ -376,7 +436,7 @@ func prepareExecution_0 (
 		_environment["ZRUN_FINGERPRINT"] = _libraryFingerprint
 	}
 	
-	_interpreterEnvironment_0 := processEnvironment_0 (
+	_interpreterEnvironment_0 := prepareEnvironment_0 (
 			_cleanEnvironment,
 			_interpreterEnvironment,
 			_scriptletEnvironment,

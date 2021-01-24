@@ -6,74 +6,9 @@ package zrun
 import "bufio"
 import "bytes"
 import "io"
-import "os"
 import "os/exec"
-import "sort"
 import "strings"
 import "sync"
-
-
-
-
-func processEnvironment_1 (_context *Context, _overrides ... map[string]string) ([]string) {
-	
-	_extraEnvironment := make (map[string]string, 16)
-	
-	_extraEnvironment["ZRUN_EXECUTABLE"] = _context.selfExecutable
-	_extraEnvironment["ZRUN_WORKSPACE"] = _context.workspace
-	_extraEnvironment["ZRUN_CACHE"] = _context.cacheRoot
-	
-	if _context.executablePaths != nil {
-		_paths := strings.Join (_context.executablePaths, string (os.PathListSeparator))
-		_paths = strings.Trim (_paths, string (os.PathListSeparator))
-		if _paths == "" {
-			_paths = "/dev/null"
-		}
-		_extraEnvironment["PATH"] = _paths
-	} else {
-		_extraEnvironment["PATH"] = "/dev/null"
-	}
-	
-	if _context.terminal != "" {
-		_extraEnvironment["TERM"] = _context.terminal
-	} else {
-		_extraEnvironment["TERM"] = "dumb"
-	}
-	
-	_overrides_0 := make ([]map[string]string, 0, 1 + len (_overrides))
-	_overrides_0 = append (_overrides_0, _extraEnvironment)
-	_overrides_0 = append (_overrides_0, _overrides ...)
-	return processEnvironment_0 (_context.cleanEnvironment, _overrides_0 ...)
-}
-
-
-func processEnvironment_0 (_environment map[string]string, _overrides ... map[string]string) ([]string) {
-	
-	_environmentMap := make (map[string]string, len (_environment))
-	
-	for _name, _value := range _environment {
-		_environmentMap[_name] = _value
-	}
-	for _, _overrides := range _overrides {
-		for _name, _value := range _overrides {
-			if _value != "" {
-				_environmentMap[_name] = _value
-			} else {
-				delete (_environmentMap, _name)
-			}
-		}
-	}
-	
-	var _environmentArray []string = make ([]string, 0, len (_environmentMap))
-	for _name, _value := range _environmentMap {
-		_variable := _name + "=" + _value
-		_environmentArray = append (_environmentArray, _variable)
-	}
-	
-	sort.Strings (_environmentArray)
-	
-	return _environmentArray
-}
 
 
 
