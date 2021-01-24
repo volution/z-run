@@ -381,12 +381,6 @@ ENVIRONMENT
        files (and pipes, sockets, etc.) are created; (if explicitly specified,
        it is exported in the scriptlet execution environment;)
 
-       ZRUN_TERM
-
-       an alternative to the default $TERM environment variable; (if
-       explicitly specified, it is exported in the scriptlet execution
-       environment;)
-
 LIBRARY
    Library source resolution
        TBD

@@ -52,11 +52,9 @@ func menuMain (_executable string, _arguments []string, _environment map[string]
 	
 	if _paths, _ok := _environment["PATH"]; _ok {
 		_context.executablePaths = filepath.SplitList (_paths)
-		delete (_environment, "PATH")
 	}
 	if _terminal, _ok := _environment["TERM"]; _ok {
 		_context.terminal = _terminal
-		delete (_environment, "TERM")
 	}
 	
 	if _outputs, _error := menuSelect (_inputs, _context); _error == nil {

@@ -72,10 +72,10 @@
 	export -n -- \
 			ZRUN_LIBRARY_SOURCE= \
 			ZRUN_LIBRARY_CACHE= \
-			ZRUN_FINGERPRINT= \
+			ZRUN_LIBRARY_FINGERPRINT= \
 			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
 			ZRUN_CACHE= \
-			ZRUN_TERM= \
 	#
 	if test -n "${ZRUNDEV_USE:-}" ; then
 		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE}"

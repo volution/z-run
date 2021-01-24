@@ -110,24 +110,27 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			}
 			
 			switch _nameCanonical {
+				
 				case "ZRUN_LIBRARY_SOURCE" :
 					_librarySourcePath = _value
 				case "ZRUN_LIBRARY_CACHE" :
 					_libraryCachePath = _value
+				case "ZRUN_LIBRARY_FINGERPRINT" :
+					// FIXME:  Validate that this value actually matches given library.
+				
 				case "ZRUN_WORKSPACE" :
 					_workspace = _value
+				
 				case "ZRUN_EXECUTABLE" :
 					if _executable != _value {
 						logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
 					}
 					// FIXME:  Find a better way to handle this!
 					_top = false
+				
 				case "ZRUN_CACHE" :
 					_cacheRoot = _value
-				case "ZRUN_TERM" :
-					_terminal = _value
-				case "ZRUN_LIBRARY_FINGERPRINT" :
-					// FIXME:  Validate that this value actually matches given library.
+				
 				default :
 					logf ('w', 0xafe247b0, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
 			}
@@ -153,6 +156,8 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			}
 			
 		} else if _name == "TERM" {
+			
+			_cleanEnvironment[_name] = _value
 			
 			if _terminal == "" {
 				_terminal = _value

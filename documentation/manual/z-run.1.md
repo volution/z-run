@@ -405,11 +405,6 @@ or (sometimes for more complex scenarios) multiple, files.
   an alternative folder to the default `$HOME/.cache/z-run`, where various files (and pipes, sockets, etc.) are created;
   (if explicitly specified, it is exported in the scriptlet execution environment;)
 
-`ZRUN_TERM`
-
-  an alternative to the default `$TERM` environment variable;
-  (if explicitly specified, it is exported in the scriptlet execution environment;)
-
 
 
 
