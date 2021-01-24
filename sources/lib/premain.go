@@ -176,6 +176,9 @@ func PreMain () () {
 		case "[z-run:menu]" :
 			// NOP
 		
+		case "[z-run:scriptlet]" :
+			// NOP
+		
 		case "[z-run:input]" :
 			// NOP
 		
@@ -213,6 +216,10 @@ func PreMain () () {
 		var _delegateEnvironment []string
 		
 		switch _arguments[0] {
+			
+			case "--scriptlet" :
+				_argument0 = "[z-run:scriptlet]"
+				_arguments = _arguments[1:]
 			
 			case "--fzf" :
 				_delegateExecutable = _executable
@@ -257,6 +264,13 @@ func PreMain () () {
 	
 	
 	switch _argument0 {
+		
+		case "[z-run:scriptlet]" :
+			if _error := scriptletMain (_executable, _arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0xb305aa74)
+			}
 		
 		case "[z-run:input]" :
 			if _error := inputMain (_arguments, _environment); _error != nil {
