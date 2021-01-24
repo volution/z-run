@@ -121,7 +121,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		
 		switch _scriptlet.Kind {
 			case "executable-pending", "generator-pending", "script-replacer-pending", "print-replacer-pending" :
-				if _error := parseInterpreter (_library, _scriptlet, _context); _error != nil {
+				if _error := parseInterpreter (_scriptlet); _error != nil {
 					return nil, _error
 				}
 //				logf ('d', 0xb76fe00e, "parsed interpreter for `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
@@ -252,7 +252,9 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 }
 
 
-func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Context) (*Error) {
+
+
+func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 	
 	switch _scriptlet.Interpreter {
 		case "<detect>" :
@@ -265,17 +267,50 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
+	_scriptletBody, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body)
+	if _error == nil {
+		
+		_scriptlet.Body = _scriptletBody
+		_scriptlet.Interpreter = _interpreter
+		_scriptlet.InterpreterExecutable = _interpreterExecutable
+		_scriptlet.InterpreterArguments = _interpreterArguments
+		_scriptlet.InterpreterArgumentsExtraDash = _interpreterArgumentsExtraDash
+		_scriptlet.InterpreterArgumentsExtraAllowed = _interpreterArgumentsExtraAllowed
+		_scriptlet.InterpreterEnvironment = _interpreterEnvironment
+		
+		return nil
+		
+	} else {
+		return _error
+	}
+}
+
+
+func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string) (
+			_scriptletBody string,
+			_interpreter string,
+			_interpreterExecutable string,
+			_interpreterArguments []string,
+			_interpreterArgumentsExtraDash bool,
+			_interpreterArgumentsExtraAllowed bool,
+			_interpreterEnvironment map[string]string,
+			_errorReturn *Error,
+		) {
+	
+	_scriptletBody = _scriptletBody_0
+	
 	_headerLine := ""
 	
-	if ! strings.HasPrefix (_scriptlet.Body, "#!") {
+	if ! strings.HasPrefix (_scriptletBody, "#!") {
 		_headerLine = "<bash+>"
 	} else {
-		_headerLimit := strings.IndexByte (_scriptlet.Body, '\n')
+		_headerLimit := strings.IndexByte (_scriptletBody, '\n')
 		if _headerLimit < 0 {
-			return errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptlet.Label)
+			_errorReturn = errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptletLabel)
+			return
 		}
-		_headerLine = _scriptlet.Body[2:_headerLimit]
-		_scriptlet.Body = _scriptlet.Body[_headerLimit + 1 :]
+		_headerLine = _scriptletBody[2:_headerLimit]
+		_scriptletBody = _scriptletBody[_headerLimit + 1 :]
 	}
 	
 	_headerLine = strings.Trim (_headerLine, " ")
@@ -290,15 +325,16 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_headerLine = strings.Trim (_headerLine, " ")
 		
 		if _headerLine != "" {
-			return errorf (0x071546cf, "invalid header for `%s` (template with arguments)", _scriptlet.Label)
+			_errorReturn = errorf (0x071546cf, "invalid header for `%s` (template with arguments)", _scriptletLabel)
+			return
 		}
 		
-		_scriptlet.Interpreter = "<template>"
-		_scriptlet.InterpreterExecutable = ""
-		_scriptlet.InterpreterArguments = nil
-		_scriptlet.InterpreterArgumentsExtraDash = false
-		_scriptlet.InterpreterArgumentsExtraAllowed = true
-		_scriptlet.InterpreterEnvironment = nil
+		_interpreter = "<template>"
+		_interpreterExecutable = ""
+		_interpreterArguments = nil
+		_interpreterArgumentsExtraDash = false
+		_interpreterArgumentsExtraAllowed = true
+		_interpreterEnvironment = nil
 		
 	} else if strings.HasPrefix (_headerLine, "<print>") {
 		
@@ -306,15 +342,16 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_headerLine = strings.Trim (_headerLine, " ")
 		
 		if _headerLine != "" {
-			return errorf (0x6a068d74, "invalid header for `%s` (print with arguments)", _scriptlet.Label)
+			_errorReturn = errorf (0x6a068d74, "invalid header for `%s` (print with arguments)", _scriptletLabel)
+			return
 		}
 		
-		_scriptlet.Interpreter = "<print>"
-		_scriptlet.InterpreterExecutable = ""
-		_scriptlet.InterpreterArguments = nil
-		_scriptlet.InterpreterArgumentsExtraDash = false
-		_scriptlet.InterpreterArgumentsExtraAllowed = false
-		_scriptlet.InterpreterEnvironment = nil
+		_interpreter = "<print>"
+		_interpreterExecutable = ""
+		_interpreterArguments = nil
+		_interpreterArgumentsExtraDash = false
+		_interpreterArgumentsExtraAllowed = false
+		_interpreterEnvironment = nil
 		
 	} else if strings.HasPrefix (_headerLine, "<menu>") {
 		
@@ -322,19 +359,19 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_headerLine = strings.Trim (_headerLine, " ")
 		
 		if _headerLine != "" {
-			return errorf (0xf542516e, "invalid header for `%s` (menu with arguments)", _scriptlet.Label)
+			_errorReturn = errorf (0xf542516e, "invalid header for `%s` (menu with arguments)", _scriptletLabel)
+			return
 		}
 		
-		_scriptlet.Interpreter = "<menu>"
-		_scriptlet.InterpreterExecutable = ""
-		_scriptlet.InterpreterArguments = nil
-		_scriptlet.InterpreterArgumentsExtraDash = false
-		_scriptlet.InterpreterArgumentsExtraAllowed = false
-		_scriptlet.InterpreterEnvironment = nil
+		_interpreter = "<menu>"
+		_interpreterExecutable = ""
+		_interpreterArguments = nil
+		_interpreterArgumentsExtraDash = false
+		_interpreterArgumentsExtraAllowed = false
+		_interpreterEnvironment = nil
 		
 	} else if strings.HasPrefix (_headerLine, "<go>") || strings.HasPrefix (_headerLine, "<go+>") {
 		
-		_interpreter := ""
 		if strings.HasPrefix (_headerLine, "<go>") {
 			_interpreter = "<go>"
 			_headerLine = _headerLine[4:]
@@ -345,15 +382,16 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 		_headerLine = strings.Trim (_headerLine, " ")
 		
 		if _headerLine != "" {
-			return errorf (0x80bc049a, "invalid header for `%s` (go with arguments)", _scriptlet.Label)
+			_errorReturn = errorf (0x80bc049a, "invalid header for `%s` (go with arguments)", _scriptletLabel)
+			return
 		}
 		
-		_scriptlet.Interpreter = _interpreter
-		_scriptlet.InterpreterExecutable = ""
-		_scriptlet.InterpreterArguments = nil
-		_scriptlet.InterpreterArgumentsExtraDash = false
-		_scriptlet.InterpreterArgumentsExtraAllowed = true
-		_scriptlet.InterpreterEnvironment = nil
+		_interpreter = _interpreter
+		_interpreterExecutable = ""
+		_interpreterArguments = nil
+		_interpreterArgumentsExtraDash = false
+		_interpreterArgumentsExtraAllowed = true
+		_interpreterEnvironment = nil
 		
 	} else {
 		
@@ -365,102 +403,108 @@ func parseInterpreter (_library *Library, _scriptlet *Scriptlet, _context *Conte
 			_header = append (_header, _part)
 		}
 		if len (_header) == 0 {
-			return errorf (0x15d0485f, "invalid header for `%s` (empty)", _scriptlet.Label)
+			_errorReturn = errorf (0x15d0485f, "invalid header for `%s` (empty)", _scriptletLabel)
+			return
 		}
 		
-		_interpreter := "<exec>"
-		_executable := _header[0]
-		_arguments := make ([]string, 0, len (_header) + 16)
-		_argumentsExtraDash := false
-		_argumentsExtraAllowed := false
+		_interpreter = "<exec>"
+		_interpreterExecutable = _header[0]
+		_interpreterArguments = make ([]string, 0, len (_header) + 16)
+		_interpreterArgumentsExtraDash = false
+		_interpreterArgumentsExtraAllowed = false
+		_interpreterArgumentsExtraDash = false
+		_interpreterArgumentsExtraDashNow := false
+		_interpreterEnvironment = nil
 		
-		if strings.HasPrefix (_executable, "<") && strings.HasSuffix (_executable, ">") {
-			_executable = _executable[1 : len (_executable) - 1]
-			switch _executable {
+		if strings.HasPrefix (_interpreterExecutable, "<") && strings.HasSuffix (_interpreterExecutable, ">") {
+			_interpreterExecutable = _interpreterExecutable[1 : len (_interpreterExecutable) - 1]
+			switch _interpreterExecutable {
 				
 				case "bash" :
-					_arguments = append (_arguments, "--")
-					_argumentsExtraDash = false
-					_argumentsExtraAllowed = true
+					_interpreterArgumentsExtraDash = false
+					_interpreterArgumentsExtraDashNow = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				case "bash+" :
-					_interpreter = "<" + _executable + ">"
-					_executable = _executable[0 : len (_executable) - 1]
-					_arguments = append (_arguments, "--")
-					_argumentsExtraDash = false
-					_argumentsExtraAllowed = true
+					_interpreter = "<" + _interpreterExecutable + ">"
+					_interpreterExecutable = _interpreterExecutable[0 : len (_interpreterExecutable) - 1]
+					_interpreterArgumentsExtraDash = false
+					_interpreterArgumentsExtraDashNow = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9" :
-					_arguments = append (_arguments, "-E", "-s", "-S", "-u", "-O", "-O", "--")
-					_argumentsExtraDash = false
-					_argumentsExtraAllowed = true
+					_interpreterArguments = append (_interpreterArguments, "-E", "-s", "-S", "-u", "-O", "-O")
+					_interpreterArgumentsExtraDash = false
+					_interpreterArgumentsExtraDashNow = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				case "python3+" :
-					_interpreter = "<" + _executable + ">"
-					_executable = _executable[0 : len (_executable) - 1]
-					_arguments = append (_arguments, "-E", "-s", "-S", "-u", "-O", "-O", "--")
-					_argumentsExtraDash = false
-					_argumentsExtraAllowed = true
+					_interpreter = "<" + _interpreterExecutable + ">"
+					_interpreterExecutable = _interpreterExecutable[0 : len (_interpreterExecutable) - 1]
+					_interpreterArguments = append (_interpreterArguments, "-E", "-s", "-S", "-u", "-O", "-O")
+					_interpreterArgumentsExtraDash = false
+					_interpreterArgumentsExtraDashNow = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				case "lua", "node", "perl", "ruby", "php", "php5", "php7", "php8" :
-					_argumentsExtraDash = false // FIXME:  Verify this!
-					_argumentsExtraAllowed = true
+					// FIXME: _interpreterArgumentsExtraDash = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				case "tcl" :
-					_executable = "tclsh"
-					_argumentsExtraDash = false // FIXME:  Verify this!
-					_argumentsExtraAllowed = true
+					_interpreterExecutable = "tclsh"
+					// FIXME: _interpreterArgumentsExtraDash = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				case "awk" :
-					// FIXME:  Append an `--` after the script to suppress interpreting other arguments!
-					_arguments = append (_arguments, "-f")
-					_argumentsExtraDash = true
-					_argumentsExtraAllowed = false
+					_interpreterArguments = append (_interpreterArguments, "-f")
+					_interpreterArgumentsExtraDash = true
+					_interpreterArgumentsExtraAllowed = false
 				
 				case "sed", "grep" :
-					_arguments = append (_arguments, "-E", "-f")
-					_argumentsExtraDash = false
-					_argumentsExtraAllowed = false
+					_interpreterArguments = append (_interpreterArguments, "-E", "-f")
+					_interpreterArgumentsExtraDash = false
+					_interpreterArgumentsExtraAllowed = false
 				
 				case "jq" :
-					_arguments = append (_arguments, "-f")
-					_argumentsExtraDash = false
-					_argumentsExtraAllowed = false
+					_interpreterArguments = append (_interpreterArguments, "-f")
+					_interpreterArgumentsExtraDash = false
+					_interpreterArgumentsExtraAllowed = false
 				
 				case "make" :
-					_arguments = append (_arguments, "-s", "-r", "-R", "-f")
-					_argumentsExtraDash = true
-					_argumentsExtraAllowed = true
+					_interpreterArguments = append (_interpreterArguments, "-s", "-r", "-R", "-f")
+					_interpreterArgumentsExtraDash = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				case "ninja" :
-					_arguments = append (_arguments, "-f")
-					_argumentsExtraDash = true
-					_argumentsExtraAllowed = true
+					_interpreterArguments = append (_interpreterArguments, "-f")
+					_interpreterArgumentsExtraDash = true
+					_interpreterArgumentsExtraAllowed = true
 				
 				default :
-					return errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptlet.Label)
+					_errorReturn = errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptletLabel)
+					return
 			}
 		}
 		
-		if strings.IndexByte (_executable, os.PathSeparator) >= 0 {
-			if _executable_0, _error := filepath.Abs (_executable); _error == nil {
-				_executable = _executable_0
+		if strings.IndexByte (_interpreterExecutable, os.PathSeparator) >= 0 {
+			if _interpreterExecutable_0, _error := filepath.Abs (_interpreterExecutable); _error == nil {
+				_interpreterExecutable = _interpreterExecutable_0
 			} else {
-				return errorw (0xda17c780, _error)
+				_errorReturn = errorw (0xda17c780, _error)
+				return
 			}
 		}
 		
-		_arguments = append (_arguments, _header[1:] ...)
+		if len (_header) > 1 {
+			_interpreterArguments = append (_interpreterArguments, _header[1:] ...)
+		}
 		
-		_scriptlet.Interpreter = _interpreter
-		_scriptlet.InterpreterExecutable = _executable
-		_scriptlet.InterpreterArguments = _arguments
-		_scriptlet.InterpreterArgumentsExtraDash = _argumentsExtraDash
-		_scriptlet.InterpreterArgumentsExtraAllowed = _argumentsExtraAllowed
-		_scriptlet.InterpreterEnvironment = nil
+		if _interpreterArgumentsExtraDashNow {
+			_interpreterArguments = append (_interpreterArguments, "--")
+		}
 	}
 	
-	return nil
+	return
 }
 
 
@@ -1142,7 +1186,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 				if _error := includeScriptlet (_library, _scriptlet); _error != nil {
 					return _error
 				}
-				if _error := parseInterpreter (_library, _scriptlet, _context); _error != nil {
+				if _error := parseInterpreter (_scriptlet); _error != nil {
 					return _error
 				}
 			}
