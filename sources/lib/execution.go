@@ -408,22 +408,18 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 		return _error
 	}
 	
-	return executeScriptlet_0 (_library.Url (), _libraryFingerprint, _scriptlet, _fork, _context)
+	if _command, _descriptors, _error := prepareExecution (_library.Url (), _libraryFingerprint, "", _scriptlet, true, _context); _error == nil {
+		return executeScriptlet_0 (_scriptlet.Label, _command, _descriptors, _fork)
+	} else {
+		return _error
+	}
+	
 }
 
 
 
 
-func executeScriptlet_0 (_libraryUrl string, _libraryFingerprint string, _scriptlet *Scriptlet, _fork bool, _context *Context) (*Error) {
-	
-	var _command *exec.Cmd
-	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_libraryUrl, _libraryFingerprint, "", _scriptlet, true, _context); _error == nil {
-		_command = _command_0
-		_descriptors = _descriptors_0
-	} else {
-		return _error
-	}
+func executeScriptlet_0 (_scriptletLabel string, _command *exec.Cmd, _descriptors []int, _fork bool) (*Error) {
 	
 	_closeDescriptors := func () () {
 		for _, _descriptor := range _descriptors {
@@ -483,7 +479,7 @@ func executeScriptlet_0 (_libraryUrl string, _libraryFingerprint string, _script
 		if _waitError != nil {
 			if _command.ProcessState.Exited () {
 				if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
-					return errorf (0xa10d5811, "spawn `%s` failed with status `%d`", _scriptlet.Label, _exitCode)
+					return errorf (0xa10d5811, "spawn `%s` failed with status `%d`", _scriptletLabel, _exitCode)
 				} else {
 					return errorf (0x9cfebeaf, "invalid state")
 				}
