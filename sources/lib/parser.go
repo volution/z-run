@@ -311,7 +311,7 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		} else {
 			_headerLimit := strings.IndexByte (_scriptletBody_0, '\n')
 			if _headerLimit < 0 {
-				_errorReturn = errorf (0x42f372b7, "invalid header for `%s` (`\n` not found)", _scriptletLabel)
+				_errorReturn = errorf (0x42f372b7, "invalid header for `%s` (`\\n` not found)", _scriptletLabel)
 				return
 			}
 			_scriptletHeader = _scriptletBody_0[2:_headerLimit]

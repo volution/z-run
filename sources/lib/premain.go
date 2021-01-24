@@ -179,6 +179,9 @@ func PreMain () () {
 		case "[z-run:scriptlet]" :
 			// NOP
 		
+		case "[z-run:scriptlet-exec]" :
+			// NOP
+		
 		case "[z-run:input]" :
 			// NOP
 		
@@ -219,6 +222,10 @@ func PreMain () () {
 			
 			case "--scriptlet" :
 				_argument0 = "[z-run:scriptlet]"
+				_arguments = _arguments[1:]
+			
+			case "--scriptlet-exec" :
+				_argument0 = "[z-run:scriptlet-exec]"
 				_arguments = _arguments[1:]
 			
 			case "--fzf" :
@@ -266,10 +273,17 @@ func PreMain () () {
 	switch _argument0 {
 		
 		case "[z-run:scriptlet]" :
-			if _error := scriptletMain (_executable, _arguments, _environment); _error != nil {
+			if _error := scriptletMain (_executable, _arguments, _environment, false); _error != nil {
 				panic (abortError (_error))
 			} else {
 				panic (0xb305aa74)
+			}
+		
+		case "[z-run:scriptlet-exec]" :
+			if _error := scriptletMain (_executable, _arguments, _environment, true); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0x8f827319)
 			}
 		
 		case "[z-run:input]" :

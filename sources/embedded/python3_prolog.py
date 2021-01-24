@@ -1195,7 +1195,6 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	Z.environment_or_none = Z_environment_or_none ()
 	
 	Z.executable = Z.environment.ZRUN_EXECUTABLE
-	Z.workspace = Z.environment.ZRUN_WORKSPACE
 	
 	Z.stdin = PY.sys.stdin
 	Z.stdout = PY.sys.stdout

@@ -10,30 +10,32 @@ import "unicode/utf8"
 
 
 
-func scriptletMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
+func scriptletMain (_selfExecutable string, _arguments []string, _environment map[string]string, _shabang bool) (*Error) {
 	
 	_label := ""
 	_header := ""
 	_path := ""
 	
-	for len (_arguments) == 0 {
-		_argument := _arguments[0]
-		if strings.HasPrefix (_argument, "--label=") {
-			_label = _argument[len ("--label=") :]
-			_arguments = _arguments[1:]
-		} else if strings.HasPrefix (_argument, "--header=") {
-			_header = _argument[len ("--header=") :]
-			_arguments = _arguments[1:]
-		} else if strings.HasPrefix (_argument, "--path=") {
-			_path = _argument[len ("--path=") :]
-			_arguments = _arguments[1:]
-		} else if _argument == "--" {
-			_arguments = _arguments[1:]
-			break
-		} else if strings.HasPrefix (_argument, "--") {
-			return errorf (0xc2b4c6d5, "invalid arguments:  unknown argument `%s`", _argument)
-		} else {
-			return errorf (0xd1e079a1, "invalid arguments:  unknown argument `%s`, expected `--`", _argument)
+	if ! _shabang {
+		for len (_arguments) == 0 {
+			_argument := _arguments[0]
+			if strings.HasPrefix (_argument, "--label=") {
+				_label = _argument[len ("--label=") :]
+				_arguments = _arguments[1:]
+			} else if strings.HasPrefix (_argument, "--header=") {
+				_header = _argument[len ("--header=") :]
+				_arguments = _arguments[1:]
+			} else if strings.HasPrefix (_argument, "--path=") {
+				_path = _argument[len ("--path=") :]
+				_arguments = _arguments[1:]
+			} else if _argument == "--" {
+				_arguments = _arguments[1:]
+				break
+			} else if strings.HasPrefix (_argument, "--") {
+				return errorf (0xc2b4c6d5, "invalid arguments:  unknown argument `%s`", _argument)
+			} else {
+				return errorf (0xd1e079a1, "invalid arguments:  unknown argument `%s`, expected `--`", _argument)
+			}
 		}
 	}
 	
@@ -76,10 +78,26 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 		}
 	}
 	
-	_body, _bodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _errorParse := parseInterpreter_0 (_label, _body, _header, "")
+	var _bodyOffset uint
+	
+	if _shabang {
+		if strings.HasPrefix (_body, "#!") {
+			_shabangLimit := strings.IndexByte (_body, '\n')
+			if _shabangLimit < 0 {
+				return errorf (0xa9c82426, "invalid scriptlet:  missing `#!...\\n`")
+			}
+			_body = _body[_shabangLimit + 1 :]
+			_bodyOffset += 1
+		} else {
+			return errorf (0xbd838bd0, "invalid scriptlet:  missing `#!`")
+		}
+	}
+	
+	_body, _bodyOffsetParse, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _errorParse := parseInterpreter_0 (_label, _body, _header, "")
 	if _errorParse != nil {
 		return _errorParse
 	}
+	_bodyOffset += _bodyOffsetParse
 	
 	_command, _descriptors, _errorPrepare := prepareExecution_0 (
 			
