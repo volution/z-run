@@ -24,15 +24,15 @@
 
 << templates / context / 2
 	#! {{}}
-	{{- zrun ":: templates / context" -}}
+	{{- Z_zspawn_capture ":: templates / context" -}}
 !!
 
 <<~~.. templates / context / 3
 	#! {{}}
-	{{- zrun ":: templates / context" }}
+	{{- Z_zspawn_capture ":: templates / context" }}
 	
 	# date
-	{{ zrun ":: templates / input / date" -}}
+	{{ Z_zspawn_capture ":: templates / input / date" -}}
 !!
 
 
@@ -40,15 +40,15 @@
 
 << templates / callback
 	#! {{}}
-	{{- zrun ":: templates / input / date" | split_all "-" | join " " -}}
-	{{ zrun ":: templates / input / json" | hex_encode | hex_decode -}}
-	{{ zrun ":: templates / input / json" | base64_encode | base64_decode -}}
-	{{ zrun ":: templates / input / json" | json_decode | json_encode }}
+	{{- Z_zspawn_capture ":: templates / input / date" | split_all "-" | join " " -}}
+	{{ Z_zspawn_capture ":: templates / input / json" | hex_encode | hex_decode -}}
+	{{ Z_zspawn_capture ":: templates / input / json" | base64_encode | base64_decode -}}
+	{{ Z_zspawn_capture ":: templates / input / json" | json_decode | json_encode }}
 !!
 
 <<~~.. templates / callback / replacer
 	#! {{}}
-	{{- zrun ":: templates / input / date" -}}
+	{{- Z_zspawn_capture ":: templates / input / date" -}}
 !!
 
 

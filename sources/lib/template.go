@@ -121,7 +121,7 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	
 	_extraFunctions := make (map[string]interface{}, 16)
 	
-	_extraFunctions["zrun"] = func (_scriptlet string, _arguments ... string) (string, error) {
+	_extraFunctions["Z_zspawn_capture"] = func (_scriptlet string, _arguments ... string) (string, error) {
 			return templateFuncZrun (_library, _context, _scriptlet, _arguments)
 		}
 	
