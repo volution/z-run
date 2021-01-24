@@ -555,7 +555,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 					_context = "Z." + _context[5:]
 				if _line > Z._scriptlet_begin_line :
 					_line -= Z._scriptlet_begin_line
-					_line += Z._scriptlet_source_line_start + 1
+					_line += Z._scriptlet_source_line_start
 					_position = "`:: %s` @ %d @ `%s`" % (Z._scriptlet_label, _line, Z._scriptlet_source_path)
 				else :
 					_position = "<python3+> @ %d" % (_line)
@@ -1196,7 +1196,6 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	Z.executable = Z.environment.ZRUN_EXECUTABLE
 	Z.workspace = Z.environment.ZRUN_WORKSPACE
-	Z.fingerprint = Z.environment.ZRUN_FINGERPRINT
 	
 	Z.stdin = PY.sys.stdin
 	Z.stdout = PY.sys.stdout
