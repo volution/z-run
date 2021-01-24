@@ -50,18 +50,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		return nil, _error
 	}
 	
-	_libraryUrl := ""
-	if true {
-		var _cacheRoot = _context.cacheRoot
-		if _cacheRoot == "" {
-			_cacheRoot = "/tmp"
-		}
-		var _socketToken = generateRandomToken ()
-		var _socketPath = path.Join (_cacheRoot, fmt.Sprintf ("%s-%08x.sock", _socketToken, os.Getpid ()))
-		_libraryUrl = fmt.Sprintf ("unix:%s", _socketPath)
-	} else {
-		_libraryUrl = fmt.Sprintf ("unix:@%s-%08x", _environmentFingerprint, os.Getpid ())
-	}
+	_libraryUrl := fmt.Sprintf ("unix:%s", path.Join (_context.cacheRoot, fmt.Sprintf ("%s-%08x.sock", generateRandomToken (), os.Getpid ())))
 	
 	var _rpc *LibraryRpcServer
 	if _rpc_0, _error := NewLibraryRpcServer (_library, _libraryUrl); _error == nil {

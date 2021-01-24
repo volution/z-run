@@ -282,18 +282,10 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	}
 	
 	if _sshLibraryLocalSocket == "" {
-		_cacheRoot := _context.cacheRoot
-		if _cacheRoot == "" {
-			if _cacheRoot_0, _error := resolveCache (); _error == nil {
-				_cacheRoot = _cacheRoot_0
-			} else {
-				return false, _error
-			}
-		}
-		_sshLibraryLocalSocket = path.Join (_cacheRoot, fmt.Sprintf ("%s-%08x.sock", _sshToken, os.Getpid ()))
+		_sshLibraryLocalSocket = path.Join (_context.cacheRoot, fmt.Sprintf ("%s-%08x.sock", _sshToken, os.Getpid ()))
 	}
 	if _sshLibraryRemoteSocket == "" {
-		_sshLibraryRemoteSocket = path.Join (_sshCache, fmt.Sprintf ("%s.sock", _sshToken))
+		_sshLibraryRemoteSocket = path.Join (_sshCache, fmt.Sprintf ("z-run--%s.sock", _sshToken))
 	}
 	
 	var _rpc *LibraryRpcServer
