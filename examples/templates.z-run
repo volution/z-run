@@ -24,15 +24,15 @@
 
 << templates / context / 2
 	#! {{}}
-	{{- ZRUN ":: templates / context" -}}
+	{{- zrun ":: templates / context" -}}
 !!
 
 <<~~.. templates / context / 3
 	#! {{}}
-	{{- ZRUN ":: templates / context" }}
+	{{- zrun ":: templates / context" }}
 	
 	# date
-	{{ ZRUN ":: templates / input / date" -}}
+	{{ zrun ":: templates / input / date" -}}
 !!
 
 
@@ -40,15 +40,15 @@
 
 << templates / callback
 	#! {{}}
-	{{- ZRUN ":: templates / input / date" | split "-" | join " " -}}
-	{{ ZRUN ":: templates / input / json" | hex_encode | hex_decode -}}
-	{{ ZRUN ":: templates / input / json" | base64_encode | base64_decode -}}
-	{{ ZRUN ":: templates / input / json" | json_decode | json_encode }}
+	{{- zrun ":: templates / input / date" | split_all "-" | join " " -}}
+	{{ zrun ":: templates / input / json" | hex_encode | hex_decode -}}
+	{{ zrun ":: templates / input / json" | base64_encode | base64_decode -}}
+	{{ zrun ":: templates / input / json" | json_decode | json_encode }}
 !!
 
 <<~~.. templates / callback / replacer
 	#! {{}}
-	{{- ZRUN ":: templates / input / date" -}}
+	{{- zrun ":: templates / input / date" -}}
 !!
 
 
@@ -65,12 +65,12 @@
 
 <<~~.. templates / fingerprint / template / compile-time
 	#! {{}}
-	template-compile-time: {{ ZRUN_LIBRARY_FINGERPRINT }}
+	template-compile-time: {{ .ZRUN_LIBRARY_FINGERPRINT }}
 !!
 
 << templates / fingerprint / template / execute-time
 	#! {{}}
-	template-execute-time: {{ ZRUN_LIBRARY_FINGERPRINT }}
+	template-execute-time: {{ .ZRUN_LIBRARY_FINGERPRINT }}
 !!
 
 <<~~.. templates / fingerprint / script / compile-time
