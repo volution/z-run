@@ -670,8 +670,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__path (_path, *, _absolute = False, _canonical = False, _relative = None) :
-		if not PY.isinstance (_path, PY.str) and not PY.isinstance (_path, PY.bytes) :
-			_path = PY.path.join (*_path)
+		if PY.isinstance (_path, PY.tuple) or PY.isinstance (_path, PY.list) :
+			_path = Z.path_join (*_path)
+		assert PY.isinstance (_path, PY.str) or PY.isinstance (_path, PY.bytes), "[cb7b97d3]"
 		_path = Z.path_normalize (_path)
 		if _absolute :
 			_path = Z.path_absolute (_path)
@@ -679,6 +680,96 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_path = Z.path_canonical (_path)
 		if _relative is not None :
 			_path = Z.path_relative (_path, _relative)
+		return _path
+	
+	@_inject
+	def __Z__path_join (*_parts) :
+		_path = PY.path.join (*_parts)
+		_path = Z.path_normalize (_path)
+		return _path
+	
+	@_inject
+	def __Z__path_dirname (_path) :
+		return PY.path.dirname (_path)
+	
+	@_inject
+	def __Z__path_basename (_path) :
+		return PY.path.basename (_path)
+	
+	@_inject
+	def __Z__path_split_last (_path) :
+		_dirname, _basename = PY.path.split (_path)
+		return _dirname, _basename
+	
+	@_inject
+	def __Z__path_split_all (_path) :
+		_components = []
+		_dirname = Z.path_normalize (_path)
+		while _dirname != "" :
+			_dirname, _basename = PY.path.split (_dirname)
+			if _basename != "" :
+				_components.append (_basename)
+			if _dirname == "/" :
+				_components.append (_dirname)
+				_dirname = ""
+		_components = _components.reverse ()
+		_components = PY.tuple (_components)
+		return _components
+	
+	@_inject
+	def __Z__path_extension (_path) :
+		_path, _extension = PY.path.splitext (_path)
+		if _extension != "" :
+			_extension = _extension[1:]
+		else :
+			_extension = None
+		return _extension
+	
+	@_inject
+	def __Z__path_without_extension (_path) :
+		_path, _extension = PY.path.splitext (_path)
+		return _path
+	
+	@_inject
+	def __Z__path_normalize (_path) :
+		_path = PY.path.normpath (_path)
+		if _path.startswith ("//") :
+			_path = "/" + _path.lstrip ("/")
+		return _path
+	
+	@_inject
+	def __Z__path_absolute (_path) :
+		return PY.path.abspath (_path)
+	
+	@_inject
+	def __Z__path_canonical (_path) :
+		return PY.path.realpath (_path)
+	
+	@_inject
+	def __Z__path_relative (_path, _base) :
+		return PY.path.relpath (_path, _base)
+	
+	@_inject
+	def __Z__path_matches (_path, _pattern) :
+		return PY.fnmatch.fnmatch (_path, _pattern)
+	
+	@_inject
+	def __Z__path_temporary_for (_path, **_options) :
+		_dirname, _basename = PY.path.split (_path)
+		return Z.path_temporary_in (_dirname, _basename, **_options)
+	
+	@_inject
+	def __Z__path_temporary_in (_path, _name, *, _prefix = ".tmp.", _infix = ".", _suffix = "", _token = 8, _pid = True) :
+		if _path is None :
+			_path = Z.environment_or_none.TMPDIR
+		if _path is None :
+			_path = "/tmp"
+		_name = _name.strip (".")
+		if _name == "" or "/" in _name :
+			Z.panic (0x9fbff49a, "invalid path")
+		_token = Z.random_token (_token)
+		_name = _prefix + (PY.str (Z.pid) + "-" if _pid else "") + _token + _infix + _name + _suffix
+		_path = PY.path.join (_path, _name)
 		return _path
 	
 	@_inject
@@ -710,85 +801,6 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_new.extend (_list)
 		_new = ":".join (_new)
 		return _new
-	
-	@_inject
-	def __Z__path_normalize (_path) :
-		_path = PY.path.normpath (_path)
-		if _path.startswith ("//") :
-			_path = "/" + _path.lstrip ("/")
-		return _path
-	
-	@_inject
-	def __Z__path_dirname (_path) :
-		return PY.path.dirname (_path)
-	
-	@_inject
-	def __Z__path_basename (_path) :
-		return PY.path.basename (_path)
-	
-	@_inject
-	def __Z__path_canonical (_path) :
-		return PY.path.realpath (_path)
-	
-	@_inject
-	def __Z__path_absolute (_path) :
-		return PY.path.abspath (_path)
-	
-	@_inject
-	def __Z__path_relative (_path) :
-		return PY.path.relpath (_path, _relative)
-	
-	@_inject
-	def __Z__path_split (_path) :
-		_components = []
-		_dirname = Z.path_normalize (_path)
-		while _dirname != "" :
-			_dirname, _basename = PY.path.split (_dirname)
-			if _basename != "" :
-				_components.append (_basename)
-			if _dirname == "/" :
-				_components.append (_dirname)
-				_dirname = ""
-		_components = _components.reverse ()
-		_components = PY.tuple (_components)
-		return _components
-	
-	@_inject
-	def __Z__path_extension (_path) :
-		_path, _extension = PY.path.splitext (_path)
-		if _extension != "" :
-			_extension = _extension[1:]
-		else :
-			_extension = None
-		return _extension
-	
-	@_inject
-	def __Z__path_without_extension (_path) :
-		_path, _extension = PY.path.splitext (_path)
-		return _path
-	
-	@_inject
-	def __Z__path_matches (_path, _pattern) :
-		return PY.fnmatch.fnmatch (_path, _pattern)
-	
-	@_inject
-	def __Z__path_temporary_for (_path, **_options) :
-		_dirname, _basename = PY.path.split (_path)
-		return Z.path_temporary_in (_dirname, _basename, **_options)
-	
-	@_inject
-	def __Z__path_temporary_in (_path, _name, *, _prefix = ".tmp.", _infix = ".", _suffix = "", _token = 8, _pid = True) :
-		if _path is None :
-			_path = Z.environment_or_none.TMPDIR
-		if _path is None :
-			_path = "/tmp"
-		_name = _name.strip (".")
-		if _name == "" or "/" in _name :
-			Z.panic (0x9fbff49a, "invalid path")
-		_token = Z.random_token (_token)
-		_name = _prefix + (PY.str (Z.pid) + "-" if _pid else "") + _token + _infix + _name + _suffix
-		_path = PY.path.join (_path, _name)
-		return _path
 	
 	## --------------------------------------------------------------------------------
 	

@@ -9,6 +9,7 @@ import "fmt"
 import "io"
 import "os"
 import "path"
+import "path/filepath"
 import "strconv"
 import "strings"
 import "text/template"
@@ -485,25 +486,24 @@ func templateFunctions () (map[string]interface{}) {
 			// --------------------------------------------------------------------------------
 			
 			
+			"path_join" : func (_paths ... string) (string) {
+					return path.Join (_paths ...)
+				},
+			
 			"path_dirname" : func (_path string) (string) {
 					return path.Dir (_path)
 				},
 			"path_basename" : func (_path string) (string) {
 					return path.Base (_path)
 				},
-			"path_join" : func (_paths ... string) (string) {
-					return path.Join (_paths ...)
-				},
-			"path_match" : func (_pattern string, _path string) (bool, error) {
-					return path.Match (_pattern, _path)
-				},
-			"path_split" : func (_path string) ([2]string) {
-					_dirname, _basename := path.Split (_path)
+			"path_split_last" : func (_path string) ([2]string) {
+					_dirname, _basename := filepath.Split (_path)
 					return [2]string { _dirname, _basename }
 				},
-			"path_clean" : func (_path string) (string) {
-					return path.Clean (_path)
+			"path_split_all" : func (_path string) ([]string) {
+					return filepath.SplitList (_path)
 				},
+			
 			"path_extension" : func (_path string) (string) {
 					return path.Ext (_path)
 				},
@@ -513,6 +513,23 @@ func templateFunctions () (map[string]interface{}) {
 						return _path
 					}
 					return _path[: len (_path) - len (_extension)]
+				},
+			
+			"path_normalize" : func (_path string) (string) {
+					return path.Clean (_path)
+				},
+			"path_absolute" : func (_path string) (string, error) {
+					return filepath.Abs (_path)
+				},
+			"path_canonical" : func (_path string) (string, error) {
+					return filepath.EvalSymlinks (_path)
+				},
+			"path_relative" : func (_base string, _path string) (string, error) {
+					return filepath.Abs (_path)
+				},
+			
+			"path_matches" : func (_pattern string, _path string) (bool, error) {
+					return path.Match (_pattern, _path)
 				},
 			
 			
