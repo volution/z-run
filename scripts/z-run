@@ -16,28 +16,21 @@
 
 
 
-<< deploy / local
-	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: deploy / release'
-	_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
-	cp -f -- ./.outputs/z-run--release--linux "${HOME}/.bin/z-run--${_timestamp}"
-	ln -s -f -- "./z-run--${_timestamp}" "${HOME}/.bin/z-run--0000"
-!!
-
-
-<< deploy / remote / linux
+<< deploy / rsync / linux
 	test "${#}" -eq 1
 	_target="${1}"
 	shift -- 1
 	"${ZRUN[@]}" ':: deploy / release'
+	printf -- '[ii]  deploying to `%s`...\n' "${_target}" >&2
 	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "${_target}"
 !!
 
-<< deploy / remote / darwin
+<< deploy / rsync / darwin
 	test "${#}" -eq 1
 	_target="${1}"
 	shift -- 1
 	"${ZRUN[@]}" ':: deploy / release'
+	printf -- '[ii]  deploying to `%s`...\n' "${_target}" >&2
 	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "${_target}"
 !!
 
@@ -47,6 +40,7 @@
 	test -d ./.publish/
 	"${ZRUN[@]}" ':: deploy / release'
 	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
+	printf -- '[ii]  publishing `%s`...\n' "${_build_version}" >&2
 	if test -e "./.publish/linux/z-run--linux--v${_build_version}" -o -e "./.publish/darwin/z-run--darwin--v${_build_version}" ; then
 		printf -- '[ee]  release already exists!\n' >&2
 		exit -- 1
@@ -57,8 +51,12 @@
 	ln -s -T -f -- "./z-run--darwin--v${_build_version}" ./.publish/darwin/z-run
 !!
 
+
 << deploy / release
 	test "${#}" -eq 0
+	if test "${ZRUNDEV_NORELEASE:-}" == true ; then
+		exit -- 0
+	fi
 	"${ZRUN[@]}" ':: go / build / main / release / linux'
 	"${ZRUN[@]}" ':: go / build / main / release / darwin'
 !!
@@ -185,14 +183,25 @@
 		_suffix=''
 	fi
 	
-	exec -- "${ZRUN[@]}" ':: go / tool' \
+	printf -- '[ii]  building release for `%s`...\n' "${GOOS:-native}" >&2
+	
+	mv -T -- "${_outputs}/z-run--release${_suffix}" "${_outputs}/z-run--release${_suffix}.old"
+	
+	"${ZRUN[@]}" ':: go / tool' \
 			build \
-			-o "${_outputs}/z-run--release${_suffix}" \
+			-o "${_outputs}/z-run--release${_suffix}.new" \
 			-tags "${_tags}" \
 			-ldflags "${_ldflags}" \
 			-- \
 			./cmd/z-run.go \
 	#
+	
+	if ! cmp -s -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}.old" ; then
+		mv -T -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}"
+	else
+		mv -T -- "${_outputs}/z-run--release${_suffix}.old" "${_outputs}/z-run--release${_suffix}"
+		rm -- "${_outputs}/z-run--release${_suffix}.new"
+	fi
 !!
 
 << go / build / main / release / linux
