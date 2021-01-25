@@ -98,7 +98,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z__zspawn_capture (_scriptlet, *_arguments, **_options) :
 		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = False, _stdout_data = PY.str, _enforce = True)
-		return Z._spawn_capture_output (_output, **_options)
+		return Z._file_read_process (_output, **_options)
 	
 	@_inject
 	def __Z__zexec (_scriptlet, *_arguments, _fd_close = True, **_options) :
@@ -128,7 +128,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z__spawn_capture (_executable, *_arguments, **_options) :
 		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = False, _stdout_data = PY.str, _enforce = True)
-		return Z._spawn_capture_output (_output, **_options)
+		return Z._file_read_process (_output, **_options)
 	
 	@_inject
 	def __Z__exec (_executable, *_arguments, _fd_close = True, **_options) :
@@ -350,43 +350,6 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		else :
 			Z.panic (0x3960636f, "invalid process id (unknown): %r", _pid)
 		return _pid
-	
-	@_inject
-	def __Z___spawn_capture_output (_output, *, _line = False, _lines = False, _separator = None, _json = False) :
-		if _line or _lines :
-			if _separator is None :
-				_separator = "\n"
-			else :
-				assert _separator != "", "[357b50e2]"
-		if _line :
-			assert not _lines, "[cefc2173]"
-			if _output == "" :
-				_output = None
-			else :
-				if _output[0 - PY.len (_separator) :] == _separator :
-					_output = _output[: 0 - PY.len (_separator)]
-				_output = _output.split (_separator)
-				if PY.len (_output) == 1 or (PY.len (_output) == 2 and _output[1] == "") :
-					_output = _output[0]
-				else :
-					Z.panic (0x5a1b7a79, "output is made of multiple lines")
-			if _json :
-				_output = PY.json.loads (_output)
-		elif _lines :
-			assert not _line, "[ddd9a8bc]"
-			if _output == "" :
-				_output = None
-			else :
-				if _output[0 - PY.len (_separator) :] == _separator :
-					_output = _output[: 0 - PY.len (_separator)]
-				_output = _output.split (_separator)
-			if _json :
-				_output = [PY.json.loads (_output) for _output in _output]
-		elif _json :
-			_output = PY.json.loads (_output)
-		else :
-			pass
-		return _output
 	
 	## --------------------------------------------------------------------------------
 	
@@ -925,11 +888,15 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		PY.os.rename (_source, _target)
 	
 	@_inject
+	def __Z__unlink (_target) :
+		PY.os.unlink (_target)
+	
+	@_inject
 	def __Z__symlink (_source, _target) :
 		PY.os.symlink (_source, _target)
 	
 	@_inject
-	def __Z__file_read (_path, *, _data = None, _json = None, _enforce = True) :
+	def __Z__file_read (_path, *, _enforce = True, **_options) :
 		_fd = Z.fd_open_for_read (_path, _enforce = _enforce)
 		if _fd is None :
 			return None
@@ -940,20 +907,66 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				break
 			_buffers.append (_buffer)
 		PY.os.close (_fd)
-		if _json :
-			assert _data is None, "[be2949cc]"
-		if _data is None or _data is PY.str :
-			_buffers = [_buffer.decode ("utf-8") for _buffer in _buffers]
-			_buffers = u"".join (_buffers)
-		elif _data is PY.bytes :
-			_buffers = "".join (_buffers)
-		else :
-			Z.panic (0x764fba9e, "invalid data type")
-		if _json :
-			_data = PY.json.loads (_buffers)
-		else :
-			_data = _buffers
+		_data = b"".join (_buffers)
+		_data = Z._file_read_process (_data, **_options)
 		return _data
+	
+	@_inject
+	def __Z___file_read_process (_output, *, _data = None, _line = None, _lines = None, _separator = None, _json = None) :
+		assert PY.isinstance (_output, PY.bytes), "[27429689]"
+		assert _line is None or _line is True, "[ba79d691]"
+		assert _lines is None or _lines is True, "[fdfc8771]"
+		assert _json is None or _json is True, "[5ff197c3]"
+		assert _separator is None or PY.isinstance (_separator, PY.str), "[4002d3ef]"
+		if _data :
+			assert not _line and not _lines and not _separator and not _json, "[0d9c84ca]"
+			if _data is PY.str :
+				_output = _output.decode ("utf-8")
+			elif _data is PY.bytes :
+				pass
+			else :
+				assert False, "[d2c9b0f9]"
+		if _line or _lines :
+			assert not _data, "[be243d10]"
+			_output = _output.decode ("utf-8")
+			if _separator is None :
+				_separator = "\n"
+			else :
+				assert _separator != "", "[357b50e2]"
+		else :
+			assert not _separator, "[f3bdf0eb]"
+		if _json :
+			assert not _data, "[be2949cc]"
+		if _line :
+			assert not _lines, "[cefc2173]"
+			if _output == "" :
+				_output = None
+			else :
+				if _output[0 - PY.len (_separator) :] == _separator :
+					_output = _output[: 0 - PY.len (_separator)]
+				_output = _output.split (_separator)
+				if PY.len (_output) == 1 or (PY.len (_output) == 2 and _output[1] == "") :
+					_output = _output[0]
+				else :
+					Z.panic (0x5a1b7a79, "output is made of multiple lines")
+		elif _lines :
+			assert not _line, "[ddd9a8bc]"
+			if _output == "" :
+				_output = None
+			else :
+				if _output[0 - PY.len (_separator) :] == _separator :
+					_output = _output[: 0 - PY.len (_separator)]
+				_output = _output.split (_separator)
+		if _json :
+			if _output is None :
+				Z.panic (0xbd0b4c92, "output is empty")
+			if _line :
+				_output = PY.json.loads (_output)
+			elif _lines :
+				_output = [PY.json.loads (_output) for _output in _output]
+			else :
+				_output = PY.json.loads (_output)
+		return _output
 	
 	@_inject
 	def __Z__file_write (_path, _data, *, _json = None, _mode = None, _replace = None, _create = None, _exclusive = None, _append = None, _truncate = None, _enforce = True) :
