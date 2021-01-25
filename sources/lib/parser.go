@@ -289,15 +289,15 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		) {
 	
 	if _scriptletHeader == "" {
-		if ! strings.HasPrefix (_scriptletBody_0, "#!") {
-			if _interpreterFallback != "" {
-				_scriptletHeader = _interpreterFallback
-				_scriptletBody = _scriptletBody_0
-			} else {
-				_errorReturn = errorf (0x273c8b2e, "missing header for `%s` (`#!` not found)", _scriptletLabel)
+		if strings.HasPrefix (_scriptletBody_0, "#!:") {
+			_headerLimit := strings.IndexByte (_scriptletBody_0, ' ')
+			if _headerLimit < 0 {
+				_errorReturn = errorf (0x48970925, "invalid header for `%s` (space not found)", _scriptletLabel)
 				return
 			}
-		} else {
+			_scriptletHeader = _scriptletBody_0[3:_headerLimit]
+			_scriptletBody = _scriptletBody_0[_headerLimit + 1 :]
+		} else if strings.HasPrefix (_scriptletBody_0, "#!") {
 			_headerLimit := strings.IndexByte (_scriptletBody_0, '\n')
 			if _headerLimit < 0 {
 				_errorReturn = errorf (0x42f372b7, "invalid header for `%s` (`\\n` not found)", _scriptletLabel)
@@ -306,6 +306,14 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 			_scriptletHeader = _scriptletBody_0[2:_headerLimit]
 			_scriptletBody = _scriptletBody_0[_headerLimit + 1 :]
 			_scriptletBodyOffset = 1
+		} else {
+			if _interpreterFallback != "" {
+				_scriptletHeader = _interpreterFallback
+				_scriptletBody = _scriptletBody_0
+			} else {
+				_errorReturn = errorf (0x273c8b2e, "missing header for `%s` (`#!` not found)", _scriptletLabel)
+				return
+			}
 		}
 	} else {
 		_scriptletBody = _scriptletBody_0

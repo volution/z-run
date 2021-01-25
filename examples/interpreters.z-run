@@ -135,3 +135,7 @@
 	Z.LogNotice (0x9ae8f4fd, "hello from Go!")
 !!
 
+
+:: interpreters / bash / one-line :: #!:<bash> printf -- '%s' 'hello from Bash one-line!'
+:: interpreters / bash+ / one-line :: #!:<bash+> Z_log_notice 0xde9b9b79 'hello from Bash+ one-line!'
+
