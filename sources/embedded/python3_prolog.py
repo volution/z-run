@@ -363,7 +363,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _output == "" :
 				_output = None
 			else :
-				if _output[: 0 - PY.len (_separator)] == _separator :
+				if _output[0 - PY.len (_separator) :] == _separator :
 					_output = _output[: 0 - PY.len (_separator)]
 				_output = _output.split (_separator)
 				if PY.len (_output) == 1 or (PY.len (_output) == 2 and _output[1] == "") :
@@ -377,7 +377,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			if _output == "" :
 				_output = None
 			else :
-				if _output[: 0 - PY.len (_separator)] == _separator :
+				if _output[0 - PY.len (_separator) :] == _separator :
 					_output = _output[: 0 - PY.len (_separator)]
 				_output = _output.split (_separator)
 			if _json :
