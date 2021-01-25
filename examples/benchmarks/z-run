@@ -1,0 +1,39 @@
+#!/dev/null
+
+
+::&& library / noop / bash :: _/noop-bash.scriptlet
+::&& library / noop / bash+ :: _/noop-bash+.scriptlet
+
+::&& library / noop / python3 :: _/noop-python3.scriptlet
+::&& library / noop / python3+ :: _/noop-python3+.scriptlet
+
+
+<< benchmark / scriptlets / noop
+	test "${#}" -eq 0
+	hyperfine \
+			\
+			--warmup 200 \
+			--runs 2000 \
+			\
+			--export-csv /dev/fd/5 \
+			\
+			-n plain:bash "bash -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
+			-n scriptlet:bash "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
+			-n scriptlet:bash+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-bash+.scriptlet" \
+			-n library:bash "${ZRUN_EXECUTABLE} ':: library / noop / bash'" \
+			-n library:bash+ "${ZRUN_EXECUTABLE} ':: library / noop / bash+'" \
+			\
+			-n plain:python3 "python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
+			-n scriptlet:python3 "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
+			-n scriptlet:python3+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3+.scriptlet" \
+			-n library:python3 "${ZRUN_EXECUTABLE} ':: library / noop / python3'" \
+			-n library:python3+ "${ZRUN_EXECUTABLE} ':: library / noop / python3+'" \
+			\
+		5>&1 \
+		>&2 \
+	| column -t -s ',' -o ' | ' \
+	| tee -a -- /dev/stderr \
+		>| "${ZRUN_WORKSPACE}/noop-statistics.txt"
+	#
+!!
+
