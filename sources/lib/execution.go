@@ -186,6 +186,8 @@ func prepareExecution_0 (
 	
 	_interpreterPrologOverhead := 0
 	switch _interpreter {
+		case "<bash>" :
+			_interpreterPrologOverhead = len (embeddedBashProlog0) + 128
 		case "<bash+>" :
 			_interpreterPrologOverhead = len (embeddedBashProlog) + 128
 		case "<python3+>" :
@@ -219,6 +221,17 @@ func prepareExecution_0 (
 					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
+			_interpreterScriptBuffer.WriteString (_scriptletBody)
+		
+		case "<bash>" :
+			_interpreterExecutable = _scriptletInterpreterExecutable
+			_interpreterArguments = append (
+					_interpreterArguments,
+					fmt.Sprintf ("[z-run:bash] [%s]", _scriptletLabel),
+					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+				)
+			_interpreterScriptBuffer.WriteString (embeddedBashProlog0)
+			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
 		case "<bash+>" :

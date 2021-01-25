@@ -250,13 +250,13 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 			// NOP
 		case "<exec>", "<print>", "<template>", "<menu>", "<go>", "<go+>" :
 			return nil
-		case "<bash+>", "<python3+>" :
+		case "<bash>", "<bash+>", "<python3+>" :
 			return nil
 		default :
 			return errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
-	_scriptletBody, _scriptletBodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "", "<bash+>")
+	_scriptletBody, _scriptletBodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "", "<bash>")
 	if _error == nil {
 		
 		_scriptlet.Body = _scriptletBody
@@ -419,6 +419,7 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 			switch _interpreterExecutable {
 				
 				case "bash" :
+					_interpreter = "<" + _interpreterExecutable + ">"
 					_interpreterArguments = append (_interpreterArguments)
 					_interpreterArgumentsExtraDash = false
 					_interpreterArgumentsExtraDashNow = true

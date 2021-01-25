@@ -343,6 +343,7 @@
 	test "${#}" -eq 0
 	
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./sources/lib/embedded_bash_prolog.go zrun embeddedBashProlog string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog_0.bash ./sources/lib/embedded_bash_prolog_0.go zrun embeddedBashProlog0 string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python3_prolog.py ./sources/lib/embedded_python3_prolog.go zrun embeddedPython3Prolog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/go_prolog.go ./sources/lib/embedded_go_prolog.go zrun embeddedGoProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./documentation/manual/z-run.1.txt ./sources/lib/embedded_manual_txt.go zrun embeddedManualTxt string
