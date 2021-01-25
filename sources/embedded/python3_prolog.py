@@ -484,6 +484,20 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	def __Z__sleep (_interval) :
 		PY.time.sleep (_interval)
 	
+	@_inject
+	def __Z__time_as_seconds_since_epoch () :
+		_time = PY.time.time ()
+		return _time
+	
+	@_inject
+	def __Z__time_as_token (_reference = None, *, _utc = False) :
+		if _utc :
+			_time = PY.time.gmtime (_reference)
+		else :
+			_time = PY.time.localtime (_reference)
+		_time = PY.time.strftime ("%Y-%m-%d-%H-%M-%S", _time)
+		return _time
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
