@@ -724,7 +724,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__path_relative (_path, _base) :
-		return PY.path.relpath (_path, _base)
+		_path = PY.path.relpath (_path, _base)
+		if not _path.startswith (".") and not _path.startswith ("/") :
+			_path = PY.path.join (".", _path)
+		return _path
 	
 	@_inject
 	def __Z__path_matches (_path, _pattern) :
