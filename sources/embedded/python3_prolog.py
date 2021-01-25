@@ -884,6 +884,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			PY.os.mkdir (_path, _mode)
 	
 	@_inject
+	def __Z__rmdir (_path) :
+		PY.os.rmdir (_path)
+	
+	@_inject
 	def __Z__touch (_path, *, _mode = None, _create = True, _exclusive = None) :
 		if _mode is None : _mode = 0o666
 		_flags = PY.os.O_WRONLY | PY.os.O_NOCTTY
