@@ -153,9 +153,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_executable, _lookup, _arguments, _environment, _chdir, _files = _descriptor
 		if _files is not None :
 			_stdin, _stdout, _stderr = _files
-			_stdin = Z._fd (_stdin)
-			_stdout = Z._fd (_stdout)
-			_stderr = Z._fd (_stderr)
+			_stdin = Z._fd (_stdin) if _stdin is not False else PY.subprocess.DEVNULL
+			_stdout = Z._fd (_stdout) if _stdout is not False else PY.subprocess.DEVNULL
+			_stderr = Z._fd (_stderr) if _stderr is not False else PY.subprocess.DEVNULL
 		else :
 			_stdin = None
 			_stdout = None
@@ -262,27 +262,32 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_delegate = PY.os.execvpe
 		else :
 			_delegate = PY.os.execve
+		_dev_null = None
 		if _files is not None :
 			_stdin, _stdout, _stderr = _files
-			_stdin = Z._fd (_stdin)
-			_stdout = Z._fd (_stdout)
-			_stderr = Z._fd (_stderr)
+			if _stdin is False or _stdout is False or _stderr is False :
+				_dev_null = Z.fd_open_null ()
+			_stdin = Z._fd (_stdin) if _stdin is not False else _dev_null
+			_stdout = Z._fd (_stdout) if _stdout is not False else _dev_null
+			_stderr = Z._fd (_stderr) if _stderr is not False else _dev_null
 		else :
 			_stdin = None
 			_stdout = None
 			_stderr = None
 		if _stdin is not None :
 			PY.os.dup2 (_stdin, 0, True)
-			if _fd_close and _stdin != 0 :
+			if _fd_close and _stdin != 0 and _stdin != _dev_null :
 				PY.os.close (_stdin)
 		if _stdout is not None :
 			PY.os.dup2 (_stdout, 1, True)
-			if _fd_close and _stdout != 1 :
+			if _fd_close and _stdout != 1 and _stdout != _dev_null :
 				PY.os.close (_stdout)
 		if _stderr is not None :
 			PY.os.dup2 (_stderr, 2, True)
-			if _fd_close and _stderr != 2 :
+			if _fd_close and _stderr != 2 and _stderr != _dev_null :
 				PY.os.close (_stderr)
+		if _dev_null is not None :
+			PY.os.close (_dev_null)
 		_delegate (_executable, _arguments, _environment)
 	
 	@_inject
