@@ -934,7 +934,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z___file_read_process (_output, *, _data = None, _line = None, _lines = None, _separator = None, _json = None) :
-		assert PY.isinstance (_output, PY.bytes), "[27429689]"
+		assert PY.isinstance (_output, PY.bytes) or PY.isinstance (_output, PY.str), "[27429689]"
 		assert _line is None or _line is True, "[ba79d691]"
 		assert _lines is None or _lines is True, "[fdfc8771]"
 		assert _json is None or _json is True, "[5ff197c3]"
@@ -942,14 +942,17 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if _data :
 			assert not _line and not _lines and not _separator and not _json, "[0d9c84ca]"
 			if _data is PY.str :
-				_output = _output.decode ("utf-8")
+				if PY.isinstance (_output, PY.bytes) :
+					_output = _output.decode ("utf-8")
 			elif _data is PY.bytes :
-				pass
+				if PY.isinstance (_output, PY.str) :
+					_output = _output.encode ("utf-8")
 			else :
 				assert False, "[d2c9b0f9]"
 		if _line or _lines :
 			assert not _data, "[be243d10]"
-			_output = _output.decode ("utf-8")
+			if PY.isinstance (_output, PY.bytes) :
+				_output = _output.decode ("utf-8")
 			if _separator is None :
 				_separator = "\n"
 			else :
@@ -986,6 +989,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			elif _lines :
 				_output = [PY.json.loads (_output) for _output in _output]
 			else :
+				if PY.isinstance (_output, PY.bytes) :
+					_output = _output.decode ("utf-8")
 				_output = PY.json.loads (_output)
 		return _output
 	
