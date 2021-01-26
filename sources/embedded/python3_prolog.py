@@ -286,7 +286,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		_delegate (_executable, _arguments, _environment)
 	
 	@_inject
-	def __Z___exec_prepare_0 (_executable, _lookup, _arguments, *, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _stdin = None, _stdout = None, _stderr = None) :
+	def __Z___exec_prepare_0 (_executable, _lookup, _arguments, *, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _stdin = None, _stdout = None, _stderr = None, _sudo = None, _sudo_user = None) :
 		if _env is not None :
 			_environment = { _name : _env[_name] for _name in _env }
 		else :
@@ -302,7 +302,24 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_files = (_stdin, _stdout, _stderr)
 		else :
 			_files = None
+		if _sudo is not None :
+			if _sudo_user is None :
+				_sudo_user = "root"
+			assert PY.isinstance (_sudo_user, PY.str), "[6846e3f1]"
+			if _executable != _arguments[0] :
+				Z.panic (0x922dd24b, "sudo can't set argument0")
+			_executable = "sudo"
+			_arguments = ["sudo", "-u", _sudo_user, "-H", "-n", "--"] + _arguments
+		else :
+			assert _sudo_user is None, "[dd439dde]"
 		return _executable, _lookup, _arguments, _environment, _chdir, _files
+	
+	@_inject
+	def __Z__sudo_prepare (_user = None) :
+		if _user is None or _user is True :
+			_user = "root"
+		assert PY.isinstance (_user, PY.str), "[9d018081]"
+		Z.spawn ("sudo", "-u", _user, "-v", "-p", "[z-run:%08d] [>>]  SUDO authentication:  password for user `%%p` is required to invoke commands as user `%%U`;  enter password: " % Z.pid)
 	
 	@_inject
 	def __Z__process_wait (_pid, *, _enforce = None) :
