@@ -26,6 +26,7 @@
 	"${ZRUN[@]}" ':: python / test / sleep'
 	"${ZRUN[@]}" ':: python / test / files'
 	"${ZRUN[@]}" ':: python / test / random'
+	"${ZRUN[@]}" ':: python / test / hash'
 !!
 
 
@@ -239,7 +240,7 @@
 	_token = Z.random_token (128)
 	Z.file_write ("/tmp/z-run-python-tests--files", '{"a":"%s"}' % _token)
 	_output = Z.file_read ("/tmp/z-run-python-tests--files")
-	assert _output == '{"a":"%s"}' % _token
+	assert _output == ('{"a":"%s"}' % _token).encode ("utf-8")
 	_output = Z.file_read ("/tmp/z-run-python-tests--files", json = True)
 	assert _output == {"a":_token}
 	_token = Z.random_token (128)
@@ -276,6 +277,23 @@
 		assert len (Z.random_shuffle ([0, 1, 2, 3])) == 4
 !!
 
+<< python / test / hash
+	#! <python3+>
+	Z.expect_no_arguments ()
+	assert Z.data_md5 ("") == "d41d8cd98f00b204e9800998ecf8427e"
+	assert Z.data_sha1 ("") == "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+	assert Z.data_sha2_224 ("") == "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f"
+	assert Z.data_sha2_256 ("") == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	assert Z.data_sha2_384 ("") == "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b"
+	assert Z.data_sha2_512 ("") == "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+	assert Z.data_sha3_224 ("") == "6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7"
+	assert Z.data_sha3_256 ("") == "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a"
+	assert Z.data_sha3_384 ("") == "0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004"
+	assert Z.data_sha3_512 ("") == "a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26"
+	assert Z.data_blake2b ("") == "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"
+	assert Z.data_blake2s ("") == "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9"
+!!
+
 << python / test / raise / internal
 	#! <python3+>
 	Z.expect_no_arguments ()
@@ -301,5 +319,12 @@
 	def y () : z ()
 	def z () : assert False
 	x ()
+!!
+
+<< python / test / sudo
+	#! <python3+>
+	Z.expect_no_arguments ()
+	Z.sudo_prepare ("root")
+	Z.spawn ("whoami", sudo = True)
 !!
 
