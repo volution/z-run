@@ -529,6 +529,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		Z.exit (1)
 	
 	@_inject
+	def __Z__panic_not_implemented (_code) :
+		Z.panic (_code, "not implemented")
+	
+	@_inject
 	def __Z___panic_with_excepthook (_error_type, _error, _traceback) :
 		_traceback_error = PY.traceback.extract_tb (_traceback)
 		_traceback_caller = []
@@ -639,27 +643,28 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__enforce (_condition, *, _code = None, _message = None) :
+	def __Z__enforce (_condition, *, _value = None, _enforce = None, _message = None) :
 		if _message is None : _message = "enforcement failed"
 		if not PY.isinstance (_condition, PY.builtins.bool) :
-			if _code is None : _code = 0x97ee7cf1
-			Z.panic (_code, _message)
+			if _enforce is None : _enforce = 0x97ee7cf1
+			Z.panic (_enforce, _message)
 		if not _condition :
-			if _code is None : _code = 0x0e36cc55
-			Z.panic (_code, _message)
+			if _enforce is None : _enforce = 0x0e36cc55
+			Z.panic (_enforce, _message)
 		return _condition
 	
 	@_inject
-	def __Z__enforce_regex (_value, _pattern, *, _code = None, _message = None) :
-		if _message is None : _message = "enforcement failed"
+	def __Z__enforce_prefix (_value, _prefix, **_options) :
+		return Z.enforce (PY.isinstance (_value, PY.str) and _value.startswith (_prefix), value = _value, **_options)
+	
+	@_inject
+	def __Z__enforce_suffix (_value, _suffix, **_options) :
+		return Z.enforce (PY.isinstance (_value, PY.str) and _value.endswith (_suffix), value = _value, **_options)
+	
+	@_inject
+	def __Z__enforce_regex (_value, _pattern, **_options) :
 		_pattern = Z.regex (_pattern)
-		if not PY.isinstance (_value, PY.str) :
-			if _code is None : _code = 0x00a780ed
-			Z.panic (_code, _message)
-		if _pattern.match (_value) is None :
-			if _code is None : _code = 0x9c922f7e
-			Z.panic (_code, _message)
-		return _value
+		return Z.enforce (PY.isinstance (_value, PY.str) and _pattern.match (_value) is not None, value = _value, **_options)
 	
 	@_inject
 	def __Z__regex (_pattern) :
