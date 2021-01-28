@@ -24,6 +24,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.errno = __import__ ("errno")
 	PY.fcntl = __import__ ("fcntl")
 	PY.fnmatch = __import__ ("fnmatch")
+	PY.hashlib = __import__ ("hashlib")
 	PY.io = __import__ ("io")
 	PY.json = __import__ ("json")
 	PY.os = __import__ ("os")
@@ -1190,6 +1191,66 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z__chdir (_path) :
 		PY.os.chdir (_path)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __Z__data_md5 (_value) :
+		return Z._data_hash (PY.hashlib.md5 (), _value)
+	
+	@_inject
+	def __Z__data_sha1 (_value) :
+		return Z._data_hash (PY.hashlib.sha1 (), _value)
+	
+	@_inject
+	def __Z__data_sha2_224 (_value) :
+		return Z._data_hash (PY.hashlib.sha224 (), _value)
+	
+	@_inject
+	def __Z__data_sha2_256 (_value) :
+		return Z._data_hash (PY.hashlib.sha256 (), _value)
+	
+	@_inject
+	def __Z__data_sha2_384 (_value) :
+		return Z._data_hash (PY.hashlib.sha384 (), _value)
+	
+	@_inject
+	def __Z__data_sha2_512 (_value) :
+		return Z._data_hash (PY.hashlib.sha512 (), _value)
+	
+	@_inject
+	def __Z__data_sha3_224 (_value) :
+		return Z._data_hash (PY.hashlib.sha3_224 (), _value)
+	
+	@_inject
+	def __Z__data_sha3_256 (_value) :
+		return Z._data_hash (PY.hashlib.sha3_256 (), _value)
+	
+	@_inject
+	def __Z__data_sha3_384 (_value) :
+		return Z._data_hash (PY.hashlib.sha3_384 (), _value)
+	
+	@_inject
+	def __Z__data_sha3_512 (_value) :
+		return Z._data_hash (PY.hashlib.sha3_512 (), _value)
+	
+	@_inject
+	def __Z__data_blake2b (_value, *, _size = 64) :
+		return Z._data_hash (PY.hashlib.blake2b (digest_size = _size), _value)
+	
+	@_inject
+	def __Z__data_blake2s (_value, *, _size = 32) :
+		return Z._data_hash (PY.hashlib.blake2s (digest_size = _size), _value)
+	
+	@_inject
+	def __Z___data_hash (_hasher, _value) :
+		if PY.isinstance (_value, PY.str) :
+			_value = _value.encode ("utf-8")
+		else :
+			assert PY.isinstance (_value, PY.bytes), "[c682f292]"
+		_hasher.update (_value)
+		_hash = _hasher.hexdigest ()
+		return _hash
 	
 	## --------------------------------------------------------------------------------
 	
