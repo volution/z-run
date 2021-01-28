@@ -254,7 +254,7 @@ func prepareExecution_0 (
 				)
 			_interpreterScriptBuffer.WriteString (embeddedPython3Prolog)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf (
-					"Z._scriptlet_begin_from_fd (%d, %s, %s, %d, %d)\n",
+					"Z._scriptlet_begin_from_fd (%d, %s, %s, %d, %d, lambda : None)\n",
 					_interpreterScriptInput,
 					strconv.QuoteToASCII (_scriptletLabel),
 					strconv.QuoteToASCII (_scriptletSourcePath),

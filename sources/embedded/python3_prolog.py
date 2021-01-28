@@ -11,6 +11,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	PY = __import__ ("types") .ModuleType ("PY")
 	PY.sys = __import__ ("sys")
+	PY.os = __import__ ("os")
 	
 	if PY.sys.version_info[0] != 3 or PY.sys.version_info[1] < 6 :
 		PY.sys.stderr.write ("[z-run] [!!] [68c3c553]  requires Python3.6+;  aborting!\n")
@@ -19,43 +20,69 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	## --------------------------------------------------------------------------------
 	
-	PY.binascii = __import__ ("binascii")
 	PY.builtins = __import__ ("builtins")
-	PY.errno = __import__ ("errno")
-	PY.fcntl = __import__ ("fcntl")
-	PY.fnmatch = __import__ ("fnmatch")
-	PY.hashlib = __import__ ("hashlib")
-	PY.io = __import__ ("io")
-	PY.json = __import__ ("json")
-	PY.os = __import__ ("os")
-	PY.random = __import__ ("random") .SystemRandom ()
-	PY.re = __import__ ("re")
-	PY.signal = __import__ ("signal")
-	PY.stat = __import__ ("stat")
-	PY.subprocess = __import__ ("subprocess")
-	PY.time = __import__ ("time")
-	PY.traceback = __import__ ("traceback")
-	PY.types = __import__ ("types")
-	
-	PY.path = PY.os.path
 	
 	PY.bytes = PY.builtins.bytes
 	PY.str = PY.builtins.str
-	
 	PY.int = PY.builtins.int
 	PY.float = PY.builtins.float
-	
 	PY.tuple = PY.builtins.tuple
 	PY.list = PY.builtins.list
 	PY.dict = PY.builtins.dict
+	
 	PY.range = PY.builtins.range
 	PY.len = PY.builtins.len
 	PY.sorted = PY.builtins.sorted
 	PY.reversed = PY.builtins.reversed
 	
 	PY.isinstance = PY.builtins.isinstance
+	PY.getattr = PY.builtins.getattr
+	PY.setattr = PY.builtins.setattr
 	PY.OSError = PY.builtins.OSError
 	PY.SystemExit = PY.builtins.SystemExit
+	PY.KeyboardInterrupt = PY.builtins.KeyboardInterrupt
+	
+	## --------------------------------------------------------------------------------
+	
+	class PY_module_lazy :
+		
+		def __init__ (self, _name, _lambda) :
+			self._PY_module_name = _name
+			self._PY_module_lambda = _lambda
+		
+		def __getattr__ (self, _member) :
+			_name = PY.getattr (self, "_PY_module_name")
+			_lambda = PY.getattr (self, "_PY_module_lambda")
+			if False :
+				PY.sys.stderr.write ("[z-run] [!!] [9a5690f6]  loading `PY.%s`;\n" % _name)
+				PY.sys.stderr.flush ()
+			_module = __import__ (_name)
+			if _lambda is not None :
+				_module = _lambda (_module)
+			PY.setattr (PY, _name, _module)
+			return PY.getattr (_module, _member)
+	
+	def __import__lazy (_name, _lambda = None) :
+		return PY_module_lazy (_name, _lambda)
+	
+	## --------------------------------------------------------------------------------
+	
+	PY.binascii = __import__lazy ("binascii")
+	PY.errno = __import__lazy ("errno")
+	PY.fcntl = __import__lazy ("fcntl")
+	PY.fnmatch = __import__lazy ("fnmatch")
+	PY.hashlib = __import__lazy ("hashlib")
+	PY.io = __import__lazy ("io")
+	PY.json = __import__lazy ("json")
+	PY.path = __import__lazy ("posixpath")
+	PY.random = __import__lazy ("random", (lambda _module : _module.SystemRandom ()))
+	PY.re = __import__lazy ("re")
+	PY.signal = __import__lazy ("signal")
+	PY.stat = __import__lazy ("stat")
+	PY.subprocess = __import__lazy ("subprocess")
+	PY.time = __import__lazy ("time")
+	PY.traceback = __import__lazy ("traceback")
+	PY.types = __import__lazy ("types")
 	
 	## --------------------------------------------------------------------------------
 	
@@ -63,6 +90,15 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		Z = __import__ ("types") .ModuleType ("Z")
 	
 	Z.py = PY
+	
+	Z.pid = PY.os.getpid ()
+	
+	Z._scriptlet_label = None
+	Z._scriptlet_source_path = None
+	Z._scriptlet_source_line_start = None
+	Z._scriptlet_source_line_end = None
+	Z._scriptlet_begin_file = None
+	Z._scriptlet_begin_line = None
 	
 	## --------------------------------------------------------------------------------
 	
@@ -77,6 +113,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			try :
 				return _function (*_arguments_list, **_arguments_map)
 			except PY.SystemExit :
+				raise
+			except PY.KeyboardInterrupt :
 				raise
 			except :
 				_error = PY.sys.exc_info ()
@@ -535,9 +573,12 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z___panic_with_excepthook (_error_type, _error, _traceback) :
-		_traceback_error = PY.traceback.extract_tb (_traceback)
-		_traceback_caller = []
-		Z._panic_with_traceback (0x338a0a5b, _error, _traceback_error, _traceback_caller)
+		if _error_type is PY.KeyboardInterrupt :
+			Z.panic (0x9ff44b9a, "scriptlet interrupted;  aborting!")
+		else :
+			_traceback_error = PY.traceback.extract_tb (_traceback)
+			_traceback_caller = []
+			Z._panic_with_traceback (0x338a0a5b, _error, _traceback_error, _traceback_caller)
 	
 	@_inject
 	def __Z___panic_with_traceback (_code, _error, _traceback_error, _traceback_caller) :
@@ -593,16 +634,23 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _code
 	
 	@_inject
-	def __Z___scriptlet_begin_from_fd (_fd, _label, _source_path, _source_line_start, _source_line_end) :
+	def __Z___scriptlet_begin_from_fd (_fd, _label, _source_path, _source_line_start, _source_line_end, _lambda_frame) :
 		PY.os.close (_fd)
 		Z._scriptlet_label = _label
 		Z._scriptlet_source_path = _source_path
 		Z._scriptlet_source_line_start = _source_line_start
 		Z._scriptlet_source_line_end = _source_line_end
-		_traceback_frame = PY.traceback.extract_stack () [0]
-		Z._scriptlet_begin_file = _traceback_frame.filename
-		Z._scriptlet_begin_line = _traceback_frame.lineno
-		PY.sys.excepthook = Z._panic_with_excepthook
+		Z._scriptlet_begin_file = _lambda_frame.__code__.co_filename
+		Z._scriptlet_begin_line = _lambda_frame.__code__.co_firstlineno
+	
+	@_inject
+	def __Z___panic_on_signals () :
+		PY.signal.signal (Z.py.signal.SIGINT, (lambda _0, _1 : Z.panic (0x6c751732, "scriptlet interrupted with SIGINT;  aborting!")))
+		PY.signal.signal (Z.py.signal.SIGTERM, (lambda _0, _1 : Z.panic (0xb5067479, "scriptlet interrupted with SIGTERM;  aborting!")))
+		PY.signal.signal (Z.py.signal.SIGQUIT, (lambda _0, _1 : Z.panic (0x921de146, "scriptlet interrupted with SIGQUIT;  aborting!")))
+		PY.signal.signal (Z.py.signal.SIGHUP, (lambda _0, _1 : Z.panic (0xe2e4c7c5, "scriptlet interrupted with SIGHUP;  aborting!")))
+		PY.signal.signal (Z.py.signal.SIGPIPE, (lambda _0, _1 : Z.panic (0xed8191f4, "scriptlet interrupted with SIGPIPE;  aborting!")))
+		PY.signal.signal (Z.py.signal.SIGABRT, (lambda _0, _1 : Z.panic (0xd6af6d5b, "scriptlet interrupted with SIGABRT;  aborting!")))
 	
 	## --------------------------------------------------------------------------------
 	
@@ -1328,7 +1376,6 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	## --------------------------------------------------------------------------------
 	
-	Z.pid = PY.os.getpid ()
 	Z.arguments = PY.tuple (PY.sys.argv[1:])
 	Z.environment = Z_environment ()
 	Z.environment_or_none = Z_environment_or_none ()
@@ -1359,15 +1406,10 @@ if __name__ == "__main__" :
 	(lambda Z : Z.py.sys.modules.__setitem__ ("Z", Z)) (__Z__create ())
 	import Z
 	
-	Z.py.signal.signal (Z.py.signal.SIGINT, (lambda _0, _1 : Z.panic (0x6c751732, "scriptlet interrupted with SIGINT;  aborting!")))
-	Z.py.signal.signal (Z.py.signal.SIGTERM, (lambda _0, _1 : Z.panic (0xb5067479, "scriptlet interrupted with SIGTERM;  aborting!")))
-	Z.py.signal.signal (Z.py.signal.SIGQUIT, (lambda _0, _1 : Z.panic (0x921de146, "scriptlet interrupted with SIGQUIT;  aborting!")))
-	Z.py.signal.signal (Z.py.signal.SIGHUP, (lambda _0, _1 : Z.panic (0xe2e4c7c5, "scriptlet interrupted with SIGHUP;  aborting!")))
-	Z.py.signal.signal (Z.py.signal.SIGPIPE, (lambda _0, _1 : Z.panic (0xed8191f4, "scriptlet interrupted with SIGPIPE;  aborting!")))
-	Z.py.signal.signal (Z.py.signal.SIGABRT, (lambda _0, _1 : Z.panic (0xd6af6d5b, "scriptlet interrupted with SIGABRT;  aborting!")))
-	
-	sys = Z.py.sys
 	os = Z.py.os
+	sys = Z.py.sys
+	
+	sys.excepthook = Z._panic_with_excepthook
 
 
 ################################################################################
