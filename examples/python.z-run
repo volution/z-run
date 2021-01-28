@@ -5,6 +5,7 @@
 
 
 ++<< python / test / all
+	"${ZRUN[@]}" ':: python / test / noop'
 	"${ZRUN[@]}" ':: python / test / prolog'
 	"${ZRUN[@]}" ':: python / test / exit'
 	"${ZRUN[@]}" ':: python / test / log' 2> /dev/null
@@ -29,6 +30,9 @@
 	"${ZRUN[@]}" ':: python / test / hash'
 !!
 
+<< python / test / noop
+	#! <python3+>
+!!
 
 << python / test / prolog
 	#! <python3+>
@@ -326,5 +330,16 @@
 	Z.expect_no_arguments ()
 	Z.sudo_prepare ("root")
 	Z.spawn ("whoami", sudo = True)
+!!
+
+<< python / benchmark / noop
+	test "${#}" -eq 0
+	exec -- hyperfine \
+			--warmup 20 \
+			--runs 200 \
+			--shell '' \
+			-n plain:python3 "python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/examples/python-noop.z-scriptlet" \
+			-n scriptlet:python3+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/examples/python-noop.z-scriptlet" \
+	#
 !!
 
