@@ -97,8 +97,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
 	
 	@_inject
-	def __Z__zspawn_capture (_scriptlet, *_arguments, **_options) :
-		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = False, _stdout_data = PY.str, _enforce = True)
+	def __Z__zspawn_capture (_scriptlet, *_arguments, _stdin_data = False, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, **_options) :
+		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = PY.str, _enforce = True, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user)
 		return Z._file_read_process (_output, **_options)
 	
 	@_inject
@@ -127,8 +127,8 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
 	
 	@_inject
-	def __Z__spawn_capture (_executable, *_arguments, **_options) :
-		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = False, _stdout_data = PY.str, _enforce = True)
+	def __Z__spawn_capture (_executable, *_arguments, _stdin_data = False, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, **_options) :
+		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = PY.str, _enforce = True, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user)
 		return Z._file_read_process (_output, **_options)
 	
 	@_inject
