@@ -58,6 +58,9 @@ func PreMain () () {
 	} else {
 		panic (abortError (errorw (0x75f2db30, _error)))
 	}
+	
+	_preMainContext.Executable0 = _executable
+	
 	if _executable_0, _error := filepath.EvalSymlinks (_executable); _error == nil {
 		_executable = _executable_0
 	} else {
@@ -196,7 +199,7 @@ func PreMain () () {
 				os.Exit (1)
 			}
 			if _argument00, _error := filepath.EvalSymlinks (_argument0); (_error != nil) || (_argument00 != _executable) {
-				logf ('e', 0xf1f1a024, "invalid argument0: `%s`;  aborting!", _argument0)
+				logf ('e', 0xf1f1a024, "invalid argument0: `%s`, expected `%s`;  aborting!", _argument0, _executable)
 				os.Exit (1)
 			}
 			_argument0IsTool = false
@@ -349,6 +352,7 @@ func PreMain () () {
 
 type PreMainContext struct {
 	Executable string
+	Executable0 string
 	Arguments []string
 	Environment []string
 }
@@ -362,10 +366,17 @@ func PreMainReExecute (_executable string) (*Error) {
 	if PreMainContextGlobal == nil {
 		return errorf (0x3d126cd2, "can't switch `z-run`")
 	}
+	_arguments := make ([]string, 0, len (PreMainContextGlobal.Arguments))
+	if PreMainContextGlobal.Arguments[0] == PreMainContextGlobal.Executable0 {
+		_arguments = append (_arguments, _executable)
+	} else {
+		_arguments = append (_arguments, PreMainContextGlobal.Arguments[0])
+	}
+	_arguments = append (_arguments, PreMainContextGlobal.Arguments[1:] ...)
 //	logf ('i', 0x91038b92, "switching `z-run` to: `%s`...", _executable)
 	_error := syscall.Exec (
 			_executable,
-			PreMainContextGlobal.Arguments,
+			_arguments,
 			PreMainContextGlobal.Environment,
 		)
 	return errorw (0x3d993836, _error)
