@@ -494,8 +494,36 @@ func prepareExecution_0 (
 	}
 	_interpreterArguments = append (_interpreterArguments, _cleanArguments ...)
 	
-	_executablePaths = append (_executablePaths, _scriptletExecutablePaths ...)
-	_executablePaths = append (_executablePaths, _contextExecutablePaths ...)
+	for _, _path_1 := range _scriptletExecutablePaths {
+		_found := false
+		for _, _path_2 := range _executablePaths {
+			if _path_1 == _path_2 || _found {
+				_found = true
+				break
+			}
+		}
+		for _, _path_2 := range _contextExecutablePaths {
+			if _path_1 == _path_2 || _found {
+				_found = true
+				break
+			}
+		}
+		if !_found {
+			_executablePaths = append (_executablePaths, _path_1)
+		}
+	}
+	for _, _path_1 := range _contextExecutablePaths {
+		_found := false
+		for _, _path_2 := range _executablePaths {
+			if _path_1 == _path_2 || _found {
+				_found = true
+				break
+			}
+		}
+		if !_found {
+			_executablePaths = append (_executablePaths, _path_1)
+		}
+	}
 	
 	if len (_executablePaths) > 0 {
 		_environment["PATH"] = strings.Join (_executablePaths, string (os.PathListSeparator))
