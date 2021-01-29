@@ -9,6 +9,7 @@ import "io/ioutil"
 import "os"
 import "os/exec"
 import "path"
+import "runtime"
 import "sort"
 import "strings"
 import "strconv"
@@ -264,10 +265,23 @@ func prepareExecution_0 (
 					_interpreterArguments,
 					_scriptletInterpreterArguments ...
 				)
-			_interpreterArguments = append (
-					_interpreterArguments,
-					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
-				)
+			if runtime.GOOS == "darwin" {
+				// FIXME:  This is a hack to work-around an OSX Python bug!
+				if _interpreterArguments[len (_interpreterArguments) - 1] == "--" {
+					_interpreterArguments = _interpreterArguments[0 : len (_interpreterArguments) - 1]
+				}
+				_interpreterArguments = append (
+						_interpreterArguments,
+						"-c",
+						fmt.Sprintf (`exec(open("/dev/fd/%d").read())`, _interpreterScriptInput),
+					)
+				_scriptletInterpreterArgumentsExtraDash = false
+			} else {
+				_interpreterArguments = append (
+						_interpreterArguments,
+						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+					)
+			}
 			_interpreterScriptBuffer.WriteString (embeddedPython3Prolog)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf (
 					"Z._scriptlet_begin_from_fd (%d, %s, %s, %d, %d, lambda : None)\n",
