@@ -169,12 +169,19 @@ func prepareExecution_0 (
 			
 		) (*exec.Cmd, []int, *Error) {
 	
+//	logf ('d', 0x2a62601b, "%#v", _scriptletInterpreterExecutable)
+//	logf ('d', 0xcd47b531, "%#v", _scriptletInterpreterArguments)
+//	logf ('d', 0x51d242fe, "%#v", _scriptletInterpreterArgumentsExtraDash)
+//	logf ('d', 0x9eea73ed, "%#v", _scriptletInterpreterArgumentsExtraAllowed)
+//	logf ('d', 0xb2668444, "%#v", _scriptletInterpreterEnvironment)
+	
 	if (len (_cleanArguments) > 0) && ! _scriptletInterpreterArgumentsExtraAllowed {
 		return nil, nil, errorf (0x4ef9e048, "unexpected arguments")
 	}
 	
 	var _interpreterExecutable string
-	var _interpreterArguments []string = make ([]string, 0, len (_cleanArguments) + 16)
+	var _interpreterArgument0 string
+	var _interpreterArguments []string = make ([]string, 1, len (_cleanArguments) + 32)
 	var _interpreterEnvironment map[string]string
 	
 	var _executablePaths []string = make ([]string, 0, 128)
@@ -209,10 +216,7 @@ func prepareExecution_0 (
 		case "<exec>" :
 			_interpreterExecutable = _scriptletInterpreterExecutable
 			_interpreterEnvironment = _scriptletInterpreterEnvironment
-			_interpreterArguments = append (
-					_interpreterArguments,
-					_scriptletInterpreterExecutable,
-				)
+			_interpreterArgument0 = _scriptletInterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
 					_scriptletInterpreterArguments ...
@@ -225,9 +229,13 @@ func prepareExecution_0 (
 		
 		case "<bash>" :
 			_interpreterExecutable = _scriptletInterpreterExecutable
+			_interpreterArgument0 = fmt.Sprintf ("[z-run:bash] [%s]", _scriptletLabel)
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:bash] [%s]", _scriptletLabel),
+					_scriptletInterpreterArguments ...,
+				)
+			_interpreterArguments = append (
+					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedBashProlog0)
@@ -236,9 +244,13 @@ func prepareExecution_0 (
 		
 		case "<bash+>" :
 			_interpreterExecutable = _scriptletInterpreterExecutable
+			_interpreterArgument0 = fmt.Sprintf ("[z-run:bash+] [%s]", _scriptletLabel)
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:bash+] [%s]", _scriptletLabel),
+					_scriptletInterpreterArguments ...
+				)
+			_interpreterArguments = append (
+					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedBashProlog)
@@ -247,9 +259,13 @@ func prepareExecution_0 (
 		
 		case "<python3+>" :
 			_interpreterExecutable = _scriptletInterpreterExecutable
+			_interpreterArgument0 = fmt.Sprintf ("[z-run:python3+] [%s]", _scriptletLabel)
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:python3+] [%s]", _scriptletLabel),
+					_scriptletInterpreterArguments ...
+				)
+			_interpreterArguments = append (
+					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (embeddedPython3Prolog)
@@ -266,17 +282,25 @@ func prepareExecution_0 (
 		case "<print>" :
 			if _libraryUrl != "" {
 				_interpreterExecutable = _selfExecutable
+				_interpreterArgument0 = "[z-run:library]"
 				_interpreterArguments = append (
 						_interpreterArguments,
-						"[z-run:library]",
+						_scriptletInterpreterArguments ...,
+					)
+				_interpreterArguments = append (
+						_interpreterArguments,
 						fmt.Sprintf (":: %s", _scriptletLabel),
 					)
 				_interpreterScriptUnused = true
 			} else {
 				_interpreterExecutable = _selfExecutable
+				_interpreterArgument0 = fmt.Sprintf ("[z-run:print] [%s]", _scriptletLabel)
 				_interpreterArguments = append (
 						_interpreterArguments,
-						fmt.Sprintf ("[z-run:print] [%s]", _scriptletLabel),
+						_scriptletInterpreterArguments ...,
+					)
+				_interpreterArguments = append (
+						_interpreterArguments,
 						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 					)
 				_interpreterScriptBuffer.WriteString (_scriptletBody)
@@ -285,17 +309,25 @@ func prepareExecution_0 (
 		case "<template>" :
 			if _libraryUrl != "" {
 				_interpreterExecutable = _selfExecutable
+				_interpreterArgument0 = "[z-run:library]"
 				_interpreterArguments = append (
 						_interpreterArguments,
-						"[z-run:library]",
+						_scriptletInterpreterArguments ...,
+					)
+				_interpreterArguments = append (
+						_interpreterArguments,
 						fmt.Sprintf (":: %s", _scriptletLabel),
 					)
 				_interpreterScriptUnused = true
 			} else {
 				_interpreterExecutable = _selfExecutable
+				_interpreterArgument0 = fmt.Sprintf ("[z-run:template] [%s]", _scriptletLabel)
 				_interpreterArguments = append (
 						_interpreterArguments,
-						fmt.Sprintf ("[z-run:template] [%s]", _scriptletLabel),
+						_scriptletInterpreterArguments ...,
+					)
+				_interpreterArguments = append (
+						_interpreterArguments,
 						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 					)
 				_interpreterScriptBuffer.WriteString (_scriptletBody)
@@ -303,9 +335,13 @@ func prepareExecution_0 (
 		
 		case "<menu>" :
 			_interpreterExecutable = _selfExecutable
+			_interpreterArgument0 = fmt.Sprintf ("[z-run:menu] [%s]", _scriptletLabel)
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:menu] [%s]", _scriptletLabel),
+					_scriptletInterpreterArguments ...,
+				)
+			_interpreterArguments = append (
+					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
@@ -405,9 +441,10 @@ func prepareExecution_0 (
 			}
 			
 			_interpreterExecutable = _goExecutable
+			_interpreterArgument0 = fmt.Sprintf ("[z-run:go] [%s]", _scriptletLabel)
 			_interpreterArguments = append (
 					_interpreterArguments,
-					fmt.Sprintf ("[z-run:go] [%s]", _scriptletLabel),
+					_scriptletInterpreterArguments ...,
 				)
 			_interpreterScriptUnused = true
 		
@@ -483,6 +520,8 @@ func prepareExecution_0 (
 		return nil, nil, _error
 	}
 	
+	_interpreterArguments[0] = _interpreterArgument0
+	
 	_command := & exec.Cmd {
 			Path : _interpreterExecutable,
 			Args : _interpreterArguments,
@@ -490,10 +529,10 @@ func prepareExecution_0 (
 			Dir : _contextWorkspace,
 		}
 	
-//	logf ('d', 0xcc6d38ba, "%v", _command.Path)
-//	logf ('d', 0xdb26cbac, "%v", _command.Args[0])
-//	logf ('d', 0x7b0c717d, "%v", _command.Args[1:])
-//	logf ('d', 0xaa0b151d, "%v", _command.Env)
+//	logf ('d', 0xcc6d38ba, "%#v", _command.Path)
+//	logf ('d', 0xdb26cbac, "%#v", _command.Args[0])
+//	logf ('d', 0x7b0c717d, "%#v", _command.Args[1:])
+//	logf ('d', 0xaa0b151d, "%#v", _command.Env)
 	
 	return _command, _descriptors, nil
 }
