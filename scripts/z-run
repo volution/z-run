@@ -185,7 +185,9 @@
 	
 	printf -- '[ii]  building release for `%s`...\n' "${GOOS:-native}" >&2
 	
-	mv -T -- "${_outputs}/z-run--release${_suffix}" "${_outputs}/z-run--release${_suffix}.old"
+	if test -f "${_outputs}/z-run--release${_suffix}" ; then
+		mv -T -- "${_outputs}/z-run--release${_suffix}" "${_outputs}/z-run--release${_suffix}.old"
+	fi
 	
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
@@ -196,7 +198,9 @@
 			./cmd/z-run.go \
 	#
 	
-	if ! cmp -s -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}.old" ; then
+	if test ! -e "${_outputs}/z-run--release${_suffix}.old" ; then
+		mv -T -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}"
+	elif ! cmp -s -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}.old" ; then
 		mv -T -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}"
 	else
 		mv -T -- "${_outputs}/z-run--release${_suffix}.old" "${_outputs}/z-run--release${_suffix}"
