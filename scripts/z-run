@@ -298,8 +298,9 @@
 	_gosrc="${_outputs}/go/src"
 	_gopkg="${_outputs}/go/pkg"
 	_markers="${_outputs}/markers"
+	_embedded="${_outputs}/embedded"
 	
-	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" "${_markers}" ; do
+	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" "${_markers}" "${_embedded}" ; do
 		if test ! -e "${_folder}" ; then
 			mkdir -- "${_folder}"
 		fi
@@ -355,12 +356,37 @@
 	
 	test "${#}" -eq 0
 	
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./sources/lib/embedded_bash_prolog.go zrun embeddedBashProlog string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog_0.bash ./sources/lib/embedded_bash_prolog_0.go zrun embeddedBashProlog0 string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_functions.bash ./sources/lib/embedded_bash_functions.go zrun embeddedBashFunctions string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python3_prolog.py ./sources/lib/embedded_python3_prolog.go zrun embeddedPython3Prolog string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/go_prolog.go ./sources/lib/embedded_go_prolog.go zrun embeddedGoProlog string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./documentation/manual/z-run.1.txt ./sources/lib/embedded_manual_txt.go zrun embeddedManualTxt string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./.outputs/embedded/embedded_bash_prolog.go zrun embeddedBashProlog string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog_0.bash ./.outputs/embedded/embedded_bash_prolog_0.go zrun embeddedBashProlog0 string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_functions.bash ./.outputs/embedded/embedded_bash_functions.go zrun embeddedBashFunctions string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python3_prolog.py ./.outputs/embedded/embedded_python3_prolog.go zrun embeddedPython3Prolog string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/go_prolog.go ./.outputs/embedded/embedded_go_prolog.go zrun embeddedGoProlog string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./documentation/manual/z-run.1.txt ./.outputs/embedded/embedded_manual_txt.go zrun embeddedManualTxt string
+	
+	if ! test \
+			-e ./sources/embedded.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_prolog.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_prolog_0.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_functions.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_python3_prolog.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_go_prolog.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_manual_txt.go \
+	; then
+		sed \
+				-r \
+				-e '1ipackage zrun' \
+				-e '/^package zrun$/d' \
+				-- \
+				./.outputs/embedded/embedded_bash_prolog.go \
+				./.outputs/embedded/embedded_bash_prolog_0.go \
+				./.outputs/embedded/embedded_bash_functions.go \
+				./.outputs/embedded/embedded_python3_prolog.go \
+				./.outputs/embedded/embedded_go_prolog.go \
+				./.outputs/embedded/embedded_manual_txt.go \
+			>| ./sources/embedded.go.tmp \
+		#
+		mv -T -- ./sources/embedded.go.tmp ./sources/embedded.go
+	fi
 	
 	"${ZRUN[@]}" ':: workspace / sources / embedded / hash'
 !!
