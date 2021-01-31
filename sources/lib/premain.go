@@ -224,7 +224,18 @@ func PreMain () () {
 	_argument0 := os.Args[0]
 	_arguments := append ([]string (nil), os.Args[1:] ...)
 	
-	_preMainContext.Arguments = append ([]string (nil), os.Args ...)
+	if _argument0 == _executable0 {
+		_argument0 = _executable
+	} else if (_argument0 != _executable) && ! strings.HasPrefix (_argument0, "[") {
+		if _executable_0, _error := filepath.EvalSymlinks (_argument0); _error == nil {
+			if _executable == _executable_0 {
+				_argument0 = _executable
+			}
+		}
+	}
+	
+	_preMainContext.Argument0 = _argument0
+	_preMainContext.Arguments = append ([]string (nil), _arguments ...)
 	
 	if strings.HasPrefix (_argument0, "[z-run:menu] ") {
 		_argument0 = "[z-run:menu]"
@@ -273,6 +284,7 @@ func PreMain () () {
 		}
 	}
 	
+//	logf ('d', 0x06cd45f9, "self-executable0: %s", _executable0)
 //	logf ('d', 0x256b2c94, "self-executable: %s", _executable)
 //	logf ('d', 0xb59e4f73, "self-argument0: %s", _argument0)
 //	logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
@@ -482,8 +494,9 @@ func PreMain () () {
 
 
 type PreMainContext struct {
-	Executable string
 	Executable0 string
+	Executable string
+	Argument0 string
 	Arguments []string
 	Environment []string
 }
@@ -497,13 +510,13 @@ func PreMainReExecute (_executable string) (*Error) {
 	if PreMainContextGlobal == nil {
 		return errorf (0x3d126cd2, "can't switch `z-run`")
 	}
-	_arguments := make ([]string, 0, len (PreMainContextGlobal.Arguments))
-	if PreMainContextGlobal.Arguments[0] == PreMainContextGlobal.Executable0 {
+	_arguments := make ([]string, 0, len (PreMainContextGlobal.Arguments) + 1)
+	if PreMainContextGlobal.Argument0 == PreMainContextGlobal.Executable {
 		_arguments = append (_arguments, _executable)
 	} else {
-		_arguments = append (_arguments, PreMainContextGlobal.Arguments[0])
+		_arguments = append (_arguments, PreMainContextGlobal.Argument0)
 	}
-	_arguments = append (_arguments, PreMainContextGlobal.Arguments[1:] ...)
+	_arguments = append (_arguments, PreMainContextGlobal.Arguments ...)
 //	logf ('i', 0x91038b92, "switching `z-run` to: `%s`...", _executable)
 	_error := syscall.Exec (
 			_executable,
