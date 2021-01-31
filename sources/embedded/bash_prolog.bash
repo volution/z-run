@@ -3,6 +3,9 @@
 set -e -E -u -o pipefail -o noclobber -o noglob +o braceexpand || exit -- 1
 trap -- 'printf -- "[ee]  failed:  %s\\n" "${BASH_COMMAND}" >&2 ; exit -- 1' ERR || exit -- 1
 
+if test -z "${ZRUN_EXECUTABLE:-}" ; then
+	export -- ZRUN_EXECUTABLE="$( type -P z-run )"
+fi
 ZRUN=( "${ZRUN_EXECUTABLE}" )
 ZRUN_ARGUMENTS=( "${@}" )
 ZRUN_PID="${$}"
@@ -93,5 +96,3 @@ function Z_enforce () {
 	fi
 }
 
-################################################################################
-################################################################################

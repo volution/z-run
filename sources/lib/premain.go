@@ -24,6 +24,14 @@ import isatty "github.com/mattn/go-isatty"
 func PreMain () () {
 	
 	
+	log.SetFlags (0)
+	
+	runtime.GOMAXPROCS (1)
+	debug.SetMaxThreads (16)
+	debug.SetMaxStack (128 * 1024)
+	debug.SetGCPercent (500)
+	
+	
 	var _executable0 string
 	if _executable_0, _error := os.Executable (); _error == nil {
 		_executable0 = _executable_0
@@ -62,7 +70,9 @@ func PreMain () () {
 		} else if (os.Args[1] == "--shell") || (os.Args[1] == "--shell-untainted") {
 			
 			if _error := CheckTerminal (); _error != nil {
-				panic (abortError (_error))
+				logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
+				os.Exit (1)
+				panic (0x67e03fa2)
 			}
 			
 			if os.Args[1] == "--shell-untainted" {
@@ -110,28 +120,79 @@ func PreMain () () {
 			}
 			panic (0xf4813cc2)
 			
-		} else if (os.Args[1] == "--shell-functions") {
+		} else if strings.HasPrefix (os.Args[1], "--export=") {
 			
-			fmt.Fprint (os.Stdout, embeddedBashShellFunctions)
+			_what := os.Args[1][len ("--export=") :]
+			var _chunks []string
+			
+			switch _what {
+				
+				case "shell-rc", "shell-rc-only", "shell-functions", "bash-prolog", "bash+-prolog", "python3+-prolog" :
+					_chunks = append (_chunks,
+							"################################################################################\n",
+							"######## z-run v" + BUILD_VERSION + "\n",
+						)
+					switch _what {
+						case "shell-rc" :
+							_chunks = append (_chunks,
+									"################################################################################\n\n",
+									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellRc, "\n"), "#!/dev/null\n"), "\n"),
+									"\n\n################################################################################\n",
+									"################################################################################\n\n",
+									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
+									"\n\n################################################################################\n",
+								)
+						case "shell-rc-only" :
+							_chunks = append (_chunks,
+									"################################################################################\n\n",
+									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellRc, "\n"), "#!/dev/null\n"), "\n"),
+									"\n\n################################################################################\n",
+								)
+						case "shell-functions" :
+							_chunks = append (_chunks,
+									"################################################################################\n\n",
+									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
+									"\n\n################################################################################\n",
+								)
+						case "bash-prolog" :
+							_chunks = append (_chunks,
+									"################################################################################\n\n",
+									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashProlog0, "\n"), "#!/dev/null\n"), "\n"),
+									"\n\n################################################################################\n",
+								)
+						case "bash+-prolog" :
+							_chunks = append (_chunks,
+									"################################################################################\n\n",
+									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashProlog, "\n"), "#!/dev/null\n"), "\n"),
+									"\n\n################################################################################\n",
+								)
+						case "python3+-prolog" :
+							_chunks = append (_chunks,
+									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedPython3Prolog, "\n"), "#!/dev/null\n"), "\n"),
+								)
+						default :
+							panic (0xaec5d2dd)
+					}
+				
+				case "go+prolog" :
+					_chunks = append (_chunks, embeddedGoProlog)
+				
+				default :
+					logf ('e', 0xa269e851, "invalid export `%s`;  aborting!", _what)
+					os.Exit (1)
+					panic (0x5a0fe24e)
+			}
+			
+			for _, _chunk := range _chunks {
+				if _, _error := os.Stdout.Write ([]byte (_chunk)); _error != nil {
+					panic (abortError (errorw (0xc08e9e5a, _error)))
+				}
+			}
+			
 			os.Exit (0)
 			panic (0xda66de5d)
-			
-		} else if (os.Args[1] == "--shell-rc") {
-			
-			fmt.Fprint (os.Stdout, embeddedBashShellRc)
-			os.Exit (0)
-			panic (0x3155fce8)
 		}
 	}
-	
-	
-	log.SetFlags (0)
-	
-	
-	runtime.GOMAXPROCS (1)
-	debug.SetMaxThreads (16)
-	debug.SetMaxStack (128 * 1024)
-	debug.SetGCPercent (500)
 	
 	
 	_preMainContext := & PreMainContext {}
