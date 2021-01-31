@@ -6,6 +6,7 @@ package zrun
 import "fmt"
 import "log"
 import "os"
+import "os/exec"
 import "path/filepath"
 import "runtime"
 import "runtime/debug"
@@ -78,7 +79,15 @@ func PreMain () () {
 				panic (abortError (errorw (0x8741d077, _error)))
 			}
 			
-			_bash := "/bin/bash"
+			var _bash string
+			if _bash_0, _error := exec.LookPath ("bash"); _error == nil {
+				_bash = _bash_0
+			} else if _bash_0, _error := resolveExecutable ("bash", []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
+				_bash = _bash_0
+			} else {
+				_bash = "/bin/bash"
+			}
+			
 			_arguments := []string {
 					_bash,
 					"--noprofile",
