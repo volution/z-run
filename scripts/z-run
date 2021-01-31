@@ -358,7 +358,8 @@
 	
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./.outputs/embedded/embedded_bash_prolog.go zrun embeddedBashProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog_0.bash ./.outputs/embedded/embedded_bash_prolog_0.go zrun embeddedBashProlog0 string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_functions.bash ./.outputs/embedded/embedded_bash_functions.go zrun embeddedBashFunctions string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_shell_rc.bash ./.outputs/embedded/embedded_bash_shell_rc.go zrun embeddedBashShellRc string
+	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_shell_functions.bash ./.outputs/embedded/embedded_bash_shell_functions.go zrun embeddedBashShellFunctions string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python3_prolog.py ./.outputs/embedded/embedded_python3_prolog.go zrun embeddedPython3Prolog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/go_prolog.go ./.outputs/embedded/embedded_go_prolog.go zrun embeddedGoProlog string
 	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./documentation/manual/z-run.1.txt ./.outputs/embedded/embedded_manual_txt.go zrun embeddedManualTxt string
@@ -367,7 +368,8 @@
 			-e ./sources/embedded.go -a \
 			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_prolog.go -a \
 			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_prolog_0.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_functions.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_shell_rc.go -a \
+			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_shell_functions.go -a \
 			./sources/embedded.go -nt ./.outputs/embedded/embedded_python3_prolog.go -a \
 			./sources/embedded.go -nt ./.outputs/embedded/embedded_go_prolog.go -a \
 			./sources/embedded.go -nt ./.outputs/embedded/embedded_manual_txt.go \
@@ -379,7 +381,8 @@
 				-- \
 				./.outputs/embedded/embedded_bash_prolog.go \
 				./.outputs/embedded/embedded_bash_prolog_0.go \
-				./.outputs/embedded/embedded_bash_functions.go \
+				./.outputs/embedded/embedded_bash_shell_rc.go \
+				./.outputs/embedded/embedded_bash_shell_functions.go \
 				./.outputs/embedded/embedded_python3_prolog.go \
 				./.outputs/embedded/embedded_go_prolog.go \
 				./.outputs/embedded/embedded_manual_txt.go \

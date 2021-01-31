@@ -37,9 +37,13 @@ func PreMain () () {
 			os.Exit (0)
 			panic (0xec70ce24)
 		} else if (os.Args[1] == "--shell-functions") {
-			fmt.Fprint (os.Stdout, embeddedBashFunctions)
+			fmt.Fprint (os.Stdout, embeddedBashShellFunctions)
 			os.Exit (0)
 			panic (0xda66de5d)
+		} else if (os.Args[1] == "--shell-rc") {
+			fmt.Fprint (os.Stdout, embeddedBashShellRc)
+			os.Exit (0)
+			panic (0x3155fce8)
 		}
 	}
 	
