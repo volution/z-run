@@ -117,6 +117,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					_libraryCacheUrl = _value
 				case "ZRUN_LIBRARY_FINGERPRINT" :
 					// FIXME:  Validate that this value actually matches given library.
+					_top = false
 				
 				case "ZRUN_WORKSPACE" :
 					_workspace = _value
@@ -125,8 +126,6 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					if _executable != _value {
 						logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
 					}
-					// FIXME:  Find a better way to handle this!
-					_top = false
 				
 				case "ZRUN_CACHE" :
 					_cacheRoot = _value

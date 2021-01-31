@@ -23,6 +23,21 @@ import isatty "github.com/mattn/go-isatty"
 func PreMain () () {
 	
 	
+	var _executable0 string
+	if _executable_0, _error := os.Executable (); _error == nil {
+		_executable0 = _executable_0
+	} else {
+		panic (abortError (errorw (0x75f2db30, _error)))
+	}
+	
+	var _executable string
+	if _executable_0, _error := filepath.EvalSymlinks (_executable0); _error == nil {
+		_executable = _executable_0
+	} else {
+		panic (abortError (errorw (0x127e013a, _error)))
+	}
+	
+	
 	if (len (os.Args) == 2) {
 		
 		if (os.Args[1] == "--version") || (os.Args[1] == "-v") {
@@ -63,13 +78,16 @@ func PreMain () () {
 				panic (abortError (errorw (0x8741d077, _error)))
 			}
 			
-			_executable := "/bin/bash"
+			_bash := "/bin/bash"
 			_arguments := []string {
-					_executable,
+					_bash,
 					"--noprofile",
 					"--rcfile", fmt.Sprintf ("/dev/fd/%d", _input),
 				}
-			if _error := syscall.Exec (_executable, _arguments, os.Environ ()); _error != nil {
+			_environment := append ([]string (nil),  os.Environ () ...)
+			_environment = append (_environment, "ZRUN_EXECUTABLE=" + _executable)
+			
+			if _error := syscall.Exec (_bash, _arguments, _environment); _error != nil {
 				panic (abortError (errorw (0x8598d4c0, _error)))
 			}
 			panic (0xf4813cc2)
@@ -100,22 +118,7 @@ func PreMain () () {
 	
 	_preMainContext := & PreMainContext {}
 	
-	
-	var _executable string
-	if _executable_0, _error := os.Executable (); _error == nil {
-		_executable = _executable_0
-	} else {
-		panic (abortError (errorw (0x75f2db30, _error)))
-	}
-	
-	_preMainContext.Executable0 = _executable
-	
-	if _executable_0, _error := filepath.EvalSymlinks (_executable); _error == nil {
-		_executable = _executable_0
-	} else {
-		panic (abortError (errorw (0x127e013a, _error)))
-	}
-	
+	_preMainContext.Executable0 = _executable0
 	_preMainContext.Executable = _executable
 	
 	
