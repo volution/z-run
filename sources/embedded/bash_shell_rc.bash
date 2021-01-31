@@ -95,7 +95,7 @@ _set_options=(
 		onecmd=false
 		
 		# history
-		# history=false #### see the end of `.bashrc`
+		history=false
 		
 		# editing
 		emacs=true
@@ -241,6 +241,4 @@ fi
 
 set +e -E -u -o pipefail -o noclobber -o noglob -o braceexpand || exit -- 1
 trap -- 'printf -- "\\n\\033[31;01m[ee] command failed (with exit code %s):\\n%s\\033[00m\\n" "${?}" "${BASH_COMMAND}" >&2' ERR || exit -- 1
-
-set -o history
 

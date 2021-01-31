@@ -15,6 +15,8 @@ import "syscall"
 import "unicode"
 import "unicode/utf8"
 
+import isatty "github.com/mattn/go-isatty"
+
 
 
 
@@ -22,7 +24,9 @@ func PreMain () () {
 	
 	
 	if (len (os.Args) == 2) {
+		
 		if (os.Args[1] == "--version") || (os.Args[1] == "-v") {
+			
 			fmt.Fprintf (os.Stdout, "* version       : %s\n", BUILD_VERSION)
 			fmt.Fprintf (os.Stdout, "* executable    : %s\n", os.Args[0])
 			fmt.Fprintf (os.Stdout, "* build target  : %s, %s-%s, %s\n", BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER)
@@ -32,15 +36,52 @@ func PreMain () () {
 			fmt.Fprintf (os.Stdout, "* code & issues : %s\n", "https://github.com/cipriancraciun/z-run")
 			os.Exit (0)
 			panic (0x66203ba4)
+			
 		} else if (os.Args[1] == "--help") || (os.Args[1] == "-h") {
+			
 			fmt.Fprint (os.Stdout, embeddedManualTxt)
 			os.Exit (0)
 			panic (0xec70ce24)
+			
+		} else if (os.Args[1] == "--shell") {
+			
+			if _error := CheckTerminal (); _error != nil {
+				panic (abortError (_error))
+			}
+			
+			_rc := "\n" + embeddedBashShellRc + "\n" + embeddedBashShellFunctions + "\n"
+			
+			_input, _output, _error := createPipe (len (_rc) + 128, "/tmp")
+			if _error != nil {
+				panic (abortError (_error))
+			}
+			_rc += fmt.Sprintf ("exec %d<&-\n", _input)
+			if _, _error := _output.Write ([]byte (_rc)); _error != nil {
+				panic (abortError (errorw (0xc58e3fe6, _error)))
+			}
+			if _error := _output.Close (); _error != nil {
+				panic (abortError (errorw (0x8741d077, _error)))
+			}
+			
+			_executable := "/bin/bash"
+			_arguments := []string {
+					_executable,
+					"--noprofile",
+					"--rcfile", fmt.Sprintf ("/dev/fd/%d", _input),
+				}
+			if _error := syscall.Exec (_executable, _arguments, os.Environ ()); _error != nil {
+				panic (abortError (errorw (0x8598d4c0, _error)))
+			}
+			panic (0xf4813cc2)
+			
 		} else if (os.Args[1] == "--shell-functions") {
+			
 			fmt.Fprint (os.Stdout, embeddedBashShellFunctions)
 			os.Exit (0)
 			panic (0xda66de5d)
+			
 		} else if (os.Args[1] == "--shell-rc") {
+			
 			fmt.Fprint (os.Stdout, embeddedBashShellRc)
 			os.Exit (0)
 			panic (0x3155fce8)
@@ -388,5 +429,21 @@ func PreMainReExecute (_executable string) (*Error) {
 			PreMainContextGlobal.Environment,
 		)
 	return errorw (0x3d993836, _error)
+}
+
+
+
+
+func CheckTerminal () (*Error) {
+	if ! isatty.IsTerminal (os.Stdin.Fd ()) {
+		return errorf (0x05d60b72, "stdin is not a TTY")
+	}
+	if ! isatty.IsTerminal (os.Stdout.Fd ()) {
+		return errorf (0xc432630a, "stdout is not a TTY")
+	}
+	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+		return errorf (0x77924518, "stderr is not a TTY")
+	}
+	return nil
 }
 
