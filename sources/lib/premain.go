@@ -59,10 +59,17 @@ func PreMain () () {
 			os.Exit (0)
 			panic (0xec70ce24)
 			
-		} else if (os.Args[1] == "--shell") {
+		} else if (os.Args[1] == "--shell") || (os.Args[1] == "--shell-untainted") {
 			
 			if _error := CheckTerminal (); _error != nil {
 				panic (abortError (_error))
+			}
+			
+			if os.Args[1] == "--shell-untainted" {
+				os.Unsetenv ("ZRUN_WORKSPACE")
+				os.Unsetenv ("ZRUN_LIBRARY_SOURCE")
+				os.Unsetenv ("ZRUN_LIBRARY_URL")
+				os.Unsetenv ("ZRUN_LIBRARY_FINGERPRINT")
 			}
 			
 			_rc := "\n" + embeddedBashShellRc + "\n" + embeddedBashShellFunctions + "\n"
@@ -94,6 +101,7 @@ func PreMain () () {
 					"--noprofile",
 					"--rcfile", fmt.Sprintf ("/dev/fd/%d", _input),
 				}
+			
 			_environment := append ([]string (nil),  os.Environ () ...)
 			_environment = append (_environment, "ZRUN_EXECUTABLE=" + _executable)
 			
