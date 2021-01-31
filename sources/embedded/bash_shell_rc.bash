@@ -1,6 +1,20 @@
 #!/dev/null
 
 
+if test -z "${BASH:-}" ; then
+	echo "[ee]  failed:  expected \`bash\`, found \`${BASH:-none}\`;  aborting!" >&2
+	exit 1
+fi
+if test -z "${BASH_VERSION:-}" ; then
+	echo "[ee]  failed:  expected \`bash\` version minimum 5, found \`${BASH_VERSION:-none}\`;  aborting!" >&2
+	exit 1
+fi
+if test "${BASH_VERSINFO[0]:-0}" -lt 5 ; then
+	echo "[ee]  failed:  expected \`bash\` version minimum 5, found \`${BASH_VERSION:-none}\`;  aborting!" >&2
+	exit 1
+fi
+
+
 set -e -E -u -o pipefail -o noclobber -o noglob +o braceexpand || exit -- 1
 trap -- 'printf -- "[ee]  failed:  %s\\n" "${BASH_COMMAND}" >&2' ERR || exit -- 1
 

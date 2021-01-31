@@ -67,11 +67,12 @@ func PreMain () () {
 			
 			_rc := "\n" + embeddedBashShellRc + "\n" + embeddedBashShellFunctions + "\n"
 			
-			_input, _output, _error := createPipe (len (_rc) + 128, "/tmp")
+			_input, _output, _error := createPipe (len (_rc) + 256, "/tmp")
 			if _error != nil {
 				panic (abortError (_error))
 			}
 			_rc += fmt.Sprintf ("exec %d<&-\n", _input)
+			_rc += "printf -- '\n%s\n' '---- [z-run:shell] -------------------------------------------------------------' >&2\n\n"
 			if _, _error := _output.Write ([]byte (_rc)); _error != nil {
 				panic (abortError (errorw (0xc58e3fe6, _error)))
 			}
@@ -89,7 +90,7 @@ func PreMain () () {
 			}
 			
 			_arguments := []string {
-					_bash,
+					"[z-run:shell]",
 					"--noprofile",
 					"--rcfile", fmt.Sprintf ("/dev/fd/%d", _input),
 				}
