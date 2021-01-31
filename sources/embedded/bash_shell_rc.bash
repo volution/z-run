@@ -5,6 +5,20 @@ set -e -E -u -o pipefail -o noclobber -o noglob +o braceexpand || exit -- 1
 trap -- 'printf -- "[ee]  failed:  %s\\n" "${BASH_COMMAND}" >&2' ERR || exit -- 1
 
 
+## sanity
+
+if test "${PATH}" == '/usr/local/bin:/usr/bin:/bin:.' ; then
+	PATH=''
+fi
+export -- PATH="${PATH:-/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin}"
+export -- HOME="${HOME:-/tmp/user-${UID}--home}"
+export -- USER="${USER:-user-${UID}}"
+export -- TMPDIR="${TMPDIR:-/tmp}"
+export -- SHELL="${SHELL:-${BASH}}"
+export -- TERM="${TERM:-dumb}"
+export -- SHLVL=1
+
+
 ## environment
 
 if test -e "${HOME}/.bash/environment" ; then
@@ -95,7 +109,7 @@ _set_options=(
 		onecmd=false
 		
 		# history
-		history=false
+		## history=false
 		
 		# editing
 		emacs=true
