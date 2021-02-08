@@ -492,6 +492,9 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 					_errorReturn = errorf (0x505f52c6, "invalid interpreter for `%s`", _scriptletLabel)
 					return
 			}
+		} else {
+			
+			_interpreterArgumentsExtraAllowed = true
 		}
 		
 		if strings.IndexByte (_interpreterExecutable, os.PathSeparator) >= 0 {
