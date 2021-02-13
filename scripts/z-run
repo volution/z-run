@@ -295,6 +295,7 @@
 			-not -name 'go.sum' \
 			-not -name '*.go' \
 			-not -name '*.c' \
+			-not -name '*.h' \
 			-not -name '*.s' \
 			-delete \
 	#
@@ -319,9 +320,15 @@
 	export -- GOTMPDIR="${_outputs}/go/tmp"
 	export -- GOCACHE="${_outputs}/go/cache"
 	
+	if test -e "${_outputs}/go-tool" ; then
+		_go="$( exec -- readlink -e -- "${_outputs}/go-tool" )"
+	else
+		_go="$( type -P -- go )"
+	fi
+	
 	cd -- "${_sources}"
 	
-	exec -- go "${@}"
+	exec -- "${_go}" "${@}"
 !!
 
 
