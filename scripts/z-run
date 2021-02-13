@@ -282,6 +282,31 @@
 !!
 
 
+<< go / dependencies / vendor
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: go / tool' \
+			mod vendor \
+	#
+	find ./sources/vendor/ \
+			-xdev \
+			-not -type d \
+			-not -path './sources/vendor/modules.txt' \
+			-not -name 'go.mod' \
+			-not -name 'go.sum' \
+			-not -name '*.go' \
+			-not -name '*.c' \
+			-not -name '*.s' \
+			-delete \
+	#
+	find ./sources/vendor/ \
+			-xdev \
+			-type d \
+			-empty \
+			-delete \
+	#
+!!
+
+
 
 
 << go / tool
