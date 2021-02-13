@@ -7,7 +7,7 @@ require (
 	github.com/colinmarc/cdb v0.0.0-20190223170904-60f317823f70
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eiannone/keyboard v0.0.0-20200508000154-caf4b762e807
-	github.com/junegunn/fzf v0.0.0-20210128024315-686528d6274f
+	github.com/junegunn/fzf v0.0.0-20210203133252-6654239c9466
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.12
