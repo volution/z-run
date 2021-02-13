@@ -57,6 +57,8 @@ func fzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 	os.Args = append ([]string {"z-run"}, _arguments ...)
 	
 	
+	fzf.Init ()
+	
 	var _options *fzf.Options
 	
 	if _embedded {

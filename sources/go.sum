@@ -10,8 +10,8 @@ github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
-github.com/cipriancraciun/fzf v0.0.0-20210116180345-abebbe304e02 h1:qZP55LGM48NfO0/h3/IfeYJLUYp3PBZSjMnmLsIVTVs=
-github.com/cipriancraciun/fzf v0.0.0-20210116180345-abebbe304e02/go.mod h1:ll79UTTxfoFrxzsOoQiz3cetZQPOsbXOqo2nxIfmkjA=
+github.com/cipriancraciun/fzf v0.0.0-20210213184424-8610a98b3b9b h1:gvr047EEusbrwnXzDBDbgBQDke/rSuNHlhMNw57YEJI=
+github.com/cipriancraciun/fzf v0.0.0-20210213184424-8610a98b3b9b/go.mod h1:ll79UTTxfoFrxzsOoQiz3cetZQPOsbXOqo2nxIfmkjA=
 github.com/cipriancraciun/go-cdb-lib v0.0.0-20190809203657-d959ce9cc674 h1:UyoEJxLS9OPdjyinKfCA2aKgIf1NhXyIxneRSMrqZls=
 github.com/cipriancraciun/go-cdb-lib v0.0.0-20190809203657-d959ce9cc674/go.mod h1:/M2lSbkwYzIP5OqU4u+aygk4LCVpB7wi60O0Myhs05g=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
