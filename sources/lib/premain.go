@@ -243,6 +243,8 @@ func PreMain () () {
 		_argument0 = "[z-run:print]"
 	} else if strings.HasPrefix (_argument0, "[z-run:template] ") {
 		_argument0 = "[z-run:template]"
+	} else if strings.HasPrefix (_argument0, "[z-run:starlark] ") {
+		_argument0 = "[z-run:starlark]"
 	}
 	
 	
@@ -318,6 +320,9 @@ func PreMain () () {
 		case "[z-run:template]" :
 			// NOP
 		
+		case "[z-run:starlark]" :
+			// NOP
+		
 		case "[z-run:scriptlet]" :
 			// NOP
 		
@@ -391,6 +396,10 @@ func PreMain () () {
 				_argument0 = "[z-run:template]"
 				_arguments = _arguments[1:]
 			
+			case "--starlark" :
+				_argument0 = "[z-run:starlark]"
+				_arguments = _arguments[1:]
+			
 			default :
 				_argument0 = "[z-run]"
 		}
@@ -451,6 +460,13 @@ func PreMain () () {
 				panic (abortError (_error))
 			} else {
 				panic (0x32241835)
+			}
+		
+		case "[z-run:starlark]" :
+			if _error := starlarkMain (_executable, _arguments, _environment); _error != nil {
+				panic (abortError (_error))
+			} else {
+				panic (0xd6f5b038)
 			}
 		
 		case "[z-run:menu]" :

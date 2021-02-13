@@ -347,6 +347,33 @@ func prepareExecution_0 (
 				_interpreterScriptBuffer.WriteString (_scriptletBody)
 			}
 		
+		case "<starlark>" :
+			if _libraryUrl != "" {
+				_interpreterExecutable = _selfExecutable
+				_interpreterArgument0 = "[z-run:library]"
+				_interpreterArguments = append (
+						_interpreterArguments,
+						_scriptletInterpreterArguments ...,
+					)
+				_interpreterArguments = append (
+						_interpreterArguments,
+						fmt.Sprintf (":: %s", _scriptletLabel),
+					)
+				_interpreterScriptUnused = true
+			} else {
+				_interpreterExecutable = _selfExecutable
+				_interpreterArgument0 = fmt.Sprintf ("[z-run:starlark] [%s]", _scriptletLabel)
+				_interpreterArguments = append (
+						_interpreterArguments,
+						_scriptletInterpreterArguments ...,
+					)
+				_interpreterArguments = append (
+						_interpreterArguments,
+						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
+					)
+				_interpreterScriptBuffer.WriteString (_scriptletBody)
+			}
+		
 		case "<menu>" :
 			_interpreterExecutable = _selfExecutable
 			_interpreterArgument0 = fmt.Sprintf ("[z-run:menu] [%s]", _scriptletLabel)
@@ -601,6 +628,17 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 				if ! _fork {
 					os.Exit (0)
 					panic (0xebdf1931)
+				} else {
+					return nil
+				}
+			} else {
+				return _error
+			}
+		case "<starlark>" :
+			if _error := executeStarlark (_library, _scriptlet, _context); _error == nil {
+				if ! _fork {
+					os.Exit (0)
+					panic (0x44d7fe22)
 				} else {
 					return nil
 				}

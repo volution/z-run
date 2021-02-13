@@ -248,7 +248,7 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 	switch _scriptlet.Interpreter {
 		case "<detect>" :
 			// NOP
-		case "<exec>", "<print>", "<template>", "<menu>", "<go>", "<go+>" :
+		case "<exec>", "<print>", "<template>", "<starlark>", "<menu>", "<go>", "<go+>" :
 			return nil
 		case "<bash>", "<bash+>", "<python3+>" :
 			return nil
@@ -336,6 +336,23 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		}
 		
 		_interpreter = "<template>"
+		_interpreterExecutable = ""
+		_interpreterArguments = nil
+		_interpreterArgumentsExtraDash = false
+		_interpreterArgumentsExtraAllowed = true
+		_interpreterEnvironment = nil
+		
+	} else if strings.HasPrefix (_scriptletHeader, "<starlark>") {
+		
+		_scriptletHeader = _scriptletHeader[10:]
+		_scriptletHeader = strings.Trim (_scriptletHeader, " ")
+		
+		if _scriptletHeader != "" {
+			_errorReturn = errorf (0xc7d23157, "invalid header for `%s` (starlark with arguments)", _scriptletLabel)
+			return
+		}
+		
+		_interpreter = "<starlark>"
 		_interpreterExecutable = ""
 		_interpreterArguments = nil
 		_interpreterArgumentsExtraDash = false
