@@ -17,23 +17,25 @@
 << benchmark / noop / all
 	test "${#}" -eq 0
 	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
-			"${ZRUN_WORKSPACE}/noop-statistics.txt" \
+			"${ZRUN_WORKSPACE}/noop-statistics--all.txt" \
 			\
-			--warmup 200 \
-			--runs 2000 \
+			--warmup 500 \
+			--min-runs 2000 \
+			--max-runs 20000 \
 			\
-			-n plain:bash "bash -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
+			-n plain:bash "/bin/bash -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
 			-n scriptlet:bash "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
 			-n scriptlet:bash+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-bash+.scriptlet" \
 			-n library:bash "${ZRUN_EXECUTABLE} ':: library / noop / bash'" \
 			-n library:bash+ "${ZRUN_EXECUTABLE} ':: library / noop / bash+'" \
 			\
-			-n plain:python3 "python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
+			-n plain:python3 "/usr/bin/python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
 			-n scriptlet:python3 "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
 			-n scriptlet:python3+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3+.scriptlet" \
 			-n library:python3 "${ZRUN_EXECUTABLE} ':: library / noop / python3'" \
 			-n library:python3+ "${ZRUN_EXECUTABLE} ':: library / noop / python3+'" \
 			\
+			-n direct:starlark "${ZRUN_EXECUTABLE} --starlark ${ZRUN_WORKSPACE}/noop-starlark.scriptlet" \
 			-n scriptlet:starlark "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-starlark.scriptlet" \
 			-n library:starlark "${ZRUN_EXECUTABLE} ':: library / noop / starlark'" \
 			\
@@ -41,19 +43,64 @@
 !!
 
 
-<< benchmark / noop / python / quick
+<< benchmark / noop / python
 	test "${#}" -eq 0
 	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
-			"${ZRUN_WORKSPACE}/noop-statistics.txt" \
+			"${ZRUN_WORKSPACE}/noop-statistics--python.txt" \
 			\
-			--warmup 5 \
-			--runs 50 \
+			--warmup 500 \
+			--runs 2000 \
 			\
-			-n plain:python3 "python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
+			-n plain:python3 "/usr/bin/python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
 			-n scriptlet:python3 "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
 			-n scriptlet:python3+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3+.scriptlet" \
 			-n library:python3 "${ZRUN_EXECUTABLE} ':: library / noop / python3'" \
 			-n library:python3+ "${ZRUN_EXECUTABLE} ':: library / noop / python3+'" \
+			\
+	#
+!!
+
+<< benchmark / noop / bash
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+			"${ZRUN_WORKSPACE}/noop-statistics--bash.txt" \
+			\
+			--warmup 2000 \
+			--runs 20000 \
+			\
+			-n plain:bash "/bin/bash -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
+			-n scriptlet:bash "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
+			-n scriptlet:bash+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-bash+.scriptlet" \
+			-n library:bash "${ZRUN_EXECUTABLE} ':: library / noop / bash'" \
+			-n library:bash+ "${ZRUN_EXECUTABLE} ':: library / noop / bash+'" \
+			\
+	#
+!!
+
+<< benchmark / noop / starlark
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+			"${ZRUN_WORKSPACE}/noop-statistics--starlark.txt" \
+			\
+			--warmup 2000 \
+			--runs 20000 \
+			\
+			-n direct:starlark "${ZRUN_EXECUTABLE} --starlark ${ZRUN_WORKSPACE}/noop-starlark.scriptlet" \
+			-n scriptlet:starlark "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-starlark.scriptlet" \
+			-n library:starlark "${ZRUN_EXECUTABLE} ':: library / noop / starlark'" \
+			\
+	#
+!!
+
+<< benchmark / noop / version
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+			"${ZRUN_WORKSPACE}/noop-statistics--version.txt" \
+			\
+			--warmup 2000 \
+			--runs 20000 \
+			\
+			-n version "${ZRUN_EXECUTABLE} --version" \
 			\
 	#
 !!
@@ -64,6 +111,7 @@
 	_output="${1}"
 	shift -- 1
 	hyperfine \
+			--shell '' \
 			"${@}" \
 			--export-csv /dev/fd/5 \
 		5>&1 \
