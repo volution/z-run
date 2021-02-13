@@ -192,8 +192,11 @@
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
 			-o "${_outputs}/z-run--release${_suffix}.new" \
+			-a \
 			-tags "${_tags}" \
 			-ldflags "${_ldflags}" \
+			-buildmode exe \
+			-trimpath \
 			-- \
 			./cmd/z-run.go \
 	#
