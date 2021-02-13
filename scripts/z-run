@@ -125,7 +125,13 @@
 	_build_sources_md5="$( exec -- cat -- ./scripts/build/build-sources-md5.txt )"
 	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
 	
-	_tags=()
+	_tags=(
+			netgo
+		)
+	_gcflags=(
+			-N
+			-l
+		)
 	_ldflags=(
 			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
 			-X "github.com/cipriancraciun/z-run/lib.BUILD_VERSION=${_build_version}"
@@ -136,12 +142,14 @@
 		)
 	
 	_tags="$( printf -- '%s,' "${_tags[@]}" )"
+	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
 	exec -- "${ZRUN[@]}" ':: go / tool' \
 			build \
 			-o "${_outputs}/z-run--debug" \
 			-tags "${_tags}" \
+			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
 			-- \
 			./cmd/z-run.go \
@@ -164,6 +172,7 @@
 	_tags=(
 			netgo
 		)
+	_gcflags=()
 	_ldflags=(
 			all=-s
 			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
@@ -175,6 +184,7 @@
 		)
 	
 	_tags="$( printf -- '%s,' "${_tags[@]}" )"
+	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
 	if test -n "${GOOS:-}" ; then
@@ -194,6 +204,7 @@
 			-o "${_outputs}/z-run--release${_suffix}.new" \
 			-a \
 			-tags "${_tags}" \
+			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
 			-buildmode exe \
 			-trimpath \
