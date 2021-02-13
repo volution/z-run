@@ -223,11 +223,27 @@
 
 << go / execute / main / debug
 	"${ZRUN[@]}" ':: go / build / main / debug'
+	export -n -- \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_URL= \
+			ZRUN_LIBRARY_FINGERPRINT= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
+			ZRUN_CACHE= \
+	#
 	exec -- ./.outputs/z-run--debug "${@}"
 !!
 
 << go / execute / main / release
 	"${ZRUN[@]}" ':: go / build / main / release'
+	export -n -- \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_URL= \
+			ZRUN_LIBRARY_FINGERPRINT= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
+			ZRUN_CACHE= \
+	#
 	exec -- ./.outputs/z-run--release "${@}"
 !!
 
