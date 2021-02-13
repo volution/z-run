@@ -287,9 +287,16 @@
 
 << go / dependencies / vendor
 	test "${#}" -eq 0
+	
+	if test -e ./vendors ; then
+		rm -- ./sources/vendor
+		mv -T -- ./vendors ./sources/vendor
+	fi
+	
 	"${ZRUN[@]}" ':: go / tool' \
 			mod vendor \
 	#
+	
 	find ./sources/vendor/ \
 			-xdev \
 			-not -type d \
@@ -308,6 +315,9 @@
 			-empty \
 			-delete \
 	#
+	
+	mv -T -- ./sources/vendor ./vendors
+	ln -s -T -- ../vendors ./sources/vendor
 !!
 
 
