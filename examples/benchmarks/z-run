@@ -1,21 +1,26 @@
 #!/dev/null
 
 
+
+
 ::&& library / noop / bash :: _/noop-bash.scriptlet
 ::&& library / noop / bash+ :: _/noop-bash+.scriptlet
 
 ::&& library / noop / python3 :: _/noop-python3.scriptlet
 ::&& library / noop / python3+ :: _/noop-python3+.scriptlet
 
+::&& library / noop / starlark :: _/noop-starlark.scriptlet
 
-<< benchmark / scriptlets / noop
+
+
+
+<< benchmark / noop / all
 	test "${#}" -eq 0
-	hyperfine \
+	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+			"${ZRUN_WORKSPACE}/noop-statistics.txt" \
 			\
 			--warmup 200 \
 			--runs 2000 \
-			\
-			--export-csv /dev/fd/5 \
 			\
 			-n plain:bash "bash -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
 			-n scriptlet:bash "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-bash.scriptlet" \
@@ -29,11 +34,44 @@
 			-n library:python3 "${ZRUN_EXECUTABLE} ':: library / noop / python3'" \
 			-n library:python3+ "${ZRUN_EXECUTABLE} ':: library / noop / python3+'" \
 			\
+			-n scriptlet:starlark "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-starlark.scriptlet" \
+			-n library:starlark "${ZRUN_EXECUTABLE} ':: library / noop / starlark'" \
+			\
+	#
+!!
+
+
+<< benchmark / noop / python / quick
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+			"${ZRUN_WORKSPACE}/noop-statistics.txt" \
+			\
+			--warmup 5 \
+			--runs 50 \
+			\
+			-n plain:python3 "python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
+			-n scriptlet:python3 "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3.scriptlet" \
+			-n scriptlet:python3+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/noop-python3+.scriptlet" \
+			-n library:python3 "${ZRUN_EXECUTABLE} ':: library / noop / python3'" \
+			-n library:python3+ "${ZRUN_EXECUTABLE} ':: library / noop / python3+'" \
+			\
+	#
+!!
+
+
+--<< benchmark / exec
+	test "${#}" -ge 2
+	_output="${1}"
+	shift -- 1
+	hyperfine \
+			"${@}" \
+			--export-csv /dev/fd/5 \
 		5>&1 \
 		>&2 \
 	| column -t -s ',' -o ' | ' \
 	| tee -a -- /dev/stderr \
-		>| "${ZRUN_WORKSPACE}/noop-statistics.txt"
+		>| "${_output}.tmp"
 	#
+	mv -T -- "${_output}.tmp" "${_output}"
 !!
 

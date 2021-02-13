@@ -15,6 +15,7 @@
 && _/ssh.z-run
 && _/python.z-run
 && _/bash.z-run
+&& _/starlark.z-run
 
 
 &&?? _/does-not-exist

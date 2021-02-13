@@ -1,0 +1,14 @@
+#!/dev/null
+
+
+<< starlark / test / prolog
+	#! <starlark>
+!!
+
+
+<< starlark / test / print
+	#! <starlark>
+	
+	print ("hello")
+!!
+
