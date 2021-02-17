@@ -5,7 +5,6 @@ package zrun
 
 import "fmt"
 import "io"
-import "io/ioutil"
 import "os"
 import "os/exec"
 import "path"
@@ -1303,7 +1302,7 @@ func loadFromFile (_path string) (string, []byte, *Error) {
 
 
 func loadFromStream (_stream io.Reader) (string, []byte, *Error) {
-	if _data, _error := ioutil.ReadAll (_stream); _error == nil {
+	if _data, _error := io.ReadAll (_stream); _error == nil {
 		_fingerprint := NewFingerprinter () .Bytes (_data) .Build ()
 		return _fingerprint, _data, nil
 	} else {

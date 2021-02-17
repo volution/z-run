@@ -5,7 +5,6 @@ package zrun
 
 import "bytes"
 import "fmt"
-import "io/ioutil"
 import "os"
 import "os/exec"
 import "path"
@@ -421,7 +420,7 @@ func prepareExecution_0 (
 				}
 				
 				_goSourceTmp := path.Join (_contextCacheRoot, generateRandomToken () + ".tmp")
-				if _error := ioutil.WriteFile (_goSourceTmp, _interpreterScriptBuffer.Bytes (), 0600); _error != nil {
+				if _error := os.WriteFile (_goSourceTmp, _interpreterScriptBuffer.Bytes (), 0600); _error != nil {
 					return nil, nil, errorw (0x55976c12, _error)
 				}
 				if _error := os.Rename (_goSourceTmp, _goSource); _error != nil {
