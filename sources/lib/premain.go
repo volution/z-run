@@ -53,7 +53,7 @@ func PreMain () () {
 			
 			fmt.Fprintf (os.Stdout, "* version       : %s\n", BUILD_VERSION)
 			fmt.Fprintf (os.Stdout, "* executable    : %s\n", os.Args[0])
-			fmt.Fprintf (os.Stdout, "* build target  : %s, %s-%s, %s\n", BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER)
+			fmt.Fprintf (os.Stdout, "* build target  : %s, %s-%s, %s, %s\n", BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER_VERSION, BUILD_COMPILER_TYPE)
 			fmt.Fprintf (os.Stdout, "* build number  : %s, %s\n", BUILD_NUMBER, BUILD_TIMESTAMP)
 			fmt.Fprintf (os.Stdout, "* sources md5   : %s\n", BUILD_SOURCES_MD5)
 			fmt.Fprintf (os.Stdout, "* sources git   : %s\n", BUILD_GIT_HASH)
