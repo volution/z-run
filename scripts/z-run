@@ -39,7 +39,7 @@
 	test "${#}" -eq 0
 	test -d ./.publish/
 	"${ZRUN[@]}" ':: deploy / release'
-	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
+	_build_version="$( exec -- cat -- ./sources/embedded/build-version.txt )"
 	printf -- '[ii]  publishing `%s`...\n' "${_build_version}" >&2
 	if test -e "./.publish/linux/z-run--linux--v${_build_version}" -o -e "./.publish/darwin/z-run--darwin--v${_build_version}" ; then
 		printf -- '[ee]  release already exists!\n' >&2
@@ -115,14 +115,10 @@
 << go / build / main / debug
 	
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: workspace / sources / embedded / build'
+	"${ZRUN[@]}" ':: workspace / sources / embedded / prepare'
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	
 	_build_target=development
-	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
-	_build_number="$( exec -- cat -- ./scripts/build/build-number.txt )"
-	_build_timestamp="$( exec -- cat -- ./scripts/build/build-timestamp.txt )"
-	_build_sources_md5="$( exec -- cat -- ./scripts/build/build-sources-md5.txt )"
 	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
 	
 	_tags=(
@@ -134,10 +130,6 @@
 		)
 	_ldflags=(
 			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_VERSION=${_build_version}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_NUMBER=${_build_number}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_TIMESTAMP=${_build_timestamp}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_SOURCES_MD5=${_build_sources_md5}"
 			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
 		)
 	
@@ -159,14 +151,10 @@
 << go / build / main / release
 	
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: workspace / sources / embedded / build'
+	"${ZRUN[@]}" ':: workspace / sources / embedded / prepare'
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	
 	_build_target=release
-	_build_version="$( exec -- cat -- ./scripts/build/build-version.txt )"
-	_build_number="$( exec -- cat -- ./scripts/build/build-number.txt )"
-	_build_timestamp="$( exec -- cat -- ./scripts/build/build-timestamp.txt )"
-	_build_sources_md5="$( exec -- cat -- ./scripts/build/build-sources-md5.txt )"
 	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
 	
 	_tags=(
@@ -176,10 +164,6 @@
 	_ldflags=(
 			all=-s
 			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_VERSION=${_build_version}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_NUMBER=${_build_number}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_TIMESTAMP=${_build_timestamp}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_SOURCES_MD5=${_build_sources_md5}"
 			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
 		)
 	
@@ -370,9 +354,8 @@
 	_gosrc="${_outputs}/go/src"
 	_gopkg="${_outputs}/go/pkg"
 	_markers="${_outputs}/markers"
-	_embedded="${_outputs}/embedded"
 	
-	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" "${_markers}" "${_embedded}" ; do
+	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" "${_markers}" ; do
 		if test ! -e "${_folder}" ; then
 			mkdir -- "${_folder}"
 		fi
@@ -424,43 +407,12 @@
 
 
 
-<< workspace / sources / embedded / build
+<< workspace / sources / embedded / prepare
 	
 	test "${#}" -eq 0
 	
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog.bash ./.outputs/embedded/embedded_bash_prolog.go zrun embeddedBashProlog string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_prolog_0.bash ./.outputs/embedded/embedded_bash_prolog_0.go zrun embeddedBashProlog0 string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_shell_rc.bash ./.outputs/embedded/embedded_bash_shell_rc.go zrun embeddedBashShellRc string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/bash_shell_functions.bash ./.outputs/embedded/embedded_bash_shell_functions.go zrun embeddedBashShellFunctions string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/python3_prolog.py ./.outputs/embedded/embedded_python3_prolog.go zrun embeddedPython3Prolog string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./sources/embedded/go_prolog.go ./.outputs/embedded/embedded_go_prolog.go zrun embeddedGoProlog string
-	"${ZRUN[@]}" ':: workspace / sources / embedded / process' ./documentation/manual/z-run.1.txt ./.outputs/embedded/embedded_manual_txt.go zrun embeddedManualTxt string
-	
-	if ! test \
-			-e ./sources/embedded.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_prolog.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_prolog_0.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_shell_rc.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_bash_shell_functions.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_python3_prolog.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_go_prolog.go -a \
-			./sources/embedded.go -nt ./.outputs/embedded/embedded_manual_txt.go \
-	; then
-		sed \
-				-r \
-				-e '1ipackage zrun' \
-				-e '/^package zrun$/d' \
-				-- \
-				./.outputs/embedded/embedded_bash_prolog.go \
-				./.outputs/embedded/embedded_bash_prolog_0.go \
-				./.outputs/embedded/embedded_bash_shell_rc.go \
-				./.outputs/embedded/embedded_bash_shell_functions.go \
-				./.outputs/embedded/embedded_python3_prolog.go \
-				./.outputs/embedded/embedded_go_prolog.go \
-				./.outputs/embedded/embedded_manual_txt.go \
-			>| ./sources/embedded.go.tmp \
-		#
-		mv -T -- ./sources/embedded.go.tmp ./sources/embedded.go
+	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual.txt ; then
+		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual.txt
 	fi
 	
 	"${ZRUN[@]}" ':: workspace / sources / embedded / hash'
@@ -471,7 +423,10 @@
 
 << workspace / sources / embedded / hash
 	
-	find ./sources/ -type f -print0 \
+	find ./sources/ \
+			-type f \
+			-not -path './sources/embedded/build-*.txt' \
+			-print0 \
 	| xargs -0 -I {} -- md5sum -b -z -- {} \
 	| LC_ALL=C sort -z \
 	| md5sum -b \
@@ -479,18 +434,18 @@
 		>| ./.outputs/markers/build-sources-md5.tmp \
 	#
 	
-	if ! cmp -s -- ./.outputs/markers/build-sources-md5.tmp ./scripts/build/build-sources-md5.txt ; then
+	if ! cmp -s -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/build-sources-md5.txt ; then
 		
-		_build_number="$( exec -- cat -- ./scripts/build/build-number.txt )"
+		_build_number="$( exec -- cat -- ./sources/embedded/build-number.txt )"
 		_build_number="$(( _build_number + 1 ))"
 		_build_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
 		
-		printf -- '%d\n' "${_build_number}" >| ./scripts/build/build-number.tmp
-		mv -T -- ./scripts/build/build-number.tmp ./scripts/build/build-number.txt
-		printf -- '%s\n' "${_build_timestamp}" >| ./scripts/build/build-timestamp.tmp
-		mv -T -- ./scripts/build/build-timestamp.tmp ./scripts/build/build-timestamp.txt
+		printf -- '%d\n' "${_build_number}" >| ./sources/embedded/build-number.tmp
+		mv -T -- ./sources/embedded/build-number.tmp ./sources/embedded/build-number.txt
+		printf -- '%s\n' "${_build_timestamp}" >| ./sources/embedded/build-timestamp.tmp
+		mv -T -- ./sources/embedded/build-timestamp.tmp ./sources/embedded/build-timestamp.txt
 		
-		mv -T -- ./.outputs/markers/build-sources-md5.tmp ./scripts/build/build-sources-md5.txt
+		mv -T -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/build-sources-md5.txt
 		
 	else
 		
@@ -508,61 +463,6 @@
 	
 	printf -- '%s\n' "${_git_hash}" >| ./.outputs/markers/build-git-hash.tmp
 	mv -T -- ./.outputs/markers/build-git-hash.tmp ./.outputs/markers/build-git-hash.txt
-!!
-
-
-
-
---<< workspace / sources / embedded / process
-	
-	test "${#}" -eq 5
-	_input="${1}"
-	_output="${2}"
-	_package="${3}"
-	_variable="${4}"
-	_type="${5}"
-	shift -- 5
-	
-	test "${#}" -eq 0
-	
-	if test -e "${_output}" -a "${_input}" -ot "${_output}" ; then
-		exit -- 0
-	fi
-	
-	test -f "${_input}"
-	exec {_output_fd}>| "${_output}.tmp"
-	
-	if test "${_package}" != "" ; then
-		printf -- '\n' >&"${_output_fd}"
-		printf -- 'package %s\n' "${_package}" >&"${_output_fd}"
-		printf -- '\n' >&"${_output_fd}"
-	fi
-	
-	printf -- '\n' >&"${_output_fd}"
-	case "${_type}" in
-		( byte )
-			printf -- 'var %s []byte = ([]byte {\n' "${_variable}" >&"${_output_fd}"
-		;;
-		( string )
-			printf -- 'var %s string = string ([]byte {\n' "${_variable}" >&"${_output_fd}"
-		;;
-		( * )
-			false -- "${_type}"
-		;;
-	esac
-	
-	xxd -i -c 256 < "${_input}" \
-	| sed -r -e 's/^ +//' -e 's/[^,]$/\0,/' \
-	| tr '\n' ' ' \
-	| sed -r -e 's/ 0x0a,/\0\n/g' \
-	| sed -r -e 's/^ */  /g' \
-	| grep -v -E -e '^ *$' \
-		>&"${_output_fd}"
-	
-	printf -- '})\n' >&"${_output_fd}"
-	printf -- '\n' >&"${_output_fd}"
-	
-	mv -f -T -- "${_output}.tmp" "${_output}"
 !!
 
 
