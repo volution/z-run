@@ -214,7 +214,10 @@ func PreMain () () {
 			case "darwin" :
 				// NOP
 			
-			case "freebsd", "netbsd", "openbsd", "dragonfly" :
+			case "freebsd", "openbsd" :
+				// NOP
+			
+			case "netbsd", "dragonfly" :
 				logf ('i', 0xc8f30933, "this tool was not tested on your OS;  please be cautions!")
 			
 			default :
