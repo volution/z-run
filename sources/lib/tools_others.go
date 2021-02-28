@@ -5,6 +5,7 @@
 package zrun
 
 
+import "fmt"
 import "os"
 import "path"
 import "runtime"
@@ -45,7 +46,7 @@ func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 			// FIXME:  We should make sure that the cache path is never empty!
 			panic (0xd6f17610)
 		}
-		_temporaryPath := path.Join (_cacheRoot, generateRandomToken () + ".scriptlet")
+		_temporaryPath := path.Join (_cacheRoot, generateRandomToken () + ".buffer")
 		if _descriptor, _error := syscall.Open (_temporaryPath, syscall.O_CREAT | syscall.O_EXCL | syscall.O_WRONLY, 0600); _error == nil {
 			_interpreterScriptOutput = os.NewFile (uintptr (_descriptor), "")
 		} else {
@@ -61,6 +62,11 @@ func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 			// FIXME:  Here we leak both descriptors!
 			return -1, nil, errorw (0xc5afd6fd, _error)
 		}
+	}
+	
+	if _, _error := os.Stat (fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput)); _error != nil {
+		// FIXME:  Here we leak both descriptors!
+		return -1, nil, errorw (0x5ea72831, _error)
 	}
 	
 	return _interpreterScriptInput, _interpreterScriptOutput, nil
