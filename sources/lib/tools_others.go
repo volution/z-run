@@ -7,6 +7,7 @@ package zrun
 
 import "os"
 import "path"
+import "runtime"
 import "syscall"
 
 
@@ -20,7 +21,17 @@ func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 	var _interpreterScriptOutput *os.File
 	var _interpreterScriptDescriptors [2]int
 	
-	_maxPipeSize := 16 * 1024
+	_maxPipeSize := 0
+	switch runtime.GOOS {
+		case "darwin" :
+			_maxPipeSize = 16 * 1024
+		case "freebsd" :
+			_maxPipeSize = 512
+		case "openbsd" :
+			_maxPipeSize = 16 * 1024
+		default :
+			_maxPipeSize = 0
+	}
 	
 	if _size <= _maxPipeSize {
 		if _error := syscall.Pipe (_interpreterScriptDescriptors[:]); _error == nil {
