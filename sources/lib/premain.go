@@ -34,10 +34,14 @@ func PreMain () () {
 	
 	var _executable0 string
 	if _executable_0, _error := os.Executable (); _error == nil {
+//		logf ('d', 0xda96ed44, "%s", _executable_0)
+		_executable0 = _executable_0
+	} else if _executable_0 := os.Getenv ("ZRUN_EXECUTABLE"); _executable_0 != "" {
 		_executable0 = _executable_0
 	} else {
-		panic (abortError (errorw (0x75f2db30, _error)))
+		panic (abortError (errorf (0x905621f4, "can't resolve `z-run` executable")))
 	}
+	
 	
 	var _executable string
 	if _executable_0, _error := filepath.EvalSymlinks (_executable0); _error == nil {
@@ -284,6 +288,12 @@ func PreMain () () {
 		} else {
 			logf ('w', 0xe745517c, "invalid environment variable (missing `=`):  `%s`", _variable)
 		}
+	}
+	
+	// FIXME:  This is for OpenBSD which doesn't have a way to find `os.Executable` outside of `arg0`...
+	if _, _exists := _environment["ZRUN_EXECUTABLE"]; !_exists {
+		_environment["ZRUN_EXECUTABLE"] = _executable
+		_preMainContext.Environment = append (_preMainContext.Environment, "ZRUN_EXECUTABLE=" + _executable)
 	}
 	
 //	logf ('d', 0x06cd45f9, "self-executable0: %s", _executable0)
