@@ -350,7 +350,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		}
 	
 	if _error := _sshCommand.Run (); _error != nil {
-		return false, errorw (0x881a60b5, _error)
+		return false, errorf (0x881a60b5, "failed to spawn `%s`  //  %v", _sshCommand.Path, _error)
 	}
 	
 	return true, nil

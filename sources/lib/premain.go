@@ -122,7 +122,7 @@ func PreMain () () {
 			_environment = append (_environment, "ZRUN_EXECUTABLE=" + _executable)
 			
 			if _error := syscall.Exec (_bash, _arguments, _environment); _error != nil {
-				panic (abortError (errorw (0x8598d4c0, _error)))
+				panic (abortError (errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
 			}
 			panic (0xf4813cc2)
 			
@@ -429,7 +429,7 @@ func PreMain () () {
 			_delegateArguments := append ([]string {_delegateArgument0}, _delegateArguments ...)
 			
 			if _error := syscall.Exec (_delegateExecutable, _delegateArguments, _delegateEnvironment); _error != nil {
-				panic (abortError (errorw (0x05bd220d, _error)))
+				panic (abortError (errorf (0x05bd220d, "failed to exec `%s`  //  %v", _delegateExecutable, _error)))
 			} else {
 				panic (0xe13aab5f)
 			}
@@ -560,7 +560,7 @@ func PreMainReExecute (_executable string) (*Error) {
 			_arguments,
 			PreMainContextGlobal.Environment,
 		)
-	return errorw (0x3d993836, _error)
+	return errorf (0x3d993836, "failed to exec `%s`  //  %v", _executable, _error)
 }
 
 

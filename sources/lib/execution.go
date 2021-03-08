@@ -702,7 +702,7 @@ func executeScriptlet_0 (_scriptletLabel string, _command *exec.Cmd, _descriptor
 		
 		if _error := syscall.Exec (_command.Path, _command.Args, _command.Env); _error != nil {
 			_closeDescriptors ()
-			return errorw (0x99b54af1, _error)
+			return errorf (0x99b54af1, "failed to exec `%s`  //  %v", _command.Path, _error)
 		} else {
 			panic (0xb6dfe17e)
 		}

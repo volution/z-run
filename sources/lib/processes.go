@@ -38,7 +38,7 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 	}
 	
 	if _error := _command.Start (); _error != nil {
-		return -1, 0, 0, errorw (0x26e1988c, _error)
+		return -1, 0, 0, errorf (0x26e1988c, "failed to spawn `%s`  //  %v", _command.Path, _error)
 	}
 	
 	_waiter := & sync.WaitGroup {}
