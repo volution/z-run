@@ -858,8 +858,13 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					}
 					
 					if _include {
-						_includePath := ""
-						if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _body); _error != nil {
+						_includePath := _body
+						if _includePath_0, _error := replaceVariables (_includePath); _error != nil {
+							return _error
+						} else {
+							_includePath = _includePath_0
+						}
+						if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
 							return _error
 						} else {
 							_includePath = _includePath_0
@@ -960,6 +965,11 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&?? ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
+					if _includePath_0, _error := replaceVariables (_includePath); _error != nil {
+						return _error
+					} else {
+						_includePath = _includePath_0
+					}
 					if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
 						return _error
 					} else {
@@ -985,6 +995,11 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&??__ ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
+					if _includePath_0, _error := replaceVariables (_includePath); _error != nil {
+						return _error
+					} else {
+						_includePath = _includePath_0
+					}
 					if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
 						return _error
 					} else {
@@ -1023,8 +1038,13 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _descriptor == "" {
 								return errorf (0x8c2e1bf8, "invalid syntax (%d):  empty statement path descriptor | %s", _lineIndex, _line)
 							}
-							_path := ""
-							if _path_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _descriptor); _error != nil {
+							_path := _descriptor
+							if _path_0, _error := replaceVariables (_path); _error != nil {
+								return _error
+							} else {
+								_path = _path_0
+							}
+							if _path_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _path); _error != nil {
 								return _error
 							} else {
 								_path = _path_0
@@ -1056,6 +1076,11 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							}
 							if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists && !_disabled {
 								return errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
+							}
+							if _value_0, _error := replaceVariables (_value); _error != nil {
+								return _error
+							} else {
+								_value = _value_0
 							}
 							if (_kind == "environment-path") || (_kind == "env-path") {
 								if _value == "" {
@@ -1092,8 +1117,13 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _descriptor == "" {
 								return errorf (0x2abc5316, "invalid syntax (%d):  empty statement `z-run` executable descriptor | %s", _lineIndex, _line)
 							}
-							_newExecutable := ""
-							if _newExecutable_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _descriptor); _error == nil {
+							_newExecutable := _descriptor
+							if _newExecutable_0, _error := replaceVariables (_newExecutable); _error != nil {
+								return _error
+							} else {
+								_newExecutable = _newExecutable_0
+							}
+							if _newExecutable_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _newExecutable); _error == nil {
 								_newExecutable = _newExecutable_0
 							} else {
 								return _error

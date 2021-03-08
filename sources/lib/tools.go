@@ -125,3 +125,10 @@ func resolveAbsolutePath (_workspace string, _base string, _path string) (string
 	return _path, nil
 }
 
+
+func replaceVariables (_input string) (string, *Error) {
+	// FIXME:  Implement this better!
+	_input = strings.ReplaceAll (_input, "${OS}", BUILD_TARGET_OS)
+	return _input, nil
+}
+
