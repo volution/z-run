@@ -62,6 +62,12 @@ func PreMain () () {
 			fmt.Fprintf (os.Stdout, "* sources md5   : %s\n", BUILD_SOURCES_MD5)
 			fmt.Fprintf (os.Stdout, "* sources git   : %s\n", BUILD_GIT_HASH)
 			fmt.Fprintf (os.Stdout, "* code & issues : %s\n", "https://github.com/cipriancraciun/z-run")
+			fmt.Fprintf (os.Stdout, "* uname node    : %s\n", UNAME_NODE)
+			fmt.Fprintf (os.Stdout, "* uname system  : %s\n", UNAME_SYSTEM)
+			fmt.Fprintf (os.Stdout, "* uname release : %s\n", UNAME_RELEASE)
+			fmt.Fprintf (os.Stdout, "* uname version : %s\n", UNAME_VERSION)
+			fmt.Fprintf (os.Stdout, "* uname machine : %s\n", UNAME_MACHINE)
+			fmt.Fprintf (os.Stdout, "* uname hash    : %s\n", UNAME_FINGERPRINT)
 			os.Exit (0)
 			panic (0x66203ba4)
 			

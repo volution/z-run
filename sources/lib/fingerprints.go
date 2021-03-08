@@ -98,6 +98,11 @@ func (_fingerprinter Fingerprinter) Bool (_value bool) (Fingerprinter) {
 }
 
 
+func fingerprintStringsQuick (_seed string, _values ... string) string {
+	return NewFingerprinter () .String (_seed) .StringsWithLen (_values) .Build ()
+}
+
+
 func fingerprintString (_value string) string {
 	return fingerprintBytes ([]byte (_value))
 }

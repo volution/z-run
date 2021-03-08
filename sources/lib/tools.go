@@ -127,8 +127,20 @@ func resolveAbsolutePath (_workspace string, _base string, _path string) (string
 
 
 func replaceVariables (_input string) (string, *Error) {
+	
 	// FIXME:  Implement this better!
-	_input = strings.ReplaceAll (_input, "${OS}", BUILD_TARGET_OS)
+	
+	_input = strings.ReplaceAll (_input, "${ZRUN_OS}", BUILD_TARGET_OS)
+	_input = strings.ReplaceAll (_input, "${ZRUN_ARCH}", BUILD_TARGET_ARCH)
+	_input = strings.ReplaceAll (_input, "${ZRUN_VERSION}", BUILD_VERSION)
+	
+	_input = strings.ReplaceAll (_input, "${UNAME_NODE}", UNAME_NODE)
+	_input = strings.ReplaceAll (_input, "${UNAME_SYSTEM}", UNAME_SYSTEM)
+	_input = strings.ReplaceAll (_input, "${UNAME_RELEASE}", UNAME_RELEASE)
+	_input = strings.ReplaceAll (_input, "${UNAME_VERSION}", UNAME_VERSION)
+	_input = strings.ReplaceAll (_input, "${UNAME_MACHINE}", UNAME_MACHINE)
+	_input = strings.ReplaceAll (_input, "${UNAME_FINGERPRINT}", UNAME_FINGERPRINT)
+	
 	return _input, nil
 }
 
