@@ -547,6 +547,12 @@ func PreMainReExecute (_executable string) (*Error) {
 	}
 	_arguments = append (_arguments, PreMainContextGlobal.Arguments ...)
 //	logf ('i', 0x91038b92, "switching `z-run` to: `%s`...", _executable)
+	for _index, _pair := range PreMainContextGlobal.Environment {
+		if strings.HasPrefix (_pair, "ZRUN_EXECUTABLE=") {
+			PreMainContextGlobal.Environment[_index] = "ZRUN_EXECUTABLE=" + _executable
+			break
+		}
+	}
 	_error := syscall.Exec (
 			_executable,
 			_arguments,
