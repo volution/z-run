@@ -130,6 +130,10 @@ func replaceVariables (_input string) (string, *Error) {
 	
 	// FIXME:  Implement this better!
 	
+	if strings.Index (_input, "$") == -1 {
+		return _input, nil
+	}
+	
 	_input = strings.ReplaceAll (_input, "${ZRUN_OS}", BUILD_TARGET_OS)
 	_input = strings.ReplaceAll (_input, "${ZRUN_ARCH}", BUILD_TARGET_ARCH)
 	_input = strings.ReplaceAll (_input, "${ZRUN_VERSION}", BUILD_VERSION)
@@ -140,6 +144,10 @@ func replaceVariables (_input string) (string, *Error) {
 	_input = strings.ReplaceAll (_input, "${UNAME_VERSION}", UNAME_VERSION)
 	_input = strings.ReplaceAll (_input, "${UNAME_MACHINE}", UNAME_MACHINE)
 	_input = strings.ReplaceAll (_input, "${UNAME_FINGERPRINT}", UNAME_FINGERPRINT)
+	
+	if strings.Index (_input, "$") != -1 {
+		return "", errorf (0xb1a0f464, "invalid replacement string `%s`", _input)
+	}
 	
 	return _input, nil
 }

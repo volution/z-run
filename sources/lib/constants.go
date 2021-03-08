@@ -50,7 +50,11 @@ func init () () {
 			}
 			_buffer = append (_buffer, byte (_byte))
 		}
-		return string (_buffer)
+		if len (_buffer) > 0 {
+			return string (_buffer)
+		} else {
+			return _default
+		}
 	}
 	
 	UNAME_NODE = _convert (_uname.Nodename[:], "{unknown-node}")
@@ -58,6 +62,13 @@ func init () () {
 	UNAME_RELEASE = _convert (_uname.Release[:], "{unknown-release}")
 	UNAME_VERSION = _convert (_uname.Version[:], "{unknown-version}")
 	UNAME_MACHINE = _convert (_uname.Machine[:], "{unknown-machine}")
+	
+	if _index := strings.Index (UNAME_NODE, "."); _index != -1 {
+		UNAME_NODE = UNAME_NODE[0 : _index]
+	}
+	if UNAME_NODE == "" {
+		UNAME_NODE = "{unknown-node}"
+	}
 	
 	UNAME_FINGERPRINT = fingerprintStringsQuick ("98ff673c677ffaeb481ce53a8deef977", UNAME_NODE, UNAME_SYSTEM, UNAME_RELEASE, UNAME_VERSION, UNAME_MACHINE) [0:32]
 }
