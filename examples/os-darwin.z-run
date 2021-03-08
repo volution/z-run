@@ -1,6 +1,6 @@
 #!/dev/null
 
-&&== env _OS_OS ${OS}--darwin
+&&== env _OS_OS ${ZRUN_OS}--darwin
 
 << osos
 	printf -- '%s\n' "${_OS_OS}"

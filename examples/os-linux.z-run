@@ -1,6 +1,6 @@
 #!/dev/null
 
-&&== env _OS_OS ${OS}--linux
+&&== env _OS_OS ${ZRUN_OS}--linux
 
 << osos
 	printf -- '%s\n' "${_OS_OS}"

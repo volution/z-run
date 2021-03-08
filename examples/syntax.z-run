@@ -16,7 +16,7 @@
 && _/python.z-run
 && _/bash.z-run
 && _/starlark.z-run
-&& _/os-${OS}.z-run
+&& _/os-${ZRUN_OS}.z-run
 
 
 &&?? _/does-not-exist
