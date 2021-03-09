@@ -44,8 +44,12 @@
 	fi
 	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "./.publish/linux/z-run--linux--v${_build_version}"
 	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "./.publish/darwin/z-run--darwin--v${_build_version}"
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--freebsd "./.publish/freebsd/z-run--freebsd--v${_build_version}"
+	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--openbsd "./.publish/openbsd/z-run--openbsd--v${_build_version}"
 	ln -s -T -f -- "./z-run--linux--v${_build_version}" ./.publish/linux/z-run
 	ln -s -T -f -- "./z-run--darwin--v${_build_version}" ./.publish/darwin/z-run
+	ln -s -T -f -- "./z-run--freebsd--v${_build_version}" ./.publish/freebsd/z-run
+	ln -s -T -f -- "./z-run--openbsd--v${_build_version}" ./.publish/openbsd/z-run
 !!
 
 
