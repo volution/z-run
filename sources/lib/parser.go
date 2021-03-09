@@ -1060,7 +1060,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								_parseContext.scriptletContext.ExecutablePaths = append (_parseContext.scriptletContext.ExecutablePaths, _path)
 							}
 							
-						case "environment", "env", "environment-path", "env-path" :
+						case "environment", "env", "environment-path", "env-path", "environment-append", "env-append", "environment-path-append", "env-path-append" :
 							
 							if _descriptor == "" {
 								return errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
@@ -1074,15 +1074,12 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _name == "" {
 								return errorf (0x6bce31bb, "invalid syntax (%d):  empty statement environment key | %s", _lineIndex, _line)
 							}
-							if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists && !_disabled {
-								return errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
-							}
 							if _value_0, _error := replaceVariables (_value); _error != nil {
 								return _error
 							} else {
 								_value = _value_0
 							}
-							if (_kind == "environment-path") || (_kind == "env-path") {
+							if (_kind == "environment-path") || (_kind == "env-path") || (_kind == "environment-path-append") || (_kind == "env-path-append") {
 								if _value == "" {
 									return errorf (0x2124d511, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 								}
@@ -1093,6 +1090,16 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								}
 							}
 							if !_disabled {
+								_valueExisting, _exists := _parseContext.scriptletContext.Environment[_name]
+								if (_kind == "environment-append") || (_kind == "env-append") || (_kind == "environment-path-append") || (_kind == "env-path-append") {
+									if _exists {
+										_value = _valueExisting + string (os.PathListSeparator) + _value
+									}
+								} else {
+									if _exists {
+										return errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
+									}
+								}
 								_parseContext.scriptletContext.Environment[_name] = _value
 							}
 							
