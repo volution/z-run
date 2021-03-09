@@ -6,6 +6,8 @@
 &&== env-path ENV_KEY_3 .
 &&== env-path ENV_KEY_4 _
 &&== env-path ENV_KEY_5 ./sources
+&&== env-path-append ENV_KEY_6 ./sources
+&&== env-path-append ENV_KEY_6 ./scripts
 
 &&== env-exclude PWD OLDPWD
 
