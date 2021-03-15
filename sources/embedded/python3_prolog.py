@@ -689,6 +689,29 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			else :
 				return PY.tuple (Z.arguments)
 	
+	@_inject
+	def __Z__extract_arguments_flag () :
+		if PY.len (Z.arguments) == 0 :
+			return None
+		_argument = Z.arguments[0]
+		if _argument == "--" :
+			Z.arguments = Z.arguments[1:]
+			return False
+		if not _argument.startswith ("--") :
+			Z.panic (0xcd34d66e, "invalid arguments:  expected flag, received `%s`!", _argument)
+		else :
+			_argument = _argument[2:]
+		Z.arguments = Z.arguments[1:]
+		return _argument
+	
+	@_inject
+	def __Z__extract_arguments_value () :
+		if PY.len (Z.arguments) == 0 :
+			Z.panic (0x7f1cfd35, "invalid arguments:  expected at least one, received none!")
+		_argument = Z.arguments[0]
+		Z.arguments = Z.arguments[1:]
+		return _argument
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
