@@ -13,6 +13,10 @@ function _ () {
 		printf -- '[z-run] [ee]  missing `z-run`;  aborting!\n' >&2
 		return -- 2
 	fi
+	_select_wrapper=()
+	if test -n "${TMUX:-}" -a "${TERM:-dumb}" != dumb -a "$( type -P -- tmux-pane )" ; then
+		_select_wrapper+=( tmux-pane -- )
+	fi
 	
 	local -- _history_command _history_save
 	_history_command="$( history 1 )"
@@ -62,9 +66,9 @@ function _ () {
 		_label_and_snippet="$(
 				export -- SHLVL=0 OLDPWD="${PWD}"
 				if test -n "${_menu_label}" ; then
-					exec -- "${_zrun}" select-export-scriptlet-label-and-body "${_menu_label}"
+					exec -- "${_select_wrapper[@]}" "${_zrun}" select-export-scriptlet-label-and-body "${_menu_label}"
 				else
-					exec -- "${_zrun}" select-export-scriptlet-label-and-body
+					exec -- "${_select_wrapper[@]}" "${_zrun}" select-export-scriptlet-label-and-body
 				fi
 			)" || _outcome="${?}"
 		if test -n "${_terminal}" ; then
