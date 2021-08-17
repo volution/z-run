@@ -1,6 +1,6 @@
 module github.com/cipriancraciun/z-run
 
-go 1.16
+go 1.17
 
 require (
 	github.com/Pallinder/go-randomdata v1.2.0 // indirect
@@ -23,6 +23,14 @@ require (
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
 	golang.org/x/text v0.3.5 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+)
+
+require (
+	github.com/VividCortex/ewma v1.1.1 // indirect
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
+	github.com/gdamore/encoding v1.0.0 // indirect
+	github.com/gdamore/tcell v1.4.0 // indirect
+	github.com/saracen/walker v0.1.1 // indirect
 )
 
 replace (

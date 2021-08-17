@@ -309,7 +309,7 @@
 << go / dependencies / tidy
 	test "${#}" -eq 0
 	exec -- "${ZRUN[@]}" ':: go / tool' \
-			mod tidy \
+			mod tidy -v \
 	#
 !!
 
