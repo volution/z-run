@@ -14,8 +14,8 @@ function _ () {
 		return -- 2
 	fi
 	_select_wrapper=()
-	if test -n "${TMUX:-}" -a "${TERM:-dumb}" != dumb -a "$( type -P -- tmux-pane )" ; then
-		_select_wrapper+=( tmux-pane -- )
+	if test -n "${TMUX:-}" -a "${TERM:-dumb}" != dumb -a "$( type -P -- tmux-popup )" ; then
+		_select_wrapper+=( tmux-popup -- )
 	fi
 	
 	local -- _history_command _history_save
