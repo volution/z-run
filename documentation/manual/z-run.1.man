@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "Z\-RUN" "1" "January 2021" "" ""
+.TH "Z\-RUN" "1" "2021-10-03" "volution.ro" "z-run"
 .
 .SH "NAME"
 \fBz\-run\fR \- lightweight scripts library tool
@@ -224,7 +224,7 @@ expects a single \fB<rpc\-target>\fR, but no other arguments or scriptlet; liste
 \fBz\-run\fR [ \fB<flag>\fR \.\.\. ] \fBexport\-library\-url\fR
 .
 .P
-expects no arguments or scriptlet; writes to \fB/dev/stdout\fR a line suitable for using it as value for the \fB\-\-library\-cache\fR flag; currently it is either a CDB database file \fB<path>\fR or \fB<rpc\-target>\fR; \fBhowever it should always be treated as an opaque value\fR, containing any ASCII character, except control characters, as it might change in future versions;
+expects no arguments or scriptlet; writes to \fB/dev/stdout\fR a line suitable for using it as value for the \fB\-\-library\-url\fR flag; currently it is either a CDB database file \fB<path>\fR or \fB<rpc\-target>\fR; \fBhowever it should always be treated as an opaque value\fR, containing any ASCII character, except control characters, as it might change in future versions;
 .
 .P
 \fBexport\-library\-fingerprint\fR
@@ -317,16 +317,16 @@ these trigger the input execution modes described in the sections above; \fBmust
 specifies a library \fB<source\-path>\fR, that overrides the default library source detection mecanism;
 .
 .P
-\fB\-\-library\-cache=<cache\-url>\fR
+\fB\-\-library\-url=<cache\-url>\fR
 .
 .P
-specifies a library \fB<cache\-url>\fR, either a \fB<cdb\-path>\fR or a \fB<rpc\-target>\fR; specifying both \fB\-\-library\-source=\.\.\.\fR and \fB\-\-library\-cache=\.\.\.\fR is not allowed;
+specifies a library \fB<cache\-url>\fR, either a \fB<cdb\-path>\fR or a \fB<rpc\-target>\fR; specifying both \fB\-\-library\-source=\.\.\.\fR and \fB\-\-library\-url=\.\.\.\fR is not allowed;
 .
 .P
 \fB\-\-workspace=<path>\fR
 .
 .P
-specifies a folder that \fBz\-run\fR switches to before executing; (if no \fB\-\-library\-source=\.\.\.\fR or \fB\-\-library\-cache=\.\.\.\fR is specified, the default library source detection mecanism uses this folder as the root;)
+specifies a folder that \fBz\-run\fR switches to before executing; (if no \fB\-\-library\-source=\.\.\.\fR or \fB\-\-library\-url=\.\.\.\fR is specified, the default library source detection mecanism uses this folder as the root;)
 .
 .P
 \fB\-\-ssh\-target=<ssh\-target>\fR
@@ -368,7 +368,7 @@ an alternative to the \fB\-\-library\-source=\.\.\.\fR flag; never exported insi
 \fBZRUN_LIBRARY_URL\fR
 .
 .P
-an alternative to the \fB\-\-library\-cache=\.\.\.\fR flag; always exported inside the scriptlet execution environment; (never unset it explicitly;)
+an alternative to the \fB\-\-library\-url=\.\.\.\fR flag; always exported inside the scriptlet execution environment; (never unset it explicitly;)
 .
 .P
 \fBZRUN_WORKSPACE\fR
@@ -393,8 +393,6 @@ always exported inside the scriptlet execution environment; (never unset it expl
 .
 .P
 an alternative folder to the default \fB$HOME/\.cache/z\-run\fR, where various files (and pipes, sockets, etc\.) are created; (if explicitly specified, it is exported in the scriptlet execution environment;)
-.
-.P
 .
 .SH "LIBRARY"
 .

@@ -41,6 +41,23 @@
   ol.man-decor li.tc {text-align:center;letter-spacing:4px}
   ol.man-decor li.tr {text-align:right;float:right}
   </style>
+  <style type='text/css' media='all'>
+  /* style: dark */
+  .mp,body#manpage {background:#080706;color:#888}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#aaa}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#fff}
+  .man-decor,.man-decor ol li {color:#666}
+  .mp code,.mp strong,.mp b {color:#fff}
+  .mp em,.mp var,.mp u {color:#ddd}
+  .mp pre code {color:#ddd}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#fff}
+  </style>
+  <style type='text/css' media='print'>
+  /* style: print */
+  .mp {max-width:none}
+  .man-navigation {display:none !important}
+  .mp a[href]:not([href^="#"]):not([data-bare-link]):after {content:" " attr(href)}
+  </style>
 </head>
 <!--
   The following styles are deprecated and will be removed at some point:
@@ -67,7 +84,7 @@
 
   <ol class='man-decor man-head man head'>
     <li class='tl'>z-run(1)</li>
-    <li class='tc'></li>
+    <li class='tc'>z-run</li>
     <li class='tr'>z-run(1)</li>
   </ol>
 
@@ -503,8 +520,8 @@ Thus it is safe to change the source code of the library, while a scriptlet is e
 
 
   <ol class='man-decor man-foot man foot'>
-    <li class='tl'></li>
-    <li class='tc'>January 2021</li>
+    <li class='tl'>volution.ro</li>
+    <li class='tc'>2021-10-03</li>
     <li class='tr'>z-run(1)</li>
   </ol>
 
