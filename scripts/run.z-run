@@ -3,15 +3,102 @@
 
 
 
-::// do / run / ...
-::// do / use / ...
+::// run / ...
+::// watch / run / ...
+::// use / run / ...
 
 
 
 
---<< do / run / 0
-	"${ZRUN[@]}" ':: go / build / main / debug'
-	test "${#}" -ge 1
+:: watch / run / exec :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec' "${@}"
+
+
+
+
+:: run / version :: exec -- "${ZRUN[@]}" ':: run / exec' --version "${@}"
+:: run / sources / md5 :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-md5 "${@}"
+:: run / sources / cpio :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-cpio "${@}"
+:: run / manual :: exec -- "${ZRUN[@]}" ':: run / exec' --manual "${@}"
+:: run / manual / text :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-text "${@}"
+:: run / manual / html :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-html "${@}"
+:: run / manual / man :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-man "${@}"
+:: run / help :: exec -- "${ZRUN[@]}" ':: run / exec' --help "${@}"
+
+
+
+
+<< run / exec
+	
+	_target="${__RUN_TARGET:-debug-build}"
+	_profile="${__RUN_PROFILE:-none}"
+	
+	_wrapper=()
+	_extra_arguments=()
+	
+	case "${_profile}" in
+		( none )
+		;;
+		( all | cpu )
+			_extra_arguments+=(
+					--profile-cpu-path ./.outputs/profile--cpu.pprof
+				)
+		;;&
+		( all | memory )
+			_extra_arguments+=(
+					--profile-memory-path ./.outputs/profile--memory.pprof
+				)
+		;;&
+		( all | cpu | memory )
+		;;
+		( hyperfine | time )
+		;;
+		( * )
+			printf -- '[ee]  invalid run profile `%s`;  aborting!\n' "${_profile}" >&2
+			exit -- 1
+		;;
+	esac
+	
+	case "${_target}" in
+		( debug-build )
+			"${ZRUN[@]}" ':: go / build / main / debug'
+		;;&
+		( release-build )
+			"${ZRUN[@]}" ':: go / build / main / release'
+		;;&
+		( debug | debug-build )
+			_command=( ./.outputs/main--debug "${_extra_arguments[@]}" "${@}" )
+		;;
+		( release | release-build )
+			_command=( ./.outputs/main--release "${_extra_arguments[@]}" "${@}" )
+		;;
+		( installed )
+			_command=( "$( type -P -- z-run )" "${_extra_arguments[@]}" "${@}" )
+		;;
+		( * )
+			printf -- '[ee]  invalid target `%s`;  aborting!\n' "${_target}" >&2
+			exit -- 1
+		;;
+	esac
+	
+	if test -e ./.outputs/profile--cpu.pprof ; then
+		rm -- ./.outputs/profile--cpu.pprof
+	fi
+	if test -e ./.outputs/profile--memory.pprof ; then
+		rm -- ./.outputs/profile--memory.pprof
+	fi
+	
+	if test -n "${__RUN_TERM:-}" ; then
+		export -- TERM="${__RUN_TERM}"
+	fi
+	export -n -- __RUN_TERM=
+	
+	if test "${__RUN_DISPLAY:-}" == none ; then
+		export -n -- DISPLAY=
+	elif test -n "${__RUN_DISPLAY:-}" ; then
+		export -- DISPLAY="${__RUN_DISPLAY}"
+	fi
+	export -n -- __RUN_DISPLAY=
+	
 	export -n -- \
 			ZRUN_LIBRARY_SOURCE= \
 			ZRUN_LIBRARY_URL= \
@@ -20,37 +107,70 @@
 			ZRUN_WORKSPACE= \
 			ZRUN_CACHE= \
 	#
-	if test -n "${ZRUNDEV_USE:-}" ; then
-		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE}"
-	else
-		export -- ZRUN_LIBRARY_SOURCE="./examples/syntax.z-run"
-	fi
-	export -n -- ZRUNDEV_USE=
-	if test -n "${ZRUNDEV_TERM:-}" ; then
-		export -- TERM="${ZRUNDEV_TERM}"
-	fi
-	export -n -- ZRUNDEV_TERM=
-	exec -a "${1:-./.outputs/z-run--debug}" -- ./.outputs/z-run--debug "${@:2}"
+	
+	case "${_profile}" in
+		( hyperfine )
+			_wrapper=(
+					hyperfine
+						--warmup 5
+						--min-runs 10
+						--max-runs 100
+						--shell ''
+						--command-name z-run
+						--
+				)
+			exec -- "${_wrapper[@]}" "${_command[*]@Q}"
+		;;
+		( time )
+			_wrapper=(
+					/usr/bin/time
+						-f '(( elapsed: %E (user: %U, kernel: %S), CPU: %P, memory: %M (faults: %F, swapped: %W), I/O: %I / %O (waits: %w) ))'
+						--
+				)
+			exec -- "${_wrapper[@]}" "${_command[@]}"
+		;;
+		( * )
+			exec -- "${_wrapper[@]}" "${_command[@]}"
+		;;
+	esac
 !!
 
-<< do / run
-	exec -- "${ZRUN[@]}" ':: do / run / 0' '' "${@}"
+
+
+
+:: use / run / reset :: export -- __RUN_TARGET= __RUN_PROFILE= __RUN_TERM= __RUN_DISPLAY=
+
+:: use / run / target / debug + build :: export -- __RUN_TARGET=debug-build
+:: use / run / target / release + build :: export -- __RUN_TARGET=release-build
+:: use / run / target / debug :: export -- __RUN_TARGET=debug
+:: use / run / target / release :: export -- __RUN_TARGET=release
+:: use / run / target / installed :: export -- __RUN_TARGET=installed
+
+:: use / run / profile / none :: export -- __RUN_PROFILE=none
+:: use / run / profile / all :: export -- __RUN_PROFILE=all
+:: use / run / profile / cpu :: export -- __RUN_PROFILE=cpu
+:: use / run / profile / memory :: export -- __RUN_PROFILE=memory
+:: use / run / profile / time :: export -- __RUN_PROFILE=time
+:: use / run / profile / hyperfine :: export -- __RUN_PROFILE=hyperfine
+
+:: use / run / term / enable :: export -- __RUN_TERM="${TERM}"
+:: use / run / term / disable :: export -- __RUN_TERM=dumb
+
+:: use / run / xorg / enable :: export -- __RUN_DISPLAY="${DISPLAY}"
+:: use / run / xorg / disable :: export -- __RUN_DISPLAY=none
+
+
+
+
+<< go / pprof / cpu / server
+	test "${#}" -eq 0
+	test -f ./.outputs/profile--cpu.pprof
+	exec -- go tool pprof -http 127.70.72.170:8080 -no_browser -functions -- ./.outputs/profile--cpu.pprof
 !!
 
-
-:: do / run / execute :: exec -- "${ZRUN[@]}" ':: do / run' execute-scriptlet "${@}"
-:: do / run / select-label :: exec -- "${ZRUN[@]}" ':: do / run' select-export-scriptlet-label "${@}"
-:: do / run / select-body :: exec -- "${ZRUN[@]}" ':: do / run' select-export-scriptlet-body "${@}"
-:: do / run / list-labels :: exec -- "${ZRUN[@]}" ':: do / run' export-scriptlet-labels "${@}"
-:: do / run / parse-library :: exec -- "${ZRUN[@]}" ':: do / run' parse-library "${@}"
-:: do / run / export-library-json :: exec -- "${ZRUN[@]}" ':: do / run' export-library-json "${@}"
-:: do / run / export-library-cdb :: exec -- "${ZRUN[@]}" ':: do / run' export-library-cdb "${@}"
-:: do / run / select :: exec -- "${ZRUN[@]}" ':: do / run / 0' '[z-run:select]' "${@}"
-
-
-:: do / use / workspace :: export -- ZRUNDEV_USE=./.z-run
-:: do / use / syntax :: export -- ZRUNDEV_USE=./examples/syntax.z-run
-
-:: do / use / term / enable :: export -- ZRUNDEV_TERM="${TERM}"
-:: do / use / term / disable :: export -- ZRUNDEV_TERM=dumb
+<< go / pprof / memory / server
+	test "${#}" -eq 0
+	test -f ./.outputs/profile--memory.pprof
+	exec -- go tool pprof -http 127.146.243.63:8080 -no_browser -functions -sample_index=alloc_space -- ./.outputs/profile--memory.pprof
+!!
 

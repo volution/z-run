@@ -8,8 +8,21 @@
 
 
 
-<< workspace / initialize / go
+<< workspace / initialize
+	
 	test "${#}" -eq 0
+	
+	"${ZRUN[@]}" ':: workspace / initialize / outputs'
+	"${ZRUN[@]}" ':: workspace / initialize / go'
+!!
+
+
+
+
+<< workspace / initialize / go
+	
+	test "${#}" -eq 0
+	
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	_sources="$( exec -- readlink -e -- ./sources )"
 	
@@ -32,7 +45,9 @@
 
 
 << workspace / initialize / outputs
+	
 	test "${#}" -eq 0
+	
 	if test ! -d ./.outputs ; then
 		_outputs_store="${TMPDIR:-/tmp}/z-run--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
 		mkdir -- "${_outputs_store}"

@@ -8,41 +8,54 @@
 
 
 
-:: deploy / rsync / linux :: exec "${ZRUN[@]}" ':: deploy / rsync' linux "${@}"
-:: deploy / rsync / darwin :: exec "${ZRUN[@]}" ':: deploy / rsync' darwin "${@}"
-:: deploy / rsync / freebsd :: exec "${ZRUN[@]}" ':: deploy / rsync' freebsd "${@}"
-:: deploy / rsync / openbsd :: exec "${ZRUN[@]}" ':: deploy / rsync' openbsd "${@}"
+:: deploy / rsync / linux :: exec -- "${ZRUN[@]}" ':: deploy / rsync' linux "${@}"
+:: deploy / rsync / darwin :: exec -- "${ZRUN[@]}" ':: deploy / rsync' darwin "${@}"
+:: deploy / rsync / freebsd :: exec -- "${ZRUN[@]}" ':: deploy / rsync' freebsd "${@}"
+:: deploy / rsync / openbsd :: exec -- "${ZRUN[@]}" ':: deploy / rsync' openbsd "${@}"
+
 --<< deploy / rsync
 	test "${#}" -eq 2
 	_os="${1}"
 	_target="${2}"
 	shift -- 2
 	"${ZRUN[@]}" ':: deploy / release' "${_os}"
-	_source="./.outputs/z-run--release--${_os}"
+	_source="./.outputs/main--release--${_os}"
 	printf -- '[ii]  deploying (`%s`) to `%s`...\n' "${_os}" "${_target}" >&2
-	rsync -i -t -p --chmod=0555 -- "${_source}" "${_target}"
+	exec -- rsync -i -t -p --chmod=0555 -- "${_source}" "${_target}"
 !!
+
+
 
 
 << deploy / publish
 	test "${#}" -eq 0
 	test -d ./.publish/
 	"${ZRUN[@]}" ':: deploy / release'
-	_build_version="$( exec -- cat -- ./sources/embedded/build-version.txt )"
+	_build_version="$( exec -- cat -- ./sources/embedded/build/version.txt )"
 	printf -- '[ii]  publishing `%s`...\n' "${_build_version}" >&2
-	if test -e "./.publish/linux/z-run--linux--v${_build_version}" -o -e "./.publish/darwin/z-run--darwin--v${_build_version}" ; then
-		printf -- '[ee]  release already exists!\n' >&2
-		exit -- 1
-	fi
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--linux "./.publish/linux/z-run--linux--v${_build_version}"
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--darwin "./.publish/darwin/z-run--darwin--v${_build_version}"
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--freebsd "./.publish/freebsd/z-run--freebsd--v${_build_version}"
-	rsync -i -t -p --chmod=0555 -- ./.outputs/z-run--release--openbsd "./.publish/openbsd/z-run--openbsd--v${_build_version}"
-	ln -s -T -f -- "./z-run--linux--v${_build_version}" ./.publish/linux/z-run
-	ln -s -T -f -- "./z-run--darwin--v${_build_version}" ./.publish/darwin/z-run
-	ln -s -T -f -- "./z-run--freebsd--v${_build_version}" ./.publish/freebsd/z-run
-	ln -s -T -f -- "./z-run--openbsd--v${_build_version}" ./.publish/openbsd/z-run
+	for _os in linux darwin freebsd openbsd ; do
+		if test -e "./.publish/${_os}/z-run--${_os}--v${_build_version}" -a "${_build_version}" != 0.0.0 ; then
+			printf -- '[ee]  release already exists for `%s`!\n' "${_os}" >&2
+			continue
+		fi
+		rsync -i -t -p --chmod=0555 -- \
+				"./.outputs/main--release--${_os}" \
+				"./.publish/${_os}/z-run--${_os}--v${_build_version}" \
+		#
+		gpg2 --sign --detach-sign --armor \
+				--default-key 58FC2194FCC2478399CB220C5A974037A6FD8839 \
+				--output "./.publish/${_os}/z-run--${_os}--v${_build_version}.asc" \
+				-- "./.publish/${_os}/z-run--${_os}--v${_build_version}" \
+		#
+		gpg2 --verify \
+				-- "./.publish/${_os}/z-run--${_os}--v${_build_version}.asc" \
+		#
+		ln -s -T -f -- "./z-run--${_os}--v${_build_version}" "./.publish/${_os}/z-run"
+		ln -s -T -f -- "./z-run--${_os}--v${_build_version}.asc" "./.publish/${_os}/z-run.asc"
+	done
 !!
+
+
 
 
 << deploy / release
@@ -53,7 +66,7 @@
 		_os='all'
 	fi
 	test "${#}" -eq 0
-	if test "${ZRUNDEV_NORELEASE:-}" == true ; then
+	if test "${__DEPLOY_NORELEASE:-}" == true ; then
 		exit -- 0
 	fi
 	case "${_os}" in

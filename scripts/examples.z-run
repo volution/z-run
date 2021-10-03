@@ -1,0 +1,33 @@
+#!/dev/null
+
+
+
+
+::// examples / ...
+::// watch / examples / ...
+::// use / examples / ...
+
+
+
+
+:: watch / examples / exec :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: examples / exec' "${@}"
+
+
+
+
+:: examples / execute :: exec -- "${ZRUN[@]}" ':: examples / exec' execute-scriptlet "${@}"
+:: examples / select-label :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-label "${@}"
+:: examples / select-body :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-body "${@}"
+:: examples / list-labels :: exec -- "${ZRUN[@]}" ':: examples / exec' export-scriptlet-labels "${@}"
+:: examples / parse-library :: exec -- "${ZRUN[@]}" ':: examples / exec' parse-library "${@}"
+:: examples / export-library-json :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-json "${@}"
+:: examples / export-library-cdb :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-cdb "${@}"
+
+:: examples / exec :: exec -- "${ZRUN[@]}" ':: run / exec' "${@}"
+
+
+
+
+:: use / examples / workspace :: export -- ZRUNDEV_USE=./.z-run
+:: use / examples / syntax :: export -- ZRUNDEV_USE=./examples/syntax.z-run
+

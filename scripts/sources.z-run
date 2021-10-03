@@ -8,7 +8,7 @@
 
 
 
-<< workspace / sources / codes / duplicates
+<< sources / codes / duplicates
 	test "${#}" -eq 0
 	exec -- xargs \
 			-r -d '\n' -I {} \
@@ -37,50 +37,40 @@
 
 
 
-<< workspace / sources / embedded / prepare
+<< sources / embedded / prepare
 	
 	test "${#}" -eq 0
 	
-	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual.txt ; then
-		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual.txt
-	fi
-	
-	"${ZRUN[@]}" ':: workspace / sources / embedded / hash'
+	"${ZRUN[@]}" ':: sources / embedded / manual'
+	"${ZRUN[@]}" ':: sources / embedded / hash'
 !!
 
 
 
 
-<< workspace / sources / embedded / hash
+<< sources / embedded / manual
 	
-	find ./sources/ \
-			-type f \
-			-not -path './sources/embedded/build-*.txt' \
-			-print0 \
-	| xargs -0 -I {} -- md5sum -b -z -- {} \
-	| LC_ALL=C sort -z \
-	| md5sum -b \
-	| cut -f 1 -d ' ' \
-		>| ./.outputs/markers/build-sources-md5.tmp \
-	#
+	test "${#}" -eq 0
 	
-	if ! cmp -s -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/build-sources-md5.txt ; then
-		
-		_build_number="$( exec -- cat -- ./sources/embedded/build-number.txt )"
-		_build_number="$(( _build_number + 1 ))"
-		_build_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
-		
-		printf -- '%d\n' "${_build_number}" >| ./sources/embedded/build-number.tmp
-		mv -T -- ./sources/embedded/build-number.tmp ./sources/embedded/build-number.txt
-		printf -- '%s\n' "${_build_timestamp}" >| ./sources/embedded/build-timestamp.tmp
-		mv -T -- ./sources/embedded/build-timestamp.tmp ./sources/embedded/build-timestamp.txt
-		
-		mv -T -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/build-sources-md5.txt
-		
-	else
-		
-		rm -- ./.outputs/markers/build-sources-md5.tmp
+	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run.txt ; then
+		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run.txt
 	fi
+	
+	if ! cmp -s -- ./documentation/manual/z-run.1.html ./sources/embedded/manual/z-run.html ; then
+		cp -T -- ./documentation/manual/z-run.1.html ./sources/embedded/manual/z-run.html
+	fi
+	
+	if ! cmp -s -- ./documentation/manual/z-run.1.man ./sources/embedded/manual/z-run.man ; then
+		cp -T -- ./documentation/manual/z-run.1.man ./sources/embedded/manual/z-run.man
+	fi
+!!
+
+
+
+
+<< sources / embedded / hash
+	
+	test "${#}" -eq 0
 	
 	if test -e ./.git ; then
 		_git_hash="$( exec -- git rev-parse HEAD )"
@@ -91,7 +81,158 @@
 		_git_hash='unknown'
 	fi
 	
-	printf -- '%s\n' "${_git_hash}" >| ./.outputs/markers/build-git-hash.tmp
-	mv -T -- ./.outputs/markers/build-git-hash.tmp ./.outputs/markers/build-git-hash.txt
+	if test -s ./sources/embedded/build/sources.cpio.gz ; then
+		rm -- ./sources/embedded/build/sources.cpio.gz
+		touch -- ./sources/embedded/build/sources.cpio.gz
+	fi
+	
+	execline-cd ./sources \
+	find . \
+			-type f \
+			-not -path './embedded/build/*' \
+			-printf '%P\0' \
+	| LC_ALL=C sort -z \
+		>| ./.outputs/markers/build-sources.list.tmp \
+	#
+	
+	execline-cd ./sources \
+	xargs -0 -I {} -- md5sum -b -z -- {} \
+		< ./.outputs/markers/build-sources.list.tmp \
+	| tr '\0' '\n' \
+		>| ./.outputs/markers/build-sources.md5.tmp \
+	#
+	
+	md5sum -b \
+		< ./.outputs/markers/build-sources.md5.tmp \
+	| cut -f 1 -d ' ' \
+		>| ./.outputs/markers/build-sources.hash.tmp \
+	#
+	
+	if ! cmp -s -- ./.outputs/markers/build-sources.hash.tmp ./sources/embedded/build/sources.hash ; then
+		
+		_build_number="$( exec -- cat -- ./sources/embedded/build/number.txt )"
+		_build_number="$(( _build_number + 1 ))"
+		_build_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
+		
+		printf -- '%d\n' "${_build_number}" >| ./sources/embedded/build/number.txt.tmp
+		printf -- '%s\n' "${_build_timestamp}" >| ./sources/embedded/build/timestamp.txt.tmp
+		
+		mv -T -- ./sources/embedded/build/number.txt.tmp ./sources/embedded/build/number.txt
+		mv -T -- ./sources/embedded/build/timestamp.txt.tmp ./sources/embedded/build/timestamp.txt
+		
+		mv -T -- ./.outputs/markers/build-sources.list.tmp ./.outputs/markers/build-sources.list
+		
+		mv -T -- ./.outputs/markers/build-sources.md5.tmp ./sources/embedded/build/sources.md5
+		mv -T -- ./.outputs/markers/build-sources.hash.tmp ./sources/embedded/build/sources.hash
+		
+	else
+		
+		rm -- ./.outputs/markers/build-sources.list.tmp
+		rm -- ./.outputs/markers/build-sources.md5.tmp
+		rm -- ./.outputs/markers/build-sources.hash.tmp
+	fi
+	
+	printf -- '%s\n' "${_git_hash}" >| ./.outputs/markers/build-git-hash.txt.tmp
+	mv -T -- ./.outputs/markers/build-git-hash.txt.tmp ./.outputs/markers/build-git-hash.txt
+!!
+
+
+
+
+<< sources / embedded / bundle
+	
+	test "${#}" -eq 0
+	
+	if test -s ./sources/embedded/build/sources.cpio.gz ; then
+		rm -- ./sources/embedded/build/sources.cpio.gz
+	fi
+	touch --reference ./sources/embedded/build/timestamp.txt -- ./sources/embedded/build/sources.cpio.gz
+	
+	execline-cd ./sources \
+	find . \
+			-type f \
+			-print0 \
+	| LC_ALL=C sort -z \
+	| execline-cd ./sources \
+	cpio \
+			--create \
+			--format newc \
+			--no-absolute-filenames \
+			--quiet \
+			--warning all \
+			--owner +65534:+65534 \
+			--ignore-devno \
+			--renumber-inodes \
+			--block-size 1 \
+			--null \
+	| gzip \
+			--best \
+			--rsyncable \
+			--no-name \
+		>| ./.outputs/sources.cpio.gz.tmp \
+	#
+	
+	mv -T -- ./.outputs/sources.cpio.gz.tmp ./sources/embedded/build/sources.cpio.gz
+!!
+
+
+
+
+<< sources / watch
+	
+	test "${#}" -ge 1
+	_command="${1}"
+	shift -- 1
+	
+	_delegate=()
+	case "${_command}" in
+		( '::'* )
+			_delegate+=( "${ZRUN[@]}" "${_command}" )
+		;;
+		( /* )
+			_delegate+=( "${_command}" )
+		;;
+		( * )
+			printf -- '[ee]  invalid delegate `%s`;  aborting!\n' "${_delegate}"
+			exit -- 1
+		;;
+	esac
+	
+	_sources="$( exec -- readlink -e -- ./sources )"
+	
+	exec -- watchexec \
+			\
+			--watch="${_sources}" \
+			\
+			--filter="${_sources}/go.*" \
+			--filter="${_sources}/cmd/**" \
+			--filter="${_sources}/lib/**" \
+			--filter="${_sources}/extensions/**" \
+			--filter="${_sources}/embedded/*.go" \
+			--filter="${_sources}/embedded/bash/**" \
+			--filter="${_sources}/embedded/prologues/**" \
+			\
+			--restart \
+			\
+			--no-shell \
+			\
+			--no-default-ignore \
+			--no-vcs-ignore \
+			--no-ignore \
+			\
+			-- \
+			\
+			"${ZRUN[@]}" ':: sources / watch / delegate' \
+			"${_delegate[@]}" \
+			"${@}" \
+	#
+!!
+
+
+--<< sources / watch / delegate
+	test "${#}" -ge 1
+	_timestamp="$( exec -- date -- '+%H:%M:%S' )"
+	printf -- '\n[--]  --------[ %s ]------------------------------------------------------\n\n' "${_timestamp}" >&2
+	exec -- "${@}"
 !!
 
