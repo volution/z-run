@@ -8,34 +8,56 @@
 
 
 
-<< readme / html / open
+<< readme / open / html / firefox
 	test "${#}" -eq 0
-	exec -- x-www guest:cmark-gfm open file:"$( exec -- readlink -e -- ./documentation/readme.html )"
+	"${ZRUN[@]}" ':: readme / render / html'
+	exec -- x-www firefox-guest:z-run open file:"$( exec -- readlink -e -- ./documentation/readme.html )"
+!!
+
+<< readme / open / html / chromium
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: readme / render / html'
+	exec -- x-www chromium-guest:z-run open file:"$( exec -- readlink -e -- ./documentation/readme.html )"
+!!
+
+<< readme / open / html / webview
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: readme / render / html'
+	exec -- x-www webview open file:"$( exec -- readlink -e -- ./documentation/readme.html )"
+!!
+
+<< readme / open / html / links
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: readme / render / html'
+	exec -- links file:"$( exec -- readlink -e -- ./documentation/readme.html )"
 !!
 
 
-<< readme / html / render / watch
+
+
+<< watch / readme / render / html
 	test "${#}" -eq 0
 	exec -- watchexec \
-			--watch=./documentation \
+			--watch=./documentation/readme.md \
 			--no-shell \
 			-- \
-			"${ZRUN[@]}" ':: readme / html / render' "${@}" \
+			"${ZRUN[@]}" ':: readme / render / html' "${@}" \
 	#
 !!
 
 
-<< readme / html / render
+<< readme / render / html
 	test "${#}" -eq 0
 	if test ./documentation/readme.md -ot ./documentation/readme.html ; then
-		# printf -- '[ii]  skipping rendering readme...\n' >&2
+		printf -- '[ii]  skipping rendering readme!\n' >&2
 		exit -- 0
 	fi
 	printf -- '[ii]  rendering readme...\n' >&2
-	exec -- "${ZRUN[@]}" ':: readme / html / render / forced' "${@}"
+	exec -- "${ZRUN[@]}" ':: readme / render / html / forced' "${@}"
 !!
 
---<< readme / html / render / forced
+
+<< readme / render / html / forced
 	test "${#}" -eq 0
 	_html="$( exec -- cmark-gfm --to html --validate-utf8 --unsafe < ./documentation/readme.md )"
 	test -n "${_html}"

@@ -75,7 +75,7 @@
 
 
 
---<< manual / render / forced
+<< manual / render / forced
 	
 	test "${#}" -eq 0
 	
