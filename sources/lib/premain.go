@@ -222,7 +222,7 @@ func PreMain () () {
 							panic (0xaec5d2dd)
 					}
 				
-				case "go+prolog" :
+				case "go+-prolog" :
 					_chunks = append (_chunks, embeddedGoProlog)
 				
 				default :
