@@ -143,6 +143,8 @@
 	
 	test "${#}" -eq 0
 	
+	"${ZRUN[@]}" ':: sources / embedded / prepare'
+	
 	if test -s ./sources/embedded/build/sources.cpio.gz ; then
 		rm -- ./sources/embedded/build/sources.cpio.gz
 	fi

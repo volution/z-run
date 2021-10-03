@@ -96,7 +96,6 @@
 	
 	test "${#}" -eq 0
 	
-	"${ZRUN[@]}" ':: sources / embedded / prepare'
 	"${ZRUN[@]}" ':: sources / embedded / bundle'
 	
 	_outputs="$( exec -- readlink -e -- ./.outputs )"

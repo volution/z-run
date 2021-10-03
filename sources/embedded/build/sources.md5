@@ -6,9 +6,9 @@
 6601b329879e4bee32fc9fec3a19e789 *embedded/bash/shell_rc.bash
 89248210749e679489e208b4f67b33ed *embedded/build.go
 3bc1e8c8c6c9affa1dad43ee226fcdb9 *embedded/manual.go
-efc54fe7f6e533e492f07e925c562504 *embedded/manual/z-run.html
-3cde91bd68c2e8eede157d526bf17af6 *embedded/manual/z-run.man
-08acc4ef74e0f7b26e9ecc7b4cc268e2 *embedded/manual/z-run.txt
+9ce83ba8a0cf0320d21e0c89e186a6f6 *embedded/manual/z-run.html
+2958e8fa4d6dc61f4873a6cc13b4badb *embedded/manual/z-run.man
+94fbcb2529e2559951a5ab0e6fc8694c *embedded/manual/z-run.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
 e10d543f2543579be161515405b52ac1 *embedded/prologues/python3.py0
@@ -27,7 +27,7 @@ b440a5fe95ceebf8ef73dcfe0b146a3a *lib/input.go
 4d270e20177e441cedef14ac56bd0460 *lib/main.go
 e9663307d481f906ba06c5a0dd5d5174 *lib/menu.go
 7da222fca9c3fb3b22df3ca5119a1414 *lib/parser.go
-46d42101159cc3a688503720f9021e45 *lib/premain.go
+70676921ac579a3a3bcd5bc14f8859d8 *lib/premain.go
 f9212227c540efc6d9aeb84318768f03 *lib/processes.go
 205018a5cec5a3044f717929cb0f2501 *lib/resolution.go
 d845fd4fb4f2d6842eba0627ffddc3ac *lib/scriptlet.go
