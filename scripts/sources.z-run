@@ -1,0 +1,97 @@
+#!/dev/null
+
+
+
+
+::// sources / ...
+
+
+
+
+<< workspace / sources / codes / duplicates
+	test "${#}" -eq 0
+	exec -- xargs \
+			-r -d '\n' -I {} \
+			-a <(
+				grep \
+						-o \
+						-P \
+						-e '(?<=\[)[0-9a-f]{8}(?=\])|(?<=0x)[0-9a-f]{8}(?=[^0-9a-zA-Z]|$)' \
+						-h \
+						-r ./sources \
+						--include '*.go' \
+				| sort \
+				| uniq -d
+			) \
+			-- \
+		grep \
+			-P \
+			-e '(?<=\[){}(?=\])|(?<=0x){}(?=[^0-9a-zA-Z]|$)' \
+			-r ./sources \
+			-n \
+			--include '*.go' \
+			--color \
+	#
+!!
+
+
+
+
+<< workspace / sources / embedded / prepare
+	
+	test "${#}" -eq 0
+	
+	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual.txt ; then
+		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual.txt
+	fi
+	
+	"${ZRUN[@]}" ':: workspace / sources / embedded / hash'
+!!
+
+
+
+
+<< workspace / sources / embedded / hash
+	
+	find ./sources/ \
+			-type f \
+			-not -path './sources/embedded/build-*.txt' \
+			-print0 \
+	| xargs -0 -I {} -- md5sum -b -z -- {} \
+	| LC_ALL=C sort -z \
+	| md5sum -b \
+	| cut -f 1 -d ' ' \
+		>| ./.outputs/markers/build-sources-md5.tmp \
+	#
+	
+	if ! cmp -s -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/build-sources-md5.txt ; then
+		
+		_build_number="$( exec -- cat -- ./sources/embedded/build-number.txt )"
+		_build_number="$(( _build_number + 1 ))"
+		_build_timestamp="$( exec -- date -- '+%Y-%m-%d-%H-%M-%S' )"
+		
+		printf -- '%d\n' "${_build_number}" >| ./sources/embedded/build-number.tmp
+		mv -T -- ./sources/embedded/build-number.tmp ./sources/embedded/build-number.txt
+		printf -- '%s\n' "${_build_timestamp}" >| ./sources/embedded/build-timestamp.tmp
+		mv -T -- ./sources/embedded/build-timestamp.tmp ./sources/embedded/build-timestamp.txt
+		
+		mv -T -- ./.outputs/markers/build-sources-md5.tmp ./sources/embedded/build-sources-md5.txt
+		
+	else
+		
+		rm -- ./.outputs/markers/build-sources-md5.tmp
+	fi
+	
+	if test -e ./.git ; then
+		_git_hash="$( exec -- git rev-parse HEAD )"
+		if ! git diff --quiet || ! git diff --quiet --cached ; then
+			_git_hash+="-uncommitted"
+		fi
+	else
+		_git_hash='unknown'
+	fi
+	
+	printf -- '%s\n' "${_git_hash}" >| ./.outputs/markers/build-git-hash.tmp
+	mv -T -- ./.outputs/markers/build-git-hash.tmp ./.outputs/markers/build-git-hash.txt
+!!
+

@@ -1,0 +1,56 @@
+#!/dev/null
+
+
+
+
+::// do / run / ...
+::// do / use / ...
+
+
+
+
+--<< do / run / 0
+	"${ZRUN[@]}" ':: go / build / main / debug'
+	test "${#}" -ge 1
+	export -n -- \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_URL= \
+			ZRUN_LIBRARY_FINGERPRINT= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
+			ZRUN_CACHE= \
+	#
+	if test -n "${ZRUNDEV_USE:-}" ; then
+		export -- ZRUN_LIBRARY_SOURCE="${ZRUNDEV_USE}"
+	else
+		export -- ZRUN_LIBRARY_SOURCE="./examples/syntax.z-run"
+	fi
+	export -n -- ZRUNDEV_USE=
+	if test -n "${ZRUNDEV_TERM:-}" ; then
+		export -- TERM="${ZRUNDEV_TERM}"
+	fi
+	export -n -- ZRUNDEV_TERM=
+	exec -a "${1:-./.outputs/z-run--debug}" -- ./.outputs/z-run--debug "${@:2}"
+!!
+
+<< do / run
+	exec -- "${ZRUN[@]}" ':: do / run / 0' '' "${@}"
+!!
+
+
+:: do / run / execute :: exec -- "${ZRUN[@]}" ':: do / run' execute-scriptlet "${@}"
+:: do / run / select-label :: exec -- "${ZRUN[@]}" ':: do / run' select-export-scriptlet-label "${@}"
+:: do / run / select-body :: exec -- "${ZRUN[@]}" ':: do / run' select-export-scriptlet-body "${@}"
+:: do / run / list-labels :: exec -- "${ZRUN[@]}" ':: do / run' export-scriptlet-labels "${@}"
+:: do / run / parse-library :: exec -- "${ZRUN[@]}" ':: do / run' parse-library "${@}"
+:: do / run / export-library-json :: exec -- "${ZRUN[@]}" ':: do / run' export-library-json "${@}"
+:: do / run / export-library-cdb :: exec -- "${ZRUN[@]}" ':: do / run' export-library-cdb "${@}"
+:: do / run / select :: exec -- "${ZRUN[@]}" ':: do / run / 0' '[z-run:select]' "${@}"
+
+
+:: do / use / workspace :: export -- ZRUNDEV_USE=./.z-run
+:: do / use / syntax :: export -- ZRUNDEV_USE=./examples/syntax.z-run
+
+:: do / use / term / enable :: export -- ZRUNDEV_TERM="${TERM}"
+:: do / use / term / disable :: export -- ZRUNDEV_TERM=dumb
+

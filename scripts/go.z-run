@@ -1,0 +1,247 @@
+#!/dev/null
+
+
+
+
+::// go / ...
+
+
+
+
+<< go / build / main / debug
+	
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: workspace / sources / embedded / prepare'
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	
+	_build_target=development
+	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
+	
+	_tags=(
+			netgo
+		)
+	_gcflags=(
+			-N
+			-l
+		)
+	_ldflags=(
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
+		)
+	
+	_tags="$( printf -- '%s,' "${_tags[@]}" )"
+	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
+	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
+	
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			build \
+			-o "${_outputs}/z-run--debug" \
+			-tags "${_tags}" \
+			-gcflags "${_gcflags}" \
+			-ldflags "${_ldflags}" \
+			-- \
+			./cmd/z-run.go \
+	#
+!!
+
+<< go / build / main / release
+	
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: workspace / sources / embedded / prepare'
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	
+	_build_target=release
+	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
+	
+	_tags=(
+			netgo
+		)
+	_gcflags=()
+	_ldflags=(
+			all=-s
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
+			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
+		)
+	
+	_tags="$( printf -- '%s,' "${_tags[@]}" )"
+	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
+	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
+	
+	if test -n "${GOOS:-}" ; then
+		_suffix="--${GOOS}"
+	else
+		_suffix=''
+	fi
+	
+	printf -- '[ii]  building release for `%s`...\n' "${GOOS:-native}" >&2
+	
+	if test -f "${_outputs}/z-run--release${_suffix}" ; then
+		mv -T -- "${_outputs}/z-run--release${_suffix}" "${_outputs}/z-run--release${_suffix}.old"
+	fi
+	
+	"${ZRUN[@]}" ':: go / tool' \
+			build \
+			-o "${_outputs}/z-run--release${_suffix}.new" \
+			-a \
+			-tags "${_tags}" \
+			-gcflags "${_gcflags}" \
+			-ldflags "${_ldflags}" \
+			-buildmode exe \
+			-trimpath \
+			-- \
+			./cmd/z-run.go \
+	#
+	
+	if test ! -e "${_outputs}/z-run--release${_suffix}.old" ; then
+		mv -T -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}"
+	elif ! cmp -s -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}.old" ; then
+		mv -T -- "${_outputs}/z-run--release${_suffix}.new" "${_outputs}/z-run--release${_suffix}"
+	else
+		mv -T -- "${_outputs}/z-run--release${_suffix}.old" "${_outputs}/z-run--release${_suffix}"
+		rm -- "${_outputs}/z-run--release${_suffix}.new"
+	fi
+!!
+
+<< go / build / main / release / linux
+	export -- GOOS=linux
+	"${ZRUN[@]}" ':: go / build / main / release'
+!!
+
+<< go / build / main / release / darwin
+	export -- GOOS=darwin
+	"${ZRUN[@]}" ':: go / build / main / release'
+!!
+
+<< go / build / main / release / freebsd
+	export -- GOOS=freebsd
+	"${ZRUN[@]}" ':: go / build / main / release'
+!!
+
+<< go / build / main / release / openbsd
+	export -- GOOS=openbsd
+	"${ZRUN[@]}" ':: go / build / main / release'
+!!
+
+
+
+
+<< go / execute / main / debug
+	"${ZRUN[@]}" ':: go / build / main / debug'
+	export -n -- \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_URL= \
+			ZRUN_LIBRARY_FINGERPRINT= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
+			ZRUN_CACHE= \
+	#
+	exec -- ./.outputs/z-run--debug "${@}"
+!!
+
+<< go / execute / main / release
+	"${ZRUN[@]}" ':: go / build / main / release'
+	export -n -- \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_URL= \
+			ZRUN_LIBRARY_FINGERPRINT= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
+			ZRUN_CACHE= \
+	#
+	exec -- ./.outputs/z-run--release "${@}"
+!!
+
+
+
+
+<< go / dependencies / update
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			get \
+			-v \
+			-d \
+			-u \
+			-- \
+			all \
+	#
+!!
+
+
+<< go / dependencies / list
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			list \
+			-m \
+			-- \
+			all \
+	#
+!!
+
+
+<< go / dependencies / tidy
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			mod tidy -v \
+	#
+!!
+
+
+<< go / dependencies / vendor
+	test "${#}" -eq 0
+	
+	if test -e ./vendors ; then
+		rm -- ./sources/vendor
+		mv -T -- ./vendors ./sources/vendor
+	fi
+	
+	"${ZRUN[@]}" ':: go / tool' \
+			mod vendor \
+	#
+	
+	find ./sources/vendor/ \
+			-xdev \
+			-not -type d \
+			-not -path './sources/vendor/modules.txt' \
+			-not -name 'go.mod' \
+			-not -name 'go.sum' \
+			-not -name '*.go' \
+			-not -name '*.c' \
+			-not -name '*.h' \
+			-not -name '*.s' \
+			-delete \
+	#
+	find ./sources/vendor/ \
+			-xdev \
+			-type d \
+			-empty \
+			-delete \
+	#
+	
+	mv -T -- ./sources/vendor ./vendors
+	ln -s -T -- ../vendors ./sources/vendor
+!!
+
+
+
+
+<< go / tool
+	test "${#}" -ge 1
+	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	_sources="$( exec -- readlink -e -- ./sources )"
+	
+	export -- GOPATH="${_outputs}/go"
+	export -- GOBIN="${_outputs}/go/bin"
+	export -- GOTMPDIR="${_outputs}/go/tmp"
+	export -- GOCACHE="${_outputs}/go/cache"
+	
+	if test -e "${_outputs}/go-tool" ; then
+		_go="$( exec -- readlink -e -- "${_outputs}/go-tool" )"
+	else
+		_go="$( type -P -- go )"
+	fi
+	
+	cd -- "${_sources}"
+	
+	exec -- "${_go}" "${@}"
+!!
+
