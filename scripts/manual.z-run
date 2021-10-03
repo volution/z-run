@@ -5,3 +5,130 @@
 
 ::// manual / ...
 
+
+
+
+<< manual / open / html / firefox
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: manual / render'
+	exec -- x-www firefox-guest:z-run open file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+!!
+
+<< manual / open / html / chromium
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: manual / render'
+	exec -- x-www chromium-guest:z-run open file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+!!
+
+<< manual / open / html / webview
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: manual / render'
+	exec -- x-www webview open file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+!!
+
+<< manual / open / html / links
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: manual / render'
+	exec -- links file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+!!
+
+<< manual / open / man
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: manual / render'
+	exec -- man -- ./documentation/manual/z-run.1.man
+!!
+
+<< manual / open / text
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: manual / render'
+	exec -- less -- ./documentation/manual/z-run.1.txt
+!!
+
+
+
+
+<< watch / manual / render
+	test "${#}" -eq 0
+	exec -- watchexec \
+			--watch=./documentation/manual/z-run.1.ronn \
+			--no-shell \
+			-- \
+			"${ZRUN[@]}" ':: manual / render' "${@}" \
+	#
+!!
+
+
+<< manual / render
+	test "${#}" -eq 0
+	if test \
+			./documentation/manual/z-run.1.ronn -ot ./documentation/manual/z-run.1.man -a \
+			./documentation/manual/z-run.1.ronn -ot ./documentation/manual/z-run.1.html -a \
+			./documentation/manual/z-run.1.ronn -ot ./documentation/manual/z-run.1.txt \
+	; then
+		printf -- '[ii]  skipping rendering manual!\n' >&2
+		exit -- 0
+	fi
+	printf -- '[ii]  rendering manual...\n' >&2
+	exec -- "${ZRUN[@]}" ':: manual / render / forced' "${@}"
+!!
+
+
+
+
+--<< manual / render / forced
+	
+	test "${#}" -eq 0
+	
+	_build_timestamp="$( exec -- cat -- ./sources/embedded/build/timestamp.txt )"
+	_build_date="${_build_timestamp:0:10}"
+	
+	_ronn_arguments=(
+			--manual=z-run
+			--organization=volution.ro
+			--date='1970-12-01'
+			--warnings
+		)
+	
+	ronn \
+			--roff --pipe "${_ronn_arguments[@]}" \
+			-- \
+			./documentation/manual/z-run.1.ronn \
+	| sed -r -e "s#December 1970#${_build_date}#g" \
+		>| ./documentation/manual/z-run.1.man.tmp \
+	#
+	mv -T -- \
+			./documentation/manual/z-run.1.man.tmp \
+			./documentation/manual/z-run.1.man \
+	#
+	
+	ronn \
+			--html --pipe "${_ronn_arguments[@]}" \
+			--style man,dark,print \
+			-- \
+			./documentation/manual/z-run.1.ronn \
+	| sed -r -e "s#December 1970#${_build_date}#g" \
+		>| ./documentation/manual/z-run.1.html.tmp \
+	#
+	mv -T -- \
+			./documentation/manual/z-run.1.html.tmp \
+			./documentation/manual/z-run.1.html \
+	#
+	
+	mandoc \
+			-c \
+			-man \
+			-T utf8 \
+			-I os=POSIX \
+			-O indent=2 \
+			-O width=78 \
+			-W all \
+		< ./documentation/manual/z-run.1.man \
+	| col -b -x \
+		>| ./documentation/manual/z-run.1.txt.tmp \
+	#
+	mv -T -- \
+			./documentation/manual/z-run.1.txt.tmp \
+			./documentation/manual/z-run.1.txt \
+	#
+!!
+
