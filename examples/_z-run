@@ -1,7 +1,5 @@
 #!/dev/null
 
-&&== z-run ./.outputs/main--debug
-
 && _/environment.z-run
 && _/basic.z-run
 && _/menus.z-run
@@ -17,12 +15,4 @@
 && _/bash.z-run
 && _/starlark.z-run
 && _/os-${ZRUN_OS}.z-run
-
-
-&&?? _/does-not-exist
-&&?? ./tmp/does-not-exist
-&&?? ../tmp/does-not-exist
-&&?? /tmp/does-not-exist
-
-&&??__ _/does-not-exist
 

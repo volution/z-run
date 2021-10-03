@@ -1,0 +1,5 @@
+#!/usr/bin/env -S z-run --scriptlet-exec
+#! <bash>
+
+printf -- '%s\n' 'hello from Bash'
+

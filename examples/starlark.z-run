@@ -9,6 +9,6 @@
 << starlark / test / print
 	#! <starlark>
 	
-	print ("hello")
+	print ("hello from Starlark")
 !!
 

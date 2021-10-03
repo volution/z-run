@@ -1,0 +1,5 @@
+#!/usr/bin/env -S z-run --scriptlet-exec
+#! <python3>
+
+print ("hello from Python3")
+
