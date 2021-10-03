@@ -13,17 +13,21 @@ import "golang.org/x/sys/unix"
 
 
 
+var PROJECT_URL = "https://github.com/cipriancraciun/z-run"
+
 var BUILD_TARGET string = "{unknown-target}"
 var BUILD_TARGET_ARCH string = runtime.GOARCH
 var BUILD_TARGET_OS string = runtime.GOOS
 var BUILD_COMPILER_TYPE string = runtime.Compiler
 var BUILD_COMPILER_VERSION string = runtime.Version ()
+var BUILD_DEVELOPMENT bool = (BUILD_TARGET == "development")
 
 var BUILD_VERSION string = strings.Trim (embedded.BuildVersion, "\n")
 var BUILD_NUMBER string = strings.Trim (embedded.BuildNumber, "\n")
 var BUILD_TIMESTAMP string = strings.Trim (embedded.BuildTimestamp, "\n")
-var BUILD_SOURCES_MD5 string = strings.Trim (embedded.BuildSourcesMd5, "\n")
+
 var BUILD_GIT_HASH string = "{unknown-git-hash}"
+var BUILD_SOURCES_HASH string = strings.Trim (embedded.BuildSourcesHash, "\n")
 
 var UNAME_NODE string = "{unknown-node}"
 var UNAME_SYSTEM string = "{unknown-system}"

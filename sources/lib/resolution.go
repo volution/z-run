@@ -224,7 +224,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 	{
 		_fingerprints := make ([]string, 0, len (_sources) * 2)
 		_fingerprints = append (_fingerprints, "build-version:" + BUILD_VERSION)
-		_fingerprints = append (_fingerprints, "build-sources:" + BUILD_SOURCES_MD5)
+		_fingerprints = append (_fingerprints, "build-sources:" + BUILD_SOURCES_HASH)
 		_fingerprints = append (_fingerprints, "workspace:" + _context.workspace)
 		for _, _source := range _sources {
 			_fingerprints = append (_fingerprints, "sources:" + _source.FingerprintMeta)

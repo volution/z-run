@@ -24,12 +24,13 @@ import isatty "github.com/mattn/go-isatty"
 func PreMain () () {
 	
 	
-	log.SetFlags (0)
-	
 	runtime.GOMAXPROCS (1)
 	debug.SetMaxThreads (16)
 	debug.SetMaxStack (128 * 1024)
 	debug.SetGCPercent (500)
+	
+	
+	log.SetFlags (0)
 	
 	
 	var _executable0 string
@@ -51,29 +52,68 @@ func PreMain () () {
 	}
 	
 	
+	
+	
 	if (len (os.Args) == 2) {
+		_argument := os.Args[1]
 		
-		if (os.Args[1] == "--version") || (os.Args[1] == "-v") {
+		if (_argument == "--version") || (_argument == "-v") {
 			
 			fmt.Fprintf (os.Stdout, "* version       : %s\n", BUILD_VERSION)
 			fmt.Fprintf (os.Stdout, "* executable    : %s\n", os.Args[0])
 			fmt.Fprintf (os.Stdout, "* build target  : %s, %s-%s, %s, %s\n", BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER_VERSION, BUILD_COMPILER_TYPE)
 			fmt.Fprintf (os.Stdout, "* build number  : %s, %s\n", BUILD_NUMBER, BUILD_TIMESTAMP)
-			fmt.Fprintf (os.Stdout, "* sources md5   : %s\n", BUILD_SOURCES_MD5)
+			fmt.Fprintf (os.Stdout, "* code & issues : %s\n", PROJECT_URL)
 			fmt.Fprintf (os.Stdout, "* sources git   : %s\n", BUILD_GIT_HASH)
-			fmt.Fprintf (os.Stdout, "* code & issues : %s\n", "https://github.com/cipriancraciun/z-run")
+			fmt.Fprintf (os.Stdout, "* sources hash  : %s\n", BUILD_SOURCES_HASH)
 			fmt.Fprintf (os.Stdout, "* uname node    : %s\n", UNAME_NODE)
 			fmt.Fprintf (os.Stdout, "* uname system  : %s, %s, %s\n", UNAME_SYSTEM, UNAME_RELEASE, UNAME_MACHINE)
+			
 			os.Exit (0)
 			panic (0x66203ba4)
-			
-		} else if (os.Args[1] == "--help") || (os.Args[1] == "-h") {
-			
+		}
+		
+		if _argument == "--sources-md5" {
+			if _, _error := os.Stdout.WriteString (embeddedSourcesMd5); _error != nil {
+				panic (abortError (errorw (0x7471032d, _error)))
+			}
+			os.Exit (0)
+			panic (0x9aaf5529)
+		}
+		
+		if _argument == "--sources-cpio" {
+			if _, _error := os.Stdout.Write (embeddedSourcesCpioGz); _error != nil {
+				panic (abortError (errorw (0x8034bf3e, _error)))
+			}
+			os.Exit (0)
+			panic (0x7dca7f0e)
+		}
+		
+		if (_argument == "--manual") || (_argument == "--manual-text") || (_argument == "--manual-html") || (_argument == "--manual-man") {
+			_manual := ""
+			switch _argument {
+				case "--manual", "--manual-text" :
+					_manual = embeddedManualTxt
+				case "--manual-html" :
+					_manual = embeddedManualHtml
+				case "--manual-man" :
+					_manual = embeddedManualMan
+				default :
+					panic (0x41b79a1d)
+			}
+			fmt.Fprint (os.Stdout, _manual)
+			os.Exit (0)
+			panic (0x1005584b)
+		}
+		
+		if (_argument == "--help") || (_argument == "-h") {
 			fmt.Fprint (os.Stdout, embeddedManualTxt)
 			os.Exit (0)
 			panic (0xec70ce24)
-			
-		} else if (os.Args[1] == "--shell") || (os.Args[1] == "--shell-untainted") {
+		}
+		
+		
+		if (_argument == "--shell") || (_argument == "--shell-untainted") {
 			
 			if _error := CheckTerminal (); _error != nil {
 				logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
@@ -81,7 +121,7 @@ func PreMain () () {
 				panic (0x67e03fa2)
 			}
 			
-			if os.Args[1] == "--shell-untainted" {
+			if _argument == "--shell-untainted" {
 				os.Unsetenv ("ZRUN_WORKSPACE")
 				os.Unsetenv ("ZRUN_LIBRARY_SOURCE")
 				os.Unsetenv ("ZRUN_LIBRARY_URL")
@@ -125,10 +165,12 @@ func PreMain () () {
 				panic (abortError (errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
 			}
 			panic (0xf4813cc2)
+		}
+		
+		
+		if strings.HasPrefix (_argument, "--export=") {
 			
-		} else if strings.HasPrefix (os.Args[1], "--export=") {
-			
-			_what := os.Args[1][len ("--export=") :]
+			_what := _argument[len ("--export=") :]
 			var _chunks []string
 			
 			switch _what {
@@ -199,6 +241,8 @@ func PreMain () () {
 			panic (0xda66de5d)
 		}
 	}
+	
+	
 	
 	
 	_preMainContext := & PreMainContext {}
