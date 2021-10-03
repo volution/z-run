@@ -15,19 +15,33 @@
 
 
 
-:: examples / execute :: exec -- "${ZRUN[@]}" ':: examples / exec' execute-scriptlet "${@}"
-:: examples / select-label :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-label "${@}"
-:: examples / select-body :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-body "${@}"
-:: examples / list-labels :: exec -- "${ZRUN[@]}" ':: examples / exec' export-scriptlet-labels "${@}"
-:: examples / parse-library :: exec -- "${ZRUN[@]}" ':: examples / exec' parse-library "${@}"
+:: examples / execute-scriptlet :: exec -- "${ZRUN[@]}" ':: examples / exec' execute-scriptlet "${@}"
+:: examples / execute-scriptlet-ssh :: exec -- "${ZRUN[@]}" ':: examples / exec' execute-scriptlet-ssh "${@}"
+
+:: examples / select-execute-scriptlet :: exec -- "${ZRUN[@]}" ':: examples / exec' select-execute-scriptlet "${@}"
+:: examples / select-execute-scriptlet-loop :: exec -- "${ZRUN[@]}" ':: examples / exec' select-execute-scriptlet-loop "${@}"
+
+:: examples / select-export-scriptlet-label :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-label "${@}"
+:: examples / select-export-scriptlet-body :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-body "${@}"
+:: examples / select-export-scriptlet-label-and-body :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-label-and-body "${@}"
+
+:: examples / export-scriptlet-labels :: exec -- "${ZRUN[@]}" ':: examples / exec' export-scriptlet-labels "${@}"
+
 :: examples / export-library-json :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-json "${@}"
 :: examples / export-library-cdb :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-cdb "${@}"
+:: examples / export-library-rpc :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-rpc "${@}"
+:: examples / export-library-url :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-url "${@}"
+:: examples / export-library-fingerprint :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-fingerprint "${@}"
+
+:: examples / parse-library :: exec -- "${ZRUN[@]}" ':: examples / exec' parse-library "${@}"
 
 :: examples / exec :: exec -- "${ZRUN[@]}" ':: run / exec' "${@}"
 
 
 
 
-:: use / examples / workspace :: export -- ZRUNDEV_USE=./.z-run
-:: use / examples / syntax :: export -- ZRUNDEV_USE=./examples/syntax.z-run
+:: use / examples / library / default :: export -- __RUN_LIBRARY_SOURCE=
+:: use / examples / library / workspace :: export -- __RUN_LIBRARY_SOURCE=./scripts/z-run
+:: use / examples / library / examples / default :: export -- __RUN_LIBRARY_SOURCE=./examples/_z-run
+:: use / examples / library / examples / syntax :: export -- __RUN_LIBRARY_SOURCE=./examples/syntax.z-run
 
