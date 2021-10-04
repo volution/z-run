@@ -78,7 +78,7 @@
 		;;&
 		( all | cpu | memory )
 		;;
-		( hyperfine | time )
+		( hyperfine | hyperfine-with-output | time )
 		;;
 		( * )
 			printf -- '[ee]  invalid run profile `%s`;  aborting!\n' "${_profile}" >&2
@@ -138,13 +138,11 @@
 	
 	if test -n "${__RUN_LIBRARY_SOURCE:-}" ; then
 		export -- ZRUN_LIBRARY_SOURCE="${__RUN_LIBRARY_SOURCE}"
-	else
-		export -- ZRUN_LIBRARY_SOURCE=./examples/z-run
 	fi
 	export -n -- __RUN_LIBRARY_SOURCE=
 	
 	case "${_profile}" in
-		( hyperfine )
+		( hyperfine | hyperfine-with-output )
 			_wrapper=(
 					hyperfine
 						--warmup 5
@@ -152,8 +150,11 @@
 						--max-runs 100
 						--shell ''
 						--command-name z-run
-						--
 				)
+			if test "${_profile}" == hyperfine-with-output ; then
+				_wrapper+=( --show-output )
+			fi
+			_wrapper+=( -- )
 			exec -- "${_wrapper[@]}" "${_command[*]@Q}"
 		;;
 		( time )
@@ -187,6 +188,7 @@
 :: use / run / profile / memory :: export -- __RUN_PROFILE=memory
 :: use / run / profile / time :: export -- __RUN_PROFILE=time
 :: use / run / profile / hyperfine :: export -- __RUN_PROFILE=hyperfine
+:: use / run / profile / hyperfine / with-output :: export -- __RUN_PROFILE=hyperfine-with-output
 
 :: use / run / term / enable :: export -- __RUN_TERM="${TERM}"
 :: use / run / term / disable :: export -- __RUN_TERM=dumb

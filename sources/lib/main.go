@@ -310,6 +310,9 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					case "parse-library" :
 						_command = "parse-library"
 					
+					case "parse-library-without-output" :
+						_command = "parse-library-without-output"
+					
 					case "export-library-json" :
 						_command = "export-library-json"
 					
@@ -434,7 +437,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 	}
 	
 	_cacheEnabled := true
-	if _command == "parse-library" {
+	if (_command == "parse-library") || (_command == "parse-library-without-output")  {
 		_cacheEnabled = false
 	}
 	if _cacheEnabled {
@@ -674,11 +677,15 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			return doExportScriptletLabels (_library, os.Stdout, _context)
 		
 		
-		case "parse-library" :
+		case "parse-library", "parse-library-without-output" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return errorf (0x400ec122, "export:  unexpected scriptlet or arguments")
 			}
-			return doExportLibraryJson (_library, os.Stdout, _context)
+			if _command == "parse-library" {
+				return doExportLibraryJson (_library, os.Stdout, _context)
+			} else {
+				return nil
+			}
 		
 		case "export-library-json" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {

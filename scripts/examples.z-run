@@ -32,8 +32,15 @@
 :: examples / export-library-fingerprint :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-fingerprint "${@}"
 
 :: examples / parse-library :: exec -- "${ZRUN[@]}" ':: examples / exec' parse-library "${@}"
+:: examples / parse-library / without-output :: exec -- "${ZRUN[@]}" ':: examples / exec' parse-library-without-output "${@}"
 
-:: examples / exec :: exec -- "${ZRUN[@]}" ':: run / exec' "${@}"
+
+
+
+<< examples / exec
+	export -- __RUN_LIBRARY_SOURCE="${__RUN_LIBRARY_SOURCE:-./examples/_z-run}"
+	exec -- "${ZRUN[@]}" ':: run / exec' "${@}"
+!!
 
 
 
