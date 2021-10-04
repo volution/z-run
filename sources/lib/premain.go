@@ -52,6 +52,27 @@ func PreMain () () {
 	}
 	
 	
+	for _, _variable := range os.Environ () {
+		_accept := true
+		if _splitIndex := strings.IndexByte (_variable, '='); _splitIndex >= 0 {
+			_variable = _variable[:_splitIndex]
+			if _variable == "" {
+				_accept = false
+			}
+		} else {
+			_accept = false
+		}
+		if _accept && strings.HasPrefix (_variable, "HYPERFINE_") {
+			_accept = false
+		}
+		if !_accept {
+			if _error := os.Unsetenv (_variable); _error != nil {
+				panic (abortError (errorw (0x14024051, _error)))
+			}
+		}
+	}
+	
+	
 	
 	
 	if (len (os.Args) == 2) {
