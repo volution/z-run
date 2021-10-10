@@ -8,6 +8,10 @@
 
 
 
+:: watch / examples / export-library-url :: exec -- "${ZRUN[@]}" ':: watch / examples / exec' export-library-url "${@}"
+:: watch / examples / export-library-identifier :: exec -- "${ZRUN[@]}" ':: watch / examples / exec' export-library-identifier "${@}"
+:: watch / examples / export-library-fingerprint :: exec -- "${ZRUN[@]}" ':: watch / examples / exec' export-library-fingerprint "${@}"
+
 :: watch / examples / exec :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: examples / exec' "${@}"
 
 
