@@ -38,22 +38,17 @@ func NewCdbStoreInput (_path string) (*CdbStoreInput, *Error) {
 }
 
 
-func (_store *CdbStoreInput) Select (_namespace string, _key string, _value interface{}) (bool, *Error) {
-	
-	_keyBuffer := bytes.NewBuffer (nil)
-	_keyBuffer.WriteString (_namespace)
-	_keyBuffer.WriteString (" // ")
-	_keyBuffer.WriteString (_key)
+func (_store *CdbStoreInput) SelectObject (_namespace string, _key string, _value interface{}) (bool, *Error) {
 	
 	var _valueData []byte
-	if _valueData_0, _error := _store.reader.Get (_keyBuffer.Bytes ()); _error == nil {
-		_valueData = _valueData_0
+	if _found, _data, _error := _store.SelectRawBytes (_namespace, _key); _error == nil {
+		if _found {
+			_valueData = _data
+		} else {
+			return false, nil
+		}
 	} else {
-		return false, errorw (0x811cd704, _error)
-	}
-	
-	if _valueData == nil {
-		return false, nil
+		return false, _error
 	}
 	
 	switch _value := _value.(type) {
@@ -76,6 +71,47 @@ func (_store *CdbStoreInput) Select (_namespace string, _key string, _value inte
 	}
 	
 	return true, nil
+}
+
+
+func (_store *CdbStoreInput) SelectRawString (_namespace string, _key string) (bool, string, *Error) {
+	
+	var _valueData []byte
+	if _found, _data, _error := _store.SelectRawBytes (_namespace, _key); _error == nil {
+		if _found {
+			_valueData = _data
+		} else {
+			return false, "", nil
+		}
+	} else {
+		return false, "", _error
+	}
+	
+	_value := string (_valueData)
+	
+	return true, _value, nil
+}
+
+
+func (_store *CdbStoreInput) SelectRawBytes (_namespace string, _key string) (bool, []byte, *Error) {
+	
+	_keyBuffer := bytes.NewBuffer (nil)
+	_keyBuffer.WriteString (_namespace)
+	_keyBuffer.WriteString (" // ")
+	_keyBuffer.WriteString (_key)
+	
+	var _valueData []byte
+	if _valueData_0, _error := _store.reader.Get (_keyBuffer.Bytes ()); _error == nil {
+		_valueData = _valueData_0
+	} else {
+		return false, nil, errorw (0x811cd704, _error)
+	}
+	
+	if _valueData == nil {
+		return false, nil, nil
+	}
+	
+	return true, _valueData, nil
 }
 
 
@@ -117,12 +153,7 @@ func NewCdbStoreOutput (_path string) (*CdbStoreOutput, *Error) {
 }
 
 
-func (_store *CdbStoreOutput) Include (_namespace string, _key string, _value interface{}) (*Error) {
-	
-	_keyBuffer := bytes.NewBuffer (nil)
-	_keyBuffer.WriteString (_namespace)
-	_keyBuffer.WriteString (" // ")
-	_keyBuffer.WriteString (_key)
+func (_store *CdbStoreOutput) IncludeObject (_namespace string, _key string, _value interface{}) (*Error) {
 	
 	_valueBuffer := bytes.NewBuffer (nil)
 	switch _value := _value.(type) {
@@ -140,12 +171,32 @@ func (_store *CdbStoreOutput) Include (_namespace string, _key string, _value in
 			}
 	}
 	
-	if _error := _store.writer.Put (_keyBuffer.Bytes (), _valueBuffer.Bytes ()); _error == nil {
+	return _store.IncludeRawBytes (_namespace, _key, _valueBuffer.Bytes ())
+}
+
+
+func (_store *CdbStoreOutput) IncludeRawString (_namespace string, _key string, _value string) (*Error) {
+	
+	_valueData := []byte (_value)
+	
+	return _store.IncludeRawBytes (_namespace, _key, _valueData)
+}
+
+
+func (_store *CdbStoreOutput) IncludeRawBytes (_namespace string, _key string, _value []byte) (*Error) {
+	
+	_keyBuffer := bytes.NewBuffer (nil)
+	_keyBuffer.WriteString (_namespace)
+	_keyBuffer.WriteString (" // ")
+	_keyBuffer.WriteString (_key)
+	
+	if _error := _store.writer.Put (_keyBuffer.Bytes (), _value); _error == nil {
 		return nil
 	} else {
 		return errorw (0x28b9a333, _error)
 	}
 }
+
 
 func (_store *CdbStoreOutput) Commit () (*Error) {
 	if _error := _store.writer.Close (); _error != nil {

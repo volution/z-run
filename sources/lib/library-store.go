@@ -51,7 +51,7 @@ func NewLibraryStoreInput (_store StoreInput, _url string) (*LibraryStoreInput, 
 
 func (_library *LibraryStoreInput) SelectFingerprints () ([]string, *Error) {
 	var _value []string
-	if _found, _error := _library.store.Select ("scriptlets-indices", "fingerprints", &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("scriptlets-indices", "fingerprints", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
@@ -64,7 +64,7 @@ func (_library *LibraryStoreInput) SelectFingerprints () ([]string, *Error) {
 
 func (_library *LibraryStoreInput) SelectLabels () ([]string, *Error) {
 	var _value []string
-	if _found, _error := _library.store.Select ("scriptlets-indices", "labels", &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("scriptlets-indices", "labels", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
@@ -77,7 +77,7 @@ func (_library *LibraryStoreInput) SelectLabels () ([]string, *Error) {
 
 func (_library *LibraryStoreInput) SelectLabelsAll () ([]string, *Error) {
 	var _value []string
-	if _found, _error := _library.store.Select ("scriptlets-indices", "labels-all", &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("scriptlets-indices", "labels-all", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
@@ -121,7 +121,7 @@ func (_library *LibraryStoreInput) ResolveFullByFingerprint (_fingerprint string
 
 func (_library *LibraryStoreInput) ResolveMetaByFingerprint (_fingerprint string) (*Scriptlet, *Error) {
 	var _value *Scriptlet
-	if _found, _error := _library.store.Select ("scriptlets-meta", _fingerprint, &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("scriptlets-meta", _fingerprint, &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
@@ -133,8 +133,7 @@ func (_library *LibraryStoreInput) ResolveMetaByFingerprint (_fingerprint string
 }
 
 func (_library *LibraryStoreInput) ResolveBodyByFingerprint (_fingerprint string) (string, bool, *Error) {
-	var _value string
-	if _found, _error := _library.store.Select ("scriptlets-body", _fingerprint, &_value); _error == nil {
+	if _found, _value, _error := _library.store.SelectRawString ("scriptlets-body", _fingerprint); _error == nil {
 		if _found {
 			return _value, _found, nil
 		} else {
@@ -183,8 +182,7 @@ func (_library *LibraryStoreInput) ResolveBodyByLabel (_label string) (string, b
 }
 
 func (_library *LibraryStoreInput) ResolveFingerprintByLabel (_label string) (string, bool, *Error) {
-	var _value string
-	if _found, _error := _library.store.Select ("scriptlets-fingerprint-by-label", _label, &_value); _error == nil {
+	if _found, _value, _error := _library.store.SelectRawString ("scriptlets-fingerprint-by-label", _label); _error == nil {
 		if _found {
 			return _value, _found, nil
 		} else {
@@ -197,7 +195,7 @@ func (_library *LibraryStoreInput) ResolveFingerprintByLabel (_label string) (st
 
 func (_library *LibraryStoreInput) ResolveContextByFingerprint (_fingerprint string) (*ScriptletContext, bool, *Error) {
 	var _value *ScriptletContext
-	if _found, _error := _library.store.Select ("scriptlets-contexts-by-fingerprint", _fingerprint, &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("scriptlets-contexts-by-fingerprint", _fingerprint, &_value); _error == nil {
 		if _found {
 			return _value, _found, nil
 		} else {
@@ -211,7 +209,7 @@ func (_library *LibraryStoreInput) ResolveContextByFingerprint (_fingerprint str
 
 func (_library *LibraryStoreInput) SelectLibrarySources () (LibrarySources, *Error) {
 	var _value LibrarySources
-	if _found, _error := _library.store.Select ("library-meta", "library-sources", &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("library-meta", "library-sources", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
@@ -224,7 +222,7 @@ func (_library *LibraryStoreInput) SelectLibrarySources () (LibrarySources, *Err
 
 func (_library *LibraryStoreInput) SelectLibraryContext () (*LibraryContext, *Error) {
 	var _value *LibraryContext
-	if _found, _error := _library.store.Select ("library-meta", "library-context", &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("library-meta", "library-context", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
@@ -236,8 +234,7 @@ func (_library *LibraryStoreInput) SelectLibraryContext () (*LibraryContext, *Er
 }
 
 func (_library *LibraryStoreInput) Fingerprint () (string, *Error) {
-	var _value string
-	if _found, _error := _library.store.Select ("library-meta", "fingerprint", &_value); _error == nil {
+	if _found, _value, _error := _library.store.SelectRawString ("library-meta", "fingerprint"); _error == nil {
 		if _found {
 			return _value, nil
 		} else {

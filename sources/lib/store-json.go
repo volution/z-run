@@ -36,7 +36,7 @@ func NewJsonStreamStoreOutput (_stream io.Writer, _closer io.Closer) (*JsonStrea
 		}
 }
 
-func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _value interface{}) (*Error) {
+func (_store *JsonStreamStoreOutput) IncludeObject (_namespace string, _key string, _value interface{}) (*Error) {
 	_record := & JsonStoreRecord {
 			Namespace : _namespace,
 			Key : _key,
@@ -47,6 +47,14 @@ func (_store *JsonStreamStoreOutput) Include (_namespace string, _key string, _v
 	} else {
 		return errorw (0x5435f95a, _error)
 	}
+}
+
+func (_store *JsonStreamStoreOutput) IncludeRawString (_namespace string, _key string, _value string) (*Error) {
+	return _store.IncludeObject (_namespace, _key, _value)
+}
+
+func (_store *JsonStreamStoreOutput) IncludeRawBytes (_namespace string, _key string, _value []byte) (*Error) {
+	return errorf (0x42df6824, "JSON store does not support raw bytes")
 }
 
 func (_store *JsonStreamStoreOutput) Commit () (*Error) {
