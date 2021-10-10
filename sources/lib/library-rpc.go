@@ -162,6 +162,34 @@ func (_client *LibraryRpcClient) Url () (string) {
 
 
 
+type LibraryRpc_Identifier_Input struct {
+}
+
+type LibraryRpc_Identifier_Output struct {
+	Identifier string
+	Error *Error
+}
+
+func (_client *LibraryRpcClient) Identifier () (string, *Error) {
+	_input := LibraryRpc_Identifier_Input {}
+	_output := LibraryRpc_Identifier_Output {}
+	if _error := _client.rpc.Call ("Library.Identifier", &_input, &_output); _error == nil {
+		return _output.Identifier, _output.Error
+	} else {
+		return "", errorw (0x116698be, _error)
+	}
+}
+
+func (_exports *LibraryRpcServerExports) Identifier (_input *LibraryRpc_Identifier_Input, _output *LibraryRpc_Identifier_Output) (error) {
+	_exports.server.mutex.RLock ()
+	defer _exports.server.mutex.RUnlock ()
+	_output.Identifier, _output.Error = _exports.server.library.Identifier ()
+	return nil
+}
+
+
+
+
 type LibraryRpc_Fingerprint_Input struct {
 }
 

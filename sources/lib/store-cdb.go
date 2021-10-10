@@ -38,10 +38,10 @@ func NewCdbStoreInput (_path string) (*CdbStoreInput, *Error) {
 }
 
 
-func (_store *CdbStoreInput) SelectObject (_namespace string, _key string, _value interface{}) (bool, *Error) {
+func (_store *CdbStoreInput) SelectObject (_instance string, _global bool, _namespace string, _key string, _value interface{}) (bool, *Error) {
 	
 	var _valueData []byte
-	if _found, _data, _error := _store.SelectRawBytes (_namespace, _key); _error == nil {
+	if _found, _data, _error := _store.SelectRawBytes (_instance, _global, _namespace, _key); _error == nil {
 		if _found {
 			_valueData = _data
 		} else {
@@ -74,10 +74,10 @@ func (_store *CdbStoreInput) SelectObject (_namespace string, _key string, _valu
 }
 
 
-func (_store *CdbStoreInput) SelectRawString (_namespace string, _key string) (bool, string, *Error) {
+func (_store *CdbStoreInput) SelectRawString (_instance string, _global bool, _namespace string, _key string) (bool, string, *Error) {
 	
 	var _valueData []byte
-	if _found, _data, _error := _store.SelectRawBytes (_namespace, _key); _error == nil {
+	if _found, _data, _error := _store.SelectRawBytes (_instance, _global, _namespace, _key); _error == nil {
 		if _found {
 			_valueData = _data
 		} else {
@@ -93,7 +93,7 @@ func (_store *CdbStoreInput) SelectRawString (_namespace string, _key string) (b
 }
 
 
-func (_store *CdbStoreInput) SelectRawBytes (_namespace string, _key string) (bool, []byte, *Error) {
+func (_store *CdbStoreInput) SelectRawBytes (_instance string, _global bool, _namespace string, _key string) (bool, []byte, *Error) {
 	
 	_keyBuffer := bytes.NewBuffer (nil)
 	_keyBuffer.WriteString (_namespace)
@@ -153,7 +153,7 @@ func NewCdbStoreOutput (_path string) (*CdbStoreOutput, *Error) {
 }
 
 
-func (_store *CdbStoreOutput) IncludeObject (_namespace string, _key string, _value interface{}) (*Error) {
+func (_store *CdbStoreOutput) IncludeObject (_instance string, _global bool, _namespace string, _key string, _value interface{}) (*Error) {
 	
 	_valueBuffer := bytes.NewBuffer (nil)
 	switch _value := _value.(type) {
@@ -171,19 +171,19 @@ func (_store *CdbStoreOutput) IncludeObject (_namespace string, _key string, _va
 			}
 	}
 	
-	return _store.IncludeRawBytes (_namespace, _key, _valueBuffer.Bytes ())
+	return _store.IncludeRawBytes (_instance, _global, _namespace, _key, _valueBuffer.Bytes ())
 }
 
 
-func (_store *CdbStoreOutput) IncludeRawString (_namespace string, _key string, _value string) (*Error) {
+func (_store *CdbStoreOutput) IncludeRawString (_instance string, _global bool, _namespace string, _key string, _value string) (*Error) {
 	
 	_valueData := []byte (_value)
 	
-	return _store.IncludeRawBytes (_namespace, _key, _valueData)
+	return _store.IncludeRawBytes (_instance, _global, _namespace, _key, _valueData)
 }
 
 
-func (_store *CdbStoreOutput) IncludeRawBytes (_namespace string, _key string, _value []byte) (*Error) {
+func (_store *CdbStoreOutput) IncludeRawBytes (_instance string, _global bool, _namespace string, _key string, _value []byte) (*Error) {
 	
 	_keyBuffer := bytes.NewBuffer (nil)
 	_keyBuffer.WriteString (_namespace)

@@ -66,9 +66,9 @@ type Library struct {
 	LibrarySources LibrarySources `json:"library_sources"`
 	LibraryContext *LibraryContext `json:"library_context"`
 	
-	SourcesFingerprint string `json:"sources_fingerprint"`
-	EnvironmentFingerprint string `json:"environment_fingerprint"`
+	LibraryIdentifier string `json:"library_identifier"`
 	LibraryFingerprint string `json:"library_fingerprint"`
+	SourcesFingerprint string `json:"sources_fingerprint"`
 	
 	url string
 }
@@ -206,6 +206,15 @@ func (_library *Library) SelectLibraryContext () (*LibraryContext, *Error) {
 
 func (_library *Library) Url () (string) {
 	return _library.url
+}
+
+func (_library *Library) Identifier () (string, *Error) {
+	_identifier := _library.LibraryIdentifier
+	if _identifier != "" {
+		return _identifier, nil
+	} else {
+		return "", errorf (0x41ca16f5, "invalid state")
+	}
 }
 
 func (_library *Library) Fingerprint () (string, *Error) {

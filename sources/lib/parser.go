@@ -31,7 +31,7 @@ type parseContext struct {
 
 
 
-func parseLibrary (_sources []*Source, _environmentFingerprint string, _context *Context) (*Library, *Error) {
+func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Context) (*Library, *Error) {
 	
 	_parseContext := & parseContext {}
 	
@@ -42,8 +42,8 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		}
 	
 	_library := NewLibrary ()
-	_library.EnvironmentFingerprint = _environmentFingerprint
-	_library.LibraryFingerprint = _environmentFingerprint
+	_library.LibraryIdentifier = _libraryIdentifier
+	_library.LibraryFingerprint = _libraryIdentifier + "--parsing"
 	
 	if _error := includeScriptletContext (_library, _parseContext.scriptletContext); _error != nil {
 		return nil, _error
@@ -230,7 +230,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 		_library.SourcesFingerprint = NewFingerprinter () .StringsWithLen (_fingerprints) .Build ()
 	}
 	
-	_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.EnvironmentFingerprint) .StringWithLen (_library.SourcesFingerprint) .Build ()
+	_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryIdentifier) .StringWithLen (_library.SourcesFingerprint) .Build ()
 	
 	if _progress != nil {
 		_progress.SetTotal (_progress.Current () + 1, true)
@@ -659,7 +659,7 @@ func parseFromSource (_library *Library, _source *Source, _context *Context, _pa
 		if _error := includeSource (_library, _source); _error != nil {
 			return _error
 		}
-		_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_source.FingerprintData) .Build ()
+//?		_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_source.FingerprintData) .Build ()
 		return parseFromData (_library, _data, _source.Path, _context, _parseContext)
 	} else {
 		return _error
@@ -882,7 +882,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								} else {
 									return errorf (0x16010e20, "invalid UTF-8")
 								}
-								_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_includeSource.FingerprintData) .Build ()
+//?								_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_includeSource.FingerprintData) .Build ()
 							} else {
 								return _error
 							}
@@ -1014,7 +1014,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _error := includeSource (_library, _includeSource); _error != nil {
 								return _error
 							}
-							_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_includeSource.FingerprintData) .Build ()
+//?							_library.LibraryFingerprint = NewFingerprinter () .StringWithLen (_library.LibraryFingerprint) .StringWithLen (_includeSource.FingerprintData) .Build ()
 						} else {
 							if !_ignoreError {
 								return _error

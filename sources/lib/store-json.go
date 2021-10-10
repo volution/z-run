@@ -17,6 +17,8 @@ type JsonStreamStoreOutput struct {
 
 
 type JsonStoreRecord struct {
+	Instance string `json:"instance"`
+	Global bool `json:"global"`
 	Namespace string `json:"namespace"`
 	Key string `json:"key"`
 	Value interface{} `json:"value"`
@@ -36,8 +38,10 @@ func NewJsonStreamStoreOutput (_stream io.Writer, _closer io.Closer) (*JsonStrea
 		}
 }
 
-func (_store *JsonStreamStoreOutput) IncludeObject (_namespace string, _key string, _value interface{}) (*Error) {
+func (_store *JsonStreamStoreOutput) IncludeObject (_instance string, _global bool, _namespace string, _key string, _value interface{}) (*Error) {
 	_record := & JsonStoreRecord {
+			Instance : _instance,
+			Global : _global,
 			Namespace : _namespace,
 			Key : _key,
 			Value : _value,
@@ -49,11 +53,11 @@ func (_store *JsonStreamStoreOutput) IncludeObject (_namespace string, _key stri
 	}
 }
 
-func (_store *JsonStreamStoreOutput) IncludeRawString (_namespace string, _key string, _value string) (*Error) {
-	return _store.IncludeObject (_namespace, _key, _value)
+func (_store *JsonStreamStoreOutput) IncludeRawString (_instance string, _global bool, _namespace string, _key string, _value string) (*Error) {
+	return _store.IncludeObject (_instance, _global, _namespace, _key, _value)
 }
 
-func (_store *JsonStreamStoreOutput) IncludeRawBytes (_namespace string, _key string, _value []byte) (*Error) {
+func (_store *JsonStreamStoreOutput) IncludeRawBytes (_instance string, _global bool, _namespace string, _key string, _value []byte) (*Error) {
 	return errorf (0x42df6824, "JSON store does not support raw bytes")
 }
 

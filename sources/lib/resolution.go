@@ -220,9 +220,9 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 		return nil, _error
 	}
 	
-	var _environmentFingerprint string
+	var _libraryIdentifier string
 	{
-		_fingerprints := make ([]string, 0, len (_sources) * 2)
+		_fingerprints := make ([]string, 0, 1024)
 		_fingerprints = append (_fingerprints, "build-version:" + BUILD_VERSION)
 		_fingerprints = append (_fingerprints, "build-sources:" + BUILD_SOURCES_HASH)
 		_fingerprints = append (_fingerprints, "workspace:" + _context.workspace)
@@ -234,7 +234,11 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 			_fingerprints = append (_fingerprints, "clean-environment:" + _fingerprint)
 		}
 		sort.Strings (_fingerprints)
-		_environmentFingerprint = NewFingerprinter () .StringsWithLen (_fingerprints) .Build ()
+		_libraryIdentifier = NewFingerprinter () .StringsWithLen (_fingerprints) .Build ()
+//		logf ('d', 0x2243d3c0, "%s", _libraryIdentifier)
+//		for _, _fingerprint := range _fingerprints {
+//			logf ('d', 0x56370791, "%s", _fingerprint)
+//		}
 	}
 	
 	var _cacheLibrary string
@@ -243,9 +247,9 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 		if _error := makeCacheFolder (_context.cacheRoot, "libraries-cdb"); _error != nil {
 			return nil, _error
 		}
-		_cacheLibrary = path.Join (_context.cacheRoot, "libraries-cdb", _environmentFingerprint + ".cdb")
+		_cacheLibrary = path.Join (_context.cacheRoot, "libraries-cdb", _libraryIdentifier + ".cdb")
 		if _, _error := os.Stat (_cacheLibrary); _error == nil {
-			if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
+			if _library, _error := resolveLibraryCached (_cacheLibrary, _libraryIdentifier); _error == nil {
 				if _fresh, _error := checkLibraryCached (_library); _error == nil {
 					if _fresh {
 //						logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
@@ -268,7 +272,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 	
 	var _library *Library
 //	logf ('i', 0xbd44916b, "parsing library from sources...")
-	if _library_0, _error := parseLibrary (_sources, _environmentFingerprint, _context); _error == nil {
+	if _library_0, _error := parseLibrary (_sources, _libraryIdentifier, _context); _error == nil {
 //		logf ('d', 0x71b45ebc, "parsed library from sources;")
 		_library = _library_0
 	} else {
@@ -290,11 +294,20 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 
 
 
-func resolveLibraryCached (_path string) (LibraryStore, *Error) {
+func resolveLibraryCached (_path string, _identifier string) (LibraryStore, *Error) {
 	if _store, _error := NewCdbStoreInput (_path); _error == nil {
-		if _library, _error := NewLibraryStoreInput (_store, _path); _error == nil {
+		if _library, _error := NewLibraryStoreInput (_store, _path, _identifier); _error == nil {
 //			logf ('d', 0x63ae360d, "opened library cached at `%s`;", _path)
-			return _library, nil
+			if _identifier_0, _error := _library.Identifier (); _error == nil {
+				if _identifier_0 == _identifier {
+					return _library, nil
+				} else {
+					return nil, errorf (0xa0e14143, "invalid store")
+				}
+			} else {
+				_store.Close ()
+				return nil, _error
+			}
 		} else {
 			_store.Close ()
 			return nil, _error

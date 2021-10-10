@@ -29,6 +29,7 @@
 :: examples / export-library-cdb :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-cdb "${@}"
 :: examples / export-library-rpc :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-rpc "${@}"
 :: examples / export-library-url :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-url "${@}"
+:: examples / export-library-identifier :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-identifier "${@}"
 :: examples / export-library-fingerprint :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-fingerprint "${@}"
 
 :: examples / parse-library :: exec -- "${ZRUN[@]}" ':: examples / exec' parse-library "${@}"

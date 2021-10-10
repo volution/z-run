@@ -59,16 +59,36 @@ func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Co
 
 func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *Context) (*Error) {
 	
-	if _fingerprint, _error := _library.Fingerprint (); _error == nil {
-		if _error := _store.IncludeRawString ("library-meta", "fingerprint", _fingerprint); _error != nil {
-			return _error
-		}
+	var _libraryIdentifier string
+	if _identifier_0, _error := _library.Identifier (); _error == nil {
+		_libraryIdentifier = _identifier_0
 	} else {
 		return _error
 	}
 	
+	var _libraryFingerprint string
+	if _fingerprint_0, _error := _library.Fingerprint (); _error == nil {
+		_libraryFingerprint = _fingerprint_0
+	} else {
+		return _error
+	}
+	
+	if _error := _store.IncludeRawString (_libraryIdentifier, false, "library-meta", "identifier", _libraryIdentifier); _error != nil {
+		return _error
+	}
+	if _error := _store.IncludeRawString (_libraryIdentifier, false, "library-meta", "fingerprint", _libraryFingerprint); _error != nil {
+		return _error
+	}
+	
+	if _error := _store.IncludeRawString (_libraryFingerprint, false, "library-meta", "identifier", _libraryIdentifier); _error != nil {
+		return _error
+	}
+	if _error := _store.IncludeRawString (_libraryFingerprint, false, "library-meta", "fingerprint", _libraryFingerprint); _error != nil {
+		return _error
+	}
+	
 	if _sources, _error := _library.SelectLibrarySources (); _error == nil {
-		if _error := _store.IncludeObject ("library-meta", "library-sources", _sources); _error != nil {
+		if _error := _store.IncludeObject (_libraryFingerprint, false, "library-meta", "library-sources", _sources); _error != nil {
 			return _error
 		}
 	} else {
@@ -76,7 +96,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	}
 	
 	if _context, _error := _library.SelectLibraryContext (); _error == nil {
-		if _error := _store.IncludeObject ("library-meta", "library-context", _context); _error != nil {
+		if _error := _store.IncludeObject (_libraryFingerprint, false, "library-meta", "library-context", _context); _error != nil {
 			return _error
 		}
 	} else {
@@ -105,13 +125,13 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 			}
 			_fingerprint := _meta.Fingerprint
 			_label := _meta.Label
-			if _error := _store.IncludeRawString ("scriptlets-fingerprint-by-label", _label, _fingerprint); _error != nil {
+			if _error := _store.IncludeRawString (_libraryFingerprint, false, "scriptlets-fingerprint-by-label", _label, _fingerprint); _error != nil {
 				return _error
 			}
-			if _error := _store.IncludeRawString ("scriptlets-label-by-fingerprint", _fingerprint, _label); _error != nil {
+			if _error := _store.IncludeRawString (_libraryFingerprint, false, "scriptlets-label-by-fingerprint", _fingerprint, _label); _error != nil {
 				return _error
 			}
-			if _error := _store.IncludeObject ("scriptlets-meta", _fingerprint, _meta); _error != nil {
+			if _error := _store.IncludeObject (_libraryFingerprint, true, "scriptlets-meta", _fingerprint, _meta); _error != nil {
 				return _error
 			}
 			_fingerprints = append (_fingerprints, _fingerprint)
@@ -132,7 +152,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 			if !_found {
 				return errorf (0xd80a265e, "invalid store")
 			}
-			if _error := _store.IncludeRawString ("scriptlets-body", _fingerprintFromStore, _body); _error != nil {
+			if _error := _store.IncludeRawString (_libraryFingerprint, true, "scriptlets-body", _fingerprintFromStore, _body); _error != nil {
 				return _error
 			}
 		} else {
@@ -144,26 +164,26 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	sort.Strings (_labels)
 	sort.Strings (_labelsAll)
 	
-	if _error := _store.IncludeObject ("scriptlets-indices", "fingerprints", _fingerprints); _error != nil {
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "fingerprints", _fingerprints); _error != nil {
 		return _error
 	}
-	if _error := _store.IncludeObject ("scriptlets-indices", "labels-by-fingerprints", _labelsByFingerprints); _error != nil {
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels-by-fingerprints", _labelsByFingerprints); _error != nil {
 		return _error
 	}
-	if _error := _store.IncludeObject ("scriptlets-indices", "labels", _labels); _error != nil {
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels", _labels); _error != nil {
 		return _error
 	}
-	if _error := _store.IncludeObject ("scriptlets-indices", "labels-all", _labelsAll); _error != nil {
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels-all", _labelsAll); _error != nil {
 		return _error
 	}
-	if _error := _store.IncludeObject ("scriptlets-indices", "fingerprints-by-labels", _fingerprintsByLabels); _error != nil {
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "fingerprints-by-labels", _fingerprintsByLabels); _error != nil {
 		return _error
 	}
 	
 	for _contextIdentifier, _ := range _contextsIdentifiers {
 		if _context, _found, _error := _library.ResolveContextByIdentifier (_contextIdentifier); _error == nil {
 			if _found && _contextIdentifier == _context.Identifier {
-				if _error := _store.IncludeObject ("scriptlet-contexts-by-identifier", _context.Identifier, _context); _error != nil {
+				if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlet-contexts-by-identifier", _context.Identifier, _context); _error != nil {
 					return _error
 				}
 			} else {

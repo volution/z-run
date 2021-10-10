@@ -325,6 +325,9 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					case "export-library-url" :
 						_command = "export-library-url"
 					
+					case "export-library-identifier" :
+						_command = "export-library-identifier"
+					
 					case "export-library-fingerprint" :
 						_command = "export-library-fingerprint"
 					
@@ -519,7 +522,12 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				return _error
 			}
 		} else {
-			if _library_0, _error := resolveLibraryCached (_libraryCacheUrl); _error == nil {
+			_libraryFileName := path.Base (_libraryCacheUrl)
+			if ! strings.HasSuffix (_libraryFileName, ".cdb") {
+				return errorf (0x06574f0e, "invalid library cache file name `%s`", _libraryCacheUrl)
+			}
+			_libraryIdentifier := _libraryFileName[: len (_libraryFileName) - 4]
+			if _library_0, _error := resolveLibraryCached (_libraryCacheUrl, _libraryIdentifier); _error == nil {
 				_library = _library_0
 			} else {
 				return _error
@@ -721,18 +729,30 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			fmt.Fprintln (os.Stdout, _library.Url ())
 			return nil
 		
-		case "export-library-fingerprint" :
+		case "export-library-identifier", "export-library-fingerprint" :
 			if _scriptlet != "" {
 				return errorf (0x3483242d, "export:  unexpected scriptlet")
 			}
 			if len (_cleanArguments) != 0 {
 				return errorf (0x2a741648, "export:  unexpected arguments")
 			}
-			if _fingerprint, _error := _library.Fingerprint (); _error == nil {
-				fmt.Fprintln (os.Stdout, _fingerprint)
-				return nil
-			} else {
-				return _error
+			switch _command {
+				case "export-library-identifier" :
+					if _identifier, _error := _library.Identifier (); _error == nil {
+						fmt.Fprintln (os.Stdout, _identifier)
+						return nil
+					} else {
+						return _error
+					}
+				case "export-library-fingerprint" :
+					if _fingerprint, _error := _library.Fingerprint (); _error == nil {
+						fmt.Fprintln (os.Stdout, _fingerprint)
+						return nil
+					} else {
+						return _error
+					}
+				default :
+					panic (0xddb85cc9)
 			}
 		
 		case "" :
