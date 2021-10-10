@@ -388,9 +388,19 @@ func prepareExecution_0 (
 		
 		case "<go>", "<go+>" :
 			
+			if _error := makeCacheFolder (_contextCacheRoot, "go-root"); _error != nil {
+				return nil, nil, _error
+			}
+			if _error := makeCacheFolder (_contextCacheRoot, "go-sources"); _error != nil {
+				return nil, nil, _error
+			}
+			if _error := makeCacheFolder (_contextCacheRoot, "go-executables"); _error != nil {
+				return nil, nil, _error
+			}
+			
 			_goFingerprint := _scriptletFingerprint
-			_goSource := path.Join (_contextCacheRoot, _goFingerprint + ".go")
-			_goExecutable := path.Join (_contextCacheRoot, _goFingerprint + ".exec")
+			_goSource := path.Join (_contextCacheRoot, "go-sources", _goFingerprint + ".go")
+			_goExecutable := path.Join (_contextCacheRoot, "go-executables", _goFingerprint + ".exec")
 			
 			if _, _error := os.Stat (_goExecutable); _error == nil {
 				// PASS
@@ -419,7 +429,7 @@ func prepareExecution_0 (
 					_interpreterScriptBuffer.WriteString (_scriptletBody)
 				}
 				
-				_goSourceTmp := path.Join (_contextCacheRoot, generateRandomToken () + ".tmp")
+				_goSourceTmp := path.Join (_contextCacheRoot, "go-sources", generateRandomToken () + ".tmp")
 				if _error := os.WriteFile (_goSourceTmp, _interpreterScriptBuffer.Bytes (), 0600); _error != nil {
 					return nil, nil, errorw (0x55976c12, _error)
 				}
@@ -427,9 +437,9 @@ func prepareExecution_0 (
 					return nil, nil, errorw (0x5367f11a, _error)
 				}
 				
-				_goExecutableTmp := path.Join (_contextCacheRoot, generateRandomToken () + ".tmp")
+				_goExecutableTmp := path.Join (_contextCacheRoot, "go-executables", generateRandomToken () + ".tmp")
 				
-				_goRoot := path.Join (_contextCacheRoot, "go")
+				_goRoot := path.Join (_contextCacheRoot, "go-root")
 				_goCache := path.Join (_goRoot, "cache")
 				_goTmp := path.Join (_goRoot, "tmp")
 				for _, _mkdirPath := range []string { _goRoot, _goCache, _goTmp } {

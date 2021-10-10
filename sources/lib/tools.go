@@ -152,3 +152,14 @@ func replaceVariables (_input string) (string, *Error) {
 	return _input, nil
 }
 
+
+
+
+func makeCacheFolder (_cacheRoot string, _cacheFolder string) (*Error) {
+	_cache := path.Join (_cacheRoot, _cacheFolder)
+	if _error := os.MkdirAll (_cache, 0750); _error != nil {
+		return errorw (0x6f530744, _error)
+	}
+	return nil
+}
+

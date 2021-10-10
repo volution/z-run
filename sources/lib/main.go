@@ -53,7 +53,7 @@ type InvokeContext struct {
 	ExecutablePaths []string `json:"executable-paths,omitempty"`
 	Terminal string `json:"terminal,omitempty"`
 	Workspace string `json:"workspace,omitempty"`
-	Cache string `json:"cache,omitempty"`
+	CacheRoot string `json:"cache-root,omitempty"`
 }
 
 
@@ -409,7 +409,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		_terminal = _context.Terminal
 		_libraryCacheUrl = _context.Library
 		_workspace = _context.Workspace
-		_cacheRoot = _context.Cache
+		_cacheRoot = _context.CacheRoot
 		_top = false
 	}
 	

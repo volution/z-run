@@ -41,7 +41,10 @@ func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 			// FIXME:  We should make sure that the cache path is never empty!
 			panic (0xd6f17610)
 		}
-		_temporaryPath := path.Join (_cacheRoot, generateRandomToken () + ".buffer")
+		if _error := makeCacheFolder (_cacheRoot, "buffers"); _error != nil {
+			return -1, nil, _error
+		}
+		_temporaryPath := path.Join (_cacheRoot, "buffers", generateRandomToken () + ".buffer")
 		if _descriptor, _error := syscall.Open (_temporaryPath, syscall.O_CREAT | syscall.O_EXCL | syscall.O_WRONLY, 0600); _error == nil {
 			_interpreterScriptOutput = os.NewFile (uintptr (_descriptor), "")
 		} else {

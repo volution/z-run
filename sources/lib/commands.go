@@ -281,8 +281,11 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		_sshCache = "/tmp"
 	}
 	
+	if _error := makeCacheFolder (_context.cacheRoot, "ssh-sockets"); _error != nil {
+		return false, _error
+	}
 	if _sshLibraryLocalSocket == "" {
-		_sshLibraryLocalSocket = path.Join (_context.cacheRoot, fmt.Sprintf ("%s-%08x.sock", _sshToken, os.Getpid ()))
+		_sshLibraryLocalSocket = path.Join (_context.cacheRoot, "ssh-sockets", fmt.Sprintf ("%s-%08x.sock", _sshToken, os.Getpid ()))
 	}
 	if _sshLibraryRemoteSocket == "" {
 		_sshLibraryRemoteSocket = path.Join (_sshCache, fmt.Sprintf ("z-run--%s.sock", _sshToken))
@@ -308,7 +311,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 			ExecutablePaths : _invokeExecutablePaths,
 			Terminal : _sshTerminal,
 			Workspace : _sshWorkspace,
-			Cache : _sshCache,
+			CacheRoot : _sshCache,
 		}
 	
 	var _invokeContextEncoded string

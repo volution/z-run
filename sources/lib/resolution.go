@@ -240,7 +240,10 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 	var _cacheLibrary string
 	
 	if _context.cacheEnabled && (_context.cacheRoot != "") {
-		_cacheLibrary = path.Join (_context.cacheRoot, _environmentFingerprint + ".cdb")
+		if _error := makeCacheFolder (_context.cacheRoot, "libraries-cdb"); _error != nil {
+			return nil, _error
+		}
+		_cacheLibrary = path.Join (_context.cacheRoot, "libraries-cdb", _environmentFingerprint + ".cdb")
 		if _, _error := os.Stat (_cacheLibrary); _error == nil {
 			if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
 				if _fresh, _error := checkLibraryCached (_library); _error == nil {
