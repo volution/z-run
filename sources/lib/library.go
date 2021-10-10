@@ -9,36 +9,41 @@ import "strings"
 
 
 type Scriptlet struct {
-	Index uint `json:"id"`
+	
 	Label string `json:"label"`
 	Kind string `json:"kind"`
 	Interpreter string `json:"interpreter"`
-	InterpreterExecutable string `json:"interpreter-executable,omitempty"`
-	InterpreterArguments []string `json:"interpreter-arguments,omitempty"`
-	InterpreterArgumentsExtraDash bool `json:"interpreter-arguments-extra-dash,omitempty"`
-	InterpreterArgumentsExtraAllowed bool `json:"interpreter-arguments-extra-allowed,omitempty"`
-	InterpreterEnvironment map[string]string `json:"interpreter-environment,omitempty"`
-	Context *ScriptletContext `json:"-"`
-	ContextFingerprint string `json:"context,omitempty"`
+	InterpreterExecutable string `json:"interpreter_executable,omitempty"`
+	InterpreterArguments []string `json:"interpreter_arguments,omitempty"`
+	InterpreterArgumentsExtraDash bool `json:"interpreter_arguments_extra_dash,omitempty"`
+	InterpreterArgumentsExtraAllowed bool `json:"interpreter_arguments_extra_allowed,omitempty"`
+	InterpreterEnvironment map[string]string `json:"interpreter_environment,omitempty"`
 	Body string `json:"body,omitempty"`
-	BodyOffset uint `json:"body-offset,omitempty"`
-	BodyFingerprint string `json:"body-fingerprint,omitempty"`
+	BodyFingerprint string `json:"body_fingerprint,omitempty"`
+	Context *ScriptletContext `json:"-"`
+	ContextIdentifier string `json:"context_identifier,omitempty"`
 	Fingerprint string `json:"fingerprint"`
+	
+	// FIXME:  Should move out of scriptlet and into library!
 	Source ScriptletSource `json:"source"`
+	
+	// FIXME:  Should move out of scriptlet and into library!
+	Index uint `json:"-"`
 	Visible bool `json:"visible"`
 	Hidden bool `json:"hidden"`
-	Menus []string `json:"menus"`
+	Menus []string `json:"menus,omitempty"`
 }
 
 type ScriptletSource struct {
 	Path string `json:"path"`
-	LineStart uint `json:"line-start"`
-	LineEnd uint `json:"line-end"`
+	LineStart uint `json:"line_start"`
+	LineEnd uint `json:"line_end"`
+	BodyOffset uint `json:"body_offset"`
 }
 
 type ScriptletContext struct {
-	Fingerprint string `json:"fingerprint"`
-	ExecutablePaths []string `json:"executable-paths"`
+	Identifier string `json:"identifier"`
+	ExecutablePaths []string `json:"executable_paths"`
 	Environment map[string]string `json:"environment"`
 }
 
@@ -49,21 +54,21 @@ type Library struct {
 	
 	Scriptlets LibraryScriptlets `json:"scriptlets"`
 	
-	ScriptletFingerprints []string `json:"fingerprints"`
-	ScriptletsByFingerprint map[string]uint `json:"index-by-fingerprint"`
+	ScriptletFingerprints []string `json:"scriptlet_fingerprints"`
+	ScriptletsByFingerprint map[string]uint `json:"scriptlets_by_fingerprint"`
 	
-	ScriptletLabels []string `json:"labels"`
-	ScriptletLabelsAll []string `json:"labels"`
-	ScriptletsByLabel map[string]uint `json:"index-by-label"`
+	ScriptletLabels []string `json:"scriptlet_labels"`
+	ScriptletLabelsAll []string `json:"scriptlet_labels_all"`
+	ScriptletsByLabel map[string]uint `json:"scriptlets_by_label"`
 	
-	ScriptletsContexts map[string]*ScriptletContext `json:"scriptlets-contexts"`
+	ScriptletContexts map[string]*ScriptletContext `json:"scriptlet_contexts"`
 	
-	LibrarySources LibrarySources `json:"library-sources"`
-	LibraryContext *LibraryContext `json:"library-context"`
+	LibrarySources LibrarySources `json:"library_sources"`
+	LibraryContext *LibraryContext `json:"library_context"`
 	
-	SourcesFingerprint string `json:"sources-fingerprint"`
-	EnvironmentFingerprint string `json:"environment-fingerprint"`
-	LibraryFingerprint string `json:"library-fingerprint"`
+	SourcesFingerprint string `json:"sources_fingerprint"`
+	EnvironmentFingerprint string `json:"environment_fingerprint"`
+	LibraryFingerprint string `json:"library_fingerprint"`
 	
 	url string
 }
@@ -72,7 +77,7 @@ type Library struct {
 
 
 type LibraryContext struct {
-	SelfExecutable string `json:"self-executable"`
+	SelfExecutable string `json:"self_executable"`
 }
 
 
@@ -81,8 +86,8 @@ type LibraryContext struct {
 type Source struct {
 	Path string `json:"path"`
 	Executable bool `json:"executable"`
-	FingerprintMeta string `json:"fingerprint-meta"`
-	FingerprintData string `json:"fingerprint-data"`
+	FingerprintMeta string `json:"fingerprint_meta"`
+	FingerprintData string `json:"fingerprint_data"`
 }
 
 
@@ -96,7 +101,7 @@ func NewLibrary () (*Library) {
 			ScriptletLabels : make ([]string, 0, 1024),
 			ScriptletLabelsAll : make ([]string, 0, 1024),
 			ScriptletsByLabel : make (map[string]uint, 1024),
-			ScriptletsContexts : make (map[string]*ScriptletContext, 16),
+			ScriptletContexts : make (map[string]*ScriptletContext, 16),
 			LibraryContext : & LibraryContext {},
 		}
 }
@@ -181,8 +186,8 @@ func (_library *Library) ResolveFingerprintByLabel (_label string) (string, bool
 }
 
 
-func (_library *Library) ResolveContextByFingerprint (_fingerprint string) (*ScriptletContext, bool, *Error) {
-	if _context, _exists := _library.ScriptletsContexts[_fingerprint]; _exists {
+func (_library *Library) ResolveContextByIdentifier (_fingerprint string) (*ScriptletContext, bool, *Error) {
+	if _context, _exists := _library.ScriptletContexts[_fingerprint]; _exists {
 		return _context, true, nil
 	} else {
 		return nil, false, errorf (0x30d90869, "invalid scriptlet context fingerprint `%s`", _fingerprint)
@@ -233,9 +238,9 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
 	}
 	
-	if _scriptlet.ContextFingerprint != "" {
-		if _, _exists := _library.ScriptletsContexts[_scriptlet.ContextFingerprint]; !_exists {
-			return errorf (0xc9cc9f6e, "invalid scriptlet context fingerprint `%s`", _scriptlet.ContextFingerprint)
+	if _scriptlet.ContextIdentifier != "" {
+		if _, _exists := _library.ScriptletContexts[_scriptlet.ContextIdentifier]; !_exists {
+			return errorf (0xc9cc9f6e, "invalid scriptlet context identifier `%s`", _scriptlet.ContextIdentifier)
 		}
 	}
 	
@@ -273,9 +278,8 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			Bool (_scriptlet.InterpreterArgumentsExtraDash) .
 			Bool (_scriptlet.InterpreterArgumentsExtraAllowed) .
 			StringsMap (_scriptlet.InterpreterEnvironment) .
-			StringWithLen (_scriptlet.ContextFingerprint) .
 			StringWithLen (_scriptlet.BodyFingerprint) .
-			Uint64 (uint64 (_scriptlet.BodyOffset)) .
+			StringWithLen (_scriptlet.ContextIdentifier) .
 			Build ()
 	
 	if _, _exists := _library.ScriptletsByFingerprint[_fingerprint]; _exists {
@@ -302,14 +306,14 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 
 func includeScriptletContext (_library *Library, _context *ScriptletContext) (*Error) {
 	
-	if _context.Fingerprint == "" {
-		return errorf (0x92fc0d53, "invalid scriptlet context fingerprint `%s`", _context.Fingerprint)
+	if _context.Identifier == "" {
+		return errorf (0x92fc0d53, "invalid scriptlet context identifier `%s`", _context.Identifier)
 	}
-	if _, _exists := _library.ScriptletsContexts[_context.Fingerprint]; _exists {
-		return errorf (0xfe91d3ae, "invalid scriptlet context fingerprint `%s`", _context.Fingerprint)
+	if _, _exists := _library.ScriptletContexts[_context.Identifier]; _exists {
+		return errorf (0xfe91d3ae, "invalid scriptlet context identifier `%s`", _context.Identifier)
 	}
 	
-	_library.ScriptletsContexts[_context.Fingerprint] = _context
+	_library.ScriptletContexts[_context.Identifier] = _context
 	
 	return nil
 }

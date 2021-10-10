@@ -88,7 +88,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	_labels := make ([]string, 0, 1024)
 	_labelsAll := make ([]string, 0, 1024)
 	_labelsByFingerprints := make (map[string]string, 1024)
-	_contextsFingerprints := make (map[string]bool, 16)
+	_contextsIdentifiers := make (map[string]bool, 16)
 	
 	var _fingerprintsFromStore []string
 	if _fingerprints_0, _error := _library.SelectFingerprints (); _error == nil {
@@ -121,8 +121,8 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 			}
 			_fingerprintsByLabels[_label] = _fingerprint
 			_labelsByFingerprints[_fingerprint] = _label
-			if _meta.ContextFingerprint != "" {
-				_contextsFingerprints[_meta.ContextFingerprint] = true
+			if _meta.ContextIdentifier != "" {
+				_contextsIdentifiers[_meta.ContextIdentifier] = true
 			}
 		} else {
 			return _error
@@ -160,10 +160,10 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 		return _error
 	}
 	
-	for _contextFingerprint, _ := range _contextsFingerprints {
-		if _context, _found, _error := _library.ResolveContextByFingerprint (_contextFingerprint); _error == nil {
-			if _found && _contextFingerprint == _context.Fingerprint {
-				if _error := _store.IncludeObject ("scriptlets-contexts-by-fingerprint", _context.Fingerprint, _context); _error != nil {
+	for _contextIdentifier, _ := range _contextsIdentifiers {
+		if _context, _found, _error := _library.ResolveContextByIdentifier (_contextIdentifier); _error == nil {
+			if _found && _contextIdentifier == _context.Identifier {
+				if _error := _store.IncludeObject ("scriptlet-contexts-by-identifier", _context.Identifier, _context); _error != nil {
 					return _error
 				}
 			} else {

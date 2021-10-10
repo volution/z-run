@@ -82,7 +82,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 		_interpreter = _scriptlet.Interpreter
 	}
 	
-	if _scriptlet.ContextFingerprint != "" {
+	if _scriptlet.ContextIdentifier != "" {
 		if _scriptlet.Context == nil {
 			return nil, nil, errorf (0x93547e3b, "invalid store")
 		}
@@ -117,7 +117,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 			_scriptlet.Body,
 			
 			_scriptlet.Source.Path,
-			_scriptlet.Source.LineStart + _scriptlet.BodyOffset,
+			_scriptlet.Source.LineStart + _scriptlet.Source.BodyOffset,
 			_scriptlet.Source.LineEnd,
 			
 			_scriptletExecutablePaths,

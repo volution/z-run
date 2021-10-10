@@ -19,7 +19,7 @@ type LibraryStore interface {
 	ResolveBodyByLabel (_label string) (string, bool, *Error)
 	ResolveFingerprintByLabel (_label string) (string, bool, *Error)
 	
-	ResolveContextByFingerprint (_fingerprint string) (*ScriptletContext, bool, *Error)
+	ResolveContextByIdentifier (_fingerprint string) (*ScriptletContext, bool, *Error)
 	
 	SelectLibrarySources () (LibrarySources, *Error)
 	SelectLibraryContext () (*LibraryContext, *Error)
@@ -101,8 +101,8 @@ func (_library *LibraryStoreInput) ResolveFullByFingerprint (_fingerprint string
 			} else {
 				return nil, _error
 			}
-			if _scriptlet.ContextFingerprint != "" {
-				if _context, _found, _error := _library.ResolveContextByFingerprint (_scriptlet.ContextFingerprint); _error == nil {
+			if _scriptlet.ContextIdentifier != "" {
+				if _context, _found, _error := _library.ResolveContextByIdentifier (_scriptlet.ContextIdentifier); _error == nil {
 					if _found {
 						_scriptlet.Context = _context
 					} else {
@@ -193,9 +193,9 @@ func (_library *LibraryStoreInput) ResolveFingerprintByLabel (_label string) (st
 	}
 }
 
-func (_library *LibraryStoreInput) ResolveContextByFingerprint (_fingerprint string) (*ScriptletContext, bool, *Error) {
+func (_library *LibraryStoreInput) ResolveContextByIdentifier (_identifier string) (*ScriptletContext, bool, *Error) {
 	var _value *ScriptletContext
-	if _found, _error := _library.store.SelectObject ("scriptlets-contexts-by-fingerprint", _fingerprint, &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject ("scriptlet-contexts-by-identifier", _identifier, &_value); _error == nil {
 		if _found {
 			return _value, _found, nil
 		} else {

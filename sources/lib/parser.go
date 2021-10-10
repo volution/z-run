@@ -36,7 +36,7 @@ func parseLibrary (_sources []*Source, _environmentFingerprint string, _context 
 	_parseContext := & parseContext {}
 	
 	_parseContext.scriptletContext = & ScriptletContext {
-			Fingerprint : generateRandomToken (),
+			Identifier : "00000000000000000000000000000000",
 			ExecutablePaths : make ([]string, 0, 16),
 			Environment : make (map[string]string, 128),
 		}
@@ -262,7 +262,7 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 	if _error == nil {
 		
 		_scriptlet.Body = _scriptletBody
-		_scriptlet.BodyOffset = _scriptletBodyOffset
+		_scriptlet.Source.BodyOffset = _scriptletBodyOffset
 		_scriptlet.Interpreter = _interpreter
 		_scriptlet.InterpreterExecutable = _interpreterExecutable
 		_scriptlet.InterpreterArguments = _interpreterArguments
@@ -1241,7 +1241,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						Kind : _scriptletState.kind,
 						Interpreter : _scriptletState.interpreter,
 						Context : _parseContext.scriptletContext,
-						ContextFingerprint : _parseContext.scriptletContext.Fingerprint,
+						ContextIdentifier : _parseContext.scriptletContext.Identifier,
 						Visible : _scriptletState.visible,
 						Hidden : _scriptletState.hidden,
 						BodyFingerprint : _bodyFingerprint,
@@ -1250,6 +1250,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								Path : _sourcePath,
 								LineStart : _scriptletState.lineStart,
 								LineEnd : _scriptletState.lineEnd,
+								BodyOffset : 0,
 							},
 					}
 				if _error := includeScriptlet (_library, _scriptlet); _error != nil {

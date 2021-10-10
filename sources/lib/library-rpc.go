@@ -486,31 +486,31 @@ func (_exports *LibraryRpcServerExports) ResolveFingerprintByLabel (_input *Libr
 
 
 
-type LibraryRpc_ResolveContextByFingerprint_Input struct {
+type LibraryRpc_ResolveContextByIdentifier_Input struct {
 	Fingerprint string
 }
 
-type LibraryRpc_ResolveContextByFingerprint_Output struct {
+type LibraryRpc_ResolveContextByIdentifier_Output struct {
 	Context *ScriptletContext
 	Found bool
 	Error *Error
 }
 
-func (_client *LibraryRpcClient) ResolveContextByFingerprint (_fingerprint string) (*ScriptletContext, bool, *Error) {
-	_input := LibraryRpc_ResolveContextByFingerprint_Input {}
-	_output := LibraryRpc_ResolveContextByFingerprint_Output {}
+func (_client *LibraryRpcClient) ResolveContextByIdentifier (_fingerprint string) (*ScriptletContext, bool, *Error) {
+	_input := LibraryRpc_ResolveContextByIdentifier_Input {}
+	_output := LibraryRpc_ResolveContextByIdentifier_Output {}
 	_input.Fingerprint = _fingerprint
-	if _error := _client.rpc.Call ("Library.ResolveContextByFingerprint", &_input, &_output); _error == nil {
+	if _error := _client.rpc.Call ("Library.ResolveContextByIdentifier", &_input, &_output); _error == nil {
 		return _output.Context, _output.Found, _output.Error
 	} else {
 		return nil, false, errorw (0x532bfaea, _error)
 	}
 }
 
-func (_exports *LibraryRpcServerExports) ResolveContextByFingerprint (_input *LibraryRpc_ResolveContextByFingerprint_Input, _output *LibraryRpc_ResolveContextByFingerprint_Output) (error) {
+func (_exports *LibraryRpcServerExports) ResolveContextByIdentifier (_input *LibraryRpc_ResolveContextByIdentifier_Input, _output *LibraryRpc_ResolveContextByIdentifier_Output) (error) {
 	_exports.server.mutex.RLock ()
 	defer _exports.server.mutex.RUnlock ()
-	_output.Context, _output.Found, _output.Error = _exports.server.library.ResolveContextByFingerprint (_input.Fingerprint)
+	_output.Context, _output.Found, _output.Error = _exports.server.library.ResolveContextByIdentifier (_input.Fingerprint)
 	return nil
 }
 
