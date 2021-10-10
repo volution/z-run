@@ -22,6 +22,7 @@ type Scriptlet struct {
 	ContextFingerprint string `json:"context,omitempty"`
 	Body string `json:"body,omitempty"`
 	BodyOffset uint `json:"body-offset,omitempty"`
+	BodyFingerprint string `json:"body-fingerprint,omitempty"`
 	Fingerprint string `json:"fingerprint"`
 	Source ScriptletSource `json:"source"`
 	Visible bool `json:"visible"`
@@ -273,7 +274,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			Bool (_scriptlet.InterpreterArgumentsExtraAllowed) .
 			StringsMap (_scriptlet.InterpreterEnvironment) .
 			StringWithLen (_scriptlet.ContextFingerprint) .
-			StringWithLen (_scriptlet.Body) .
+			StringWithLen (_scriptlet.BodyFingerprint) .
 			Uint64 (uint64 (_scriptlet.BodyOffset)) .
 			Build ()
 	
