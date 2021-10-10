@@ -76,7 +76,7 @@ func prepareEnvironment_0 (_environment map[string]string, _overrides ... map[st
 
 
 
-func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpreter string, _scriptlet *Scriptlet, _includeArguments bool, _context *Context) (*exec.Cmd, []int, *Error) {
+func prepareExecution (_libraryUrl string, _libraryIdentifier string, _libraryFingerprint string, _interpreter string, _scriptlet *Scriptlet, _includeArguments bool, _context *Context) (*exec.Cmd, []int, *Error) {
 	
 	if _interpreter == "" {
 		_interpreter = _scriptlet.Interpreter
@@ -103,6 +103,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 	return prepareExecution_0 (
 			
 			_libraryUrl,
+			_libraryIdentifier,
 			_libraryFingerprint,
 			
 			_interpreter,
@@ -139,6 +140,7 @@ func prepareExecution (_libraryUrl string, _libraryFingerprint string, _interpre
 func prepareExecution_0 (
 			
 			_libraryUrl string,
+			_libraryIdentifier string,
 			_libraryFingerprint string,
 			
 			_interpreter string,
@@ -579,6 +581,9 @@ func prepareExecution_0 (
 	if _libraryUrl != "" {
 		_environment["ZRUN_LIBRARY_URL"] = _libraryUrl
 	}
+	if _libraryIdentifier != "" {
+		_environment["ZRUN_LIBRARY_IDENTIFIER"] = _libraryIdentifier
+	}
 	if _libraryFingerprint != "" {
 		_environment["ZRUN_LIBRARY_FINGERPRINT"] = _libraryFingerprint
 	}
@@ -656,6 +661,13 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 			}
 	}
 	
+	var _libraryIdentifier string
+	if _libraryIdentifier_0, _error := _library.Identifier (); _error == nil {
+		_libraryIdentifier = _libraryIdentifier_0
+	} else {
+		return _error
+	}
+	
 	var _libraryFingerprint string
 	if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
 		_libraryFingerprint = _libraryFingerprint_0
@@ -663,7 +675,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 		return _error
 	}
 	
-	if _command, _descriptors, _error := prepareExecution (_library.Url (), _libraryFingerprint, "", _scriptlet, true, _context); _error == nil {
+	if _command, _descriptors, _error := prepareExecution (_library.Url (), _libraryIdentifier, _libraryFingerprint, "", _scriptlet, true, _context); _error == nil {
 		return executeScriptlet_0 (_scriptlet.Label, _command, _descriptors, _fork)
 	} else {
 		return _error

@@ -506,13 +506,19 @@ func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler,
 				for {
 					var _outputLines []string
 					if _scriptlet.Interpreter != "<menu>" {
+						_libraryIdentifier := ""
+						if _libraryIdentifier_0, _error := _library.Identifier (); _error == nil {
+							_libraryIdentifier = _libraryIdentifier_0
+						} else {
+							return false, _error
+						}
 						_libraryFingerprint := ""
 						if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
 							_libraryFingerprint = _libraryFingerprint_0
 						} else {
 							return false, _error
 						}
-						if _, _outputData, _error := loadFromScriptlet (_library.Url (), _libraryFingerprint, "", _scriptlet, _context); _error == nil {
+						if _, _outputData, _error := loadFromScriptlet (_library.Url (), _libraryIdentifier, _libraryFingerprint, "", _scriptlet, _context); _error == nil {
 							_outputText := string (_outputData)
 							_outputText = strings.TrimSpace (_outputText)
 							if _outputText != "" {

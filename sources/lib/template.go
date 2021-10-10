@@ -92,6 +92,7 @@ func templateMain (_selfExecutable string, _arguments []string, _environment map
 			"",
 			"",
 			"",
+			"",
 			nil,
 			os.Stdout,
 		)
@@ -113,6 +114,12 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 	}
 	
 	_libraryUrl := _library.Url ()
+	_libraryIdentifier := ""
+	if _libraryIdentifier_0, _error := _library.Identifier (); _error == nil {
+		_libraryIdentifier = _libraryIdentifier_0
+	} else {
+		return _error
+	}
 	_libraryFingerprint := ""
 	if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
 		_libraryFingerprint = _libraryFingerprint_0
@@ -133,6 +140,7 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 			_context.selfExecutable,
 			_context.workspace,
 			_libraryUrl,
+			_libraryIdentifier,
 			_libraryFingerprint,
 			_extraFunctions,
 			_output,
@@ -149,6 +157,7 @@ func executeTemplate_0 (
 			_selfExecutable string,
 			_workspace string,
 			_libraryUrl string,
+			_libraryIdentifier string,
 			_libraryFingerprint string,
 			_extraFunctions map[string]interface{},
 			_output io.Writer,
@@ -171,6 +180,7 @@ func executeTemplate_0 (
 			"ZRUN_EXECUTABLE" : _selfExecutable,
 			"ZRUN_WORKSPACE" : _workspace,
 			"ZRUN_LIBRARY_URL" : _libraryUrl,
+			"ZRUN_LIBRARY_IDENTIFIER" : _libraryIdentifier,
 			"ZRUN_LIBRARY_FINGERPRINT" : _libraryFingerprint,
 		}
 	
@@ -188,6 +198,12 @@ func templateFuncZrun (_library LibraryStore, _context *Context, _scriptletLabel
 	if strings.HasPrefix (_scriptletLabel, ":: ") {
 		_scriptletLabel = _scriptletLabel[3:]
 	}
+	_libraryIdentifier := ""
+	if _libraryIdentifier_0, _error := _library.Identifier (); _error == nil {
+		_libraryIdentifier = _libraryIdentifier_0
+	} else {
+		return "", _error.ToError ()
+	}
 	_libraryFingerprint := ""
 	if _libraryFingerprint_0, _error := _library.Fingerprint (); _error == nil {
 		_libraryFingerprint = _libraryFingerprint_0
@@ -196,7 +212,7 @@ func templateFuncZrun (_library LibraryStore, _context *Context, _scriptletLabel
 	}
 	if _scriptlet, _error := _library.ResolveFullByLabel (_scriptletLabel); _error == nil {
 		if _scriptlet != nil {
-			if _, _output, _error := loadFromScriptlet (_library.Url (), _libraryFingerprint, "", _scriptlet, _context); _error == nil {
+			if _, _output, _error := loadFromScriptlet (_library.Url (), _libraryIdentifier, _libraryFingerprint, "", _scriptlet, _context); _error == nil {
 				return string (_output), nil
 			} else {
 				return "", _error.ToError ()

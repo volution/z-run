@@ -146,6 +146,7 @@ func PreMain () () {
 				os.Unsetenv ("ZRUN_WORKSPACE")
 				os.Unsetenv ("ZRUN_LIBRARY_SOURCE")
 				os.Unsetenv ("ZRUN_LIBRARY_URL")
+				os.Unsetenv ("ZRUN_LIBRARY_IDENTIFIER")
 				os.Unsetenv ("ZRUN_LIBRARY_FINGERPRINT")
 			}
 			

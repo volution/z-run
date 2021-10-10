@@ -126,7 +126,7 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 		
 		switch _scriptlet.Kind {
 			case "generator-pending" :
-				if _error := parseFromGenerator (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context, _parseContext); _error == nil {
+				if _error := parseFromGenerator (_library, _rpc.Url (), _library.LibraryIdentifier, _library.LibraryFingerprint, _scriptlet, _context, _parseContext); _error == nil {
 					_scriptlet.Kind = "generator"
 //					logf ('d', 0x84787ea0, "parsed generator `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
 					continue _loop
@@ -134,7 +134,7 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 					return nil, _error
 				}
 			case "script-replacer-pending", "print-replacer-pending" :
-				if _error := parseFromReplacer (_library, _rpc.Url (), _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
+				if _error := parseFromReplacer (_library, _rpc.Url (), _library.LibraryIdentifier, _library.LibraryFingerprint, _scriptlet, _context); _error == nil {
 					switch _scriptlet.Kind {
 						case "script-replacer-pending" :
 							_scriptlet.Kind = "executable-pending"
@@ -540,18 +540,18 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 
 
 
-func parseFromGenerator (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context, _parseContext *parseContext) (*Error) {
+func parseFromGenerator (_library *Library, _libraryUrl string, _libraryIdentifier string, _libraryFingerprint string, _source *Scriptlet, _context *Context, _parseContext *parseContext) (*Error) {
 //	logf ('s', 0xf75b04b5, "parsing `:: %s`...", _source.Label)
-	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, "", _source, _context); _error == nil {
+	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryIdentifier, _libraryFingerprint, "", _source, _context); _error == nil {
 		return parseFromData (_library, _data, _source.Source.Path, _context, _parseContext)
 	} else {
 		return _error
 	}
 }
 
-func parseFromReplacer (_library *Library, _libraryUrl string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
+func parseFromReplacer (_library *Library, _libraryUrl string, _libraryIdentifier string, _libraryFingerprint string, _source *Scriptlet, _context *Context) (*Error) {
 //	logf ('s', 0xc336e8bd, "parsing `:: %s`...", _source.Label)
-	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryFingerprint, _source.Interpreter, _source, _context); _error == nil {
+	if _, _data, _error := loadFromScriptlet (_libraryUrl, _libraryIdentifier, _libraryFingerprint, _source.Interpreter, _source, _context); _error == nil {
 		if utf8.Valid (_data) {
 			_source.Body = string (_data)
 			return nil
@@ -1354,11 +1354,11 @@ func loadFromStream (_stream io.Reader) (string, []byte, *Error) {
 }
 
 
-func loadFromScriptlet (_libraryUrl string, _libraryFingerprint string, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, *Error) {
+func loadFromScriptlet (_libraryUrl string, _libraryIdentifier string, _libraryFingerprint string, _interpreter string, _scriptlet *Scriptlet, _context *Context) (string, []byte, *Error) {
 	
 	var _command *exec.Cmd
 	var _descriptors []int
-	if _command_0, _descriptors_0, _error := prepareExecution (_libraryUrl, _libraryFingerprint, _interpreter, _scriptlet, false, _context); _error == nil {
+	if _command_0, _descriptors_0, _error := prepareExecution (_libraryUrl, _libraryIdentifier, _libraryFingerprint, _interpreter, _scriptlet, false, _context); _error == nil {
 		_command = _command_0
 		_descriptors = _descriptors_0
 	} else {

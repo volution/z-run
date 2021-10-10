@@ -115,7 +115,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					_librarySourcePath = _value
 				case "ZRUN_LIBRARY_URL" :
 					_libraryCacheUrl = _value
-				case "ZRUN_LIBRARY_FINGERPRINT" :
+				case "ZRUN_LIBRARY_IDENTIFIER", "ZRUN_LIBRARY_FINGERPRINT" :
 					// FIXME:  Validate that this value actually matches given library.
 					_top = false
 				

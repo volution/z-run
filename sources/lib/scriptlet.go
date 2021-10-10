@@ -109,6 +109,7 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 			
 			"",
 			"",
+			"",
 			
 			_interpreter,
 			_interpreterExecutable,
