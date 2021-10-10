@@ -3,10 +3,12 @@
 package zrun
 
 
+import "fmt"
 import "os"
 import "path"
 import "path/filepath"
 import "sort"
+import "strings"
 
 
 
@@ -248,8 +250,22 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 			return nil, _error
 		}
 		_cacheLibrary = path.Join (_context.cacheRoot, "libraries-cdb", _libraryIdentifier + ".cdb")
-		if _, _error := os.Stat (_cacheLibrary); _error == nil {
-			if _library, _error := resolveLibraryCached (_cacheLibrary, _libraryIdentifier); _error == nil {
+		if _stat, _error := os.Lstat (_cacheLibrary); _error == nil {
+			if _stat.Mode () .Type () == os.ModeSymlink {
+				if _target, _error := filepath.EvalSymlinks (_cacheLibrary); _error == nil {
+					_cacheLibrary = _target
+				} else {
+					return nil, errorw (0x1d1aa28a, _error)
+				}
+			}
+		} else if ! os.IsNotExist (_error) {
+			return nil, errorw (0x1dd01c9c, _error)
+		}
+		if _stat, _error := os.Lstat (_cacheLibrary); _error == nil {
+			if ! _stat.Mode () .IsRegular () {
+				return nil, errorf (0x5b3ae1d5, "invalid library cached at `%s`;", _cacheLibrary)
+			}
+			if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
 				if _fresh, _error := checkLibraryCached (_library); _error == nil {
 					if _fresh {
 //						logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
@@ -279,12 +295,29 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 		return nil, _error
 	}
 	
+	var _libraryFingerprint string
+	if _fingerprint, _error := _library.Fingerprint (); _error == nil {
+		_libraryFingerprint = _fingerprint
+	} else {
+		return nil, _error
+	}
+	
 	if _context.cacheEnabled {
-		if _error := doExportLibraryCdb (_library, _cacheLibrary, _context); _error == nil {
-//			logf ('d', 0xdf78377c, "created library cached at `%s`;", _cacheLibrary)
-			_library.url = _cacheLibrary
+		_cacheLibraryLink := path.Join (_context.cacheRoot, "libraries-cdb", _libraryIdentifier + ".cdb")
+		_cacheLibraryLinkTmp := fmt.Sprintf ("%s--%08x.tmp", _cacheLibraryLink, os.Getpid ())
+		_cacheLibraryStable := path.Join (_context.cacheRoot, "libraries-cdb", _libraryFingerprint + ".cdb")
+		if _error := doExportLibraryCdb (_library, _cacheLibraryStable, _context); _error == nil {
+//			logf ('d', 0xdf78377c, "created library cached link at `%s`;", _cacheLibraryLink)
+//			logf ('d', 0x43e263da, "created library cached stable at `%s`;", _cacheLibraryStable)
+			_library.url = _cacheLibraryStable
 		} else {
 			return nil, _error
+		}
+		if _error := os.Symlink (_libraryFingerprint + ".cdb", _cacheLibraryLinkTmp); _error != nil {
+			return nil, errorw (0xc8bbef7a, _error)
+		}
+		if _error := os.Rename (_cacheLibraryLinkTmp, _cacheLibraryLink); _error != nil {
+			return nil, errorw (0x39c785b9, _error)
 		}
 	}
 	
@@ -294,12 +327,17 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 
 
 
-func resolveLibraryCached (_path string, _identifier string) (LibraryStore, *Error) {
+func resolveLibraryCached (_path string) (LibraryStore, *Error) {
+	_fileName := path.Base (_path)
+	if ! strings.HasSuffix (_fileName, ".cdb") {
+		return nil, errorf (0x06574f0e, "invalid library cached file name `%s`", _path)
+	}
+	_fingerprint := _fileName[: len (_fileName) - 4]
 	if _store, _error := NewCdbStoreInput (_path); _error == nil {
-		if _library, _error := NewLibraryStoreInput (_store, _path, _identifier); _error == nil {
+		if _library, _error := NewLibraryStoreInput (_store, _path, _fingerprint); _error == nil {
 //			logf ('d', 0x63ae360d, "opened library cached at `%s`;", _path)
-			if _identifier_0, _error := _library.Identifier (); _error == nil {
-				if _identifier_0 == _identifier {
+			if _fingerprint_0, _error := _library.Fingerprint (); _error == nil {
+				if _fingerprint_0 == _fingerprint {
 					return _library, nil
 				} else {
 					return nil, errorf (0xa0e14143, "invalid store")

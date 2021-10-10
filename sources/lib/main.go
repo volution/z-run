@@ -522,12 +522,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				return _error
 			}
 		} else {
-			_libraryFileName := path.Base (_libraryCacheUrl)
-			if ! strings.HasSuffix (_libraryFileName, ".cdb") {
-				return errorf (0x06574f0e, "invalid library cache file name `%s`", _libraryCacheUrl)
-			}
-			_libraryIdentifier := _libraryFileName[: len (_libraryFileName) - 4]
-			if _library_0, _error := resolveLibraryCached (_libraryCacheUrl, _libraryIdentifier); _error == nil {
+			if _library_0, _error := resolveLibraryCached (_libraryCacheUrl); _error == nil {
 				_library = _library_0
 			} else {
 				return _error
