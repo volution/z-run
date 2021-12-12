@@ -12,8 +12,8 @@
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
 e10d543f2543579be161515405b52ac1 *embedded/prologues/python3.py0
-93205f91e97df53a28281bb29d045b1d *go.mod
-70fc39875f5f8d34d9d8837260d3bc0f *go.sum
+02e9ac2dc7b749fcbb53828b414796ea *go.mod
+5d225d0a29adc0ca9eea2dca992aeaab *go.sum
 06674b8f70747599c63064105a76d5af *lib/commands.go
 22ea414af68e8b949daf5b4258e75cac *lib/constants.go
 626b276fb3e1107bc3b963235671f351 *lib/embedded.go
