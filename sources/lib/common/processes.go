@@ -1,6 +1,6 @@
 
 
-package zrun
+package common
 
 
 import "bufio"
@@ -10,12 +10,10 @@ import "os/exec"
 import "strings"
 import "sync"
 
-import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-
-func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string, _ignoreMissingNewline bool) (int, uint, uint, *Error) {
+func ProcessExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _outputsChannel chan<- string, _ignoreMissingNewline bool) (int, uint, uint, *Error) {
 	
 	var _stdin io.WriteCloser
 	if _inputsChannel != nil {
@@ -151,7 +149,7 @@ func processExecuteAndPipe (_command *exec.Cmd, _inputsChannel <-chan string, _o
 
 
 
-func processExecuteGetStdout (_command *exec.Cmd) (int, []byte, *Error) {
+func ProcessExecuteGetStdout (_command *exec.Cmd) (int, []byte, *Error) {
 	
 	_stdout := bytes.NewBuffer (nil)
 	_stdout.Grow (128 * 1024)

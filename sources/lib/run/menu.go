@@ -184,7 +184,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 //	Logf ('d', 0x3cc16861, "%v", _command.Args[1:])
 //	Logf ('d', 0x8f4e574f, "%v", _command.Env)
 	
-	if _exitCode, _, _outputsCount, _error := processExecuteAndPipe (_command, _inputsChannel, _outputsChannel, true); _error == nil {
+	if _exitCode, _, _outputsCount, _error := ProcessExecuteAndPipe (_command, _inputsChannel, _outputsChannel, true); _error == nil {
 		if _commandFzf {
 			switch _exitCode {
 				case 0 :

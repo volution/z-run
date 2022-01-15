@@ -1379,7 +1379,7 @@ func loadFromCommand (_command *exec.Cmd) (string, []byte, *Error) {
 		_command.Stderr = os.Stderr
 	}
 	
-	if _exitCode, _data, _error := processExecuteGetStdout (_command); _error == nil {
+	if _exitCode, _data, _error := ProcessExecuteGetStdout (_command); _error == nil {
 		if _exitCode == 0 {
 			_fingerprint := NewFingerprinter () .Bytes (_data) .Build ()
 			return _fingerprint, _data, nil
