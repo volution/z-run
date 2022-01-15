@@ -19,7 +19,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func printMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
+func PrintMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) != 1 {
 		return Errorf (0xbc2c2406, "invalid arguments")
@@ -70,7 +70,7 @@ func executePrint_0 (_source string, _output io.Writer) (*Error) {
 
 
 
-func templateMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
+func TemplateMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) < 1 {
 		return Errorf (0x47c3f9f1, "invalid arguments")

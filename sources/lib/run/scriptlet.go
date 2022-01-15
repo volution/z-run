@@ -12,7 +12,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func scriptletMain (_selfExecutable string, _arguments []string, _environment map[string]string, _shabang bool) (*Error) {
+func ScriptletMain (_selfExecutable string, _arguments []string, _environment map[string]string, _shabang bool) (*Error) {
 	
 	_label := ""
 	_header := ""

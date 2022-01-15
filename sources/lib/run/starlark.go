@@ -12,7 +12,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func starlarkMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
+func StarlarkMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) < 1 {
 		return Errorf (0xd776bfb0, "invalid arguments")

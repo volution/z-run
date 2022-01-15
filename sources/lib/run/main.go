@@ -541,7 +541,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 	if _top {
 		if _libraryContext, _error := _library.SelectLibraryContext (); _error == nil {
 			if (_libraryContext.SelfExecutable != "") && (_libraryContext.SelfExecutable != _context.selfExecutable) {
-				PreMainReExecute (_libraryContext.SelfExecutable)
+				preMainReExecute (_libraryContext.SelfExecutable)
 			}
 		} else {
 			return _error
@@ -758,5 +758,13 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		default :
 			return Errorf (0x66cf8700, "unexpected command `%s`", _command)
 	}
+}
+
+
+
+
+func preMainReExecute (_executable string) (*Error) {
+	// FIXME!
+	panic (0xafb6eaf2)
 }
 

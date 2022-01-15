@@ -17,7 +17,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func inputMain (_arguments []string, _environment map[string]string) (*Error) {
+func InputMain (_arguments []string, _environment map[string]string) (*Error) {
 	
 	
 	_message := ""

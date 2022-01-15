@@ -1,6 +1,6 @@
 
 
-package zrun
+package premain
 
 
 import "fmt"
@@ -18,6 +18,9 @@ import "unicode/utf8"
 
 import isatty "github.com/mattn/go-isatty"
 
+import embedded "github.com/cipriancraciun/z-run/embedded"
+
+import . "github.com/cipriancraciun/z-run/lib/run"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -97,7 +100,7 @@ func PreMain () () {
 		}
 		
 		if _argument == "--sources-md5" {
-			if _, _error := os.Stdout.WriteString (embeddedSourcesMd5); _error != nil {
+			if _, _error := os.Stdout.WriteString (embedded.BuildSourcesMd5); _error != nil {
 				panic (AbortError (Errorw (0x7471032d, _error)))
 			}
 			os.Exit (0)
@@ -105,7 +108,7 @@ func PreMain () () {
 		}
 		
 		if _argument == "--sources-cpio" {
-			if _, _error := os.Stdout.Write (embeddedSourcesCpioGz); _error != nil {
+			if _, _error := os.Stdout.Write (embedded.BuildSourcesCpioGz); _error != nil {
 				panic (AbortError (Errorw (0x8034bf3e, _error)))
 			}
 			os.Exit (0)
@@ -116,11 +119,11 @@ func PreMain () () {
 			_manual := ""
 			switch _argument {
 				case "--manual", "--manual-text" :
-					_manual = embeddedManualTxt
+					_manual = embedded.ManualTxt
 				case "--manual-html" :
-					_manual = embeddedManualHtml
+					_manual = embedded.ManualHtml
 				case "--manual-man" :
-					_manual = embeddedManualMan
+					_manual = embedded.ManualMan
 				default :
 					panic (0x41b79a1d)
 			}
@@ -130,7 +133,7 @@ func PreMain () () {
 		}
 		
 		if (_argument == "--help") || (_argument == "-h") {
-			fmt.Fprint (os.Stdout, embeddedManualTxt)
+			fmt.Fprint (os.Stdout, embedded.ManualTxt)
 			os.Exit (0)
 			panic (0xec70ce24)
 		}
@@ -152,9 +155,9 @@ func PreMain () () {
 				os.Unsetenv ("ZRUN_LIBRARY_FINGERPRINT")
 			}
 			
-			_rc := "\n" + embeddedBashShellRc + "\n" + embeddedBashShellFunctions + "\n"
+			_rc := "\n" + embedded.BashShellRc + "\n" + embedded.BashShellFunctions + "\n"
 			
-			_input, _output, _error := createPipe (len (_rc) + 256, "/tmp")
+			_input, _output, _error := CreatePipe (len (_rc) + 256, "/tmp")
 			if _error != nil {
 				panic (AbortError (_error))
 			}
@@ -170,7 +173,7 @@ func PreMain () () {
 			var _bash string
 			if _bash_0, _error := exec.LookPath ("bash"); _error == nil {
 				_bash = _bash_0
-			} else if _bash_0, _error := resolveExecutable ("bash", []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
+			} else if _bash_0, _error := ResolveExecutable ("bash", []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
 				_bash = _bash_0
 			} else {
 				_bash = "/bin/bash"
@@ -208,46 +211,46 @@ func PreMain () () {
 						case "shell-rc" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellRc, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellRc, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "shell-rc-only" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellRc, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellRc, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "shell-functions" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "bash-prolog" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashProlog0, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashProlog0, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "bash+-prolog" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedBashProlog, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashProlog, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "python3+-prolog" :
 							_chunks = append (_chunks,
-									strings.Trim (strings.TrimPrefix (strings.Trim (embeddedPython3Prolog, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.Python3Prolog, "\n"), "#!/dev/null\n"), "\n"),
 								)
 						default :
 							panic (0xaec5d2dd)
 					}
 				
 				case "go+-prolog" :
-					_chunks = append (_chunks, embeddedGoProlog)
+					_chunks = append (_chunks, embedded.GoProlog)
 				
 				default :
 					Logf ('e', 0xa269e851, "invalid export `%s`;  aborting!", _what)
@@ -511,63 +514,63 @@ func PreMain () () {
 	switch _argument0 {
 		
 		case "[z-run:scriptlet]" :
-			if _error := scriptletMain (_executable, _arguments, _environment, false); _error != nil {
+			if _error := ScriptletMain (_executable, _arguments, _environment, false); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xb305aa74)
 			}
 		
 		case "[z-run:scriptlet-exec]" :
-			if _error := scriptletMain (_executable, _arguments, _environment, true); _error != nil {
+			if _error := ScriptletMain (_executable, _arguments, _environment, true); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x8f827319)
 			}
 		
 		case "[z-run:input]" :
-			if _error := inputMain (_arguments, _environment); _error != nil {
+			if _error := InputMain (_arguments, _environment); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xe62a9355)
 			}
 		
 		case "[z-run:print]" :
-			if _error := printMain (_executable, _arguments, _environment); _error != nil {
+			if _error := PrintMain (_executable, _arguments, _environment); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xf2084070)
 			}
 		
 		case "[z-run:template]" :
-			if _error := templateMain (_executable, _arguments, _environment); _error != nil {
+			if _error := TemplateMain (_executable, _arguments, _environment); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x32241835)
 			}
 		
 		case "[z-run:starlark]" :
-			if _error := starlarkMain (_executable, _arguments, _environment); _error != nil {
+			if _error := StarlarkMain (_executable, _arguments, _environment); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xd6f5b038)
 			}
 		
 		case "[z-run:menu]" :
-			if _error := menuMain (_executable, _arguments, _environment); _error != nil {
+			if _error := MenuMain (_executable, _arguments, _environment); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x6b21e0ab)
 			}
 		
 		case "[z-run:select]" :
-			if _error := fzfMain (true, _arguments, _environment); _error != nil {
+			if _error := FzfMain (true, _arguments, _environment); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x2346ca3f)
 			}
 		
 		case "[z-run:fzf]" :
-			if _error := fzfMain (false, _arguments, _environment); _error != nil {
+			if _error := FzfMain (false, _arguments, _environment); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xfae3720e)

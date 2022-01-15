@@ -20,7 +20,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func menuMain (_executable string, _arguments []string, _environment map[string]string) (*Error) {
+func MenuMain (_executable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) != 1 {
 		return Errorf (0x6b439ede, "invalid arguments")

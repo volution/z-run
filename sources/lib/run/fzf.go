@@ -15,7 +15,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func fzfMain (_embedded bool, _arguments []string, _environment map[string]string) (*Error) {
+func FzfMain (_embedded bool, _arguments []string, _environment map[string]string) (*Error) {
 	
 	
 	if _embedded {

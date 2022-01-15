@@ -1162,7 +1162,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if !_disabled {
 								if ! os.SameFile (_statNewExecutable, _statSelfExecutable) {
 									// FIXME:  A better solution would be nice!
-									return PreMainReExecute (_newExecutable)
+									return preMainReExecute (_newExecutable)
 								} else {
 									if _library.LibraryContext.SelfExecutable == "" {
 										_library.LibraryContext.SelfExecutable = _newExecutable
