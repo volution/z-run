@@ -61,7 +61,7 @@ type InvokeContext struct {
 
 
 
-func Main (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string) (*Error) {
+func RunMain (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string) (*Error) {
 	
 	var _command string = _commandOverride
 	var _scriptlet string = _scriptletOverride

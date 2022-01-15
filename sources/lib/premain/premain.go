@@ -24,34 +24,47 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 func PreMain () () {
 	
+	_descriptor := & MainDescriptor {
+			
+			Main : Main,
+			ExecutableName : "z-run",
+			ExecutableEnvironmentHint : "ZRUN_EXECUTABLE",
+			
+			ManualTxt : embedded.ManualTxt,
+			ManualHtml : embedded.ManualHtml,
+			ManualMan : embedded.ManualMan,
+		}
 	
+	PreMainWith (_descriptor)
 	
-	
-	if _error := InitializeMainRuntime (); _error != nil {
-		panic (AbortError (_error))
-	}
-	
-	if _error := CleanMainEnvironment (); _error != nil {
-		panic (AbortError (_error))
-	}
-	
-	var _executable0, _executable string
-	if _executable0_0, _executable_0, _error := ResolveMainExecutable ("z-run", "ZRUN_EXECUTABLE"); _error == nil {
-		_executable0 = _executable0_0
-		_executable = _executable_0
-	} else {
-		panic (AbortError (_error))
-	}
-	
-	if _error := InterceptMainSpecialFlags ("z-run", _executable0, _executable, embedded.ManualTxt, embedded.ManualHtml, embedded.ManualMan); _error != nil {
-		panic (AbortError (_error))
-	}
+	panic (0xdc677689)
+}
+
+
+
+
+func Main (_context *MainContext) (*Error) {
 	
 	
 	
 	
-	if (len (os.Args) == 2) {
-		_argument := os.Args[1]
+	_executable0 := _context.Executable0
+	_executable := _context.Executable
+	
+	_argument0 := _context.Argument0
+	_arguments := _context.Arguments
+	
+	_environmentMap := _context.EnvironmentMap
+	_environmentList := _context.EnvironmentList
+	
+	_environmentMap["ZRUN_EXECUTABLE"] = _executable
+	_environmentList = EnvironmentMapToList (_environmentMap)
+	
+	
+	
+	
+	if (len (_arguments) == 1) {
+		_argument := _arguments[0]
 		
 		
 		if (_argument == "--shell") || (_argument == "--shell-untainted") {
@@ -62,11 +75,12 @@ func PreMain () () {
 			}
 			
 			if _argument == "--shell-untainted" {
-				os.Unsetenv ("ZRUN_WORKSPACE")
-				os.Unsetenv ("ZRUN_LIBRARY_SOURCE")
-				os.Unsetenv ("ZRUN_LIBRARY_URL")
-				os.Unsetenv ("ZRUN_LIBRARY_IDENTIFIER")
-				os.Unsetenv ("ZRUN_LIBRARY_FINGERPRINT")
+				delete (_environmentMap, "ZRUN_WORKSPACE")
+				delete (_environmentMap, "ZRUN_LIBRARY_SOURCE")
+				delete (_environmentMap, "ZRUN_LIBRARY_URL")
+				delete (_environmentMap, "ZRUN_LIBRARY_IDENTIFIER")
+				delete (_environmentMap, "ZRUN_LIBRARY_FINGERPRINT")
+				_environmentList = EnvironmentMapToList (_environmentMap)
 			}
 			
 			_rc := "\n" + embedded.BashShellRc + "\n" + embedded.BashShellFunctions + "\n"
@@ -99,10 +113,7 @@ func PreMain () () {
 					"--rcfile", fmt.Sprintf ("/dev/fd/%d", _input),
 				}
 			
-			_environment := append ([]string (nil),  os.Environ () ...)
-			_environment = append (_environment, "ZRUN_EXECUTABLE=" + _executable)
-			
-			if _error := syscall.Exec (_bash, _arguments, _environment); _error != nil {
+			if _error := syscall.Exec (_bash, _arguments, _environmentList); _error != nil {
 				panic (AbortError (Errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
 			}
 			panic (0xf4813cc2)
@@ -189,17 +200,10 @@ func PreMain () () {
 	_preMainContext.Executable0 = _executable0
 	_preMainContext.Executable = _executable
 	
-	var _argument0 string
-	var _arguments []string
-	if _argument0_0, _arguments_0, _error := ResolveMainArguments (_executable0, _executable); _error == nil {
-		_argument0 = _argument0_0
-		_arguments = _arguments_0
-	} else {
-		panic (AbortError (_error))
-	}
-	
 	_preMainContext.Argument0 = _argument0
 	_preMainContext.Arguments = append ([]string (nil), _arguments ...)
+	
+	_preMainContext.Environment = _environmentList
 	
 	if strings.HasPrefix (_argument0, "[z-run:menu] ") {
 		_argument0 = "[z-run:menu]"
@@ -211,34 +215,9 @@ func PreMain () () {
 		_argument0 = "[z-run:starlark]"
 	}
 	
-	
-	var _environment map[string]string
-	if _environmentMap_0, _environmentList_0, _error := ResolveMainEnvironment (); _error == nil {
-		_environment = _environmentMap_0
-		_preMainContext.Environment = _environmentList_0
-	} else {
-		panic (AbortError (_error))
-	}
-	
-	// FIXME:  This is for OpenBSD which doesn't have a way to find `os.Executable` outside of `arg0`...
-	if _, _exists := _environment["ZRUN_EXECUTABLE"]; !_exists {
-		_environment["ZRUN_EXECUTABLE"] = _executable
-		_preMainContext.Environment = append (_preMainContext.Environment, "ZRUN_EXECUTABLE=" + _executable)
-	}
-	
-//	Logf ('d', 0x06cd45f9, "self-executable0: %s", _executable0)
-//	Logf ('d', 0x256b2c94, "self-executable: %s", _executable)
-//	Logf ('d', 0xb59e4f73, "self-argument0: %s", _argument0)
-//	Logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
-//	Logf ('d', 0x7a411846, "self-environment: %s", _environment)
-	
 	PreMainContextGlobal = _preMainContext
 	
-	os.Args = append ([]string {"z-run"}, _arguments ...)
-	os.Clearenv ()
-	for _name, _value := range _environment {
-		os.Setenv (_name, _value)
-	}
+	
 	
 	
 	_argument0IsTool := true
@@ -346,7 +325,7 @@ func PreMain () () {
 		
 		if _delegateExecutable != "" {
 			
-			for _name, _value := range _environment {
+			for _name, _value := range _environmentMap {
 				_delegateEnvironment = append (_delegateEnvironment, _name + "=" + _value)
 			}
 			sort.Strings (_delegateEnvironment)
@@ -362,69 +341,75 @@ func PreMain () () {
 	}
 	
 	
-	os.Args = append ([]string {"z-run"}, _arguments ...)
+	
+	
+	if _error := ResetMainEnvironment ("z-run", _arguments, _environmentMap); _error != nil {
+		panic (AbortError (_error))
+	}
+	
+	
 	
 	
 	switch _argument0 {
 		
 		case "[z-run:scriptlet]" :
-			if _error := ScriptletMain (_executable, _arguments, _environment, false); _error != nil {
+			if _error := ScriptletMain (_executable, _arguments, _environmentMap, false); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xb305aa74)
 			}
 		
 		case "[z-run:scriptlet-exec]" :
-			if _error := ScriptletMain (_executable, _arguments, _environment, true); _error != nil {
+			if _error := ScriptletMain (_executable, _arguments, _environmentMap, true); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x8f827319)
 			}
 		
 		case "[z-run:input]" :
-			if _error := InputMain (_arguments, _environment); _error != nil {
+			if _error := InputMain (_arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xe62a9355)
 			}
 		
 		case "[z-run:print]" :
-			if _error := PrintMain (_executable, _arguments, _environment); _error != nil {
+			if _error := PrintMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xf2084070)
 			}
 		
 		case "[z-run:template]" :
-			if _error := TemplateMain (_executable, _arguments, _environment); _error != nil {
+			if _error := TemplateMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x32241835)
 			}
 		
 		case "[z-run:starlark]" :
-			if _error := StarlarkMain (_executable, _arguments, _environment); _error != nil {
+			if _error := StarlarkMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xd6f5b038)
 			}
 		
 		case "[z-run:menu]" :
-			if _error := MenuMain (_executable, _arguments, _environment); _error != nil {
+			if _error := MenuMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x6b21e0ab)
 			}
 		
 		case "[z-run:select]" :
-			if _error := FzfMain (true, _arguments, _environment); _error != nil {
+			if _error := FzfMain (true, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x2346ca3f)
 			}
 		
 		case "[z-run:fzf]" :
-			if _error := FzfMain (false, _arguments, _environment); _error != nil {
+			if _error := FzfMain (false, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xfae3720e)
@@ -438,7 +423,7 @@ func PreMain () () {
 			panic (ExitMainFailed ())
 	}
 	
-	if _error := Main (_executable, _argument0, _arguments, _environment, "", ""); _error == nil {
+	if _error := RunMain (_executable, _argument0, _arguments, _environmentMap, "", ""); _error == nil {
 		panic (ExitMainSucceeded ())
 	} else {
 		panic (AbortError (_error))

@@ -251,7 +251,7 @@ func menuPause (_context *Context) (bool, *Error) {
 	
 	// FIMXE:  Find a more proper implementation for this!
 	
-	_term := os.Getenv ("TERM")
+	_term, _ := _context.cleanEnvironment["TERM"]
 	if (_term == "dumb") || (_term == "") {
 		return false, nil
 	}

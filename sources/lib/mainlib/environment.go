@@ -160,3 +160,18 @@ func CleanMainEnvironment () (*Error) {
 	return nil
 }
 
+
+
+
+func ResetMainEnvironment (_argument0 string, _arguments []string, _environment map[string]string) (*Error) {
+	
+	os.Args = append ([]string {_argument0}, _arguments ...)
+	
+	os.Clearenv ()
+	for _name, _value := range _environment {
+		os.Setenv (_name, _value)
+	}
+	
+	return nil
+}
+
