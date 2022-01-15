@@ -1,6 +1,6 @@
 
 
-package zrun
+package common
 
 
 import "crypto/sha256"
@@ -98,16 +98,16 @@ func (_fingerprinter Fingerprinter) Bool (_value bool) (Fingerprinter) {
 }
 
 
-func fingerprintStringsQuick (_seed string, _values ... string) string {
+func FingerprintStringsQuick (_seed string, _values ... string) string {
 	return NewFingerprinter () .String (_seed) .StringsWithLen (_values) .Build ()
 }
 
 
-func fingerprintString (_value string) string {
-	return fingerprintBytes ([]byte (_value))
+func FingerprintString (_value string) string {
+	return FingerprintBytes ([]byte (_value))
 }
 
-func fingerprintBytes (_value []byte) string {
+func FingerprintBytes (_value []byte) string {
 	_hasher := sha256.New ()
 	_hasher.Write (_value)
 	return hex.EncodeToString (_hasher.Sum (nil))

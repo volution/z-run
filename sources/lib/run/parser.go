@@ -1236,7 +1236,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 		
 		if _state == SCRIPTLET_PUSH {
 			if !_scriptletState.disabled {
-				_bodyFingerprint := fingerprintString (_scriptletState.body)
+				_bodyFingerprint := FingerprintString (_scriptletState.body)
 				_scriptlet := & Scriptlet {
 						Label : _scriptletState.label,
 						Kind : _scriptletState.kind,

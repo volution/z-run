@@ -10,6 +10,8 @@ import "golang.org/x/sys/unix"
 
 import embedded "github.com/cipriancraciun/z-run/embedded"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -74,6 +76,6 @@ func init () () {
 		UNAME_NODE = "{unknown-node}"
 	}
 	
-	UNAME_FINGERPRINT = fingerprintStringsQuick ("98ff673c677ffaeb481ce53a8deef977", UNAME_NODE, UNAME_SYSTEM, UNAME_RELEASE, UNAME_VERSION, UNAME_MACHINE) [0:32]
+	UNAME_FINGERPRINT = FingerprintStringsQuick ("98ff673c677ffaeb481ce53a8deef977", UNAME_NODE, UNAME_SYSTEM, UNAME_RELEASE, UNAME_VERSION, UNAME_MACHINE) [0:32]
 }
 
