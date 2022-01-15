@@ -1,6 +1,6 @@
 
 
-package zrun
+package store
 
 import . "github.com/cipriancraciun/z-run/lib/common"
 
