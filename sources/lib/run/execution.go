@@ -433,7 +433,7 @@ func prepareExecution_0 (
 					_interpreterScriptBuffer.WriteString (_scriptletBody)
 				}
 				
-				_goSourceTmp := path.Join (_contextCacheRoot, "go-sources", generateRandomToken () + ".tmp")
+				_goSourceTmp := path.Join (_contextCacheRoot, "go-sources", GenerateRandomToken () + ".tmp")
 				if _error := os.WriteFile (_goSourceTmp, _interpreterScriptBuffer.Bytes (), 0600); _error != nil {
 					return nil, nil, Errorw (0x55976c12, _error)
 				}
@@ -441,7 +441,7 @@ func prepareExecution_0 (
 					return nil, nil, Errorw (0x5367f11a, _error)
 				}
 				
-				_goExecutableTmp := path.Join (_contextCacheRoot, "go-executables", generateRandomToken () + ".tmp")
+				_goExecutableTmp := path.Join (_contextCacheRoot, "go-executables", GenerateRandomToken () + ".tmp")
 				
 				_goRoot := path.Join (_contextCacheRoot, "go-root")
 				_goCache := path.Join (_goRoot, "cache")

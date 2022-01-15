@@ -46,7 +46,7 @@ func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 		if _error := makeCacheFolder (_cacheRoot, "buffers"); _error != nil {
 			return -1, nil, _error
 		}
-		_temporaryPath := path.Join (_cacheRoot, "buffers", generateRandomToken () + ".buffer")
+		_temporaryPath := path.Join (_cacheRoot, "buffers", GenerateRandomToken () + ".buffer")
 		if _descriptor, _error := syscall.Open (_temporaryPath, syscall.O_CREAT | syscall.O_EXCL | syscall.O_WRONLY, 0600); _error == nil {
 			_interpreterScriptOutput = os.NewFile (uintptr (_descriptor), "")
 		} else {

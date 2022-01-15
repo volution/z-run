@@ -53,7 +53,7 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 	if _error := makeCacheFolder (_context.cacheRoot, "parse-sockets"); _error != nil {
 		return nil, _error
 	}
-	_libraryUrl := fmt.Sprintf ("unix:%s", path.Join (_context.cacheRoot, "parse-sockets", fmt.Sprintf ("%s-%08x.sock", generateRandomToken (), os.Getpid ())))
+	_libraryUrl := fmt.Sprintf ("unix:%s", path.Join (_context.cacheRoot, "parse-sockets", fmt.Sprintf ("%s-%08x.sock", GenerateRandomToken (), os.Getpid ())))
 	
 	var _rpc *LibraryRpcServer
 	if _rpc_0, _error := NewLibraryRpcServer (_library, _libraryUrl); _error == nil {

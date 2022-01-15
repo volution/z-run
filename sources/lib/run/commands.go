@@ -243,7 +243,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	}
 	
 	if _sshToken == "" {
-		_sshToken = generateRandomToken ()
+		_sshToken = GenerateRandomToken ()
 	}
 	
 	if _sshLauncher == "" {
