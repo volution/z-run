@@ -4,25 +4,19 @@ package premain
 
 
 import "fmt"
-import "log"
 import "os"
 import "os/exec"
 import "path/filepath"
-import "runtime"
-import "runtime/debug"
 import "sort"
 import "strings"
 import "syscall"
-import "unicode"
-import "unicode/utf8"
-
-import isatty "github.com/mattn/go-isatty"
 
 import embedded "github.com/cipriancraciun/z-run/embedded"
 
 import . "github.com/cipriancraciun/z-run/lib/run"
 import . "github.com/cipriancraciun/z-run/lib/fzf"
 import . "github.com/cipriancraciun/z-run/lib/input"
+import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -31,52 +25,26 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 func PreMain () () {
 	
 	
-	runtime.GOMAXPROCS (1)
-	debug.SetMaxThreads (16)
-	debug.SetMaxStack (128 * 1024)
-	debug.SetGCPercent (500)
 	
 	
-	log.SetFlags (0)
-	
-	
-	var _executable0 string
-	if _executable_0, _error := os.Executable (); _error == nil {
-//		Logf ('d', 0xda96ed44, "%s", _executable_0)
-		_executable0 = _executable_0
-	} else if _executable_0 := os.Getenv ("ZRUN_EXECUTABLE"); _executable_0 != "" {
-		_executable0 = _executable_0
-	} else {
-		panic (AbortError (Errorf (0x905621f4, "can't resolve `z-run` executable")))
+	if _error := InitializeMainRuntime (); _error != nil {
+		panic (AbortError (_error))
 	}
 	
+	if _error := CleanMainEnvironment (); _error != nil {
+		panic (AbortError (_error))
+	}
 	
-	var _executable string
-	if _executable_0, _error := filepath.EvalSymlinks (_executable0); _error == nil {
+	var _executable0, _executable string
+	if _executable0_0, _executable_0, _error := ResolveMainExecutable ("z-run", "ZRUN_EXECUTABLE"); _error == nil {
+		_executable0 = _executable0_0
 		_executable = _executable_0
 	} else {
-		panic (AbortError (Errorw (0x127e013a, _error)))
+		panic (AbortError (_error))
 	}
 	
-	
-	for _, _variable := range os.Environ () {
-		_accept := true
-		if _splitIndex := strings.IndexByte (_variable, '='); _splitIndex >= 0 {
-			_variable = _variable[:_splitIndex]
-			if _variable == "" {
-				_accept = false
-			}
-		} else {
-			_accept = false
-		}
-		if _accept && strings.HasPrefix (_variable, "HYPERFINE_") {
-			_accept = false
-		}
-		if !_accept {
-			if _error := os.Unsetenv (_variable); _error != nil {
-				panic (AbortError (Errorw (0x14024051, _error)))
-			}
-		}
+	if _error := InterceptMainSpecialFlags ("z-run", _executable0, _executable, embedded.ManualTxt, embedded.ManualHtml, embedded.ManualMan); _error != nil {
+		panic (AbortError (_error))
 	}
 	
 	
@@ -85,68 +53,12 @@ func PreMain () () {
 	if (len (os.Args) == 2) {
 		_argument := os.Args[1]
 		
-		if (_argument == "--version") || (_argument == "-v") {
-			
-			fmt.Fprintf (os.Stdout, "* version       : %s\n", BUILD_VERSION)
-			fmt.Fprintf (os.Stdout, "* executable    : %s\n", os.Args[0])
-			fmt.Fprintf (os.Stdout, "* build target  : %s, %s-%s, %s, %s\n", BUILD_TARGET, BUILD_TARGET_OS, BUILD_TARGET_ARCH, BUILD_COMPILER_VERSION, BUILD_COMPILER_TYPE)
-			fmt.Fprintf (os.Stdout, "* build number  : %s, %s\n", BUILD_NUMBER, BUILD_TIMESTAMP)
-			fmt.Fprintf (os.Stdout, "* code & issues : %s\n", PROJECT_URL)
-			fmt.Fprintf (os.Stdout, "* sources git   : %s\n", BUILD_GIT_HASH)
-			fmt.Fprintf (os.Stdout, "* sources hash  : %s\n", BUILD_SOURCES_HASH)
-			fmt.Fprintf (os.Stdout, "* uname node    : %s\n", UNAME_NODE)
-			fmt.Fprintf (os.Stdout, "* uname system  : %s, %s, %s\n", UNAME_SYSTEM, UNAME_RELEASE, UNAME_MACHINE)
-			
-			os.Exit (0)
-			panic (0x66203ba4)
-		}
-		
-		if _argument == "--sources-md5" {
-			if _, _error := os.Stdout.WriteString (embedded.BuildSourcesMd5); _error != nil {
-				panic (AbortError (Errorw (0x7471032d, _error)))
-			}
-			os.Exit (0)
-			panic (0x9aaf5529)
-		}
-		
-		if _argument == "--sources-cpio" {
-			if _, _error := os.Stdout.Write (embedded.BuildSourcesCpioGz); _error != nil {
-				panic (AbortError (Errorw (0x8034bf3e, _error)))
-			}
-			os.Exit (0)
-			panic (0x7dca7f0e)
-		}
-		
-		if (_argument == "--manual") || (_argument == "--manual-text") || (_argument == "--manual-html") || (_argument == "--manual-man") {
-			_manual := ""
-			switch _argument {
-				case "--manual", "--manual-text" :
-					_manual = embedded.ManualTxt
-				case "--manual-html" :
-					_manual = embedded.ManualHtml
-				case "--manual-man" :
-					_manual = embedded.ManualMan
-				default :
-					panic (0x41b79a1d)
-			}
-			fmt.Fprint (os.Stdout, _manual)
-			os.Exit (0)
-			panic (0x1005584b)
-		}
-		
-		if (_argument == "--help") || (_argument == "-h") {
-			fmt.Fprint (os.Stdout, embedded.ManualTxt)
-			os.Exit (0)
-			panic (0xec70ce24)
-		}
-		
 		
 		if (_argument == "--shell") || (_argument == "--shell-untainted") {
 			
-			if _error := CheckTerminal (); _error != nil {
+			if _error := CheckMainTerminal (); _error != nil {
 				Logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
-				os.Exit (1)
-				panic (0x67e03fa2)
+				panic (ExitMainFailed ())
 			}
 			
 			if _argument == "--shell-untainted" {
@@ -256,8 +168,7 @@ func PreMain () () {
 				
 				default :
 					Logf ('e', 0xa269e851, "invalid export `%s`;  aborting!", _what)
-					os.Exit (1)
-					panic (0x5a0fe24e)
+					panic (ExitMainFailed ())
 			}
 			
 			for _, _chunk := range _chunks {
@@ -266,8 +177,7 @@ func PreMain () () {
 				}
 			}
 			
-			os.Exit (0)
-			panic (0xda66de5d)
+			panic (ExitMainSucceeded ())
 		}
 	}
 	
@@ -279,41 +189,13 @@ func PreMain () () {
 	_preMainContext.Executable0 = _executable0
 	_preMainContext.Executable = _executable
 	
-	
-	if os.Getenv ("ZRUN_EXECUTABLE") == "" {
-		switch runtime.GOOS {
-			
-			case "linux" :
-				// NOP
-			
-			case "darwin" :
-				// NOP
-			
-			case "freebsd", "openbsd" :
-				// NOP
-			
-			case "netbsd", "dragonfly" :
-				Logf ('i', 0xc8f30933, "this tool was not tested on your OS;  please be cautions!")
-			
-			default :
-				Logf ('e', 0xcdd5f570, "this tool was not tested on your OS;  it is highly unlikely that it will work;  aborting!")
-				os.Exit (1)
-				panic (0x9c080b95)
-		}
-	}
-	
-	
-	_argument0 := os.Args[0]
-	_arguments := append ([]string (nil), os.Args[1:] ...)
-	
-	if _argument0 == _executable0 {
-		_argument0 = _executable
-	} else if (_argument0 != _executable) && ! strings.HasPrefix (_argument0, "[") {
-		if _executable_0, _error := filepath.EvalSymlinks (_argument0); _error == nil {
-			if _executable == _executable_0 {
-				_argument0 = _executable
-			}
-		}
+	var _argument0 string
+	var _arguments []string
+	if _argument0_0, _arguments_0, _error := ResolveMainArguments (_executable0, _executable); _error == nil {
+		_argument0 = _argument0_0
+		_arguments = _arguments_0
+	} else {
+		panic (AbortError (_error))
 	}
 	
 	_preMainContext.Argument0 = _argument0
@@ -330,42 +212,12 @@ func PreMain () () {
 	}
 	
 	
-	_environment := make (map[string]string, 128)
-	_preMainContext.Environment = make ([]string, 0, 128)
-	for _, _variable := range os.Environ () {
-		_preMainContext.Environment = append (_preMainContext.Environment, _variable)
-		
-		if _splitIndex := strings.IndexByte (_variable, '='); _splitIndex >= 0 {
-			
-			_name := _variable[:_splitIndex]
-			_value := _variable[_splitIndex + 1:]
-			
-			_nameTrimmed := strings.TrimSpace (_name)
-			if _name != _nameTrimmed {
-				Logf ('w', 0x1d362f26, "invalid environment variable (name has spaces):  `%s`", _name)
-				_name = _nameTrimmed
-			}
-			if strings.IndexFunc (_name, func (r rune) (bool) { return unicode.IsSpace (r) || (r > unicode.MaxASCII) }) >= 0 {
-				Logf ('w', 0x81ac6f2e, "invalid environment variable (name is not ASCII):  `%s`", _name)
-			}
-			
-			if _name == "" {
-				Logf ('w', 0x0ffb0031, "invalid environment variable (name empty):  `%s`", _variable)
-			} else if ! utf8.Valid ([]byte (_name)) {
-				Logf ('w', 0x54278534, "invalid environment variable (name invalid UTF-c):  `%s`", _name)
-			} else if ! utf8.Valid ([]byte (_value)) {
-				Logf ('w', 0x785ba004, "invalid environment variable (value invalid UTF-c):  `%s`", _name)
-			} else if _value == "" {
-//				Logf ('w', 0xfe658d34, "invalid environment variable (value empty):  `%s`", _name)
-			} else if _, _exists := _environment[_name]; _exists {
-				Logf ('w', 0x7e7e41a5, "invalid environment variable (name duplicate):  `%s`", _name)
-			} else {
-				_environment[_nameTrimmed] = _value
-			}
-			
-		} else {
-			Logf ('w', 0xe745517c, "invalid environment variable (missing `=`):  `%s`", _variable)
-		}
+	var _environment map[string]string
+	if _environmentMap_0, _environmentList_0, _error := ResolveMainEnvironment (); _error == nil {
+		_environment = _environmentMap_0
+		_preMainContext.Environment = _environmentList_0
+	} else {
+		panic (AbortError (_error))
 	}
 	
 	// FIXME:  This is for OpenBSD which doesn't have a way to find `os.Executable` outside of `arg0`...
@@ -432,11 +284,11 @@ func PreMain () () {
 		default :
 			if strings.HasPrefix (_argument0, "[z-run:") {
 				Logf ('e', 0xf6274ed5, "invalid argument0: `%s`;  aborting!", _argument0)
-				os.Exit (1)
+				panic (ExitMainFailed ())
 			}
 			if _argument00, _error := filepath.EvalSymlinks (_argument0); (_error != nil) || (_argument00 != _executable) {
 				Logf ('e', 0xf1f1a024, "invalid argument0: `%s`, expected `%s`;  aborting!", _argument0, _executable)
-				os.Exit (1)
+				panic (ExitMainFailed ())
 			}
 			_argument0IsTool = false
 	}
@@ -583,12 +435,11 @@ func PreMain () () {
 		
 		default :
 			Logf ('e', 0xf965e92e, "invalid argument0: `%s`;  aborting!", _argument0)
-			os.Exit (1)
+			panic (ExitMainFailed ())
 	}
 	
 	if _error := Main (_executable, _argument0, _arguments, _environment, "", ""); _error == nil {
-		os.Exit (0)
-		panic (0xe0e1c1a1)
+		panic (ExitMainSucceeded ())
 	} else {
 		panic (AbortError (_error))
 	}
@@ -634,21 +485,5 @@ func PreMainReExecute (_executable string) (*Error) {
 			PreMainContextGlobal.Environment,
 		)
 	return Errorf (0x3d993836, "failed to exec `%s`  //  %v", _executable, _error)
-}
-
-
-
-
-func CheckTerminal () (*Error) {
-	if ! isatty.IsTerminal (os.Stdin.Fd ()) {
-		return Errorf (0x05d60b72, "stdin is not a TTY")
-	}
-	if ! isatty.IsTerminal (os.Stdout.Fd ()) {
-		return Errorf (0xc432630a, "stdout is not a TTY")
-	}
-	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-		return Errorf (0x77924518, "stderr is not a TTY")
-	}
-	return nil
 }
 
