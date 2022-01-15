@@ -1,6 +1,6 @@
 
 
-package zrun
+package fzf
 
 
 import "os"

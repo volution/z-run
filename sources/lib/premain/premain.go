@@ -21,6 +21,8 @@ import isatty "github.com/mattn/go-isatty"
 import embedded "github.com/cipriancraciun/z-run/embedded"
 
 import . "github.com/cipriancraciun/z-run/lib/run"
+import . "github.com/cipriancraciun/z-run/lib/fzf"
+import . "github.com/cipriancraciun/z-run/lib/input"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 

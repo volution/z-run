@@ -1,6 +1,6 @@
 
 
-package zrun
+package input
 
 
 import "flag"
