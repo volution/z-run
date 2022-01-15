@@ -423,7 +423,7 @@ func Main (_context *MainContext) (*Error) {
 			panic (ExitMainFailed ())
 	}
 	
-	if _error := RunMain (_executable, _argument0, _arguments, _environmentMap, "", ""); _error == nil {
+	if _error := RunMain (_executable, _argument0, _arguments, _environmentMap, "", "", preMainReExecute); _error == nil {
 		panic (ExitMainSucceeded ())
 	} else {
 		panic (AbortError (_error))
@@ -446,7 +446,7 @@ var PreMainContextGlobal *PreMainContext = nil
 
 
 
-func PreMainReExecute (_executable string) (*Error) {
+func preMainReExecute (_executable string) (*Error) {
 	if PreMainContextGlobal == nil {
 		return Errorf (0x3d126cd2, "can't switch `z-run`")
 	}

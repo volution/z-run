@@ -31,6 +31,7 @@ type Context struct {
 	cacheRoot string
 	cacheEnabled bool
 	top bool
+	preMainReExecute func (string) (*Error)
 }
 
 
@@ -63,7 +64,7 @@ type InvokeContext struct {
 
 
 
-func RunMain (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string) (*Error) {
+func RunMain (_executable string, _argument0 string, _arguments []string, _environment map[string]string, _commandOverride string, _scriptletOverride string, _preMainReExecute func (string) (*Error)) (*Error) {
 	
 	var _command string = _commandOverride
 	var _scriptlet string = _scriptletOverride
@@ -515,6 +516,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 			workspace : _workspace,
 			cacheRoot : _cacheRoot,
 			cacheEnabled : _cacheEnabled,
+			preMainReExecute : _preMainReExecute,
 		}
 	
 	var _library LibraryStore
@@ -543,7 +545,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 	if _top {
 		if _libraryContext, _error := _library.SelectLibraryContext (); _error == nil {
 			if (_libraryContext.SelfExecutable != "") && (_libraryContext.SelfExecutable != _context.selfExecutable) {
-				preMainReExecute (_libraryContext.SelfExecutable)
+				_context.preMainReExecute (_libraryContext.SelfExecutable)
 			}
 		} else {
 			return _error
@@ -760,13 +762,5 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 		default :
 			return Errorf (0x66cf8700, "unexpected command `%s`", _command)
 	}
-}
-
-
-
-
-func preMainReExecute (_executable string) (*Error) {
-	// FIXME!
-	panic (0xafb6eaf2)
 }
 
