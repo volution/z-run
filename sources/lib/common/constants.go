@@ -1,6 +1,6 @@
 
 
-package zrun
+package common
 
 
 import "runtime"
@@ -9,8 +9,6 @@ import "strings"
 import "golang.org/x/sys/unix"
 
 import embedded "github.com/cipriancraciun/z-run/embedded"
-
-import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 

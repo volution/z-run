@@ -1,6 +1,6 @@
 
 
-package zrun
+package common
 
 
 import "strings"
@@ -8,12 +8,10 @@ import "path"
 import "path/filepath"
 import "os"
 
-import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-
-func resolveExecutable (_executable string, _paths []string) (string, *Error) {
+func ResolveExecutable (_executable string, _paths []string) (string, *Error) {
 	
 	// NOTE:  Based on `os.exec.LookPath` implementation:
 	//        https://golang.org/src/os/exec/lp_unix.go
@@ -63,7 +61,7 @@ func resolveExecutable (_executable string, _paths []string) (string, *Error) {
 
 
 
-func resolveRelativePath (_workspace string, _base string, _path string) (string, *Error) {
+func ResolveRelativePath (_workspace string, _base string, _path string) (string, *Error) {
 	
 	if (_path == ".") || (_path == "..") || (_path == "_") {
 		_path = _path + "/"
@@ -93,9 +91,9 @@ func resolveRelativePath (_workspace string, _base string, _path string) (string
 }
 
 
-func resolveAbsolutePath (_workspace string, _base string, _path string) (string, *Error) {
+func ResolveAbsolutePath (_workspace string, _base string, _path string) (string, *Error) {
 	
-	if _path_0, _error := resolveRelativePath (_workspace, _base, _path); _error != nil {
+	if _path_0, _error := ResolveRelativePath (_workspace, _base, _path); _error != nil {
 		return "", _error
 	} else {
 		_path = _path_0
@@ -110,7 +108,7 @@ func resolveAbsolutePath (_workspace string, _base string, _path string) (string
 }
 
 
-func replaceVariables (_input string) (string, *Error) {
+func ReplaceVariables (_input string) (string, *Error) {
 	
 	// FIXME:  Implement this better!
 	
@@ -134,16 +132,5 @@ func replaceVariables (_input string) (string, *Error) {
 	}
 	
 	return _input, nil
-}
-
-
-
-
-func makeCacheFolder (_cacheRoot string, _cacheFolder string) (*Error) {
-	_cache := path.Join (_cacheRoot, _cacheFolder)
-	if _error := os.MkdirAll (_cache, 0750); _error != nil {
-		return Errorw (0x6f530744, _error)
-	}
-	return nil
 }
 

@@ -141,12 +141,12 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 		_command.Args = []string {
 				"[z-run:select]",
 			}
-	} else if _path, _error := resolveExecutable ("z-run--select", _context.executablePaths); _error == nil {
+	} else if _path, _error := ResolveExecutable ("z-run--select", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",
 			}
-	} else if _path, _error := resolveExecutable ("rofi", _context.executablePaths); _error == nil {
+	} else if _path, _error := ResolveExecutable ("rofi", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",
@@ -156,7 +156,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-no-custom",
 				"-matching-negate-char", "\\x0",
 			}
-	} else if _path, _error := resolveExecutable ("dmenu", _context.executablePaths); _error == nil {
+	} else if _path, _error := ResolveExecutable ("dmenu", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",
@@ -164,7 +164,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-l", "16",
 				"-i",
 			}
-	} else if _path, _error := resolveExecutable ("choose", _context.executablePaths); _error == nil {
+	} else if _path, _error := ResolveExecutable ("choose", _context.executablePaths); _error == nil {
 		_command.Path = _path
 		_command.Args = []string {
 				"[z-run:select]",

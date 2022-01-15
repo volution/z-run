@@ -50,7 +50,7 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 		return nil, _error
 	}
 	
-	if _error := makeCacheFolder (_context.cacheRoot, "parse-sockets"); _error != nil {
+	if _error := MakeCacheFolder (_context.cacheRoot, "parse-sockets"); _error != nil {
 		return nil, _error
 	}
 	_libraryUrl := fmt.Sprintf ("unix:%s", path.Join (_context.cacheRoot, "parse-sockets", fmt.Sprintf ("%s-%08x.sock", GenerateRandomToken (), os.Getpid ())))
@@ -863,12 +863,12 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					
 					if _include {
 						_includePath := _body
-						if _includePath_0, _error := replaceVariables (_includePath); _error != nil {
+						if _includePath_0, _error := ReplaceVariables (_includePath); _error != nil {
 							return _error
 						} else {
 							_includePath = _includePath_0
 						}
-						if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
+						if _includePath_0, _error := ResolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
 							return _error
 						} else {
 							_includePath = _includePath_0
@@ -969,12 +969,12 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&?? ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
-					if _includePath_0, _error := replaceVariables (_includePath); _error != nil {
+					if _includePath_0, _error := ReplaceVariables (_includePath); _error != nil {
 						return _error
 					} else {
 						_includePath = _includePath_0
 					}
-					if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
+					if _includePath_0, _error := ResolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
 						return _error
 					} else {
 						_includePath = _includePath_0
@@ -999,12 +999,12 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&??__ ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
-					if _includePath_0, _error := replaceVariables (_includePath); _error != nil {
+					if _includePath_0, _error := ReplaceVariables (_includePath); _error != nil {
 						return _error
 					} else {
 						_includePath = _includePath_0
 					}
-					if _includePath_0, _error := resolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
+					if _includePath_0, _error := ResolveRelativePath (_context.workspace, path.Dir (_sourcePath), _includePath); _error != nil {
 						return _error
 					} else {
 						_includePath = _includePath_0
@@ -1043,12 +1043,12 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								return Errorf (0x8c2e1bf8, "invalid syntax (%d):  empty statement path descriptor | %s", _lineIndex, _line)
 							}
 							_path := _descriptor
-							if _path_0, _error := replaceVariables (_path); _error != nil {
+							if _path_0, _error := ReplaceVariables (_path); _error != nil {
 								return _error
 							} else {
 								_path = _path_0
 							}
-							if _path_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _path); _error != nil {
+							if _path_0, _error := ResolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _path); _error != nil {
 								return _error
 							} else {
 								_path = _path_0
@@ -1078,7 +1078,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _name == "" {
 								return Errorf (0x6bce31bb, "invalid syntax (%d):  empty statement environment key | %s", _lineIndex, _line)
 							}
-							if _value_0, _error := replaceVariables (_value); _error != nil {
+							if _value_0, _error := ReplaceVariables (_value); _error != nil {
 								return _error
 							} else {
 								_value = _value_0
@@ -1087,7 +1087,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								if _value == "" {
 									return Errorf (0x2124d511, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 								}
-								if _path_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _value); _error != nil {
+								if _path_0, _error := ResolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _value); _error != nil {
 									return _error
 								} else {
 									_value = _path_0
@@ -1129,12 +1129,12 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								return Errorf (0x2abc5316, "invalid syntax (%d):  empty statement `z-run` executable descriptor | %s", _lineIndex, _line)
 							}
 							_newExecutable := _descriptor
-							if _newExecutable_0, _error := replaceVariables (_newExecutable); _error != nil {
+							if _newExecutable_0, _error := ReplaceVariables (_newExecutable); _error != nil {
 								return _error
 							} else {
 								_newExecutable = _newExecutable_0
 							}
-							if _newExecutable_0, _error := resolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _newExecutable); _error == nil {
+							if _newExecutable_0, _error := ResolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _newExecutable); _error == nil {
 								_newExecutable = _newExecutable_0
 							} else {
 								return _error

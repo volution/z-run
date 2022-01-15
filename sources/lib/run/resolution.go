@@ -248,7 +248,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 	var _cacheLibrary string
 	
 	if _context.cacheEnabled && (_context.cacheRoot != "") {
-		if _error := makeCacheFolder (_context.cacheRoot, "libraries-cdb"); _error != nil {
+		if _error := MakeCacheFolder (_context.cacheRoot, "libraries-cdb"); _error != nil {
 			return nil, _error
 		}
 		_cacheLibrary = path.Join (_context.cacheRoot, "libraries-cdb", _libraryIdentifier + ".cdb")

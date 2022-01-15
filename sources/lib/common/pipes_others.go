@@ -2,7 +2,7 @@
 // +build !linux
 
 
-package zrun
+package common
 
 
 import "fmt"
@@ -11,14 +11,12 @@ import "path"
 import "runtime"
 import "syscall"
 
-import . "github.com/cipriancraciun/z-run/lib/common"
-
 
 
 
 // FIXME:  Merge with Linux variant!
 
-func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
+func CreatePipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 	
 	var _interpreterScriptInput int
 	var _interpreterScriptOutput *os.File
@@ -48,7 +46,7 @@ func createPipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 			// FIXME:  We should make sure that the cache path is never empty!
 			panic (0xd6f17610)
 		}
-		if _error := makeCacheFolder (_cacheRoot, "buffers"); _error != nil {
+		if _error := MakeCacheFolder (_cacheRoot, "buffers"); _error != nil {
 			return -1, nil, _error
 		}
 		_temporaryPath := path.Join (_cacheRoot, "buffers", GenerateRandomToken () + ".buffer")

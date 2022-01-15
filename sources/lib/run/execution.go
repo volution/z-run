@@ -14,6 +14,8 @@ import "strings"
 import "strconv"
 import "syscall"
 
+import embedded "github.com/cipriancraciun/z-run/embedded"
+
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -198,14 +200,14 @@ func prepareExecution_0 (
 	_interpreterPrologOverhead := 0
 	switch _interpreter {
 		case "<bash>" :
-			_interpreterPrologOverhead = len (embeddedBashProlog0) + 128
+			_interpreterPrologOverhead = len (embedded.BashProlog0) + 128
 		case "<bash+>" :
-			_interpreterPrologOverhead = len (embeddedBashProlog) + 128
+			_interpreterPrologOverhead = len (embedded.BashProlog) + 128
 		case "<python3+>" :
-			_interpreterPrologOverhead = len (embeddedPython3Prolog) + 2048
+			_interpreterPrologOverhead = len (embedded.Python3Prolog) + 2048
 	}
 	
-	if _interpreterScriptInput_0, _interpreterScriptOutput_0, _error := createPipe (len (_scriptletBody) + _interpreterPrologOverhead, _contextCacheRoot); _error == nil {
+	if _interpreterScriptInput_0, _interpreterScriptOutput_0, _error := CreatePipe (len (_scriptletBody) + _interpreterPrologOverhead, _contextCacheRoot); _error == nil {
 		_interpreterScriptInput = _interpreterScriptInput_0
 		_interpreterScriptOutput = _interpreterScriptOutput_0
 	} else {
@@ -242,7 +244,7 @@ func prepareExecution_0 (
 					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
-			_interpreterScriptBuffer.WriteString (embeddedBashProlog0)
+			_interpreterScriptBuffer.WriteString (embedded.BashProlog0)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
@@ -257,7 +259,7 @@ func prepareExecution_0 (
 					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
-			_interpreterScriptBuffer.WriteString (embeddedBashProlog)
+			_interpreterScriptBuffer.WriteString (embedded.BashProlog)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
@@ -285,7 +287,7 @@ func prepareExecution_0 (
 						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 					)
 			}
-			_interpreterScriptBuffer.WriteString (embeddedPython3Prolog)
+			_interpreterScriptBuffer.WriteString (embedded.Python3Prolog)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf (
 					"Z._scriptlet_begin_from_fd (%d, %s, %s, %d, %d, lambda : None)\n",
 					_interpreterScriptInput,
@@ -392,13 +394,13 @@ func prepareExecution_0 (
 		
 		case "<go>", "<go+>" :
 			
-			if _error := makeCacheFolder (_contextCacheRoot, "go-root"); _error != nil {
+			if _error := MakeCacheFolder (_contextCacheRoot, "go-root"); _error != nil {
 				return nil, nil, _error
 			}
-			if _error := makeCacheFolder (_contextCacheRoot, "go-sources"); _error != nil {
+			if _error := MakeCacheFolder (_contextCacheRoot, "go-sources"); _error != nil {
 				return nil, nil, _error
 			}
-			if _error := makeCacheFolder (_contextCacheRoot, "go-executables"); _error != nil {
+			if _error := MakeCacheFolder (_contextCacheRoot, "go-executables"); _error != nil {
 				return nil, nil, _error
 			}
 			
@@ -422,7 +424,7 @@ func prepareExecution_0 (
 							break
 						}
 					}
-					_interpreterScriptBuffer.WriteString (embeddedGoProlog)
+					_interpreterScriptBuffer.WriteString (embedded.GoProlog)
 					_interpreterScriptBuffer.WriteString ("\nfunc main () () {\n")
 					for _, _line := range _lines {
 						_interpreterScriptBuffer.WriteString (_line)
@@ -453,7 +455,7 @@ func prepareExecution_0 (
 				}
 				
 				_goExec := ""
-				if _goExec_0, _error := resolveExecutable ("go", _contextExecutablePaths); _error == nil {
+				if _goExec_0, _error := ResolveExecutable ("go", _contextExecutablePaths); _error == nil {
 					_goExec = _goExec_0
 				} else {
 					return nil, nil, _error
@@ -597,7 +599,7 @@ func prepareExecution_0 (
 			_environment,
 		)
 	
-	if _interpreterExecutable_0, _error := resolveExecutable (_interpreterExecutable, _executablePaths); _error == nil {
+	if _interpreterExecutable_0, _error := ResolveExecutable (_interpreterExecutable, _executablePaths); _error == nil {
 		_interpreterExecutable = _interpreterExecutable_0
 	} else {
 		syscall.Close (_interpreterScriptInput)

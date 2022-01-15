@@ -249,7 +249,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	if _sshLauncher == "" {
 		_sshLauncher = "ssh"
 	}
-	if _sshLauncher_0, _error := resolveExecutable (_sshLauncher, _context.executablePaths); _error == nil {
+	if _sshLauncher_0, _error := ResolveExecutable (_sshLauncher, _context.executablePaths); _error == nil {
 		_sshLauncher = _sshLauncher_0
 	} else {
 		return false, _error
@@ -303,7 +303,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		_sshCache = "/tmp"
 	}
 	
-	if _error := makeCacheFolder (_context.cacheRoot, "ssh-sockets"); _error != nil {
+	if _error := MakeCacheFolder (_context.cacheRoot, "ssh-sockets"); _error != nil {
 		return false, _error
 	}
 	if _sshLibraryLocalSocket == "" {
