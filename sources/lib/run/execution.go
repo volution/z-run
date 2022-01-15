@@ -16,6 +16,7 @@ import "syscall"
 
 import embedded "github.com/cipriancraciun/z-run/embedded"
 
+import . "github.com/cipriancraciun/z-run/lib/library"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 

@@ -10,6 +10,7 @@ import "path/filepath"
 import "sort"
 import "strings"
 
+import . "github.com/cipriancraciun/z-run/lib/library"
 import . "github.com/cipriancraciun/z-run/lib/store"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
@@ -312,7 +313,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 		if _error := doExportLibraryCdb (_library, _cacheLibraryStable, _context); _error == nil {
 //			Logf ('d', 0xdf78377c, "created library cached link at `%s`;", _cacheLibraryLink)
 //			Logf ('d', 0x43e263da, "created library cached stable at `%s`;", _cacheLibraryStable)
-			_library.url = _cacheLibraryStable
+			_library.UrlSet (_cacheLibraryStable)
 		} else {
 			return nil, _error
 		}

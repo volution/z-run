@@ -7,6 +7,7 @@ import "os"
 
 import "go.starlark.net/starlark"
 
+import . "github.com/cipriancraciun/z-run/lib/library"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
