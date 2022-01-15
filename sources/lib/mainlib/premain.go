@@ -15,6 +15,8 @@ type MainDescriptor struct {
 	ExecutableName string
 	ExecutableEnvironmentHint string
 	
+	HelpTxt string
+	
 	ManualTxt string
 	ManualHtml string
 	ManualMan string
@@ -56,7 +58,7 @@ func PreMainWith (_descriptor *MainDescriptor) () {
 		panic (AbortError (_error))
 	}
 	
-	if _error := InterceptMainSpecialFlags (_descriptor.ExecutableName, _executable0, _executable, _descriptor.ManualTxt, _descriptor.ManualHtml, _descriptor.ManualMan); _error != nil {
+	if _error := InterceptMainSpecialFlags (_descriptor.ExecutableName, _executable0, _executable, _descriptor.HelpTxt, _descriptor.ManualTxt, _descriptor.ManualHtml, _descriptor.ManualMan); _error != nil {
 		panic (AbortError (_error))
 	}
 	

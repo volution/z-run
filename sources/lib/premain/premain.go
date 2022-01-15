@@ -30,6 +30,7 @@ func PreMain () () {
 			ExecutableName : "z-run",
 			ExecutableEnvironmentHint : "ZRUN_EXECUTABLE",
 			
+			HelpTxt : embedded.ManualTxt,
 			ManualTxt : embedded.ManualTxt,
 			ManualHtml : embedded.ManualHtml,
 			ManualMan : embedded.ManualMan,

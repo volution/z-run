@@ -13,7 +13,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func InterceptMainSpecialFlags (_executableName string, _executable0 string, _executable string, _manualText string, _manualHtml string, _manualMan string) (*Error) {
+func InterceptMainSpecialFlags (_executableName string, _executable0 string, _executable string, _helpText string, _manualText string, _manualHtml string, _manualMan string) (*Error) {
 	
 	if (len (os.Args) == 2) {
 		_argument := os.Args[1]
@@ -53,9 +53,11 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 			panic (ExitMainSucceeded ())
 		}
 		
-		if (_argument == "--manual") || (_argument == "--manual-text") || (_argument == "--manual-html") || (_argument == "--manual-man") {
+		if (_argument == "--help") || (_argument == "-h") || (_argument == "--manual") || (_argument == "--manual-text") || (_argument == "--manual-html") || (_argument == "--manual-man") {
 			_manual := ""
 			switch _argument {
+				case "--help", "-h" :
+					_manual = _helpText
 				case "--manual", "--manual-text" :
 					_manual = _manualText
 				case "--manual-html" :
@@ -65,20 +67,13 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 				default :
 					panic (0x41b79a1d)
 			}
-			if _manual == "" {
-				panic (AbortError (Errorf (0x7f11c1ac, "manual not available")))
+			if _manual != "__custom__" {
+				if _manual == "" {
+					panic (AbortError (Errorf (0x7f11c1ac, "manual not available")))
+				}
+				fmt.Fprint (os.Stdout, _manual)
+				panic (ExitMainSucceeded ())
 			}
-			fmt.Fprint (os.Stdout, _manual)
-			panic (ExitMainSucceeded ())
-		}
-		
-		if (_argument == "--help") || (_argument == "-h") {
-			_manual := _manualText
-			if _manual == "" {
-				panic (AbortError (Errorf (0x8d9c5560, "manual not available")))
-			}
-			fmt.Fprint (os.Stdout, _manual)
-			panic (ExitMainSucceeded ())
 		}
 	}
 	
