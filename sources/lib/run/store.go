@@ -2,6 +2,9 @@
 
 package zrun
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
+
 
 
 type StoreOutput interface {

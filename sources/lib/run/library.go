@@ -5,6 +5,8 @@ package zrun
 
 import "strings"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -190,7 +192,7 @@ func (_library *Library) ResolveContextByIdentifier (_fingerprint string) (*Scri
 	if _context, _exists := _library.ScriptletContexts[_fingerprint]; _exists {
 		return _context, true, nil
 	} else {
-		return nil, false, errorf (0x30d90869, "invalid scriptlet context fingerprint `%s`", _fingerprint)
+		return nil, false, Errorf (0x30d90869, "invalid scriptlet context fingerprint `%s`", _fingerprint)
 	}
 }
 
@@ -213,7 +215,7 @@ func (_library *Library) Identifier () (string, *Error) {
 	if _identifier != "" {
 		return _identifier, nil
 	} else {
-		return "", errorf (0x41ca16f5, "invalid state")
+		return "", Errorf (0x41ca16f5, "invalid state")
 	}
 }
 
@@ -222,7 +224,7 @@ func (_library *Library) Fingerprint () (string, *Error) {
 	if _fingerprint != "" {
 		return _fingerprint, nil
 	} else {
-		return "", errorf (0x7c26bcc2, "invalid state")
+		return "", Errorf (0x7c26bcc2, "invalid state")
 	}
 }
 
@@ -238,18 +240,18 @@ func (_library *Library) Close () (*Error) {
 func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 	
 	if _scriptlet.Label != strings.TrimSpace (_scriptlet.Label) {
-		return errorf (0xd8797e9e, "invalid scriptlet label `%s`", _scriptlet.Label)
+		return Errorf (0xd8797e9e, "invalid scriptlet label `%s`", _scriptlet.Label)
 	}
 	if _scriptlet.Label == "" {
-		return errorf (0xaede3d8c, "invalid scriptlet label `%s`", _scriptlet.Label)
+		return Errorf (0xaede3d8c, "invalid scriptlet label `%s`", _scriptlet.Label)
 	}
 	if _, _exists := _library.ScriptletsByLabel[_scriptlet.Label]; _exists {
-		return errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
+		return Errorf (0x883f9a7f, "duplicate scriptlet label `%s`", _scriptlet.Label)
 	}
 	
 	if _scriptlet.ContextIdentifier != "" {
 		if _, _exists := _library.ScriptletContexts[_scriptlet.ContextIdentifier]; !_exists {
-			return errorf (0xc9cc9f6e, "invalid scriptlet context identifier `%s`", _scriptlet.ContextIdentifier)
+			return Errorf (0xc9cc9f6e, "invalid scriptlet context identifier `%s`", _scriptlet.ContextIdentifier)
 		}
 	}
 	
@@ -257,10 +259,10 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 		case "<detect>", "<print>", "<menu>" :
 			// NOP
 		default :
-			return errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
+			return Errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
 	}
 	if (_scriptlet.InterpreterExecutable != "") || (_scriptlet.InterpreterArguments != nil) || (_scriptlet.InterpreterEnvironment != nil) || _scriptlet.InterpreterArgumentsExtraDash || _scriptlet.InterpreterArgumentsExtraAllowed {
-		return errorf (0x901675e8, "invalid scriptlet interpreter state")
+		return Errorf (0x901675e8, "invalid scriptlet interpreter state")
 	}
 	
 	switch _scriptlet.Kind {
@@ -275,7 +277,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 		case "menu" :
 			_scriptlet.Kind = "menu-pending"
 		default :
-			return errorf (0x4b8aacf2, "invalid scriptlet kind `%s`", _scriptlet.Kind)
+			return Errorf (0x4b8aacf2, "invalid scriptlet kind `%s`", _scriptlet.Kind)
 	}
 	
 	_fingerprint := NewFingerprinter () .
@@ -316,10 +318,10 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 func includeScriptletContext (_library *Library, _context *ScriptletContext) (*Error) {
 	
 	if _context.Identifier == "" {
-		return errorf (0x92fc0d53, "invalid scriptlet context identifier `%s`", _context.Identifier)
+		return Errorf (0x92fc0d53, "invalid scriptlet context identifier `%s`", _context.Identifier)
 	}
 	if _, _exists := _library.ScriptletContexts[_context.Identifier]; _exists {
-		return errorf (0xfe91d3ae, "invalid scriptlet context identifier `%s`", _context.Identifier)
+		return Errorf (0xfe91d3ae, "invalid scriptlet context identifier `%s`", _context.Identifier)
 	}
 	
 	_library.ScriptletContexts[_context.Identifier] = _context
@@ -332,23 +334,23 @@ func includeScriptletContext (_library *Library, _context *ScriptletContext) (*E
 
 func includeSource (_library *Library, _source *Source) (*Error) {
 	if _source.Path == "" {
-		return errorf (0x12bdc134, "invalid state")
+		return Errorf (0x12bdc134, "invalid state")
 	}
 	if _source.FingerprintMeta == "" {
-		return errorf (0x152074de, "invalid state")
+		return Errorf (0x152074de, "invalid state")
 	}
 //	if _source.FingerprintData == "" {
-//		return errorf (0x401d0c16, "invalid state")
+//		return Errorf (0x401d0c16, "invalid state")
 //	}
 	for _, _existing := range _library.LibrarySources {
 		if _existing.Path == _source.Path {
-			return errorf (0xf01b93ea, "invalid state")
+			return Errorf (0xf01b93ea, "invalid state")
 		}
 		if _existing.FingerprintMeta == _source.FingerprintMeta {
-			return errorf (0x310f6193, "invalid state")
+			return Errorf (0x310f6193, "invalid state")
 		}
 		if (_existing.FingerprintData == _source.FingerprintData) && (_existing.FingerprintData != "") {
-			return errorf (0x00fb18a1, "invalid state %#v %#v", _existing, _source)
+			return Errorf (0x00fb18a1, "invalid state %#v %#v", _existing, _source)
 		}
 	}
 	_library.LibrarySources = append (_library.LibrarySources, _source)

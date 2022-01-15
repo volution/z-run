@@ -8,6 +8,8 @@ import "net/rpc"
 import "strings"
 import "sync"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -43,17 +45,17 @@ func NewLibraryRpcServer (_library LibraryStore, _url string) (*LibraryRpcServer
 	} else {
 		return nil, _error
 	}
-//	logf ('d', 0x49d3cc32, "listening library RPC server on `%s` / `%s`...", _network, _address)
+//	Logf ('d', 0x49d3cc32, "listening library RPC server on `%s` / `%s`...", _network, _address)
 	var _listener net.Listener
 	if _listener_0, _error := net.Listen (_network, _address); _error == nil {
 		_listener = _listener_0
 	} else {
-		return nil, errorw (0x565a3b35, _error)
+		return nil, Errorw (0x565a3b35, _error)
 	}
 	_exports := & LibraryRpcServerExports {}
 	_rpc := rpc.NewServer ()
 	if _error := _rpc.RegisterName ("Library", _exports); _error != nil {
-		return nil, errorw (0x6c72d486, _error)
+		return nil, Errorw (0x6c72d486, _error)
 	}
 	_server := & LibraryRpcServer {
 			library : _library,
@@ -88,7 +90,7 @@ func (_server *LibraryRpcServer) ServeStart () (*Error) {
 
 func (_server *LibraryRpcServer) ServeStop () (*Error) {
 	if _error := _server.listener.Close (); _error != nil {
-		return errorw (0x8748e4e6, _error)
+		return Errorw (0x8748e4e6, _error)
 	}
 	_server.waiter.Wait ()
 	return nil
@@ -96,7 +98,7 @@ func (_server *LibraryRpcServer) ServeStop () (*Error) {
 
 
 func (_server *LibraryRpcServer) loop () () {
-//	logf ('d', 0x205ad5d1, "begin accepting client connections...")
+//	Logf ('d', 0x205ad5d1, "begin accepting client connections...")
 	for {
 		if _connection, _error := _server.listener.Accept (); _error == nil {
 			_server.waiter.Add (1)
@@ -104,19 +106,19 @@ func (_server *LibraryRpcServer) loop () () {
 		} else if strings.HasSuffix (_error.Error (), ": use of closed network connection") {
 			break
 		} else {
-			logError ('w', errorw (0x2737c361, _error))
+			LogError ('w', Errorw (0x2737c361, _error))
 			break
 		}
 	}
 	_server.waiter.Done ()
-//	logf ('d', 0x9ab6240d, "ended accepting client connections;")
+//	Logf ('d', 0x9ab6240d, "ended accepting client connections;")
 }
 
 
 func (_server *LibraryRpcServer) handle (_connection net.Conn) () {
-//	logf ('d', 0x1699394e, "begin handling client connection...")
+//	Logf ('d', 0x1699394e, "begin handling client connection...")
 	_server.rpc.ServeConn (_connection)
-//	logf ('d', 0x9f91f3f9, "ended handling client connection;")
+//	Logf ('d', 0x9f91f3f9, "ended handling client connection;")
 	_server.waiter.Done ()
 }
 
@@ -131,12 +133,12 @@ func NewLibraryRpcClient (_url string) (*LibraryRpcClient, *Error) {
 	} else {
 		return nil, _error
 	}
-//	logf ('d', 0x1afdd51f, "connecting library RPC client to `%s` / `%s`...", _network, _address)
+//	Logf ('d', 0x1afdd51f, "connecting library RPC client to `%s` / `%s`...", _network, _address)
 	var _rpc *rpc.Client
 	if _rpc_0, _error := rpc.Dial (_network, _address); _error == nil {
 		_rpc = _rpc_0
 	} else {
-		return nil, errorw (0xf4366bf1, _error)
+		return nil, Errorw (0xf4366bf1, _error)
 	}
 	_client := & LibraryRpcClient {
 			url : _url,
@@ -150,7 +152,7 @@ func (_client *LibraryRpcClient) Close () (*Error) {
 	if _error := _client.rpc.Close (); _error == nil {
 		return nil
 	} else {
-		return errorw (0x7d41d83f, _error)
+		return Errorw (0x7d41d83f, _error)
 	}
 }
 
@@ -176,7 +178,7 @@ func (_client *LibraryRpcClient) Identifier () (string, *Error) {
 	if _error := _client.rpc.Call ("Library.Identifier", &_input, &_output); _error == nil {
 		return _output.Identifier, _output.Error
 	} else {
-		return "", errorw (0x116698be, _error)
+		return "", Errorw (0x116698be, _error)
 	}
 }
 
@@ -204,7 +206,7 @@ func (_client *LibraryRpcClient) Fingerprint () (string, *Error) {
 	if _error := _client.rpc.Call ("Library.Fingerprint", &_input, &_output); _error == nil {
 		return _output.Fingerprint, _output.Error
 	} else {
-		return "", errorw (0xdbfbf38a, _error)
+		return "", Errorw (0xdbfbf38a, _error)
 	}
 }
 
@@ -232,7 +234,7 @@ func (_client *LibraryRpcClient) SelectFingerprints () ([]string, *Error) {
 	if _error := _client.rpc.Call ("Library.SelectFingerprints", &_input, &_output); _error == nil {
 		return _output.Fingerprints, _output.Error
 	} else {
-		return nil, errorw (0xf6ef7108, _error)
+		return nil, Errorw (0xf6ef7108, _error)
 	}
 }
 
@@ -262,7 +264,7 @@ func (_client *LibraryRpcClient) ResolveFullByFingerprint (_fingerprint string) 
 	if _error := _client.rpc.Call ("Library.ResolveFullByFingerprint", &_input, &_output); _error == nil {
 		return _output.Scriptlet, _output.Error
 	} else {
-		return nil, errorw (0xfee982f0, _error)
+		return nil, Errorw (0xfee982f0, _error)
 	}
 }
 
@@ -292,7 +294,7 @@ func (_client *LibraryRpcClient) ResolveMetaByFingerprint (_fingerprint string) 
 	if _error := _client.rpc.Call ("Library.ResolveMetaByFingerprint", &_input, &_output); _error == nil {
 		return _output.Scriptlet, _output.Error
 	} else {
-		return nil, errorw (0x58a5846f, _error)
+		return nil, Errorw (0x58a5846f, _error)
 	}
 }
 
@@ -323,7 +325,7 @@ func (_client *LibraryRpcClient) ResolveBodyByFingerprint (_fingerprint string) 
 	if _error := _client.rpc.Call ("Library.ResolveBodyByFingerprint", &_input, &_output); _error == nil {
 		return _output.Body, _output.Found, _output.Error
 	} else {
-		return "", false, errorw (0x612519d7, _error)
+		return "", false, Errorw (0x612519d7, _error)
 	}
 }
 
@@ -351,7 +353,7 @@ func (_client *LibraryRpcClient) SelectLabels () ([]string, *Error) {
 	if _error := _client.rpc.Call ("Library.SelectLabels", &_input, &_output); _error == nil {
 		return _output.Labels, _output.Error
 	} else {
-		return nil, errorw (0x149f3d3e, _error)
+		return nil, Errorw (0x149f3d3e, _error)
 	}
 }
 
@@ -379,7 +381,7 @@ func (_client *LibraryRpcClient) SelectLabelsAll () ([]string, *Error) {
 	if _error := _client.rpc.Call ("Library.SelectLabelsAll", &_input, &_output); _error == nil {
 		return _output.Labels, _output.Error
 	} else {
-		return nil, errorw (0xa8d5d0c5, _error)
+		return nil, Errorw (0xa8d5d0c5, _error)
 	}
 }
 
@@ -409,7 +411,7 @@ func (_client *LibraryRpcClient) ResolveFullByLabel (_label string) (*Scriptlet,
 	if _error := _client.rpc.Call ("Library.ResolveFullByLabel", &_input, &_output); _error == nil {
 		return _output.Scriptlet, _output.Error
 	} else {
-		return nil, errorw (0x80b71741, _error)
+		return nil, Errorw (0x80b71741, _error)
 	}
 }
 
@@ -439,7 +441,7 @@ func (_client *LibraryRpcClient) ResolveMetaByLabel (_label string) (*Scriptlet,
 	if _error := _client.rpc.Call ("Library.ResolveMetaByLabel", &_input, &_output); _error == nil {
 		return _output.Scriptlet, _output.Error
 	} else {
-		return nil, errorw (0x7133a4fd, _error)
+		return nil, Errorw (0x7133a4fd, _error)
 	}
 }
 
@@ -470,7 +472,7 @@ func (_client *LibraryRpcClient) ResolveBodyByLabel (_label string) (string, boo
 	if _error := _client.rpc.Call ("Library.ResolveBodyByLabel", &_input, &_output); _error == nil {
 		return _output.Body, _output.Found, _output.Error
 	} else {
-		return "", false, errorw (0x5d8357ba, _error)
+		return "", false, Errorw (0x5d8357ba, _error)
 	}
 }
 
@@ -501,7 +503,7 @@ func (_client *LibraryRpcClient) ResolveFingerprintByLabel (_label string) (stri
 	if _error := _client.rpc.Call ("Library.ResolveFingerprintByLabel", &_input, &_output); _error == nil {
 		return _output.Fingerprint, _output.Found, _output.Error
 	} else {
-		return "", false, errorw (0xc4df3289, _error)
+		return "", false, Errorw (0xc4df3289, _error)
 	}
 }
 
@@ -531,7 +533,7 @@ func (_client *LibraryRpcClient) ResolveContextByIdentifier (_fingerprint string
 	if _error := _client.rpc.Call ("Library.ResolveContextByIdentifier", &_input, &_output); _error == nil {
 		return _output.Context, _output.Found, _output.Error
 	} else {
-		return nil, false, errorw (0x532bfaea, _error)
+		return nil, false, Errorw (0x532bfaea, _error)
 	}
 }
 
@@ -559,7 +561,7 @@ func (_client *LibraryRpcClient) SelectLibrarySources () (LibrarySources, *Error
 	if _error := _client.rpc.Call ("Library.SelectLibrarySources", &_input, &_output); _error == nil {
 		return _output.Sources, _output.Error
 	} else {
-		return nil, errorw (0x607c2934, _error)
+		return nil, Errorw (0x607c2934, _error)
 	}
 }
 
@@ -587,7 +589,7 @@ func (_client *LibraryRpcClient) SelectLibraryContext () (*LibraryContext, *Erro
 	if _error := _client.rpc.Call ("Library.SelectLibraryContext", &_input, &_output); _error == nil {
 		return _output.Context, _output.Error
 	} else {
-		return nil, errorw (0x4ec2bf5a, _error)
+		return nil, Errorw (0x4ec2bf5a, _error)
 	}
 }
 
@@ -604,7 +606,7 @@ func (_exports *LibraryRpcServerExports) SelectLibraryContext (_input *LibraryRp
 func urlSplit (_url string) (string, string, *Error) {
 	_urlParts := strings.SplitAfterN (_url, ":", 2)
 	if (len (_urlParts) < 1) || (len (_urlParts[0]) <= 1) || (len (_urlParts[1]) == 0) {
-		return "", "", errorf (0x2dbbd8c7, "invalid URL")
+		return "", "", Errorf (0x2dbbd8c7, "invalid URL")
 	}
 	return _urlParts[0][: len (_urlParts[0]) - 1], _urlParts[1], nil
 }

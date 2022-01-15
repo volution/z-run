@@ -8,8 +8,9 @@ import "encoding/json"
 import "fmt"
 import "os"
 
-
 import cdb "github.com/colinmarc/cdb"
+
+import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
@@ -30,10 +31,10 @@ func NewCdbStoreInput (_path string) (*CdbStoreInput, *Error) {
 				}
 			return _store, nil
 		} else {
-			return nil, errorw (0xb4697ac2, _error)
+			return nil, Errorw (0xb4697ac2, _error)
 		}
 	} else {
-		return nil, errorw (0x9566422e, _error)
+		return nil, Errorw (0x9566422e, _error)
 	}
 }
 
@@ -53,7 +54,7 @@ func (_store *CdbStoreInput) SelectObject (_instance string, _global bool, _name
 	
 	switch _value := _value.(type) {
 		case []byte :
-			return false, errorf (0xed6ab84e, "unexpected type")
+			return false, Errorf (0xed6ab84e, "unexpected type")
 		case *[]byte :
 			if *_value == nil {
 				*_value = _valueData
@@ -61,12 +62,12 @@ func (_store *CdbStoreInput) SelectObject (_instance string, _global bool, _name
 				*_value = append ((*_value)[:0], _valueData ...)
 			}
 		case string :
-			return false, errorf (0x36de066a, "unexpected type")
+			return false, Errorf (0x36de066a, "unexpected type")
 		case *string :
 			*_value = string (_valueData)
 		default :
 			if _error := json.Unmarshal (_valueData, _value); _error != nil {
-				return false, errorw (0x8ebfc830, _error)
+				return false, Errorw (0x8ebfc830, _error)
 			}
 	}
 	
@@ -104,7 +105,7 @@ func (_store *CdbStoreInput) SelectRawBytes (_instance string, _global bool, _na
 	if _valueData_0, _error := _store.reader.Get (_keyBuffer.Bytes ()); _error == nil {
 		_valueData = _valueData_0
 	} else {
-		return false, nil, errorw (0x811cd704, _error)
+		return false, nil, Errorw (0x811cd704, _error)
 	}
 	
 	if _valueData == nil {
@@ -118,7 +119,7 @@ func (_store *CdbStoreInput) SelectRawBytes (_instance string, _global bool, _na
 func (_store *CdbStoreInput) Close () (*Error) {
 	if _error := _store.reader.Close (); _error == nil {
 		_store.reader = nil
-		return errorw (0x10dd4299, _error)
+		return Errorw (0x10dd4299, _error)
 	} else {
 		return nil
 	}
@@ -136,7 +137,7 @@ type CdbStoreOutput struct {
 
 func NewCdbStoreOutput (_path string) (*CdbStoreOutput, *Error) {
 	if _path == "" {
-		return nil, errorf (0x6917ab7d, "invalid path")
+		return nil, Errorf (0x6917ab7d, "invalid path")
 	}
 	_pathFinal := _path
 	_pathTemporary := fmt.Sprintf ("%s--%08x.tmp", _pathFinal, os.Getpid ())
@@ -148,7 +149,7 @@ func NewCdbStoreOutput (_path string) (*CdbStoreOutput, *Error) {
 			}
 		return _store, nil
 	} else {
-		return nil, errorw (0x064e6aec, _error)
+		return nil, Errorw (0x064e6aec, _error)
 	}
 }
 
@@ -167,7 +168,7 @@ func (_store *CdbStoreOutput) IncludeObject (_instance string, _global bool, _na
 			_valueBuffer.WriteString (*_value)
 		default :
 			if _error := json.NewEncoder (_valueBuffer) .Encode (_value); _error != nil {
-				return errorw (0x02600262, _error)
+				return Errorw (0x02600262, _error)
 			}
 	}
 	
@@ -193,18 +194,18 @@ func (_store *CdbStoreOutput) IncludeRawBytes (_instance string, _global bool, _
 	if _error := _store.writer.Put (_keyBuffer.Bytes (), _value); _error == nil {
 		return nil
 	} else {
-		return errorw (0x28b9a333, _error)
+		return Errorw (0x28b9a333, _error)
 	}
 }
 
 
 func (_store *CdbStoreOutput) Commit () (*Error) {
 	if _error := _store.writer.Close (); _error != nil {
-		return errorw (0xfc3f2b2b, _error)
+		return Errorw (0xfc3f2b2b, _error)
 	}
 	_store.writer = nil
 	if _error := os.Rename (_store.pathTemporary, _store.pathFinal); _error != nil {
-		return errorw (0x62423da2, _error)
+		return Errorw (0x62423da2, _error)
 	}
 	return nil
 }

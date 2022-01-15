@@ -10,6 +10,8 @@ import "path"
 import "path/filepath"
 import "os"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -40,7 +42,7 @@ func resolveExecutable (_executable string, _paths []string) (string, *Error) {
 		if _executable, _error := filepath.Abs (_executable); _error == nil {
 			return _executable, nil
 		} else {
-			return "", errorw (0x352dbfef, _error)
+			return "", Errorw (0x352dbfef, _error)
 		}
 	}
 	
@@ -69,11 +71,11 @@ func resolveExecutable (_executable string, _paths []string) (string, *Error) {
 		if _file, _error := filepath.Abs (_file); _error == nil {
 			return _file, nil
 		} else {
-			return "", errorw (0xac1cdf5d, _error)
+			return "", Errorw (0xac1cdf5d, _error)
 		}
 	}
 	
-	return "", errorf (0x9db5ca84, "unresolved executable `%s`", _executable)
+	return "", Errorf (0x9db5ca84, "unresolved executable `%s`", _executable)
 }
 
 
@@ -96,13 +98,13 @@ func resolveRelativePath (_workspace string, _base string, _path string) (string
 	} else if strings.HasPrefix (_path, "_" + string (os.PathSeparator)) {
 		_path = path.Join (_base, _path[2:])
 	} else {
-		return "", errorf (0x3ca0a241, "invalid path syntax: `%s`", _path)
+		return "", Errorf (0x3ca0a241, "invalid path syntax: `%s`", _path)
 	}
 	
 	_path = path.Clean (_path)
 	
 	if _path == "" {
-		return "", errorf (0xe971645a, "invalid empty path")
+		return "", Errorf (0xe971645a, "invalid empty path")
 	}
 	
 	return _path, nil
@@ -119,7 +121,7 @@ func resolveAbsolutePath (_workspace string, _base string, _path string) (string
 	if _path_0, _error := filepath.Abs (_path); _error == nil {
 		_path = _path_0
 	} else {
-		return "", errorw (0xb007b166, _error)
+		return "", Errorw (0xb007b166, _error)
 	}
 	
 	return _path, nil
@@ -146,7 +148,7 @@ func replaceVariables (_input string) (string, *Error) {
 	_input = strings.ReplaceAll (_input, "${UNAME_FINGERPRINT}", UNAME_FINGERPRINT)
 	
 	if strings.Index (_input, "$") != -1 {
-		return "", errorf (0xb1a0f464, "invalid replacement string `%s`", _input)
+		return "", Errorf (0xb1a0f464, "invalid replacement string `%s`", _input)
 	}
 	
 	return _input, nil
@@ -158,7 +160,7 @@ func replaceVariables (_input string) (string, *Error) {
 func makeCacheFolder (_cacheRoot string, _cacheFolder string) (*Error) {
 	_cache := path.Join (_cacheRoot, _cacheFolder)
 	if _error := os.MkdirAll (_cache, 0750); _error != nil {
-		return errorw (0x6f530744, _error)
+		return Errorw (0x6f530744, _error)
 	}
 	return nil
 }

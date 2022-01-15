@@ -12,9 +12,10 @@ import "path/filepath"
 import "strings"
 import "sync"
 
-
 import isatty "github.com/mattn/go-isatty"
 import "github.com/eiannone/keyboard"
+
+import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
@@ -22,7 +23,7 @@ import "github.com/eiannone/keyboard"
 func menuMain (_executable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) != 1 {
-		return errorf (0x6b439ede, "invalid arguments")
+		return Errorf (0x6b439ede, "invalid arguments")
 	}
 	
 	_inputs := make ([]string, 0, 1024)
@@ -37,10 +38,10 @@ func menuMain (_executable string, _arguments []string, _environment map[string]
 				if _line == "" {
 					break
 				} else {
-					errorf (0x1f57b1db, "expected proper line")
+					Errorf (0x1f57b1db, "expected proper line")
 				}
 			} else {
-				return errorw (0x3dd692c8, _error)
+				return Errorw (0x3dd692c8, _error)
 			}
 		}
 	}
@@ -60,7 +61,7 @@ func menuMain (_executable string, _arguments []string, _environment map[string]
 	if _outputs, _error := menuSelect (_inputs, _context); _error == nil {
 		for _, _output := range _outputs {
 			if _, _error := io.WriteString (os.Stdout, _output + "\n"); _error != nil {
-				return errorw (0xeb4af0b7, _error)
+				return Errorw (0xeb4af0b7, _error)
 			}
 		}
 		os.Exit (0)
@@ -122,7 +123,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 	
 	if _hasTerminal {
 		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-			return errorf (0xfc026596, "stderr is not a TTY")
+			return Errorf (0xfc026596, "stderr is not a TTY")
 		}
 	}
 	
@@ -172,50 +173,50 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 				"-s", "14",
 			}
 	} else {
-		return errorf (0xb91714f7, "unresolved `z-run--select`")
+		return Errorf (0xb91714f7, "unresolved `z-run--select`")
 	}
 	
 	if _command.Env == nil {
 		_command.Env = prepareEnvironment (_context)
 	}
 	
-//	logf ('d', 0x5cbde167, "%v", _command.Path)
-//	logf ('d', 0x44b3328a, "%v", _command.Args[0])
-//	logf ('d', 0x3cc16861, "%v", _command.Args[1:])
-//	logf ('d', 0x8f4e574f, "%v", _command.Env)
+//	Logf ('d', 0x5cbde167, "%v", _command.Path)
+//	Logf ('d', 0x44b3328a, "%v", _command.Args[0])
+//	Logf ('d', 0x3cc16861, "%v", _command.Args[1:])
+//	Logf ('d', 0x8f4e574f, "%v", _command.Env)
 	
 	if _exitCode, _, _outputsCount, _error := processExecuteAndPipe (_command, _inputsChannel, _outputsChannel, true); _error == nil {
 		if _commandFzf {
 			switch _exitCode {
 				case 0 :
 					if _outputsCount == 0 {
-						return errorf (0xbb7ff442, "invalid outputs")
+						return Errorf (0xbb7ff442, "invalid outputs")
 					}
 				case 1 :
 					if _outputsCount != 0 {
-						return errorf (0x6bd364da, "invalid outputs")
+						return Errorf (0x6bd364da, "invalid outputs")
 					}
 				case 130 :
 					if _outputsCount != 0 {
-						return errorf (0xac4b1681, "invalid outputs")
+						return Errorf (0xac4b1681, "invalid outputs")
 					}
 				case 2 :
-					return errorf (0x85cabb2a, "failed")
+					return Errorf (0x85cabb2a, "failed")
 				default :
-					return errorf (0xef9908df, "failed")
+					return Errorf (0xef9908df, "failed")
 			}
 		} else {
 			switch _exitCode {
 				case 0 :
 					if _outputsCount == 0 {
-						return errorf (0x4e0abce6, "invalid outputs")
+						return Errorf (0x4e0abce6, "invalid outputs")
 					}
 				case 1 :
 					if _outputsCount != 0 {
-						return errorf (0x6ad0fdcd, "invalid outputs")
+						return Errorf (0x6ad0fdcd, "invalid outputs")
 					}
 				default :
-					return errorf (0xb156b11d, "failed")
+					return Errorf (0xb156b11d, "failed")
 			}
 		}
 	} else {
@@ -236,7 +237,7 @@ func menuQuit (_context *Context) (bool, *Error) {
 		} else if (len (_outputs) == 1) && (_outputs[0] == "quit?") {
 			return true, nil
 		} else {
-			return false, errorf (0x272fb981, "invalid outputs")
+			return false, Errorf (0x272fb981, "invalid outputs")
 		}
 	} else {
 		return false, _error
@@ -270,7 +271,7 @@ func menuPause (_context *Context) (bool, *Error) {
 		} else {
 			fmt.Fprintf (os.Stderr, "\n\n")
 			os.Stderr.Sync ()
-			return false, errorw (0x933cd3f2, _error)
+			return false, Errorw (0x933cd3f2, _error)
 		}
 		
 		switch _key {

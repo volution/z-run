@@ -14,6 +14,8 @@ import "strings"
 import "strconv"
 import "syscall"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -84,7 +86,7 @@ func prepareExecution (_libraryUrl string, _libraryIdentifier string, _libraryFi
 	
 	if _scriptlet.ContextIdentifier != "" {
 		if _scriptlet.Context == nil {
-			return nil, nil, errorf (0x93547e3b, "invalid store")
+			return nil, nil, Errorf (0x93547e3b, "invalid store")
 		}
 	}
 	
@@ -171,14 +173,14 @@ func prepareExecution_0 (
 			
 		) (*exec.Cmd, []int, *Error) {
 	
-//	logf ('d', 0x2a62601b, "%#v", _scriptletInterpreterExecutable)
-//	logf ('d', 0xcd47b531, "%#v", _scriptletInterpreterArguments)
-//	logf ('d', 0x51d242fe, "%#v", _scriptletInterpreterArgumentsExtraDash)
-//	logf ('d', 0x9eea73ed, "%#v", _scriptletInterpreterArgumentsExtraAllowed)
-//	logf ('d', 0xb2668444, "%#v", _scriptletInterpreterEnvironment)
+//	Logf ('d', 0x2a62601b, "%#v", _scriptletInterpreterExecutable)
+//	Logf ('d', 0xcd47b531, "%#v", _scriptletInterpreterArguments)
+//	Logf ('d', 0x51d242fe, "%#v", _scriptletInterpreterArgumentsExtraDash)
+//	Logf ('d', 0x9eea73ed, "%#v", _scriptletInterpreterArgumentsExtraAllowed)
+//	Logf ('d', 0xb2668444, "%#v", _scriptletInterpreterEnvironment)
 	
 	if (len (_cleanArguments) > 0) && ! _scriptletInterpreterArgumentsExtraAllowed {
-		return nil, nil, errorf (0x4ef9e048, "unexpected arguments")
+		return nil, nil, Errorf (0x4ef9e048, "unexpected arguments")
 	}
 	
 	var _interpreterExecutable string
@@ -433,10 +435,10 @@ func prepareExecution_0 (
 				
 				_goSourceTmp := path.Join (_contextCacheRoot, "go-sources", generateRandomToken () + ".tmp")
 				if _error := os.WriteFile (_goSourceTmp, _interpreterScriptBuffer.Bytes (), 0600); _error != nil {
-					return nil, nil, errorw (0x55976c12, _error)
+					return nil, nil, Errorw (0x55976c12, _error)
 				}
 				if _error := os.Rename (_goSourceTmp, _goSource); _error != nil {
-					return nil, nil, errorw (0x5367f11a, _error)
+					return nil, nil, Errorw (0x5367f11a, _error)
 				}
 				
 				_goExecutableTmp := path.Join (_contextCacheRoot, "go-executables", generateRandomToken () + ".tmp")
@@ -446,7 +448,7 @@ func prepareExecution_0 (
 				_goTmp := path.Join (_goRoot, "tmp")
 				for _, _mkdirPath := range []string { _goRoot, _goCache, _goTmp } {
 					if _error := os.Mkdir (_mkdirPath, 0700); _error != nil && ! os.IsExist (_error) {
-						return nil, nil, errorw (0x5097b00d, _error)
+						return nil, nil, Errorw (0x5097b00d, _error)
 					}
 				}
 				
@@ -481,15 +483,15 @@ func prepareExecution_0 (
 				
 				if _error := _goBuild.Run (); _error == nil {
 					if _error := os.Rename (_goExecutableTmp, _goExecutable); _error != nil {
-						return nil, nil, errorw (0xbeffd67b, _error)
+						return nil, nil, Errorw (0xbeffd67b, _error)
 					}
 				} else {
 					_ = os.Remove (_goExecutableTmp)
-					return nil, nil, errorw (0x72eb9cad, _error)
+					return nil, nil, Errorw (0x72eb9cad, _error)
 				}
 				
 			} else {
-				return nil, nil, errorw (0x46248f88, _error)
+				return nil, nil, Errorw (0x46248f88, _error)
 			}
 			
 			_interpreterExecutable = _goExecutable
@@ -501,21 +503,21 @@ func prepareExecution_0 (
 			_interpreterScriptUnused = true
 		
 		default :
-			return nil, nil, errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _interpreter, _scriptletLabel)
+			return nil, nil, Errorf (0x0873f2db, "unknown scriptlet interpreter `%s` for `%s`", _interpreter, _scriptletLabel)
 	}
 	
 	
 	var _descriptors []int
 	if ! _interpreterScriptUnused {
 		
-//		logf ('d', 0xedfcf88b, "\n----------\n%s----------\n", _interpreterScriptBuffer.Bytes ())
+//		Logf ('d', 0xedfcf88b, "\n----------\n%s----------\n", _interpreterScriptBuffer.Bytes ())
 		
 		if _, _error := _interpreterScriptBuffer.WriteTo (_interpreterScriptOutput); _error == nil {
 			_interpreterScriptOutput.Close ()
 		} else {
 			syscall.Close (_interpreterScriptInput)
 			_interpreterScriptOutput.Close ()
-			return nil, nil, errorw (0xf789ed3f, _error)
+			return nil, nil, Errorw (0xf789ed3f, _error)
 		}
 		
 		_descriptors = []int {
@@ -612,10 +614,10 @@ func prepareExecution_0 (
 			Dir : _contextWorkspace,
 		}
 	
-//	logf ('d', 0xcc6d38ba, "%#v", _command.Path)
-//	logf ('d', 0xdb26cbac, "%#v", _command.Args[0])
-//	logf ('d', 0x7b0c717d, "%#v", _command.Args[1:])
-//	logf ('d', 0xaa0b151d, "%#v", _command.Env)
+//	Logf ('d', 0xcc6d38ba, "%#v", _command.Path)
+//	Logf ('d', 0xdb26cbac, "%#v", _command.Args[0])
+//	Logf ('d', 0x7b0c717d, "%#v", _command.Args[1:])
+//	Logf ('d', 0xaa0b151d, "%#v", _command.Env)
 	
 	return _command, _descriptors, nil
 }
@@ -696,35 +698,35 @@ func executeScriptlet_0 (_scriptletLabel string, _command *exec.Cmd, _descriptor
 	
 	if _command.Dir != "" {
 		if _error := os.Chdir (_command.Dir); _error != nil {
-			return errorw (0xe4bab179, _error)
+			return Errorw (0xe4bab179, _error)
 		}
 	}
 	if _command.Stdin != nil {
 		_closeDescriptors ()
-		return errorf (0x78cfda21, "invalid state")
+		return Errorf (0x78cfda21, "invalid state")
 	}
 	if _command.Stdout != nil {
 		_closeDescriptors ()
-		return errorf (0xf9a9dc74, "invalid state")
+		return Errorf (0xf9a9dc74, "invalid state")
 	}
 	if _command.Stderr != nil {
 		_closeDescriptors ()
-		return errorf (0xf887025f, "invalid state")
+		return Errorf (0xf887025f, "invalid state")
 	}
 	if _command.ExtraFiles != nil {
 		_closeDescriptors ()
-		return errorf (0x50354e63, "invalid state")
+		return Errorf (0x50354e63, "invalid state")
 	}
 	if (_command.Process != nil) || (_command.ProcessState != nil) {
 		_closeDescriptors ()
-		return errorf (0x9d640d1e, "invalid state")
+		return Errorf (0x9d640d1e, "invalid state")
 	}
 	
 	if ! _fork {
 		
 		if _error := syscall.Exec (_command.Path, _command.Args, _command.Env); _error != nil {
 			_closeDescriptors ()
-			return errorf (0x99b54af1, "failed to exec `%s`  //  %v", _command.Path, _error)
+			return Errorf (0x99b54af1, "failed to exec `%s`  //  %v", _command.Path, _error)
 		} else {
 			panic (0xb6dfe17e)
 		}
@@ -746,12 +748,12 @@ func executeScriptlet_0 (_scriptletLabel string, _command *exec.Cmd, _descriptor
 		if _waitError != nil {
 			if _command.ProcessState.Exited () {
 				if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
-					return errorf (0xa10d5811, "spawn `%s` failed with status `%d`", _scriptletLabel, _exitCode)
+					return Errorf (0xa10d5811, "spawn `%s` failed with status `%d`", _scriptletLabel, _exitCode)
 				} else {
-					return errorf (0x9cfebeaf, "invalid state")
+					return Errorf (0x9cfebeaf, "invalid state")
 				}
 			} else {
-				return errorw (0x07b37e04, _waitError)
+				return Errorw (0x07b37e04, _waitError)
 			}
 		} else {
 			return nil

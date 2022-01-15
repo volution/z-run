@@ -10,6 +10,8 @@ import "path/filepath"
 import "sort"
 import "strings"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -36,10 +38,10 @@ func resolveSources (_candidate string, _workspace string, _lookupPaths []string
 			}
 		
 		case _statMode.IsDir () :
-			return nil, errorf (0x8a04b23b, "not-implemented")
+			return nil, Errorf (0x8a04b23b, "not-implemented")
 		
 		default :
-			return nil, errorf (0xa35428a2, "invalid source `%s`", _path)
+			return nil, Errorf (0xa35428a2, "invalid source `%s`", _path)
 	}
 	
 	return _sources, nil
@@ -65,7 +67,7 @@ func resolveSource_0 (_path string, _stat os.FileInfo) (*Source, *Error) {
 			}
 		return _source, nil
 	} else {
-		return nil, errorf (0x557961c4, "invalid source `%s`", _path)
+		return nil, Errorf (0x557961c4, "invalid source `%s`", _path)
 	}
 }
 
@@ -90,7 +92,7 @@ func fingerprintSource_0 (_path string) (string, *Error) {
 	if _stat, _error := os.Stat (_path); _error == nil {
 		return fingerprintSource_1 (_path, _stat), nil
 	} else {
-		return "", errorw (0x375f2514, _error)
+		return "", Errorw (0x375f2514, _error)
 	}
 }
 
@@ -104,10 +106,10 @@ func fingerprintSource_1 (_path string, _stat os.FileInfo) (string) {
 
 func resolveSourcePath_0 (_candidate string, _workspace string, _lookupPaths []string) (string, os.FileInfo, *Error) {
 	if _candidate != "" {
-//		logf ('d', 0x16563f01, "using candidate `%s`...", _candidate)
+//		Logf ('d', 0x16563f01, "using candidate `%s`...", _candidate)
 		return resolveSourcePath_2 (_candidate)
 	} else {
-//		logf ('d', 0xef5420f5, "searching candidate...")
+//		Logf ('d', 0xef5420f5, "searching candidate...")
 		return resolveSourcePath_1 (_workspace, _lookupPaths)
 	}
 }
@@ -163,15 +165,15 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 			} else if os.IsNotExist (_error) {
 				// NOP
 			} else {
-				return "", nil, errorw (0x49b2b24c, _error)
+				return "", nil, Errorw (0x49b2b24c, _error)
 			}
 		}
 	}
 	
 	if len (_candidates) == 0 {
-		return "", nil, errorf (0x779f9a9f, "no sources found")
+		return "", nil, Errorf (0x779f9a9f, "no sources found")
 	} else if len (_candidates) > 1 {
-		return "", nil, errorf (0x519bb041, "too many sources found: `%s`", _candidates)
+		return "", nil, Errorf (0x519bb041, "too many sources found: `%s`", _candidates)
 	} else {
 		return resolveSourcePath_2 (_candidates[0])
 	}
@@ -183,12 +185,12 @@ func resolveSourcePath_2 (_path string) (string, os.FileInfo, *Error) {
 		if _path, _error := filepath.Abs (_path); _error == nil {
 			return _path, _stat, nil
 		} else {
-			return "", nil, errorw (0x53c05222, _error)
+			return "", nil, Errorw (0x53c05222, _error)
 		}
 	} else if os.IsNotExist (_error) {
-		return "", nil, errorf (0x4b0005de, "source does not exist `%s`", _path)
+		return "", nil, Errorf (0x4b0005de, "source does not exist `%s`", _path)
 	} else {
-		return "", nil, errorw (0x43066170, _error)
+		return "", nil, Errorw (0x43066170, _error)
 	}
 }
 
@@ -200,14 +202,14 @@ func resolveCache () (string, *Error) {
 	if _cache_0, _error := os.UserCacheDir (); _error == nil {
 		_cache = _cache_0
 	} else {
-		return "", errorw (0x4d666a7f, _error)
+		return "", Errorw (0x4d666a7f, _error)
 	}
 	if _error := os.MkdirAll (_cache, 0750); _error != nil {
-		return "", errorw (0xf214ed44, _error)
+		return "", Errorw (0xf214ed44, _error)
 	}
 	_cache = path.Join (_cache, "z-run")
 	if _error := os.MkdirAll (_cache, 0750); _error != nil {
-		return "", errorw (0xa66a0341, _error)
+		return "", Errorw (0xa66a0341, _error)
 	}
 	return _cache, nil
 }
@@ -237,9 +239,9 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 		}
 		sort.Strings (_fingerprints)
 		_libraryIdentifier = NewFingerprinter () .StringsWithLen (_fingerprints) .Build ()
-//		logf ('d', 0x2243d3c0, "%s", _libraryIdentifier)
+//		Logf ('d', 0x2243d3c0, "%s", _libraryIdentifier)
 //		for _, _fingerprint := range _fingerprints {
-//			logf ('d', 0x56370791, "%s", _fingerprint)
+//			Logf ('d', 0x56370791, "%s", _fingerprint)
 //		}
 	}
 	
@@ -255,23 +257,23 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 				if _target, _error := filepath.EvalSymlinks (_cacheLibrary); _error == nil {
 					_cacheLibrary = _target
 				} else {
-					return nil, errorw (0x1d1aa28a, _error)
+					return nil, Errorw (0x1d1aa28a, _error)
 				}
 			}
 		} else if ! os.IsNotExist (_error) {
-			return nil, errorw (0x1dd01c9c, _error)
+			return nil, Errorw (0x1dd01c9c, _error)
 		}
 		if _stat, _error := os.Lstat (_cacheLibrary); _error == nil {
 			if ! _stat.Mode () .IsRegular () {
-				return nil, errorf (0x5b3ae1d5, "invalid library cached at `%s`;", _cacheLibrary)
+				return nil, Errorf (0x5b3ae1d5, "invalid library cached at `%s`;", _cacheLibrary)
 			}
 			if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
 				if _fresh, _error := checkLibraryCached (_library); _error == nil {
 					if _fresh {
-//						logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
+//						Logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
 						return _library, nil
 					} else {
-//						logf ('d', 0x8fc67fa1, "ignoring library cached at `%s`;", _cacheLibrary)
+//						Logf ('d', 0x8fc67fa1, "ignoring library cached at `%s`;", _cacheLibrary)
 						_library.Close ()
 					}
 				} else {
@@ -282,14 +284,14 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 				return nil, _error
 			}
 		} else if ! os.IsNotExist (_error) {
-			return nil, errorw (0x19404141, _error)
+			return nil, Errorw (0x19404141, _error)
 		}
 	}
 	
 	var _library *Library
-//	logf ('i', 0xbd44916b, "parsing library from sources...")
+//	Logf ('i', 0xbd44916b, "parsing library from sources...")
 	if _library_0, _error := parseLibrary (_sources, _libraryIdentifier, _context); _error == nil {
-//		logf ('d', 0x71b45ebc, "parsed library from sources;")
+//		Logf ('d', 0x71b45ebc, "parsed library from sources;")
 		_library = _library_0
 	} else {
 		return nil, _error
@@ -307,17 +309,17 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 		_cacheLibraryLinkTmp := fmt.Sprintf ("%s--%08x.tmp", _cacheLibraryLink, os.Getpid ())
 		_cacheLibraryStable := path.Join (_context.cacheRoot, "libraries-cdb", _libraryFingerprint + ".cdb")
 		if _error := doExportLibraryCdb (_library, _cacheLibraryStable, _context); _error == nil {
-//			logf ('d', 0xdf78377c, "created library cached link at `%s`;", _cacheLibraryLink)
-//			logf ('d', 0x43e263da, "created library cached stable at `%s`;", _cacheLibraryStable)
+//			Logf ('d', 0xdf78377c, "created library cached link at `%s`;", _cacheLibraryLink)
+//			Logf ('d', 0x43e263da, "created library cached stable at `%s`;", _cacheLibraryStable)
 			_library.url = _cacheLibraryStable
 		} else {
 			return nil, _error
 		}
 		if _error := os.Symlink (_libraryFingerprint + ".cdb", _cacheLibraryLinkTmp); _error != nil {
-			return nil, errorw (0xc8bbef7a, _error)
+			return nil, Errorw (0xc8bbef7a, _error)
 		}
 		if _error := os.Rename (_cacheLibraryLinkTmp, _cacheLibraryLink); _error != nil {
-			return nil, errorw (0x39c785b9, _error)
+			return nil, Errorw (0x39c785b9, _error)
 		}
 	}
 	
@@ -330,17 +332,17 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 func resolveLibraryCached (_path string) (LibraryStore, *Error) {
 	_fileName := path.Base (_path)
 	if ! strings.HasSuffix (_fileName, ".cdb") {
-		return nil, errorf (0x06574f0e, "invalid library cached file name `%s`", _path)
+		return nil, Errorf (0x06574f0e, "invalid library cached file name `%s`", _path)
 	}
 	_fingerprint := _fileName[: len (_fileName) - 4]
 	if _store, _error := NewCdbStoreInput (_path); _error == nil {
 		if _library, _error := NewLibraryStoreInput (_store, _path, _fingerprint); _error == nil {
-//			logf ('d', 0x63ae360d, "opened library cached at `%s`;", _path)
+//			Logf ('d', 0x63ae360d, "opened library cached at `%s`;", _path)
 			if _fingerprint_0, _error := _library.Fingerprint (); _error == nil {
 				if _fingerprint_0 == _fingerprint {
 					return _library, nil
 				} else {
-					return nil, errorf (0xa0e14143, "invalid store")
+					return nil, Errorf (0xa0e14143, "invalid store")
 				}
 			} else {
 				_store.Close ()
@@ -372,7 +374,7 @@ func checkLibraryCached (_library LibraryStore) (bool, *Error) {
 		} else if os.IsNotExist (_error) {
 			return false, nil
 		} else {
-			return false, errorw (0x0f7764d9, _error)
+			return false, Errorw (0x0f7764d9, _error)
 		}
 	}
 	return true, nil

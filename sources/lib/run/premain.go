@@ -18,6 +18,8 @@ import "unicode/utf8"
 
 import isatty "github.com/mattn/go-isatty"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -35,12 +37,12 @@ func PreMain () () {
 	
 	var _executable0 string
 	if _executable_0, _error := os.Executable (); _error == nil {
-//		logf ('d', 0xda96ed44, "%s", _executable_0)
+//		Logf ('d', 0xda96ed44, "%s", _executable_0)
 		_executable0 = _executable_0
 	} else if _executable_0 := os.Getenv ("ZRUN_EXECUTABLE"); _executable_0 != "" {
 		_executable0 = _executable_0
 	} else {
-		panic (abortError (errorf (0x905621f4, "can't resolve `z-run` executable")))
+		panic (AbortError (Errorf (0x905621f4, "can't resolve `z-run` executable")))
 	}
 	
 	
@@ -48,7 +50,7 @@ func PreMain () () {
 	if _executable_0, _error := filepath.EvalSymlinks (_executable0); _error == nil {
 		_executable = _executable_0
 	} else {
-		panic (abortError (errorw (0x127e013a, _error)))
+		panic (AbortError (Errorw (0x127e013a, _error)))
 	}
 	
 	
@@ -67,7 +69,7 @@ func PreMain () () {
 		}
 		if !_accept {
 			if _error := os.Unsetenv (_variable); _error != nil {
-				panic (abortError (errorw (0x14024051, _error)))
+				panic (AbortError (Errorw (0x14024051, _error)))
 			}
 		}
 	}
@@ -96,7 +98,7 @@ func PreMain () () {
 		
 		if _argument == "--sources-md5" {
 			if _, _error := os.Stdout.WriteString (embeddedSourcesMd5); _error != nil {
-				panic (abortError (errorw (0x7471032d, _error)))
+				panic (AbortError (Errorw (0x7471032d, _error)))
 			}
 			os.Exit (0)
 			panic (0x9aaf5529)
@@ -104,7 +106,7 @@ func PreMain () () {
 		
 		if _argument == "--sources-cpio" {
 			if _, _error := os.Stdout.Write (embeddedSourcesCpioGz); _error != nil {
-				panic (abortError (errorw (0x8034bf3e, _error)))
+				panic (AbortError (Errorw (0x8034bf3e, _error)))
 			}
 			os.Exit (0)
 			panic (0x7dca7f0e)
@@ -137,7 +139,7 @@ func PreMain () () {
 		if (_argument == "--shell") || (_argument == "--shell-untainted") {
 			
 			if _error := CheckTerminal (); _error != nil {
-				logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
+				Logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
 				os.Exit (1)
 				panic (0x67e03fa2)
 			}
@@ -154,15 +156,15 @@ func PreMain () () {
 			
 			_input, _output, _error := createPipe (len (_rc) + 256, "/tmp")
 			if _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			}
 			_rc += fmt.Sprintf ("exec %d<&-\n", _input)
 			_rc += "printf -- '\n%s\n' '---- [z-run:shell] -------------------------------------------------------------' >&2\n\n"
 			if _, _error := _output.Write ([]byte (_rc)); _error != nil {
-				panic (abortError (errorw (0xc58e3fe6, _error)))
+				panic (AbortError (Errorw (0xc58e3fe6, _error)))
 			}
 			if _error := _output.Close (); _error != nil {
-				panic (abortError (errorw (0x8741d077, _error)))
+				panic (AbortError (Errorw (0x8741d077, _error)))
 			}
 			
 			var _bash string
@@ -184,7 +186,7 @@ func PreMain () () {
 			_environment = append (_environment, "ZRUN_EXECUTABLE=" + _executable)
 			
 			if _error := syscall.Exec (_bash, _arguments, _environment); _error != nil {
-				panic (abortError (errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
+				panic (AbortError (Errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
 			}
 			panic (0xf4813cc2)
 		}
@@ -248,14 +250,14 @@ func PreMain () () {
 					_chunks = append (_chunks, embeddedGoProlog)
 				
 				default :
-					logf ('e', 0xa269e851, "invalid export `%s`;  aborting!", _what)
+					Logf ('e', 0xa269e851, "invalid export `%s`;  aborting!", _what)
 					os.Exit (1)
 					panic (0x5a0fe24e)
 			}
 			
 			for _, _chunk := range _chunks {
 				if _, _error := os.Stdout.Write ([]byte (_chunk)); _error != nil {
-					panic (abortError (errorw (0xc08e9e5a, _error)))
+					panic (AbortError (Errorw (0xc08e9e5a, _error)))
 				}
 			}
 			
@@ -286,10 +288,10 @@ func PreMain () () {
 				// NOP
 			
 			case "netbsd", "dragonfly" :
-				logf ('i', 0xc8f30933, "this tool was not tested on your OS;  please be cautions!")
+				Logf ('i', 0xc8f30933, "this tool was not tested on your OS;  please be cautions!")
 			
 			default :
-				logf ('e', 0xcdd5f570, "this tool was not tested on your OS;  it is highly unlikely that it will work;  aborting!")
+				Logf ('e', 0xcdd5f570, "this tool was not tested on your OS;  it is highly unlikely that it will work;  aborting!")
 				os.Exit (1)
 				panic (0x9c080b95)
 		}
@@ -335,29 +337,29 @@ func PreMain () () {
 			
 			_nameTrimmed := strings.TrimSpace (_name)
 			if _name != _nameTrimmed {
-				logf ('w', 0x1d362f26, "invalid environment variable (name has spaces):  `%s`", _name)
+				Logf ('w', 0x1d362f26, "invalid environment variable (name has spaces):  `%s`", _name)
 				_name = _nameTrimmed
 			}
 			if strings.IndexFunc (_name, func (r rune) (bool) { return unicode.IsSpace (r) || (r > unicode.MaxASCII) }) >= 0 {
-				logf ('w', 0x81ac6f2e, "invalid environment variable (name is not ASCII):  `%s`", _name)
+				Logf ('w', 0x81ac6f2e, "invalid environment variable (name is not ASCII):  `%s`", _name)
 			}
 			
 			if _name == "" {
-				logf ('w', 0x0ffb0031, "invalid environment variable (name empty):  `%s`", _variable)
+				Logf ('w', 0x0ffb0031, "invalid environment variable (name empty):  `%s`", _variable)
 			} else if ! utf8.Valid ([]byte (_name)) {
-				logf ('w', 0x54278534, "invalid environment variable (name invalid UTF-c):  `%s`", _name)
+				Logf ('w', 0x54278534, "invalid environment variable (name invalid UTF-c):  `%s`", _name)
 			} else if ! utf8.Valid ([]byte (_value)) {
-				logf ('w', 0x785ba004, "invalid environment variable (value invalid UTF-c):  `%s`", _name)
+				Logf ('w', 0x785ba004, "invalid environment variable (value invalid UTF-c):  `%s`", _name)
 			} else if _value == "" {
-//				logf ('w', 0xfe658d34, "invalid environment variable (value empty):  `%s`", _name)
+//				Logf ('w', 0xfe658d34, "invalid environment variable (value empty):  `%s`", _name)
 			} else if _, _exists := _environment[_name]; _exists {
-				logf ('w', 0x7e7e41a5, "invalid environment variable (name duplicate):  `%s`", _name)
+				Logf ('w', 0x7e7e41a5, "invalid environment variable (name duplicate):  `%s`", _name)
 			} else {
 				_environment[_nameTrimmed] = _value
 			}
 			
 		} else {
-			logf ('w', 0xe745517c, "invalid environment variable (missing `=`):  `%s`", _variable)
+			Logf ('w', 0xe745517c, "invalid environment variable (missing `=`):  `%s`", _variable)
 		}
 	}
 	
@@ -367,11 +369,11 @@ func PreMain () () {
 		_preMainContext.Environment = append (_preMainContext.Environment, "ZRUN_EXECUTABLE=" + _executable)
 	}
 	
-//	logf ('d', 0x06cd45f9, "self-executable0: %s", _executable0)
-//	logf ('d', 0x256b2c94, "self-executable: %s", _executable)
-//	logf ('d', 0xb59e4f73, "self-argument0: %s", _argument0)
-//	logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
-//	logf ('d', 0x7a411846, "self-environment: %s", _environment)
+//	Logf ('d', 0x06cd45f9, "self-executable0: %s", _executable0)
+//	Logf ('d', 0x256b2c94, "self-executable: %s", _executable)
+//	Logf ('d', 0xb59e4f73, "self-argument0: %s", _argument0)
+//	Logf ('d', 0xf7d65090, "self-arguments: %s", _arguments)
+//	Logf ('d', 0x7a411846, "self-environment: %s", _environment)
 	
 	PreMainContextGlobal = _preMainContext
 	
@@ -424,11 +426,11 @@ func PreMain () () {
 		
 		default :
 			if strings.HasPrefix (_argument0, "[z-run:") {
-				logf ('e', 0xf6274ed5, "invalid argument0: `%s`;  aborting!", _argument0)
+				Logf ('e', 0xf6274ed5, "invalid argument0: `%s`;  aborting!", _argument0)
 				os.Exit (1)
 			}
 			if _argument00, _error := filepath.EvalSymlinks (_argument0); (_error != nil) || (_argument00 != _executable) {
-				logf ('e', 0xf1f1a024, "invalid argument0: `%s`, expected `%s`;  aborting!", _argument0, _executable)
+				Logf ('e', 0xf1f1a024, "invalid argument0: `%s`, expected `%s`;  aborting!", _argument0, _executable)
 				os.Exit (1)
 			}
 			_argument0IsTool = false
@@ -495,7 +497,7 @@ func PreMain () () {
 			_delegateArguments := append ([]string {_delegateArgument0}, _delegateArguments ...)
 			
 			if _error := syscall.Exec (_delegateExecutable, _delegateArguments, _delegateEnvironment); _error != nil {
-				panic (abortError (errorf (0x05bd220d, "failed to exec `%s`  //  %v", _delegateExecutable, _error)))
+				panic (AbortError (Errorf (0x05bd220d, "failed to exec `%s`  //  %v", _delegateExecutable, _error)))
 			} else {
 				panic (0xe13aab5f)
 			}
@@ -510,63 +512,63 @@ func PreMain () () {
 		
 		case "[z-run:scriptlet]" :
 			if _error := scriptletMain (_executable, _arguments, _environment, false); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0xb305aa74)
 			}
 		
 		case "[z-run:scriptlet-exec]" :
 			if _error := scriptletMain (_executable, _arguments, _environment, true); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0x8f827319)
 			}
 		
 		case "[z-run:input]" :
 			if _error := inputMain (_arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0xe62a9355)
 			}
 		
 		case "[z-run:print]" :
 			if _error := printMain (_executable, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0xf2084070)
 			}
 		
 		case "[z-run:template]" :
 			if _error := templateMain (_executable, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0x32241835)
 			}
 		
 		case "[z-run:starlark]" :
 			if _error := starlarkMain (_executable, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0xd6f5b038)
 			}
 		
 		case "[z-run:menu]" :
 			if _error := menuMain (_executable, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0x6b21e0ab)
 			}
 		
 		case "[z-run:select]" :
 			if _error := fzfMain (true, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0x2346ca3f)
 			}
 		
 		case "[z-run:fzf]" :
 			if _error := fzfMain (false, _arguments, _environment); _error != nil {
-				panic (abortError (_error))
+				panic (AbortError (_error))
 			} else {
 				panic (0xfae3720e)
 			}
@@ -575,7 +577,7 @@ func PreMain () () {
 			// NOP
 		
 		default :
-			logf ('e', 0xf965e92e, "invalid argument0: `%s`;  aborting!", _argument0)
+			Logf ('e', 0xf965e92e, "invalid argument0: `%s`;  aborting!", _argument0)
 			os.Exit (1)
 	}
 	
@@ -583,7 +585,7 @@ func PreMain () () {
 		os.Exit (0)
 		panic (0xe0e1c1a1)
 	} else {
-		panic (abortError (_error))
+		panic (AbortError (_error))
 	}
 }
 
@@ -605,7 +607,7 @@ var PreMainContextGlobal *PreMainContext = nil
 
 func PreMainReExecute (_executable string) (*Error) {
 	if PreMainContextGlobal == nil {
-		return errorf (0x3d126cd2, "can't switch `z-run`")
+		return Errorf (0x3d126cd2, "can't switch `z-run`")
 	}
 	_arguments := make ([]string, 0, len (PreMainContextGlobal.Arguments) + 1)
 	if PreMainContextGlobal.Argument0 == PreMainContextGlobal.Executable {
@@ -614,7 +616,7 @@ func PreMainReExecute (_executable string) (*Error) {
 		_arguments = append (_arguments, PreMainContextGlobal.Argument0)
 	}
 	_arguments = append (_arguments, PreMainContextGlobal.Arguments ...)
-//	logf ('i', 0x91038b92, "switching `z-run` to: `%s`...", _executable)
+//	Logf ('i', 0x91038b92, "switching `z-run` to: `%s`...", _executable)
 	for _index, _pair := range PreMainContextGlobal.Environment {
 		if strings.HasPrefix (_pair, "ZRUN_EXECUTABLE=") {
 			PreMainContextGlobal.Environment[_index] = "ZRUN_EXECUTABLE=" + _executable
@@ -626,7 +628,7 @@ func PreMainReExecute (_executable string) (*Error) {
 			_arguments,
 			PreMainContextGlobal.Environment,
 		)
-	return errorf (0x3d993836, "failed to exec `%s`  //  %v", _executable, _error)
+	return Errorf (0x3d993836, "failed to exec `%s`  //  %v", _executable, _error)
 }
 
 
@@ -634,13 +636,13 @@ func PreMainReExecute (_executable string) (*Error) {
 
 func CheckTerminal () (*Error) {
 	if ! isatty.IsTerminal (os.Stdin.Fd ()) {
-		return errorf (0x05d60b72, "stdin is not a TTY")
+		return Errorf (0x05d60b72, "stdin is not a TTY")
 	}
 	if ! isatty.IsTerminal (os.Stdout.Fd ()) {
-		return errorf (0xc432630a, "stdout is not a TTY")
+		return Errorf (0xc432630a, "stdout is not a TTY")
 	}
 	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-		return errorf (0x77924518, "stderr is not a TTY")
+		return Errorf (0x77924518, "stderr is not a TTY")
 	}
 	return nil
 }

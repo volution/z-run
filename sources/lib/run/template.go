@@ -14,13 +14,15 @@ import "strconv"
 import "strings"
 import "text/template"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
 func printMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) != 1 {
-		return errorf (0xbc2c2406, "invalid arguments")
+		return Errorf (0xbc2c2406, "invalid arguments")
 	}
 	
 	var _sourcePath = _arguments[0]
@@ -45,11 +47,11 @@ func printMain (_selfExecutable string, _arguments []string, _environment map[st
 func executePrint (_library LibraryStore, _scriptlet *Scriptlet, _context *Context, _output io.Writer) (*Error) {
 	
 	if _scriptlet.Interpreter != "<print>" {
-		return errorf (0x43c4a524, "invalid interpreter")
+		return Errorf (0x43c4a524, "invalid interpreter")
 	}
 	
 	if len (_context.cleanArguments) != 0 {
-		return errorf (0x4f9e0e3b, "invalid arguments")
+		return Errorf (0x4f9e0e3b, "invalid arguments")
 	}
 	
 	return executePrint_0 (_scriptlet.Body, _output)
@@ -59,7 +61,7 @@ func executePrint (_library LibraryStore, _scriptlet *Scriptlet, _context *Conte
 func executePrint_0 (_source string, _output io.Writer) (*Error) {
 	
 	if _, _error := _output.Write ([]byte (_source)); _error != nil {
-		return errorw (0x1fea6849, _error)
+		return Errorw (0x1fea6849, _error)
 	}
 	
 	return nil
@@ -71,7 +73,7 @@ func executePrint_0 (_source string, _output io.Writer) (*Error) {
 func templateMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) < 1 {
-		return errorf (0x47c3f9f1, "invalid arguments")
+		return Errorf (0x47c3f9f1, "invalid arguments")
 	}
 	
 	var _sourcePath = _arguments[0]
@@ -110,7 +112,7 @@ func templateMain (_selfExecutable string, _arguments []string, _environment map
 func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Context, _output io.Writer) (*Error) {
 	
 	if _scriptlet.Interpreter != "<template>" {
-		return errorf (0xa18a5ca9, "invalid interpreter")
+		return Errorf (0xa18a5ca9, "invalid interpreter")
 	}
 	
 	_libraryUrl := _library.Url ()
@@ -171,7 +173,7 @@ func executeTemplate_0 (
 	_template := template.New ("z-run")
 	_template.Funcs (_functions)
 	if _, _error := _template.Parse (_source); _error != nil {
-		return errorw (0xad3804cc, _error)
+		return Errorw (0xad3804cc, _error)
 	}
 	
 	_data := map[string]interface{} {
@@ -185,7 +187,7 @@ func executeTemplate_0 (
 		}
 	
 	if _error := _template.Execute (_output, _data); _error != nil {
-		return errorw (0x0d6d4b96, _error)
+		return Errorw (0x0d6d4b96, _error)
 	}
 	
 	return nil
@@ -218,7 +220,7 @@ func templateFuncZrun (_library LibraryStore, _context *Context, _scriptletLabel
 				return "", _error.ToError ()
 			}
 		} else {
-			return "", errorf (0x944c3172, "unknown scriptlet `%s`", _scriptletLabel) .ToError ()
+			return "", Errorf (0x944c3172, "unknown scriptlet `%s`", _scriptletLabel) .ToError ()
 		}
 	} else {
 		return "", _error.ToError ()
@@ -398,7 +400,7 @@ func templateFunctions () (map[string]interface{}) {
 						if _input_0, _ok := _input_0.(string); _ok {
 							_input[_index] = _input_0
 						} else {
-							return "", errorf (0xa2880bb1, "invalid value") .ToError ()
+							return "", Errorf (0xa2880bb1, "invalid value") .ToError ()
 						}
 					}
 					return strings.Join (_input, _separator), nil
@@ -567,7 +569,7 @@ func templateFunctions () (map[string]interface{}) {
 						}
 					}
 					if !_wasEmpty {
-						return nil, errorf (0x1e677d43, "expected `\\n` at end of input") .ToError ()
+						return nil, Errorf (0x1e677d43, "expected `\\n` at end of input") .ToError ()
 					}
 					return _array, nil
 				},
@@ -599,7 +601,7 @@ func templateFunctions () (map[string]interface{}) {
 						}
 					}
 					if !_wasEmpty {
-						return nil, errorf (0x88a1e3db, "expected `\\0` at end of input") .ToError ()
+						return nil, Errorf (0x88a1e3db, "expected `\\0` at end of input") .ToError ()
 					}
 					return _array, nil
 				},

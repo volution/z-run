@@ -11,6 +11,8 @@ import "path"
 import "path/filepath"
 import "strings"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -106,7 +108,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		if strings.HasPrefix (_nameCanonical, "ZRUN_") || strings.HasPrefix (_nameCanonical, "_ZRUN_") {
 			
 			if _name != _nameCanonical {
-				logf ('w', 0x9bc8b3da, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
+				Logf ('w', 0x9bc8b3da, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
 			}
 			
 			switch _nameCanonical {
@@ -124,23 +126,23 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				
 				case "ZRUN_EXECUTABLE" :
 					if _executable != _value {
-						logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
+						Logf ('w', 0xfb1f0645, "environment variable mismatched:  `%s`;  expected `%s`, encountered `%s`!", _nameCanonical, _executable, _value)
 					}
 				
 				case "ZRUN_CACHE" :
 					_cacheRoot = _value
 				
 				default :
-					logf ('w', 0xafe247b0, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
+					Logf ('w', 0xafe247b0, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
 			}
 			
 		} else if strings.HasPrefix (_nameCanonical, "X_RUN_") || strings.HasPrefix (_nameCanonical, "_X_RUN_") {
 			
 			if _name != _nameCanonical {
-				logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
+				Logf ('w', 0x37850eb3, "environment variable does not have canonical name;  expected `%s`, encountered `%s`!", _nameCanonical, _name)
 			}
 			
-			logf ('w', 0xdf61b057, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
+			Logf ('w', 0xdf61b057, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)
 			
 		} else if _name == "_" {
 			
@@ -190,7 +192,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		} else if strings.HasPrefix (_argument, "-") {
 			
 			if _command != "" {
-				return errorf (0xae04b5ff, "unexpected argument `%s`", _argument)
+				return Errorf (0xae04b5ff, "unexpected argument `%s`", _argument)
 			}
 			
 			if _argument == "--exec" {
@@ -201,7 +203,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					_workspace = ""
 					_top = true
 				} else {
-					return errorf (0x12cdad05, "unexpected argument `--exec` (only first)")
+					return Errorf (0x12cdad05, "unexpected argument `--exec` (only first)")
 				}
 				
 			} else if _argument == "--untainted" {
@@ -211,14 +213,14 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					_workspace = ""
 					_top = true
 				} else {
-					return errorf (0x7ce36db9, "unexpected argument `--untainted` (only first)")
+					return Errorf (0x7ce36db9, "unexpected argument `--untainted` (only first)")
 				}
 				
 			} else if _argument == "--invoke" {
 				if _index == 0 {
 					_invokeMode = true
 				} else {
-					return errorf (0x03da9932, "unexpected argument `--invoke` (only first)")
+					return Errorf (0x03da9932, "unexpected argument `--invoke` (only first)")
 				}
 				
 			} else if _argument == "--ssh" {
@@ -226,7 +228,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					_sshMode = true
 					_sshContext = & SshContext {}
 				} else {
-					return errorf (0x6a4ba0b6, "unexpected argument `--ssh` (only first)")
+					return Errorf (0x6a4ba0b6, "unexpected argument `--ssh` (only first)")
 				}
 				
 			} else if strings.HasPrefix (_argument, "--library-source=") {
@@ -241,7 +243,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				
 			} else if strings.HasPrefix (_argument, "--ssh-") {
 				if !_sshMode {
-					return errorf (0x0e1cdc68, "unexpected argument `%s` (only with `--ssh`)", _argument)
+					return Errorf (0x0e1cdc68, "unexpected argument `%s` (only with `--ssh`)", _argument)
 				}
 				if strings.HasPrefix (_argument, "--ssh-target=") {
 					_target := _argument[len ("--ssh-target="):]
@@ -261,18 +263,18 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 					_workspace := _argument[len ("--ssh-workspace="):]
 					_sshContext.workspace = _workspace
 				} else {
-					return errorf (0x33555ffb, "invalid argument `%s`", _argument)
+					return Errorf (0x33555ffb, "invalid argument `%s`", _argument)
 				}
 				
 			} else {
-				return errorf (0x33555ffb, "invalid argument `%s`", _argument)
+				return Errorf (0x33555ffb, "invalid argument `%s`", _argument)
 			}
 			
 		} else if strings.HasPrefix (_argument, "::") {
 			_scriptlet = _argument
 			
 		} else if _sshMode {
-			return errorf (0x7af6b31f, "unexpected argument `%s` (for `--ssh`)", _argument)
+			return Errorf (0x7af6b31f, "unexpected argument `%s` (for `--ssh`)", _argument)
 			
 		} else {
 			if _command == "" {
@@ -332,7 +334,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 						_command = "export-library-fingerprint"
 					
 					default :
-						return errorf (0x63de47f8, "unexpected argument `%s`", _argument)
+						return Errorf (0x63de47f8, "unexpected argument `%s`", _argument)
 				}
 				
 			} else if (_command == "execute-scriptlet-ssh") && (_sshContext.target == "") {
@@ -343,17 +345,17 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 				break
 				
 			} else {
-				return errorf (0x6a6a6cef, "unexpected argument `%s`", _argument)
+				return Errorf (0x6a6a6cef, "unexpected argument `%s`", _argument)
 			}
 		}
 	}
 	
 	if _execMode {
 		if _librarySourcePath == "" {
-			return errorf (0xe13c6051, "invalid arguments:  expected source path")
+			return Errorf (0xe13c6051, "invalid arguments:  expected source path")
 		}
 		if _scriptlet != "" {
-			return errorf (0xb2b83ca4, "invalid arguments:  unexpected scriptlet")
+			return Errorf (0xb2b83ca4, "invalid arguments:  unexpected scriptlet")
 		}
 		if len (_cleanArguments) > 0 {
 			_scriptlet = _cleanArguments[0]
@@ -367,38 +369,38 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 	
 	if _invokeMode {
 		if _command != "" {
-			return errorf (0x996e4c2b, "invalid arguments:  unexpected command")
+			return Errorf (0x996e4c2b, "invalid arguments:  unexpected command")
 		}
 		if _scriptlet != "" {
-			return errorf (0x3344b708, "invalid arguments:  unexpected scriptlet")
+			return Errorf (0x3344b708, "invalid arguments:  unexpected scriptlet")
 		}
 		if len (_cleanArguments) != 0 {
-			return errorf (0x71d92eec, "invalid arguments:  unexpected arguments")
+			return Errorf (0x71d92eec, "invalid arguments:  unexpected arguments")
 		}
 		if (_librarySourcePath != "") || (_libraryCacheUrl != "") || (len (_libraryLookupPaths) != 0) {
-			return errorf (0x70d72d6d, "invalid arguments:  unexpected library source, cache or lookup")
+			return Errorf (0x70d72d6d, "invalid arguments:  unexpected library source, cache or lookup")
 		}
 		if _workspace != "" {
-			return errorf (0x70d37d49, "invalid arguments:  unexpected workspace")
+			return Errorf (0x70d37d49, "invalid arguments:  unexpected workspace")
 		}
 		if _cacheRoot != "" {
-			return errorf (0xb8216677, "invalid arguments:  unexpected cache")
+			return Errorf (0xb8216677, "invalid arguments:  unexpected cache")
 		}
 		if _invokeContextEncoded == "" {
-			return errorf (0xd08f059a, "invalid arguments:  expected invoke context")
+			return Errorf (0xd08f059a, "invalid arguments:  expected invoke context")
 		}
 		var _context InvokeContext
 		if _data, _error := base64.RawURLEncoding.DecodeString (_invokeContextEncoded); _error == nil {
 			if _error := json.Unmarshal (_data, &_context); _error == nil {
 				// NOP
 			} else {
-				return errorw (0x29dfbd1e, _error)
+				return Errorw (0x29dfbd1e, _error)
 			}
 		} else {
-			return errorw (0x7c9f1ada, _error)
+			return Errorw (0x7c9f1ada, _error)
 		}
 		if _context.Version != BUILD_VERSION {
-			return errorf (0xfe2f9709, "mismatched version, self `%s`, other `%s`", BUILD_VERSION, _context.Version)
+			return Errorf (0xfe2f9709, "mismatched version, self `%s`, other `%s`", BUILD_VERSION, _context.Version)
 		}
 		_scriptlet = _context.Scriptlet
 		if ! strings.HasPrefix (_scriptlet, "::") {
@@ -418,7 +420,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 	
 	if _sshMode {
 		if _command != "" {
-			return errorf (0x8937413a, "invalid arguments:  unexpected command")
+			return Errorf (0x8937413a, "invalid arguments:  unexpected command")
 		}
 		_command = "execute-scriptlet-ssh"
 	}
@@ -427,7 +429,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		if strings.HasPrefix (_scriptlet, ":: ") {
 			_scriptlet = _scriptlet[3:]
 		} else {
-			return errorf (0x72ad17f7, "invalid scriptlet label `%s`", _scriptlet)
+			return Errorf (0x72ad17f7, "invalid scriptlet label `%s`", _scriptlet)
 		}
 	}
 	
@@ -453,7 +455,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		}
 	} else {
 		if _libraryCacheUrl != "" {
-			logf ('w', 0xdb80c4de, "library URL specified, but caching is disabled;  ignoring cached path!")
+			Logf ('w', 0xdb80c4de, "library URL specified, but caching is disabled;  ignoring cached path!")
 			_libraryCacheUrl = ""
 		}
 	}
@@ -462,7 +464,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		if _path, _error := os.Getwd (); _error == nil {
 			_workspace = _path
 		} else {
-			return errorw (0x69daa060, _error)
+			return Errorw (0x69daa060, _error)
 		}
 		var _insideVcs bool
 		for _, _subfolder := range resolveWorkspaceSubfolders {
@@ -472,21 +474,21 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			} else if os.IsNotExist (_error) {
 				// NOP
 			} else {
-				return errorw (0x43bc330c, _error)
+				return Errorw (0x43bc330c, _error)
 			}
 		}
 		if !_insideVcs {
 			if _home, _error := os.UserHomeDir (); _error == nil {
 				_libraryLookupPaths = append (_libraryLookupPaths, _home)
 			} else {
-				return errorw (0x3884b718, _error)
+				return Errorw (0x3884b718, _error)
 			}
 		}
 	}
 	if _path, _error := filepath.Abs (_workspace); _error == nil {
 		_workspace = _path
 	} else {
-		return errorw (0x9f5c1d2a, _error)
+		return Errorw (0x9f5c1d2a, _error)
 	}
 	
 	if _terminal == "dumb" {
@@ -495,7 +497,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 	
 	if _libraryCacheUrl != "" {
 		if _librarySourcePath != "" {
-			logf ('w', 0x1fe0b572, "library URL specified, but also source path specified;  ignoring cached path!")
+			Logf ('w', 0x1fe0b572, "library URL specified, but also source path specified;  ignoring cached path!")
 			_libraryCacheUrl = ""
 		}
 	}
@@ -546,20 +548,20 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		}
 	}
 	
-//	logf ('d', 0x66e8b16d, "%v `%s` `%s` %d %v", _top, _command, _scriptlet, len (_cleanArguments), _cleanArguments)
+//	Logf ('d', 0x66e8b16d, "%v `%s` `%s` %d %v", _top, _command, _scriptlet, len (_cleanArguments), _cleanArguments)
 	
 	switch _command {
 		
 		
 		case "execute-scriptlet" :
 			if _scriptlet == "" {
-				return errorf (0x39718e70, "execute:  expected scriptlet")
+				return Errorf (0x39718e70, "execute:  expected scriptlet")
 			}
 			return doHandleWithLabel (_library, _scriptlet, doHandleExecuteScriptlet, _context)
 		
 		case "execute-scriptlet-ssh" :
 			if _scriptlet == "" {
-				return errorf (0xcc3c2ea6, "execute-ssh:  expected scriptlet")
+				return Errorf (0xcc3c2ea6, "execute-ssh:  expected scriptlet")
 			}
 			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExecuteScriptletSsh (_library, _scriptlet, _sshContext, _context)
@@ -568,10 +570,10 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "export-scriptlet-body" :
 			if _scriptlet == "" {
-				return errorf (0xf24640a2, "export:  expected scriptlet")
+				return Errorf (0xf24640a2, "export:  expected scriptlet")
 			}
 			if len (_cleanArguments) != 0 {
-				return errorf (0xcf8db3c0, "export:  unexpected arguments")
+				return Errorf (0xcf8db3c0, "export:  unexpected arguments")
 			}
 			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
@@ -581,7 +583,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "select-execute-scriptlet" :
 			if len (_cleanArguments) != 0 {
-				return errorf (0x203e410a, "select:  unexpected arguments")
+				return Errorf (0x203e410a, "select:  unexpected arguments")
 			}
 			if _scriptlet != "" {
 				return doSelectHandleWithLabel (_library, _scriptlet, doHandleExecuteScriptlet, _context)
@@ -591,7 +593,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "select-execute-scriptlet-loop" :
 			if len (_cleanArguments) != 0 {
-				return errorf (0x2c6bb7ce, "select:  unexpected arguments")
+				return Errorf (0x2c6bb7ce, "select:  unexpected arguments")
 			}
 			for {
 				_handled := false
@@ -635,7 +637,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "select-export-scriptlet-label" :
 			if len (_cleanArguments) != 0 {
-				return errorf (0x2d19b1bc, "select:  unexpected arguments")
+				return Errorf (0x2d19b1bc, "select:  unexpected arguments")
 			}
 			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletLabel (_library, _scriptlet, os.Stdout, _context)
@@ -648,7 +650,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "select-export-scriptlet-body" :
 			if len (_cleanArguments) != 0 {
-				return errorf (0x5f573713, "select:  unexpected arguments")
+				return Errorf (0x5f573713, "select:  unexpected arguments")
 			}
 			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
@@ -661,7 +663,7 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "select-export-scriptlet-label-and-body" :
 			if len (_cleanArguments) != 0 {
-				return errorf (0xe4f7e6f5, "export:  unexpected arguments")
+				return Errorf (0xe4f7e6f5, "export:  unexpected arguments")
 			}
 			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletLegacy (_library, _scriptlet, os.Stdout, _context)
@@ -675,14 +677,14 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "export-scriptlet-labels" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
-				return errorf (0xf7b9c7f3, "export:  unexpected scriptlet or arguments")
+				return Errorf (0xf7b9c7f3, "export:  unexpected scriptlet or arguments")
 			}
 			return doExportScriptletLabels (_library, os.Stdout, _context)
 		
 		
 		case "parse-library", "parse-library-without-output" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
-				return errorf (0x400ec122, "export:  unexpected scriptlet or arguments")
+				return Errorf (0x400ec122, "export:  unexpected scriptlet or arguments")
 			}
 			if _command == "parse-library" {
 				return doExportLibraryJson (_library, os.Stdout, _context)
@@ -692,44 +694,44 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 		
 		case "export-library-json" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
-				return errorf (0xdd0752b8, "export:  unexpected scriptlet or arguments")
+				return Errorf (0xdd0752b8, "export:  unexpected scriptlet or arguments")
 			}
 			return doExportLibraryStore (_library, NewJsonStreamStoreOutput (os.Stdout, nil), _context)
 		
 		case "export-library-cdb" :
 			if _scriptlet != "" {
-				return errorf (0x492ac50e, "export:  unexpected scriptlet")
+				return Errorf (0x492ac50e, "export:  unexpected scriptlet")
 			}
 			if len (_cleanArguments) != 1 {
-				return errorf (0xf76f4459, "export:  expected database path")
+				return Errorf (0xf76f4459, "export:  expected database path")
 			}
 			return doExportLibraryCdb (_library, _cleanArguments[0], _context)
 		
 		case "export-library-rpc" :
 			if _scriptlet != "" {
-				return errorf (0x04d71684, "export:  unexpected scriptlet")
+				return Errorf (0x04d71684, "export:  unexpected scriptlet")
 			}
 			if len (_cleanArguments) != 1 {
-				return errorf (0xe7886d74, "export:  expected RPC url")
+				return Errorf (0xe7886d74, "export:  expected RPC url")
 			}
 			return doExportLibraryRpc (_library, _cleanArguments[0], _context)
 		
 		case "export-library-url" :
 			if _scriptlet != "" {
-				return errorf (0xff2905b6, "export:  unexpected scriptlet")
+				return Errorf (0xff2905b6, "export:  unexpected scriptlet")
 			}
 			if len (_cleanArguments) != 0 {
-				return errorf (0x3cda6407, "export:  unexpected arguments")
+				return Errorf (0x3cda6407, "export:  unexpected arguments")
 			}
 			fmt.Fprintln (os.Stdout, _library.Url ())
 			return nil
 		
 		case "export-library-identifier", "export-library-fingerprint" :
 			if _scriptlet != "" {
-				return errorf (0x3483242d, "export:  unexpected scriptlet")
+				return Errorf (0x3483242d, "export:  unexpected scriptlet")
 			}
 			if len (_cleanArguments) != 0 {
-				return errorf (0x2a741648, "export:  unexpected arguments")
+				return Errorf (0x2a741648, "export:  unexpected arguments")
 			}
 			switch _command {
 				case "export-library-identifier" :
@@ -751,10 +753,10 @@ func Main (_executable string, _argument0 string, _arguments []string, _environm
 			}
 		
 		case "" :
-			return errorf (0x5d2a4326, "expected command")
+			return Errorf (0x5d2a4326, "expected command")
 		
 		default :
-			return errorf (0x66cf8700, "unexpected command `%s`", _command)
+			return Errorf (0x66cf8700, "unexpected command `%s`", _command)
 	}
 }
 

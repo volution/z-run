@@ -7,6 +7,8 @@ import "path/filepath"
 import "strings"
 import "unicode/utf8"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -32,9 +34,9 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 				_arguments = _arguments[1:]
 				break
 			} else if strings.HasPrefix (_argument, "--") {
-				return errorf (0xc2b4c6d5, "invalid arguments:  unknown argument `%s`", _argument)
+				return Errorf (0xc2b4c6d5, "invalid arguments:  unknown argument `%s`", _argument)
 			} else {
-				return errorf (0xd1e079a1, "invalid arguments:  unknown argument `%s`, expected `--`", _argument)
+				return Errorf (0xd1e079a1, "invalid arguments:  unknown argument `%s`, expected `--`", _argument)
 			}
 		}
 	}
@@ -45,7 +47,7 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 	
 	if _path == "" {
 		if (len (_arguments) == 0) {
-			return errorf (0xc146acb9, "invalid arguments:  expected path")
+			return Errorf (0xc146acb9, "invalid arguments:  expected path")
 		}
 		_path = _arguments[0]
 		_arguments = _arguments[1:]
@@ -58,7 +60,7 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 			_fingerprint = _fingerprint_0
 			_body = string (_body_0)
 		} else {
-			return errorf (0x03c1bbdb, "invalid scriptlet:  invalid UTF-8 body")
+			return Errorf (0x03c1bbdb, "invalid scriptlet:  invalid UTF-8 body")
 		}
 	} else {
 		return _error
@@ -90,12 +92,12 @@ func scriptletMain (_selfExecutable string, _arguments []string, _environment ma
 		if strings.HasPrefix (_body, "#!") {
 			_shabangLimit := strings.IndexByte (_body, '\n')
 			if _shabangLimit < 0 {
-				return errorf (0xa9c82426, "invalid scriptlet:  missing `#!...\\n`")
+				return Errorf (0xa9c82426, "invalid scriptlet:  missing `#!...\\n`")
 			}
 			_body = _body[_shabangLimit + 1 :]
 			_bodyOffset += 1
 		} else {
-			return errorf (0xbd838bd0, "invalid scriptlet:  missing `#!`")
+			return Errorf (0xbd838bd0, "invalid scriptlet:  missing `#!`")
 		}
 	}
 	

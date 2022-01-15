@@ -7,13 +7,15 @@ import "os"
 
 import "go.starlark.net/starlark"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
 func starlarkMain (_selfExecutable string, _arguments []string, _environment map[string]string) (*Error) {
 	
 	if len (_arguments) < 1 {
-		return errorf (0xd776bfb0, "invalid arguments")
+		return Errorf (0xd776bfb0, "invalid arguments")
 	}
 	
 	var _sourcePath = _arguments[0]
@@ -50,7 +52,7 @@ func starlarkMain (_selfExecutable string, _arguments []string, _environment map
 func executeStarlark (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (*Error) {
 	
 	if _scriptlet.Interpreter != "<starlark>" {
-		return errorf (0x8044a656, "invalid interpreter")
+		return Errorf (0x8044a656, "invalid interpreter")
 	}
 	
 	_libraryUrl := _library.Url ()
@@ -92,7 +94,7 @@ func executeStarlark_0 (
 	_thread := & starlark.Thread {
 			Name : "scriptlet",
 			Print : func (_thread *starlark.Thread, _message string) () {
-					logf ('>', 0x98499c0a, "%s", _message)
+					Logf ('>', 0x98499c0a, "%s", _message)
 				},
 			Load : nil,
 		}
@@ -100,7 +102,7 @@ func executeStarlark_0 (
 	_builtins := starlark.StringDict {}
 	
 	if _, _error := starlark.ExecFile (_thread, "<scriptlet>", _source, _builtins); _error != nil {
-		return errorw (0x4027d940, _error)
+		return Errorw (0x4027d940, _error)
 	}
 	
 	return nil

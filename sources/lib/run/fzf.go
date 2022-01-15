@@ -6,10 +6,11 @@ package zrun
 import "os"
 import "unsafe"
 
-
 import fzf "github.com/junegunn/fzf/src"
 import fzf_tui "github.com/junegunn/fzf/src/tui"
 import isatty "github.com/mattn/go-isatty"
+
+import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
@@ -19,7 +20,7 @@ func fzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 	
 	if _embedded {
 		if len (_arguments) != 0 {
-			return errorf (0x68f8e127, "invalid arguments")
+			return Errorf (0x68f8e127, "invalid arguments")
 		}
 	}
 	
@@ -43,13 +44,13 @@ func fzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 	
 	if !_dryrun {
 		if isatty.IsTerminal (os.Stdin.Fd ()) {
-			return errorf (0x34efe59c, "stdin is a TTY")
+			return Errorf (0x34efe59c, "stdin is a TTY")
 		}
 		if isatty.IsTerminal (os.Stdout.Fd ()) {
-			return errorf (0xf12b8d81, "stdout is a TTY")
+			return Errorf (0xf12b8d81, "stdout is a TTY")
 		}
 		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
-			return errorf (0x55a1298a, "stderr is not a TTY")
+			return Errorf (0x55a1298a, "stderr is not a TTY")
 		}
 	}
 	

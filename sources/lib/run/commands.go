@@ -16,6 +16,8 @@ import "strings"
 
 import isatty "github.com/mattn/go-isatty"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -29,7 +31,7 @@ func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context
 		if _, _error := _stream.Write (_buffer.Bytes ()) ; _error == nil {
 			return nil
 		} else {
-			return errorw (0x1215e523, _error)
+			return Errorw (0x1215e523, _error)
 		}
 	} else {
 		return _error
@@ -42,7 +44,7 @@ func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context
 func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Context) (*Error) {
 	_library, _ok := _library.(*Library)
 	if !_ok {
-		return errorf (0x4f480517, "only works with in-memory library store")
+		return Errorf (0x4f480517, "only works with in-memory library store")
 	}
 	_encoder := json.NewEncoder (_stream)
 	_encoder.SetIndent ("", "    ")
@@ -50,7 +52,7 @@ func doExportLibraryJson (_library LibraryStore, _stream io.Writer, _context *Co
 	if _error := _encoder.Encode (_library); _error == nil {
 		return nil
 	} else {
-		return errorw (0xb3a1eb99, _error)
+		return Errorw (0xb3a1eb99, _error)
 	}
 }
 
@@ -121,7 +123,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 		
 		if _meta, _error := _library.ResolveMetaByFingerprint (_fingerprintFromStore); _error == nil {
 			if _meta == nil {
-				return errorf (0x20bc9d40, "invalid store")
+				return Errorf (0x20bc9d40, "invalid store")
 			}
 			_fingerprint := _meta.Fingerprint
 			_label := _meta.Label
@@ -150,7 +152,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 		
 		if _body, _found, _error := _library.ResolveBodyByFingerprint (_fingerprintFromStore); _error == nil {
 			if !_found {
-				return errorf (0xd80a265e, "invalid store")
+				return Errorf (0xd80a265e, "invalid store")
 			}
 			if _error := _store.IncludeRawString (_libraryFingerprint, true, "scriptlets-body", _fingerprintFromStore, _body); _error != nil {
 				return _error
@@ -187,7 +189,7 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 					return _error
 				}
 			} else {
-				return errorf (0x7c9d40d9, "invalid store")
+				return Errorf (0x7c9d40d9, "invalid store")
 			}
 		} else {
 			return _error
@@ -237,7 +239,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	_sshToken := _sshContext.token
 	
 	if _sshTarget == "" {
-		return false, errorf (0xa552d948, "invalid target:  missing")
+		return false, Errorf (0xa552d948, "invalid target:  missing")
 	}
 	
 	if _sshToken == "" {
@@ -257,10 +259,10 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		_sshDelegate = "z-run"
 	}
 	if fmt.Sprintf ("%+q", _sshDelegate) != ("\"" + _sshDelegate + "\"") {
-		return false, errorf (0x230a2fc4, "invalid delegate:  non ASCII")
+		return false, Errorf (0x230a2fc4, "invalid delegate:  non ASCII")
 	}
 	if strings.ContainsAny (_sshDelegate, " !\"#$%&'()*+,:;<=>?@[\\]^`{|}~") {
-		return false, errorf (0x1e5c7a40, "invalid delegate:  contains disallowed special character")
+		return false, Errorf (0x1e5c7a40, "invalid delegate:  contains disallowed special character")
 	}
 	
 	var _invokeEnvironment map[string]string
@@ -338,7 +340,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	if _data, _error := json.Marshal (_invokeContext); _error == nil {
 		_invokeContextEncoded = base64.RawURLEncoding.EncodeToString (_data)
 	} else {
-		return false, errorw (0x5bbc9bcc, _error)
+		return false, Errorw (0x5bbc9bcc, _error)
 	}
 	
 	_sshArguments := make ([]string, 0, 16)
@@ -352,7 +354,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		if !_stdinIsTty || !_stdoutIsTty || !_stderrIsTty {
 			// NOP
 		} else if _stdinIsTty && _stdoutIsTty && _stderrIsTty {
-//			logf ('d', 0x93bc5a69, "SSH with TTY allowed;")
+//			Logf ('d', 0x93bc5a69, "SSH with TTY allowed;")
 			_sshArguments = append (_sshArguments, "-t")
 		}
 	}
@@ -373,7 +375,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 		}
 	
 	if _error := _sshCommand.Run (); _error != nil {
-		return false, errorf (0x881a60b5, "failed to spawn `%s`  //  %v", _sshCommand.Path, _error)
+		return false, Errorf (0x881a60b5, "failed to spawn `%s`  //  %v", _sshCommand.Path, _error)
 	}
 	
 	return true, nil
@@ -395,7 +397,7 @@ func doHandleExportScriptletLabel (_library LibraryStore, _scriptlet *Scriptlet,
 	if _, _error := fmt.Fprintf (_stream, "%s\n", _scriptlet.Label); _error == nil {
 		return true, nil
 	} else {
-		return false, errorw (0x75e2481b, _error)
+		return false, Errorw (0x75e2481b, _error)
 	}
 }
 
@@ -406,10 +408,10 @@ func doHandleExportScriptletBody (_library LibraryStore, _scriptlet *Scriptlet, 
 			if _, _error := io.WriteString (_stream, _body); _error == nil {
 				return true, nil
 			} else {
-				return false, errorw (0x313551b7, _error)
+				return false, Errorw (0x313551b7, _error)
 			}
 		} else {
-			return false, errorf (0x95e0b174, "undefined scriptlet body `%s`", _scriptlet.Label)
+			return false, Errorf (0x95e0b174, "undefined scriptlet body `%s`", _scriptlet.Label)
 		}
 	} else {
 		return false, _error
@@ -421,7 +423,7 @@ func doHandleExportScriptletLegacy (_library LibraryStore, _scriptlet *Scriptlet
 	if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error == nil {
 		return true, nil
 	} else {
-		return false, errorw (0x1827808c, _error)
+		return false, Errorw (0x1827808c, _error)
 	}
 }
 
@@ -438,13 +440,13 @@ func doHandleWithLabel (_library LibraryStore, _label string, _handler doHandler
 				if _handled {
 					return nil
 				} else {
-					return errorf (0x832d3041, "unhandled scriptlet `%s`", _label)
+					return Errorf (0x832d3041, "unhandled scriptlet `%s`", _label)
 				}
 			} else {
 				return _error
 			}
 		} else {
-			return errorf (0x3be6dcd7, "unknown scriptlet for `%s`", _label)
+			return Errorf (0x3be6dcd7, "unknown scriptlet for `%s`", _label)
 		}
 	} else {
 		return _error
@@ -464,14 +466,14 @@ func doSelectHandleWithLabel (_library LibraryStore, _label string, _handler doH
 			if _handled {
 				return nil
 			} else {
-//				return errorf (0xb78ed426, "unhandled scriptlet `%s`", _label)
+//				return Errorf (0xb78ed426, "unhandled scriptlet `%s`", _label)
 				return nil
 			}
 		} else {
 			return _error
 		}
 	} else {
-		return errorf (0xab61361e, "invalid label")
+		return Errorf (0xab61361e, "invalid label")
 	}
 }
 
@@ -554,7 +556,7 @@ func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler,
 							return false, _error
 						}
 					} else {
-						return false, errorf (0xc8e9bf9b, "invalid output")
+						return false, Errorf (0xc8e9bf9b, "invalid output")
 					}
 				}
 			} else {
@@ -562,14 +564,14 @@ func doSelectHandle_2 (_library LibraryStore, _label string, _handler doHandler,
 					if _handled {
 						return true, nil
 					} else {
-						return false, errorf (0x4be0f083, "unhandled scriptlet `%s`", _label)
+						return false, Errorf (0x4be0f083, "unhandled scriptlet `%s`", _label)
 					}
 				} else {
 					return false, _error
 				}
 			}
 		} else {
-			return false, errorf (0x76c06125, "unknown scriptlet for `%s`", _label)
+			return false, Errorf (0x76c06125, "unknown scriptlet for `%s`", _label)
 		}
 	} else {
 		return false, _error
@@ -594,7 +596,7 @@ func doSelectScriptlet (_library LibraryStore, _label string, _context *Context)
 		if _scriptlet != nil {
 			return _scriptlet, nil
 		} else {
-			return nil, errorf (0x06ef8e1d, "unknown scriptlet for `%s`", _label)
+			return nil, Errorf (0x06ef8e1d, "unknown scriptlet for `%s`", _label)
 		}
 	} else {
 		return nil, _error
@@ -605,7 +607,7 @@ func doSelectLabel (_library LibraryStore, _stream io.Writer, _context *Context)
 	if _label, _error := doSelectLabel_0 (_library, _context); _error == nil {
 		if _label != "" {
 			if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
-				return errorw (0x0b7f5d09, _error)
+				return Errorw (0x0b7f5d09, _error)
 			}
 		} else {
 			return nil
@@ -621,7 +623,7 @@ func doSelectLabels (_library LibraryStore, _stream io.Writer, _context *Context
 		if len (_labels) != 0 {
 			for _, _label := range _labels {
 				if _, _error := fmt.Fprintf (_stream, "%s\n", _label); _error != nil {
-					return errorw (0x7f0c1122, _error)
+					return Errorw (0x7f0c1122, _error)
 				}
 			}
 		} else {
@@ -643,7 +645,7 @@ func doSelectLabel_0 (_library LibraryStore, _context *Context) (string, *Error)
 		} else if len (_labels) == 1 {
 			return _labels[0], nil
 		} else {
-			return "", errorf (0xa11d1022, "no scriptlet selected")
+			return "", Errorf (0xa11d1022, "no scriptlet selected")
 		}
 	} else {
 		return "", _error
@@ -657,7 +659,7 @@ func doSelectLabel_1 (_inputs []string, _context *Context) (string, *Error) {
 		} else if len (_labels) == 1 {
 			return _labels[0], nil
 		} else {
-			return "", errorf (0xb7ae6203, "no scriptlet selected")
+			return "", Errorf (0xb7ae6203, "no scriptlet selected")
 		}
 	} else {
 		return "", _error

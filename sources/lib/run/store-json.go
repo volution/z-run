@@ -6,6 +6,8 @@ package zrun
 import "encoding/json"
 import "io"
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
 
 
 
@@ -49,7 +51,7 @@ func (_store *JsonStreamStoreOutput) IncludeObject (_instance string, _global bo
 	if _error := _store.encoder.Encode (_record); _error == nil {
 		return nil
 	} else {
-		return errorw (0x5435f95a, _error)
+		return Errorw (0x5435f95a, _error)
 	}
 }
 
@@ -58,14 +60,14 @@ func (_store *JsonStreamStoreOutput) IncludeRawString (_instance string, _global
 }
 
 func (_store *JsonStreamStoreOutput) IncludeRawBytes (_instance string, _global bool, _namespace string, _key string, _value []byte) (*Error) {
-	return errorf (0x42df6824, "JSON store does not support raw bytes")
+	return Errorf (0x42df6824, "JSON store does not support raw bytes")
 }
 
 func (_store *JsonStreamStoreOutput) Commit () (*Error) {
 	var _error *Error
 	if _store.closer != nil {
 		if _error_0 := _store.closer.Close (); _error_0 != nil {
-			_error = errorw (0x9f5565fc, _error_0)
+			_error = Errorw (0x9f5565fc, _error_0)
 		}
 	}
 	_store.stream = nil

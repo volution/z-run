@@ -3,6 +3,9 @@
 package zrun
 
 
+import . "github.com/cipriancraciun/z-run/lib/common"
+
+
 
 
 type LibraryStore interface {
@@ -58,7 +61,7 @@ func (_library *LibraryStoreInput) SelectFingerprints () ([]string, *Error) {
 		if _found {
 			return _value, nil
 		} else {
-			return nil, errorf (0x7f976073, "invalid store")
+			return nil, Errorf (0x7f976073, "invalid store")
 		}
 	} else {
 		return nil, _error
@@ -71,7 +74,7 @@ func (_library *LibraryStoreInput) SelectLabels () ([]string, *Error) {
 		if _found {
 			return _value, nil
 		} else {
-			return nil, errorf (0x64c3a996, "invalid store")
+			return nil, Errorf (0x64c3a996, "invalid store")
 		}
 	} else {
 		return nil, _error
@@ -84,7 +87,7 @@ func (_library *LibraryStoreInput) SelectLabelsAll () ([]string, *Error) {
 		if _found {
 			return _value, nil
 		} else {
-			return nil, errorf (0x4d9d3702, "invalid store")
+			return nil, Errorf (0x4d9d3702, "invalid store")
 		}
 	} else {
 		return nil, _error
@@ -99,7 +102,7 @@ func (_library *LibraryStoreInput) ResolveFullByFingerprint (_fingerprint string
 				if _found {
 					_scriptlet.Body = _body
 				} else {
-					return nil, errorf (0x5c4c21e2, "invalid store")
+					return nil, Errorf (0x5c4c21e2, "invalid store")
 				}
 			} else {
 				return nil, _error
@@ -109,7 +112,7 @@ func (_library *LibraryStoreInput) ResolveFullByFingerprint (_fingerprint string
 					if _found {
 						_scriptlet.Context = _context
 					} else {
-						return nil, errorf (0x656d6774, "invalid store")
+						return nil, Errorf (0x656d6774, "invalid store")
 					}
 				}
 			}
@@ -128,7 +131,7 @@ func (_library *LibraryStoreInput) ResolveMetaByFingerprint (_fingerprint string
 		if _found {
 			return _value, nil
 		} else {
-			return nil, errorf (0x008e4a04, "invalid store")
+			return nil, Errorf (0x008e4a04, "invalid store")
 		}
 	} else {
 		return nil, _error
@@ -140,7 +143,7 @@ func (_library *LibraryStoreInput) ResolveBodyByFingerprint (_fingerprint string
 		if _found {
 			return _value, _found, nil
 		} else {
-			return "", false, errorf (0x4fd14583, "invalid store")
+			return "", false, Errorf (0x4fd14583, "invalid store")
 		}
 	} else {
 		return "", false, _error
@@ -216,7 +219,7 @@ func (_library *LibraryStoreInput) SelectLibrarySources () (LibrarySources, *Err
 		if _found {
 			return _value, nil
 		} else {
-			return nil, errorf (0x2986327f, "invalid store")
+			return nil, Errorf (0x2986327f, "invalid store")
 		}
 	} else {
 		return nil, _error
@@ -229,7 +232,7 @@ func (_library *LibraryStoreInput) SelectLibraryContext () (*LibraryContext, *Er
 		if _found {
 			return _value, nil
 		} else {
-			return nil, errorf (0x2986327f, "9ddd4b2a store")
+			return nil, Errorf (0x2986327f, "9ddd4b2a store")
 		}
 	} else {
 		return nil, _error
@@ -241,7 +244,7 @@ func (_library *LibraryStoreInput) Identifier () (string, *Error) {
 		if _found {
 			return _value, nil
 		} else {
-			return "", errorf (0x1b88b9d5, "invalid store")
+			return "", Errorf (0x1b88b9d5, "invalid store")
 		}
 	} else {
 		return "", _error
@@ -253,7 +256,7 @@ func (_library *LibraryStoreInput) Fingerprint () (string, *Error) {
 		if _found {
 			return _value, nil
 		} else {
-			return "", errorf (0x1b88b9d5, "invalid store")
+			return "", Errorf (0x1b88b9d5, "invalid store")
 		}
 	} else {
 		return "", _error
