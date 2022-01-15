@@ -3,7 +3,7 @@
 package main
 
 
-import . "github.com/cipriancraciun/z-run/lib"
+import . "github.com/cipriancraciun/z-run/lib/run"
 
 
 
