@@ -8,7 +8,6 @@ import "unsafe"
 
 import fzf "github.com/junegunn/fzf/src"
 import fzf_tui "github.com/junegunn/fzf/src/tui"
-import isatty "github.com/mattn/go-isatty"
 
 import . "github.com/cipriancraciun/z-run/lib/common"
 
@@ -43,13 +42,13 @@ func FzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 	
 	
 	if !_dryrun {
-		if isatty.IsTerminal (os.Stdin.Fd ()) {
+		if IsStdinTerminal () {
 			return Errorf (0x34efe59c, "stdin is a TTY")
 		}
-		if isatty.IsTerminal (os.Stdout.Fd ()) {
+		if IsStdoutTerminal () {
 			return Errorf (0xf12b8d81, "stdout is a TTY")
 		}
-		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+		if ! IsStderrTerminal () {
 			return Errorf (0x55a1298a, "stderr is not a TTY")
 		}
 	}

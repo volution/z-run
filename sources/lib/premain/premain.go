@@ -69,7 +69,7 @@ func Main (_context *MainContext) (*Error) {
 		
 		if (_argument == "--shell") || (_argument == "--shell-untainted") {
 			
-			if _error := CheckMainTerminal (); _error != nil {
+			if _error := CheckStdioTerminal (); _error != nil {
 				Logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
 				panic (ExitMainFailed ())
 			}

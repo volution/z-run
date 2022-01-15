@@ -14,8 +14,6 @@ import "path"
 import "sort"
 import "strings"
 
-import isatty "github.com/mattn/go-isatty"
-
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -348,9 +346,9 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	if _sshTerminal == "" {
 		_sshArguments = append (_sshArguments, "-T")
 	} else {
-		_stdinIsTty := isatty.IsTerminal (os.Stdin.Fd ())
-		_stdoutIsTty := isatty.IsTerminal (os.Stdout.Fd ())
-		_stderrIsTty := isatty.IsTerminal (os.Stderr.Fd ())
+		_stdinIsTty := IsStdinTerminal ()
+		_stdoutIsTty := IsStdoutTerminal ()
+		_stderrIsTty := IsStderrTerminal ()
 		if !_stdinIsTty || !_stdoutIsTty || !_stderrIsTty {
 			// NOP
 		} else if _stdinIsTty && _stdoutIsTty && _stderrIsTty {

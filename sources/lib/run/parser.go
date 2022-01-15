@@ -16,7 +16,6 @@ import "time"
 import "unicode"
 import "unicode/utf8"
 
-import isatty "github.com/mattn/go-isatty"
 import mpb "github.com/vbauerster/mpb/v5"
 import mpb_decor "github.com/vbauerster/mpb/v5/decor"
 
@@ -69,7 +68,7 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 	var _progress_0 *mpb.Progress
 	var _progress *mpb.Bar
 	
-	if isatty.IsTerminal (os.Stderr.Fd ()) {
+	if IsStderrTerminal () {
 		_progress_0 = mpb.New (
 				mpb.WithOutput (os.Stderr),
 				mpb.WithRefreshRate (250 * time.Millisecond),

@@ -12,7 +12,6 @@ import "path/filepath"
 import "strings"
 import "sync"
 
-import isatty "github.com/mattn/go-isatty"
 import "github.com/eiannone/keyboard"
 
 import . "github.com/cipriancraciun/z-run/lib/common"
@@ -122,7 +121,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 	_hasTerminal := (_context.terminal != "") && (_context.terminal != "dumb")
 	
 	if _hasTerminal {
-		if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+		if ! IsStderrTerminal () {
 			return Errorf (0xfc026596, "stderr is not a TTY")
 		}
 	}
@@ -256,7 +255,7 @@ func menuPause (_context *Context) (bool, *Error) {
 		return false, nil
 	}
 	
-	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+	if ! IsStderrTerminal () {
 		return false, nil
 	}
 	

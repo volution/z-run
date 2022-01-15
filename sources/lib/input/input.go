@@ -10,7 +10,6 @@ import "os"
 import "syscall"
 
 import "github.com/peterh/liner"
-import isatty "github.com/mattn/go-isatty"
 
 import . "github.com/cipriancraciun/z-run/lib/common"
 
@@ -43,10 +42,10 @@ func InputMain (_arguments []string, _environment map[string]string) (*Error) {
 	}
 	
 	
-	if isatty.IsTerminal (os.Stdout.Fd ()) {
+	if IsStdoutTerminal () {
 		return Errorf (0xbddf576d, "stdout is a TTY")
 	}
-	if ! isatty.IsTerminal (os.Stderr.Fd ()) {
+	if ! IsStderrTerminal () {
 		return Errorf (0xf33f2d91, "stderr is not a TTY")
 	}
 	
