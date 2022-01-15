@@ -15,6 +15,7 @@ import "strings"
 import "text/template"
 
 import . "github.com/cipriancraciun/z-run/lib/library"
+import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -40,8 +41,7 @@ func PrintMain (_selfExecutable string, _arguments []string, _environment map[st
 		return _error
 	}
 	
-	os.Exit (0)
-	panic (0x3889ef57)
+	panic (ExitMainSucceeded ())
 }
 
 
@@ -103,8 +103,7 @@ func TemplateMain (_selfExecutable string, _arguments []string, _environment map
 		return _error
 	}
 	
-	os.Exit (0)
-	panic (0x8e448279)
+	panic (ExitMainSucceeded ())
 }
 
 

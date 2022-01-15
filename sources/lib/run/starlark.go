@@ -3,11 +3,10 @@
 package zrun
 
 
-import "os"
-
 import "go.starlark.net/starlark"
 
 import . "github.com/cipriancraciun/z-run/lib/library"
+import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -43,8 +42,7 @@ func StarlarkMain (_selfExecutable string, _arguments []string, _environment map
 		return _error
 	}
 	
-	os.Exit (0)
-	panic (0x340179ee)
+	panic (ExitMainSucceeded ())
 }
 
 

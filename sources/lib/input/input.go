@@ -11,6 +11,7 @@ import "syscall"
 
 import "github.com/peterh/liner"
 
+import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -32,7 +33,7 @@ func InputMain (_arguments []string, _environment map[string]string) (*Error) {
 	
 	if _error := _flags.Parse (_arguments); _error != nil {
 		if _error == flag.ErrHelp {
-			os.Exit (0)
+			panic (ExitMainSucceeded ())
 		} else {
 			return Errorw (0xfe27c070, _error)
 		}
@@ -94,7 +95,6 @@ func InputMain (_arguments []string, _environment map[string]string) (*Error) {
 	
 	fmt.Fprintln (_stdout, _output)
 	
-	os.Exit (0)
-	panic (0x4fd8aaa0)
+	panic (ExitMainSucceeded ())
 }
 

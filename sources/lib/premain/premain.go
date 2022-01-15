@@ -36,8 +36,6 @@ func PreMain () () {
 		}
 	
 	PreMainWith (_descriptor)
-	
-	panic (0xdc677689)
 }
 
 

@@ -17,6 +17,7 @@ import "syscall"
 import embedded "github.com/cipriancraciun/z-run/embedded"
 
 import . "github.com/cipriancraciun/z-run/lib/library"
+import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -634,8 +635,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 		case "<print>" :
 			if _error := executePrint (_library, _scriptlet, _context, os.Stdout); _error == nil {
 				if ! _fork {
-					os.Exit (0)
-					panic (0x0efeec0c)
+					panic (ExitMainSucceeded ())
 				} else {
 					return nil
 				}
@@ -645,8 +645,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 		case "<template>" :
 			if _error := executeTemplate (_library, _scriptlet, _context, os.Stdout); _error == nil {
 				if ! _fork {
-					os.Exit (0)
-					panic (0xebdf1931)
+					panic (ExitMainSucceeded ())
 				} else {
 					return nil
 				}
@@ -656,8 +655,7 @@ func executeScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _fork bool,
 		case "<starlark>" :
 			if _error := executeStarlark (_library, _scriptlet, _context); _error == nil {
 				if ! _fork {
-					os.Exit (0)
-					panic (0x44d7fe22)
+					panic (ExitMainSucceeded ())
 				} else {
 					return nil
 				}

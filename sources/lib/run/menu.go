@@ -14,6 +14,7 @@ import "sync"
 
 import "github.com/eiannone/keyboard"
 
+import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -63,8 +64,7 @@ func MenuMain (_executable string, _arguments []string, _environment map[string]
 				return Errorw (0xeb4af0b7, _error)
 			}
 		}
-		os.Exit (0)
-		panic (0x1ad77faa)
+		panic (ExitMainSucceeded ())
 	} else {
 		return _error
 	}
