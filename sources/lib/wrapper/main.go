@@ -29,10 +29,10 @@ func WrapperPreMain () () {
 			ExecutableName : "z-run",
 			ExecutableEnvironmentHint : "ZRUN_EXECUTABLE",
 			
-			HelpTxt : ManualTxt,
-			ManualTxt : ManualTxt,
-			ManualHtml : ManualHtml,
-			ManualMan : ManualMan,
+			HelpTxt : ZrunHelpTxt,
+			ManualTxt : ZrunManualTxt,
+			ManualHtml : ZrunManualHtml,
+			ManualMan : ZrunManualMan,
 		}
 	
 	PreMainWith (_descriptor)

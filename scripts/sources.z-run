@@ -52,16 +52,20 @@
 	
 	test "${#}" -eq 0
 	
-	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run.txt ; then
-		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run.txt
+	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--help.txt ; then
+		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--help.txt
 	fi
 	
-	if ! cmp -s -- ./documentation/manual/z-run.1.html ./sources/embedded/manual/z-run.html ; then
-		cp -T -- ./documentation/manual/z-run.1.html ./sources/embedded/manual/z-run.html
+	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--manual.txt ; then
+		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--manual.txt
 	fi
 	
-	if ! cmp -s -- ./documentation/manual/z-run.1.man ./sources/embedded/manual/z-run.man ; then
-		cp -T -- ./documentation/manual/z-run.1.man ./sources/embedded/manual/z-run.man
+	if ! cmp -s -- ./documentation/manual/z-run.1.html ./sources/embedded/manual/z-run--manual.html ; then
+		cp -T -- ./documentation/manual/z-run.1.html ./sources/embedded/manual/z-run--manual.html
+	fi
+	
+	if ! cmp -s -- ./documentation/manual/z-run.1.man ./sources/embedded/manual/z-run--manual.man ; then
+		cp -T -- ./documentation/manual/z-run.1.man ./sources/embedded/manual/z-run--manual.man
 	fi
 !!
 
