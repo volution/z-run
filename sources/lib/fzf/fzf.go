@@ -30,9 +30,7 @@ func FzfMain (_embedded bool, _fullscreen bool, _arguments []string, _environmen
 					_arguments = []string {"--help"}
 					break
 				case "-v", "-version", "--version" :
-					_dryrun = true
-					_arguments = []string {"--version"}
-					break
+					return Errorf (0xbf8543cb, "invalid arguments")
 			}
 		}
 	}
