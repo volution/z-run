@@ -21,10 +21,11 @@ type InputMainFlags struct {
 	
 	Message *string `long:"message" short:"m" value-name:"{message}" description:"message to be displayed before the prompt line;"`
 	Prompt *string `long:"prompt" short:"p" value-name:"{prompt}" description:"message to de displayed on the prompt line, before the input; \n if spaces are desired between the message and the input, then include them in the message itself;"`
+	Default *string `long:"default" short:"d" value-name:"{default}" description:"contents to be used as the default input;  (not allowed with sensitive or confirm;)"`
 	
 	Sensitive *bool `long:"sensitive" short:"s" description:"enables hiding the input;  useful for entering passwords and other sensitive information;"`
 	
-	Trim *bool `long:"trim" short:"t" description:"enables triming prefix and suffix spaces;  useful for handling copy-pasted information;"`
+	Trim *bool `long:"trim" short:"t" description:"enables triming prefix and suffix spaces from the input;  useful for handling copy-pasted information;"`
 	NotEmpty *bool `long:"not-empty" short:"n" description:"enables checking if the input is not empty, else the tool exits with an error;"`
 	
 	Retries *uint16 `long:"retry" short:"r" value-name:"{retries}" description:"enables retrying the input, in case of not-empty or confirm modes;"`
@@ -51,6 +52,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	_message := FlagStringOrDefault (_flags.Message, "")
 	_prompt := FlagStringOrDefault (_flags.Prompt, ">> ")
+	_default := FlagStringOrDefault (_flags.Default, "")
 	_sensitive := FlagBoolOrDefault (_flags.Sensitive, false)
 	_trim := FlagBoolOrDefault (_flags.Trim, false)
 	_notEmpty := FlagBoolOrDefault (_flags.NotEmpty, false)
@@ -85,7 +87,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 		if _loop > 1 {
 			_prompt_0 = fmt.Sprintf ("[%d] %s", _loop - 1, _prompt)
 		}
-		_output_0, _canceled, _error := input (_prompt_0, _sensitive, _trim)
+		_output_0, _canceled, _error := input (_prompt_0, _default, _sensitive, _trim)
 		if _canceled {
 			panic (ExitMainFailed ())
 		}
@@ -111,7 +113,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 
 
 
-func input (_prompt string, _sensitive bool, _trim bool) (string, bool, *Error) {
+func input (_prompt string, _default string, _sensitive bool, _trim bool) (string, bool, *Error) {
 	
 	var _output string
 	var _error error
@@ -122,7 +124,11 @@ func input (_prompt string, _sensitive bool, _trim bool) (string, bool, *Error) 
 	if _sensitive {
 		_output, _error = _liner.PasswordPrompt (_prompt)
 	} else {
-		_output, _error = _liner.Prompt (_prompt)
+		if _default != "" {
+			_output, _error = _liner.PromptWithSuggestion (_prompt, _default, -1)
+		} else {
+			_output, _error = _liner.Prompt (_prompt)
+		}
 	}
 	_liner.Close ()
 	
