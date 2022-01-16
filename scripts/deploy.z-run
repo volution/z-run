@@ -14,13 +14,14 @@
 :: deploy / rsync / openbsd :: exec -- "${ZRUN[@]}" ':: deploy / rsync' openbsd "${@}"
 
 --<< deploy / rsync
-	test "${#}" -eq 2
+	test "${#}" -eq 3
 	_os="${1}"
-	_target="${2}"
-	shift -- 2
-	"${ZRUN[@]}" ':: deploy / release' "${_os}"
-	_source="./.outputs/main--release--${_os}"
-	printf -- '[ii]  deploying (`%s`) to `%s`...\n' "${_os}" "${_target}" >&2
+	_main="${2}"
+	_target="${3}"
+	shift -- 3
+	"${ZRUN[@]}" ':: deploy / release' "${_os}" "${_main}"
+	_source="./.outputs/${_main}--release--${_os}"
+	printf -- '[ii]  deploying `%s` for `%s` to `%s`...\n' "${_main}" "${_os}" "${_target}" >&2
 	exec -- rsync -i -t -p --chmod=0555 -- "${_source}" "${_target}"
 !!
 
@@ -34,24 +35,26 @@
 	_build_version="$( exec -- cat -- ./sources/embedded/build/version.txt )"
 	printf -- '[ii]  publishing `%s`...\n' "${_build_version}" >&2
 	for _os in linux darwin freebsd openbsd ; do
-		if test -e "./.publish/${_os}/z-run--${_os}--v${_build_version}" -a "${_build_version}" != 0.0.0 ; then
-			printf -- '[ee]  release already exists for `%s`!\n' "${_os}" >&2
-			continue
-		fi
-		rsync -i -t -p --chmod=0555 -- \
-				"./.outputs/main--release--${_os}" \
-				"./.publish/${_os}/z-run--${_os}--v${_build_version}" \
-		#
-		gpg2 --sign --detach-sign --armor \
-				--default-key 58FC2194FCC2478399CB220C5A974037A6FD8839 \
-				--output "./.publish/${_os}/z-run--${_os}--v${_build_version}.asc" \
-				-- "./.publish/${_os}/z-run--${_os}--v${_build_version}" \
-		#
-		gpg2 --verify \
-				-- "./.publish/${_os}/z-run--${_os}--v${_build_version}.asc" \
-		#
-		ln -s -T -f -- "./z-run--${_os}--v${_build_version}" "./.publish/${_os}/z-run"
-		ln -s -T -f -- "./z-run--${_os}--v${_build_version}.asc" "./.publish/${_os}/z-run.asc"
+		for _main in z-run z-input z-select z-fzf ; do
+			if test -e "./.publish/${_os}/${_main}--${_os}--v${_build_version}" -a "${_build_version}" != 0.0.0 ; then
+				printf -- '[ee]  release already exists for `%s` for `%s`!\n' "${_main}" "${_os}" >&2
+				continue
+			fi
+			rsync -i -t -p --chmod=0555 -- \
+					"./.outputs/${_main}--release--${_os}" \
+					"./.publish/${_os}/${_main}--${_os}--v${_build_version}" \
+			#
+			gpg2 --sign --detach-sign --armor \
+					--default-key 58FC2194FCC2478399CB220C5A974037A6FD8839 \
+					--output "./.publish/${_os}/${_main}--${_os}--v${_build_version}.asc" \
+					-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}" \
+			#
+			gpg2 --verify \
+					-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}.asc" \
+			#
+			ln -s -T -f -- "./${_main}--${_os}--v${_build_version}" "./.publish/${_os}/${_main}"
+			ln -s -T -f -- "./${_main}--${_os}--v${_build_version}.asc" "./.publish/${_os}/${_main}.asc"
+		done
 	done
 !!
 
@@ -65,28 +68,39 @@
 	else
 		_os='all'
 	fi
+	if test "${#}" -ge 1 ; then
+		_main="${1}"
+		shift -- 1
+	else
+		_main=all
+	fi
 	test "${#}" -eq 0
 	if test "${__DEPLOY_NORELEASE:-}" == true ; then
 		exit -- 0
 	fi
-	case "${_os}" in
-		( all | linux )
-			"${ZRUN[@]}" ':: go / build / main / release / linux'
-		;;&
-		( all | darwin )
-			"${ZRUN[@]}" ':: go / build / main / release / darwin'
-		;;&
-		( all | freebsd )
-			"${ZRUN[@]}" ':: go / build / main / release / freebsd'
-		;;&
-		( all | openbsd )
-			"${ZRUN[@]}" ':: go / build / main / release / openbsd'
-		;;&
-		( all | linux | darwin | freebsd | openbsd )
-		;;
-		( * )
-			printf -- '[ee]  invalid os `%s`;  aborting!\n' "${_os}" >&2
-		;;
-	esac
+	for _main_0 in z-run z-input z-select z-fzf ; do
+		if test "${_main}" != all -a "${_main}" != "${_main_0}" ; then
+			continue
+		fi
+		case "${_os}" in
+			( all | linux )
+				"${ZRUN[@]}" ':: go / build / * / release / linux' "${_main_0}"
+			;;&
+			( all | darwin )
+				"${ZRUN[@]}" ':: go / build / * / release / darwin' "${_main_0}"
+			;;&
+			( all | freebsd )
+				"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${_main_0}"
+			;;&
+			( all | openbsd )
+				"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${_main_0}"
+			;;&
+			( all | linux | darwin | freebsd | openbsd )
+			;;
+			( * )
+				printf -- '[ee]  invalid os `%s`;  aborting!\n' "${_os}" >&2
+			;;
+		esac
+	done
 !!
 

@@ -8,32 +8,18 @@
 
 
 
-:: watch / go / build / main / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / build / main / debug' "${@}"
+:: watch / go / build / * / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / build / * / debug' "${@}"
 
 
 
 
-<< go / execute / main / debug
+<< go / execute / * / debug
 	
-	"${ZRUN[@]}" ':: go / build / main / debug'
+	test "${#}" -ge 1
+	_main="${1}"
+	shift -- 1
 	
-	export -n -- \
-			ZRUN_LIBRARY_SOURCE= \
-			ZRUN_LIBRARY_URL= \
-			ZRUN_LIBRARY_IDENTIFIER= \
-			ZRUN_LIBRARY_FINGERPRINT= \
-			ZRUN_EXECUTABLE= \
-			ZRUN_WORKSPACE= \
-			ZRUN_CACHE= \
-	#
-	
-	exec -- ./.outputs/main--debug "${@}"
-!!
-
-
-<< go / execute / main / release
-	
-	"${ZRUN[@]}" ':: go / build / main / release'
+	"${ZRUN[@]}" ':: go / build / * / debug' "${_main}"
 	
 	export -n -- \
 			ZRUN_LIBRARY_SOURCE= \
@@ -45,13 +31,39 @@
 			ZRUN_CACHE= \
 	#
 	
-	exec -- ./.outputs/main--release "${@}"
+	exec -- "./.outputs/${_main}--debug" "${@}"
+!!
+
+
+<< go / execute / * / release
+	
+	test "${#}" -ge 1
+	_main="${1}"
+	shift -- 1
+	
+	"${ZRUN[@]}" ':: go / build / * / release' "${_main}"
+	
+	export -n -- \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_URL= \
+			ZRUN_LIBRARY_IDENTIFIER= \
+			ZRUN_LIBRARY_FINGERPRINT= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
+			ZRUN_CACHE= \
+	#
+	
+	exec -- "./.outputs/${_main}--release" "${@}"
 !!
 
 
 
 
-<< go / build / main / debug
+<< go / build / * / debug
+	
+	test "${#}" -ge 1
+	_main="${1}"
+	shift -- 1
 	
 	test "${#}" -eq 0
 	
@@ -82,19 +94,23 @@
 		nice -n 19 -- \
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
-			-o "${_outputs}/main--debug" \
+			-o "${_outputs}/${_main}--debug" \
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
 			-- \
-			./cmd/main.go \
+			"./cmd/${_main}.go" \
 	#
 !!
 
 
 
 
-<< go / build / main / release
+<< go / build / * / release
+	
+	test "${#}" -ge 1
+	_main="${1}"
+	shift -- 1
 	
 	test "${#}" -eq 0
 	
@@ -125,16 +141,16 @@
 		_suffix=''
 	fi
 	
-	printf -- '[ii]  building release for `%s`...\n' "${GOOS:-native}" >&2
+	printf -- '[ii]  building `%s` release for `%s`...\n' "${_main}" "${GOOS:-native}" >&2
 	
-	if test -f "${_outputs}/main--release${_suffix}" ; then
-		mv -T -- "${_outputs}/main--release${_suffix}" "${_outputs}/main--release${_suffix}.old"
+	if test -f "${_outputs}/${_main}--release${_suffix}" ; then
+		mv -T -- "${_outputs}/${_main}--release${_suffix}" "${_outputs}/${_main}--release${_suffix}.old"
 	fi
 	
 	nice -n 19 -- \
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
-			-o "${_outputs}/main--release${_suffix}.new" \
+			-o "${_outputs}/${_main}--release${_suffix}.new" \
 			-a \
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
@@ -142,47 +158,47 @@
 			-buildmode exe \
 			-trimpath \
 			-- \
-			./cmd/main.go \
+			"./cmd/${_main}.go" \
 	#
 	
-	if test ! -e "${_outputs}/main--release${_suffix}.old" ; then
-		mv -T -- "${_outputs}/main--release${_suffix}.new" "${_outputs}/main--release${_suffix}"
-	elif ! cmp -s -- "${_outputs}/main--release${_suffix}.new" "${_outputs}/main--release${_suffix}.old" ; then
-		mv -T -- "${_outputs}/main--release${_suffix}.new" "${_outputs}/main--release${_suffix}"
+	if test ! -e "${_outputs}/${_main}--release${_suffix}.old" ; then
+		mv -T -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}"
+	elif ! cmp -s -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}.old" ; then
+		mv -T -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}"
 	else
-		mv -T -- "${_outputs}/main--release${_suffix}.old" "${_outputs}/main--release${_suffix}"
-		rm -- "${_outputs}/main--release${_suffix}.new"
+		mv -T -- "${_outputs}/${_main}--release${_suffix}.old" "${_outputs}/${_main}--release${_suffix}"
+		rm -- "${_outputs}/${_main}--release${_suffix}.new"
 	fi
 !!
 
 
 
 
-<< go / build / main / release / all
-	"${ZRUN[@]}" ':: go / build / main / release / linux' "${@}"
-	"${ZRUN[@]}" ':: go / build / main / release / darwin' "${@}"
-	"${ZRUN[@]}" ':: go / build / main / release / freebsd' "${@}"
-	"${ZRUN[@]}" ':: go / build / main / release / openbsd' "${@}"
+<< go / build / * / release / all
+	"${ZRUN[@]}" ':: go / build / * / release / linux' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / darwin' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${@}"
 !!
 
-<< go / build / main / release / linux
+<< go / build / * / release / linux
 	export -- GOOS=linux
-	exec -- "${ZRUN[@]}" ':: go / build / main / release' "${@}"
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
-<< go / build / main / release / darwin
+<< go / build / * / release / darwin
 	export -- GOOS=darwin
-	exec -- "${ZRUN[@]}" ':: go / build / main / release' "${@}"
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
-<< go / build / main / release / freebsd
+<< go / build / * / release / freebsd
 	export -- GOOS=freebsd
-	exec -- "${ZRUN[@]}" ':: go / build / main / release' "${@}"
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
-<< go / build / main / release / openbsd
+<< go / build / * / release / openbsd
 	export -- GOOS=openbsd
-	exec -- "${ZRUN[@]}" ':: go / build / main / release' "${@}"
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
 
