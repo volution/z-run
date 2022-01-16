@@ -1,6 +1,6 @@
 
 
-package premain
+package wrapper
 
 
 import "fmt"
@@ -22,11 +22,11 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func PreMain () () {
+func WrapperPreMain () () {
 	
 	_descriptor := & MainDescriptor {
 			
-			Main : Main,
+			Main : WrapperMain,
 			ExecutableName : "z-run",
 			ExecutableEnvironmentHint : "ZRUN_EXECUTABLE",
 			
@@ -42,7 +42,7 @@ func PreMain () () {
 
 
 
-func Main (_context *MainContext) (*Error) {
+func WrapperMain (_context *MainContext) (*Error) {
 	
 	
 	

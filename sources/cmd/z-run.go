@@ -3,12 +3,12 @@
 package main
 
 
-import . "github.com/cipriancraciun/z-run/lib/premain"
+import . "github.com/cipriancraciun/z-run/lib/wrapper"
 
 
 
 
 func main () () {
-	PreMain ()
+	WrapperPreMain ()
 }
 
