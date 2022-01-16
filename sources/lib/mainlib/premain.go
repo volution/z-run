@@ -46,6 +46,8 @@ func PreMainWith (_descriptor *MainDescriptor) () {
 		panic (AbortError (_error))
 	}
 	
+	LogfTool = _descriptor.ExecutableName
+	
 	if _error := CleanMainEnvironment (); _error != nil {
 		panic (AbortError (_error))
 	}

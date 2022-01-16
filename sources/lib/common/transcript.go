@@ -23,9 +23,9 @@ func Logf (_slug rune, _code uint32, _format string, _arguments ... interface{})
 	_pid := os.Getpid ()
 	_message := fmt.Sprintf (_format, _arguments ...)
 	if _slug != 's' {
-		log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _code, _message)
+		log.Printf ("[%s:%08d] [%c%c] [%08x]  %s\n", LogfTool, _pid, _slug, _slug, _code, _message)
 	} else {
-		log.Printf ("[z-run]  %s\n", _message)
+		log.Printf ("[%s]  %s\n", LogfTool, _message)
 	}
 }
 
@@ -40,13 +40,13 @@ func logErrorf (_slug rune, _code uint32, _error *Error, _format string, _argume
 	}
 	if _error != nil {
 		if _error.Message != "" {
-			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Message)
+			log.Printf ("[%s:%08d] [%c%c] [%08x]  %s\n", LogfTool, _pid, _slug, _slug, _error.Code, _error.Message)
 		} else {
-			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, "unexpected error encountered!")
+			log.Printf ("[%s:%08d] [%c%c] [%08x]  %s\n", LogfTool, _pid, _slug, _slug, _error.Code, "unexpected error encountered!")
 		}
 		if _error.Error != nil {
-			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %s\n", _pid, _slug, _slug, _error.Code, _error.Error.Error ())
-			log.Printf ("[z-run:%08d] [%c%c] [%08x]  %#v\n", _pid, _slug, _slug, _error.Code, _error.Error)
+			log.Printf ("[%s:%08d] [%c%c] [%08x]  %s\n", LogfTool, _pid, _slug, _slug, _error.Code, _error.Error.Error ())
+			log.Printf ("[%s:%08d] [%c%c] [%08x]  %#v\n", LogfTool, _pid, _slug, _slug, _error.Code, _error.Error)
 		}
 	}
 }
@@ -110,4 +110,7 @@ func (_error *Error) ToError () (error) {
 		return fmt.Errorf ("[%08x]  %s", _error.Code, _message)
 	}
 }
+
+
+var LogfTool string = "z-tool"
 
