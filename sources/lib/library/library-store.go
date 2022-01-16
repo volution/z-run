@@ -220,7 +220,7 @@ func (_library *LibraryStoreInput) SelectLibrarySources () (LibrarySources, *Err
 		if _found {
 			return _value, nil
 		} else {
-			return nil, Errorf (0x2986327f, "invalid store")
+			return nil, Errorf (0x43048dec, "invalid store")
 		}
 	} else {
 		return nil, _error
@@ -245,7 +245,7 @@ func (_library *LibraryStoreInput) Identifier () (string, *Error) {
 		if _found {
 			return _value, nil
 		} else {
-			return "", Errorf (0x1b88b9d5, "invalid store")
+			return "", Errorf (0x9a9bde2c, "invalid store")
 		}
 	} else {
 		return "", _error

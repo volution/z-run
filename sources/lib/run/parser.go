@@ -1067,7 +1067,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						case "environment", "env", "environment-path", "env-path", "environment-append", "env-append", "environment-path-append", "env-path-append" :
 							
 							if _descriptor == "" {
-								return Errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
+								return Errorf (0xa36b04fa, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 							}
 							_descriptor := strings.SplitN (_descriptor, " ", 2)
 							if len (_descriptor) != 2 {

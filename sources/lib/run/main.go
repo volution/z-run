@@ -266,7 +266,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 					_workspace := _argument[len ("--ssh-workspace="):]
 					_sshContext.workspace = _workspace
 				} else {
-					return Errorf (0x33555ffb, "invalid argument `%s`", _argument)
+					return Errorf (0xeed6fa17, "invalid argument `%s`", _argument)
 				}
 				
 			} else {
