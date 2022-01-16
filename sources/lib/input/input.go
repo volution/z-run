@@ -22,7 +22,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 type InputMainFlags struct {
 	
 	Message *string `long:"message" short:"m" value-name:"{message}" description:"message to be displayed on the first line, before the prompt line;"`
-	Prompt *string `long:"prompt" short:"p" value-name:"{prompt}" description:"message to de displayed on the prompt line, before the input contents; \n if spaces are desired between the message and the input, then include them in the message; \n if confirm or repeat modes are enabled then '&{EXPECTED}' is replaced by the expected input; \n if retry mode is enabled then '%{RETRY}' is replaced by the retry index;"`
+	Prompt *string `long:"prompt" short:"p" value-name:"{prompt}" description:"message to de displayed on the prompt line, before the input contents; \n if spaces are desired between the message and the input, then include them in the message; \n if confirm or repeat modes are enabled then '&{EXPECTED}' is replaced by the expected input; \n if retry mode is enabled then '&{RETRY}' is replaced by the retry index;"`
 	PromptRepeat *string `long:"prompt-repeat" short:"P" value-name:"{prompt}" description:"(see the previous option;)"`
 	
 	Default *string `long:"default" short:"d" value-name:"{default}" description:"contents to be used as the default input; \n (not allowed with sensitive, repeat or confirm modes;)"`

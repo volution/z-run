@@ -400,14 +400,14 @@ func WrapperMain (_context *MainContext) (*Error) {
 			}
 		
 		case "[z-run:select]" :
-			if _error := FzfMain (true, _arguments, _environmentMap); _error != nil {
+			if _error := FzfMain (true, false, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0x2346ca3f)
 			}
 		
 		case "[z-run:fzf]" :
-			if _error := FzfMain (false, _arguments, _environmentMap); _error != nil {
+			if _error := FzfMain (false, true, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
 				panic (0xfae3720e)
