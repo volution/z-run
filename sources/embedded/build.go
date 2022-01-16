@@ -9,17 +9,17 @@ import _ "embed"
 
 
 //go:embed build/version.txt
-var BuildVersion string
+var buildVersion string
 
 //go:embed build/number.txt
-var BuildNumber string
+var buildNumber string
 
 //go:embed build/timestamp.txt
-var BuildTimestamp string
+var buildTimestamp string
 
 
 //go:embed build/sources.hash
-var BuildSourcesHash string
+var buildSourcesHash string
 
 //go:embed build/sources.md5
 var BuildSourcesMd5 string

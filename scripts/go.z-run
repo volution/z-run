@@ -82,8 +82,8 @@
 			-l
 		)
 	_ldflags=(
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
+			-X "github.com/cipriancraciun/z-run/embedded.BUILD_TARGET=${_build_target}"
+			-X "github.com/cipriancraciun/z-run/embedded.BUILD_GIT_HASH=${_build_git_hash}"
 		)
 	
 	_tags="$( printf -- '%s,' "${_tags[@]}" )"
@@ -127,8 +127,8 @@
 	_gcflags=()
 	_ldflags=(
 			all=-s
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_TARGET=${_build_target}"
-			-X "github.com/cipriancraciun/z-run/lib.BUILD_GIT_HASH=${_build_git_hash}"
+			-X "github.com/cipriancraciun/z-run/embedded.BUILD_TARGET=${_build_target}"
+			-X "github.com/cipriancraciun/z-run/embedded.BUILD_GIT_HASH=${_build_git_hash}"
 		)
 	
 	_tags="$( printf -- '%s,' "${_tags[@]}" )"

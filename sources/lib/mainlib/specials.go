@@ -6,9 +6,8 @@ package mainlib
 import "fmt"
 import "os"
 
-import embedded "github.com/cipriancraciun/z-run/embedded"
-
 import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/cipriancraciun/z-run/embedded"
 
 
 
@@ -40,14 +39,14 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 		}
 		
 		if _argument == "--sources-md5" {
-			if _, _error := os.Stdout.WriteString (embedded.BuildSourcesMd5); _error != nil {
+			if _, _error := os.Stdout.WriteString (BuildSourcesMd5); _error != nil {
 				panic (AbortError (Errorw (0x7471032d, _error)))
 			}
 			panic (ExitMainSucceeded ())
 		}
 		
 		if _argument == "--sources-cpio" {
-			if _, _error := os.Stdout.Write (embedded.BuildSourcesCpioGz); _error != nil {
+			if _, _error := os.Stdout.Write (BuildSourcesCpioGz); _error != nil {
 				panic (AbortError (Errorw (0x8034bf3e, _error)))
 			}
 			panic (ExitMainSucceeded ())

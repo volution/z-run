@@ -14,11 +14,10 @@ import "strings"
 import "strconv"
 import "syscall"
 
-import embedded "github.com/cipriancraciun/z-run/embedded"
-
 import . "github.com/cipriancraciun/z-run/lib/library"
 import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/cipriancraciun/z-run/embedded"
 
 
 
@@ -202,11 +201,11 @@ func prepareExecution_0 (
 	_interpreterPrologOverhead := 0
 	switch _interpreter {
 		case "<bash>" :
-			_interpreterPrologOverhead = len (embedded.BashProlog0) + 128
+			_interpreterPrologOverhead = len (BashProlog0) + 128
 		case "<bash+>" :
-			_interpreterPrologOverhead = len (embedded.BashProlog) + 128
+			_interpreterPrologOverhead = len (BashProlog) + 128
 		case "<python3+>" :
-			_interpreterPrologOverhead = len (embedded.Python3Prolog) + 2048
+			_interpreterPrologOverhead = len (Python3Prolog) + 2048
 	}
 	
 	if _interpreterScriptInput_0, _interpreterScriptOutput_0, _error := CreatePipe (len (_scriptletBody) + _interpreterPrologOverhead, _contextCacheRoot); _error == nil {
@@ -246,7 +245,7 @@ func prepareExecution_0 (
 					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
-			_interpreterScriptBuffer.WriteString (embedded.BashProlog0)
+			_interpreterScriptBuffer.WriteString (BashProlog0)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
@@ -261,7 +260,7 @@ func prepareExecution_0 (
 					_interpreterArguments,
 					fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 				)
-			_interpreterScriptBuffer.WriteString (embedded.BashProlog)
+			_interpreterScriptBuffer.WriteString (BashProlog)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf ("exec %d<&-\n", _interpreterScriptInput))
 			_interpreterScriptBuffer.WriteString (_scriptletBody)
 		
@@ -289,7 +288,7 @@ func prepareExecution_0 (
 						fmt.Sprintf ("/dev/fd/%d", _interpreterScriptInput),
 					)
 			}
-			_interpreterScriptBuffer.WriteString (embedded.Python3Prolog)
+			_interpreterScriptBuffer.WriteString (Python3Prolog)
 			_interpreterScriptBuffer.WriteString (fmt.Sprintf (
 					"Z._scriptlet_begin_from_fd (%d, %s, %s, %d, %d, lambda : None)\n",
 					_interpreterScriptInput,
@@ -426,7 +425,7 @@ func prepareExecution_0 (
 							break
 						}
 					}
-					_interpreterScriptBuffer.WriteString (embedded.GoProlog)
+					_interpreterScriptBuffer.WriteString (GoProlog)
 					_interpreterScriptBuffer.WriteString ("\nfunc main () () {\n")
 					for _, _line := range _lines {
 						_interpreterScriptBuffer.WriteString (_line)

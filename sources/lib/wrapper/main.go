@@ -11,13 +11,12 @@ import "sort"
 import "strings"
 import "syscall"
 
-import embedded "github.com/cipriancraciun/z-run/embedded"
-
 import . "github.com/cipriancraciun/z-run/lib/run"
 import . "github.com/cipriancraciun/z-run/lib/fzf"
 import . "github.com/cipriancraciun/z-run/lib/input"
 import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/cipriancraciun/z-run/embedded"
 
 
 
@@ -30,10 +29,10 @@ func WrapperPreMain () () {
 			ExecutableName : "z-run",
 			ExecutableEnvironmentHint : "ZRUN_EXECUTABLE",
 			
-			HelpTxt : embedded.ManualTxt,
-			ManualTxt : embedded.ManualTxt,
-			ManualHtml : embedded.ManualHtml,
-			ManualMan : embedded.ManualMan,
+			HelpTxt : ManualTxt,
+			ManualTxt : ManualTxt,
+			ManualHtml : ManualHtml,
+			ManualMan : ManualMan,
 		}
 	
 	PreMainWith (_descriptor)
@@ -82,7 +81,7 @@ func WrapperMain (_context *MainContext) (*Error) {
 				_environmentList = EnvironmentMapToList (_environmentMap)
 			}
 			
-			_rc := "\n" + embedded.BashShellRc + "\n" + embedded.BashShellFunctions + "\n"
+			_rc := "\n" + BashShellRc + "\n" + BashShellFunctions + "\n"
 			
 			_input, _output, _error := CreatePipe (len (_rc) + 256, "/tmp")
 			if _error != nil {
@@ -135,46 +134,46 @@ func WrapperMain (_context *MainContext) (*Error) {
 						case "shell-rc" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellRc, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (BashShellRc, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (BashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "shell-rc-only" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellRc, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (BashShellRc, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "shell-functions" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (BashShellFunctions, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "bash-prolog" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashProlog0, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (BashProlog0, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "bash+-prolog" :
 							_chunks = append (_chunks,
 									"################################################################################\n\n",
-									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.BashProlog, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (BashProlog, "\n"), "#!/dev/null\n"), "\n"),
 									"\n\n################################################################################\n",
 								)
 						case "python3+-prolog" :
 							_chunks = append (_chunks,
-									strings.Trim (strings.TrimPrefix (strings.Trim (embedded.Python3Prolog, "\n"), "#!/dev/null\n"), "\n"),
+									strings.Trim (strings.TrimPrefix (strings.Trim (Python3Prolog, "\n"), "#!/dev/null\n"), "\n"),
 								)
 						default :
 							panic (0xaec5d2dd)
 					}
 				
 				case "go+-prolog" :
-					_chunks = append (_chunks, embedded.GoProlog)
+					_chunks = append (_chunks, GoProlog)
 				
 				default :
 					Logf ('e', 0xa269e851, "invalid export `%s`;  aborting!", _what)
