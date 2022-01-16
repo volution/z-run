@@ -9,7 +9,7 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
-func FzfPreMain (_embedded bool) () {
+func FzfPreMain (_embedded bool, _fullscreen bool) () {
 	
 	var _name string
 	if _embedded {
@@ -20,7 +20,7 @@ func FzfPreMain (_embedded bool) () {
 	
 	_descriptor := & MainDescriptor {
 			Main : func (_context *MainContext) (*Error) {
-					return FzfMain (_embedded, _context.Arguments, _context.EnvironmentMap)
+					return FzfMain (_embedded, _fullscreen, _context.Arguments, _context.EnvironmentMap)
 				},
 			ExecutableName : _name,
 			HelpTxt : "__custom__",

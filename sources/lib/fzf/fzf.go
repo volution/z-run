@@ -3,18 +3,15 @@
 package fzf
 
 
-import "os"
-import "unsafe"
-
 import fzf "github.com/junegunn/fzf/src"
-import fzf_tui "github.com/junegunn/fzf/src/tui"
 
 import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/cipriancraciun/z-run/embedded"
 
 
 
 
-func FzfMain (_embedded bool, _arguments []string, _environment map[string]string) (*Error) {
+func FzfMain (_embedded bool, _fullscreen bool, _arguments []string, _environment map[string]string) (*Error) {
 	
 	
 	if _embedded {
@@ -54,46 +51,7 @@ func FzfMain (_embedded bool, _arguments []string, _environment map[string]strin
 	}
 	
 	
-	os.Args = append ([]string {"z-run"}, _arguments ...)
-	
-	
-	fzf.Init ()
-	
-	var _options *fzf.Options
-	
-	if _embedded {
-		
-		_options = fzf.DefaultOptions ()
-		
-		_options.Prompt = ": "
-		
-		_options.Fuzzy = false
-		_options.Extended = true
-		_options.Case = fzf.CaseIgnore
-		_options.Normalize = true
-		_options.Sort = 1
-		_options.Multi = 0
-		
-		_options.Theme = fzf_tui.NoColorTheme ()
-		_options.Bold = false
-		_options.ClearOnExit = true
-		_options.Mouse = false
-		
-		// NOTE:  Replace `accept` with `accept-non-empty` action!
-		for _key, _actions := range _options.Keymap {
-			if (_key.Type == fzf_tui.CtrlM) || (_key.Type == fzf_tui.DoubleClick) {
-				_action := &_actions[0]
-				* ((*int) (unsafe.Pointer (_action))) = 7
-			}
-		}
-		
-	} else {
-		
-		_options = fzf.ParseOptions ()
-		
-	}
-	
-	fzf.Run (_options, "z-run", "")
+	fzf.MinimalMain (_arguments, _fullscreen, BUILD_VERSION, "z-fzf")
 	
 	panic (0x4716a580)
 }

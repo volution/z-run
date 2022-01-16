@@ -34,5 +34,5 @@ require (
 
 replace (
 	github.com/colinmarc/cdb => github.com/cipriancraciun/go-cdb-lib v0.0.0-20190809203657-d959ce9cc674
-	github.com/junegunn/fzf => github.com/cipriancraciun/fzf v0.0.0-20211003064031-05459fb93190
+	github.com/junegunn/fzf => github.com/cipriancraciun/fzf v0.0.0-20220116123551-9290004226f4
 )

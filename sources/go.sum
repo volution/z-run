@@ -13,6 +13,8 @@ github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5P
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
 github.com/cipriancraciun/fzf v0.0.0-20211003064031-05459fb93190 h1:v/tqWT61hBDIY04bgNweOUiiqs7W5dNCa0MjGE7jyo0=
 github.com/cipriancraciun/fzf v0.0.0-20211003064031-05459fb93190/go.mod h1:ES3C34jz6SRa4ae4ckp9lo1nnJtEJgC0L9l7lxE7XXY=
+github.com/cipriancraciun/fzf v0.0.0-20220116123551-9290004226f4 h1:dFM0Tbt1auZkrT/ORb1Ua4uNbvnjjCGwIZK7ckoLvWw=
+github.com/cipriancraciun/fzf v0.0.0-20220116123551-9290004226f4/go.mod h1:Cs4tRSj71EPYwcAuLaMdrqfB3FfSh+0flE51PHDfomw=
 github.com/cipriancraciun/go-cdb-lib v0.0.0-20190809203657-d959ce9cc674 h1:UyoEJxLS9OPdjyinKfCA2aKgIf1NhXyIxneRSMrqZls=
 github.com/cipriancraciun/go-cdb-lib v0.0.0-20190809203657-d959ce9cc674/go.mod h1:/M2lSbkwYzIP5OqU4u+aygk4LCVpB7wi60O0Myhs05g=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
