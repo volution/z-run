@@ -34,6 +34,7 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 			fmt.Fprintf (os.Stdout, "* sources hash  : %s\n", BUILD_SOURCES_HASH)
 			fmt.Fprintf (os.Stdout, "* uname node    : %s\n", UNAME_NODE)
 			fmt.Fprintf (os.Stdout, "* uname system  : %s, %s, %s\n", UNAME_SYSTEM, UNAME_RELEASE, UNAME_MACHINE)
+			fmt.Fprintf (os.Stdout, "* uname hash    : %s\n", UNAME_FINGERPRINT)
 			
 			panic (ExitMainSucceeded ())
 		}
