@@ -3,7 +3,6 @@
 package input
 
 
-import "flag"
 import "fmt"
 import "io"
 import "os"
@@ -17,31 +16,35 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 
 
+type InputMainFlags struct {
+	
+	Message *string `long:"message" short:"m" value-name:"{message}"`
+	Prompt *string `long:"prompt" short:"p" value-name:"{prompt}"`
+	Sensitive *bool `long:"sensitive" short:"s"`
+}
+
+
+
+
 func InputMain (_arguments []string, _environment map[string]string) (*Error) {
 	
+	_flags := & InputMainFlags {}
 	
-	_message := ""
-	_prompt := ">> "
-	_sensitive := false
-	
-	
-	_flags := flag.NewFlagSet ("[z-run:input]", flag.ContinueOnError)
-	_flags.StringVar (&_message, "message", _message, "message (line or lines) to display before the prompt")
-	_flags.StringVar (&_prompt, "prompt", _prompt, "prompt to display before the input")
-	_flags.BoolVar (&_sensitive, "sensitive", _sensitive, "treat input as sensitive data and hide the echo")
-	
-	
-	if _error := _flags.Parse (_arguments); _error != nil {
-		if _error == flag.ErrHelp {
-			panic (ExitMainSucceeded ())
-		} else {
-			return Errorw (0xfe27c070, _error)
-		}
-	}
-	if _flags.NArg () > 0 {
-		return Errorf (0xdc26a939, "unexpected arguments")
+	if _error := ResolveMainFlags ("z-input", _arguments, _environment, _flags, os.Stderr); _error != nil {
+		return _error
 	}
 	
+	return InputMainWithFlags (_flags)
+}
+
+
+
+
+func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
+	
+	_message := FlagStringOrDefault (_flags.Message, "")
+	_prompt := FlagStringOrDefault (_flags.Prompt, ">> ")
+	_sensitive := FlagBoolOrDefault (_flags.Sensitive, false)
 	
 	if IsStdoutTerminal () {
 		return Errorf (0xbddf576d, "stdout is a TTY")
@@ -62,6 +65,7 @@ func InputMain (_arguments []string, _environment map[string]string) (*Error) {
 	if _message != "" {
 		fmt.Fprintln (os.Stderr, _message)
 	}
+	
 	
 	_output := ""
 	{

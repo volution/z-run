@@ -13,8 +13,9 @@ func InputPreMain () () {
 	
 	_descriptor := & MainDescriptor {
 			Main : func (_context *MainContext) (*Error) {
-					return InputMain (_context.Arguments, _context.EnvironmentMap)
+					return InputMainWithFlags (_context.Flags.(*InputMainFlags))
 				},
+			Flags : & InputMainFlags {},
 			ExecutableName : "z-input",
 			HelpTxt : "__custom__",
 		}

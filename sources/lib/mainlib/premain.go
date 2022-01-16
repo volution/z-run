@@ -3,6 +3,8 @@
 package mainlib
 
 
+import "os"
+
 import . "github.com/cipriancraciun/z-run/lib/common"
 
 
@@ -14,6 +16,8 @@ type MainDescriptor struct {
 	
 	ExecutableName string
 	ExecutableEnvironmentHint string
+	
+	Flags interface{}
 	
 	HelpTxt string
 	
@@ -35,6 +39,8 @@ type MainContext struct {
 	
 	EnvironmentMap map[string]string
 	EnvironmentList []string
+	
+	Flags interface{}
 }
 
 
@@ -82,9 +88,17 @@ func PreMainWith (_descriptor *MainDescriptor) () {
 		panic (AbortError (_error))
 	}
 	
+	if _descriptor.Flags != nil {
+		if _error := ResolveMainFlags (_descriptor.ExecutableName, _arguments, _environmentMap, _descriptor.Flags, os.Stderr); _error != nil {
+			panic (AbortError (_error))
+		}
+	}
+	
 	_context := & MainContext {
 			
 			Descriptor : _descriptor,
+			
+			Flags : _descriptor.Flags,
 			
 			Executable0 : _executable0,
 			Executable : _executable,
