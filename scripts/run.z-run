@@ -9,23 +9,12 @@
 
 
 :: watch / run / exec :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec' "${@}"
+:: watch / run / exec / * :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec / *' "${@}"
 
 
 
 
-:: run / exec :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-run "${@}"
-
-:: run / version :: exec -- "${ZRUN[@]}" ':: run / exec' --version "${@}"
-:: run / sources / md5 :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-md5 "${@}"
-:: run / sources / cpio :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-cpio "${@}"
-:: run / manual :: exec -- "${ZRUN[@]}" ':: run / exec' --manual "${@}"
-:: run / manual / text :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-text "${@}"
-:: run / manual / html :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-html "${@}"
-:: run / manual / man :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-man "${@}"
-:: run / help :: exec -- "${ZRUN[@]}" ':: run / exec' --help "${@}"
-
-
-
+++:: run / exec :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-run "${@}"
 
 :: run / shell :: exec -- "${ZRUN[@]}" ':: run / exec' --shell "${@}"
 :: run / shell / untainted :: exec -- "${ZRUN[@]}" ':: run / exec' --shell-untainted "${@}"
@@ -50,9 +39,25 @@
 :: run / export / prologues / python3+ :: exec -- "${ZRUN[@]}" ':: run / exec' --export=python3+-prolog "${@}"
 :: run / export / prologues / go+ :: exec -- "${ZRUN[@]}" ':: run / exec' --export=go+-prolog "${@}"
 
-:: run / tools / fzf :: exec -- "${ZRUN[@]}" ':: run / exec' --fzf "${@}"
-:: run / tools / input :: exec -- "${ZRUN[@]}" ':: run / exec' --input "${@}"
-:: run / tools / select :: exec -- "${ZRUN[@]}" ':: run / exec' --select "${@}"
+:: run / flags / version :: exec -- "${ZRUN[@]}" ':: run / exec' --version "${@}"
+:: run / flags / sources / md5 :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-md5 "${@}"
+:: run / flags / sources / cpio :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-cpio "${@}"
+:: run / flags / manual :: exec -- "${ZRUN[@]}" ':: run / exec' --manual "${@}"
+:: run / flags / manual / text :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-text "${@}"
+:: run / flags / manual / html :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-html "${@}"
+:: run / flags / manual / man :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-man "${@}"
+:: run / flags / help :: exec -- "${ZRUN[@]}" ':: run / exec' --help "${@}"
+
+
+
+
+:: run / wrapper / input :: exec -- "${ZRUN[@]}" ':: run / exec' --input "${@}"
+:: run / wrapper / select :: exec -- "${ZRUN[@]}" ':: run / exec' --select "${@}"
+:: run / wrapper / fzf :: exec -- "${ZRUN[@]}" ':: run / exec' --fzf "${@}"
+
+++:: run / tools / input :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-input "${@}"
+++:: run / tools / select :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-select "${@}"
+++:: run / tools / fzf :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-fzf "${@}"
 
 
 
