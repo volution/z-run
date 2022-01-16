@@ -7,6 +7,7 @@ import "fmt"
 import "io"
 import "os"
 import "syscall"
+import "strings"
 
 import "github.com/peterh/liner"
 
@@ -18,9 +19,15 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 type InputMainFlags struct {
 	
-	Message *string `long:"message" short:"m" value-name:"{message}"`
-	Prompt *string `long:"prompt" short:"p" value-name:"{prompt}"`
-	Sensitive *bool `long:"sensitive" short:"s"`
+	Message *string `long:"message" short:"m" value-name:"{message}" description:"message to be displayed before the prompt line;"`
+	Prompt *string `long:"prompt" short:"p" value-name:"{prompt}" description:"message to de displayed on the prompt line, before the input; \n if spaces are desired between the message and the input, then include them in the message itself;"`
+	
+	Sensitive *bool `long:"sensitive" short:"s" description:"enables hiding the input;  useful for entering passwords and other sensitive information;"`
+	
+	Trim *bool `long:"trim" short:"t" description:"enables triming prefix and suffix spaces;  useful for handling copy-pasted information;"`
+	NotEmpty *bool `long:"not-empty" short:"n" description:"enables checking if the input is not empty, else the tool exits with an error;"`
+	
+	Retries *uint16 `long:"retry" short:"r" value-name:"{retries}" description:"enables retrying the input, in case of not-empty or confirm modes;"`
 }
 
 
@@ -45,6 +52,9 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	_message := FlagStringOrDefault (_flags.Message, "")
 	_prompt := FlagStringOrDefault (_flags.Prompt, ">> ")
 	_sensitive := FlagBoolOrDefault (_flags.Sensitive, false)
+	_trim := FlagBoolOrDefault (_flags.Trim, false)
+	_notEmpty := FlagBoolOrDefault (_flags.NotEmpty, false)
+	_retries := FlagUint16OrDefault (_flags.Retries, 0)
 	
 	if IsStdoutTerminal () {
 		return Errorf (0xbddf576d, "stdout is a TTY")
@@ -66,39 +76,71 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 		fmt.Fprintln (os.Stderr, _message)
 	}
 	
+	var _output string
 	
-	_output := ""
-	{
-		var _output_0 string
-		var _error error
-		
-		_liner := liner.NewLiner ()
-		_liner.SetCtrlCAborts (true)
-		
-		if _sensitive {
-			_output_0, _error = _liner.PasswordPrompt (_prompt)
-		} else {
-			_output_0, _error = _liner.Prompt (_prompt)
+	_loop := uint16 (0)
+	for _loop <= _retries {
+		_loop += 1
+		_prompt_0 := _prompt
+		if _loop > 1 {
+			_prompt_0 = fmt.Sprintf ("[%d] %s", _loop - 1, _prompt)
 		}
-		_liner.Close ()
-		
+		_output_0, _canceled, _error := input (_prompt_0, _sensitive, _trim)
+		if _canceled {
+			panic (ExitMainFailed ())
+		}
 		if _error != nil {
-			if _error == io.EOF {
-				fmt.Fprintln (os.Stderr)
-				return Errorf (0x4f6d6f8d, "canceled")
-			} else if _error == liner.ErrPromptAborted {
-				return Errorf (0x5e488998, "canceled")
-			} else {
-				return (Errorw (0xa6e02efc, _error))
-			}
+			panic (AbortError (_error))
 		}
-		
+		if _notEmpty && (_output_0 == "") {
+			continue
+		}
 		_output = _output_0
+		_loop = 0
+		break
 	}
-	
+	if _loop > 0 {
+		panic (ExitMainFailed ())
+	}
 	
 	fmt.Fprintln (_stdout, _output)
 	
 	panic (ExitMainSucceeded ())
+}
+
+
+
+
+func input (_prompt string, _sensitive bool, _trim bool) (string, bool, *Error) {
+	
+	var _output string
+	var _error error
+	
+	_liner := liner.NewLiner ()
+	_liner.SetCtrlCAborts (true)
+	
+	if _sensitive {
+		_output, _error = _liner.PasswordPrompt (_prompt)
+	} else {
+		_output, _error = _liner.Prompt (_prompt)
+	}
+	_liner.Close ()
+	
+	if _error == nil {
+		if _trim {
+			_output = strings.TrimSpace (_output)
+		}
+	} else {
+		if _error == io.EOF {
+			fmt.Fprintln (os.Stderr)
+			return "", true, Errorf (0x4f6d6f8d, "canceled")
+		} else if _error == liner.ErrPromptAborted {
+			return "", true, Errorf (0x5e488998, "canceled")
+		} else {
+			return "", false, Errorw (0xa6e02efc, _error)
+		}
+	}
+	
+	return _output, false, nil
 }
 
