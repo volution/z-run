@@ -42,7 +42,8 @@
 
 
 
-<< examples / exec
+++<< examples / exec
+	export -- __RUN_WORKSPACE="${__RUN_WORKSPACE:-./examples}"
 	export -- __RUN_LIBRARY_SOURCE="${__RUN_LIBRARY_SOURCE:-./examples/_z-run}"
 	exec -- "${ZRUN[@]}" ':: run / exec' "${@}"
 !!

@@ -149,6 +149,11 @@
 			ZRUN_CACHE= \
 	#
 	
+	if test -n "${__RUN_WORKSPACE:-}" ; then
+		export -- ZRUN_WORKSPACE="${__RUN_WORKSPACE}"
+	fi
+	export -n -- __RUN_WORKSPACE=
+	
 	if test -n "${__RUN_LIBRARY_SOURCE:-}" ; then
 		export -- ZRUN_LIBRARY_SOURCE="${__RUN_LIBRARY_SOURCE}"
 	fi
