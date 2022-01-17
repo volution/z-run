@@ -26,6 +26,7 @@ type InputMainFlags struct {
 	PromptRepeat *string `long:"prompt-repeat" short:"P" value-name:"{prompt}" description:"(see the previous option;)"`
 	
 	Default *string `long:"default" short:"d" value-name:"{default}" description:"contents to be used as the default input; \n (not allowed with sensitive, repeat or confirm modes;)"`
+	Options *[]string `long:"option" short:"o" value-name:"{option}" description:"contents to be used for auto-completing the input; \n if the default input is desired for auto-completion, then include it in the options; \n (not allowed with sensitive or confirm modes;)"`
 	
 	Sensitive *bool `long:"sensitive" short:"s" description:"enables a mode that hides the input; \n useful for entering passwords and other sensitive information;"`
 	Repeat *bool `long:"repeat" short:"r" description:"enables asking the user to renter the input; \n (not allowed with default or confirm modes;)"`
@@ -68,6 +69,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	_prompt := FlagStringOrDefault (_flags.Prompt, ">> ")
 	_promptRepeat := FlagStringOrDefault (_flags.PromptRepeat, "")
 	_default := FlagStringOrDefault (_flags.Default, "")
+	_options := FlagStringsOrDefault (_flags.Options, nil)
 	_sensitive := FlagBoolOrDefault (_flags.Sensitive, false)
 	_repeat := FlagBoolOrDefault (_flags.Repeat, false)
 	_retries := FlagUint16OrDefault (_flags.Retries, 0)
@@ -83,6 +85,9 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	if (_flags.Default != nil) && (_sensitive || _repeat || _confirm) {
 		return Errorf (0x64a90a9f, "`--default` not allowed with `--sensitive`, `--repeat` or `--confirm`!")
+	}
+	if (_flags.Options != nil) && (_sensitive || _confirm) {
+		return Errorf (0xe06e39d2, "`--option` not allowed with `--sensitive` or `--confirm`!")
 	}
 	
 	if (_flags.ConfirmToken != nil) && !_confirm {
@@ -217,7 +222,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 			}
 		}
 		
-		_input_0, _canceled, _error := input (_prompt_0, _default, _sensitive, _trim)
+		_input_0, _canceled, _error := input (_prompt_0, _default, _options, _sensitive, _trim)
 		
 		if _canceled {
 			panic (ExitMainFailed ())
@@ -264,13 +269,28 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 
 
 
-func input (_prompt string, _default string, _sensitive bool, _trim bool) (string, bool, *Error) {
+func input (_prompt string, _default string, _options []string, _sensitive bool, _trim bool) (string, bool, *Error) {
 	
 	var _input string
 	var _error error
 	
 	_liner := liner.NewLiner ()
 	_liner.SetCtrlCAborts (true)
+	defer _liner.Close ()
+	
+	if len (_options) > 0 {
+		_completer := func (_prefix string) ([]string) {
+				_filtered := make ([]string, 0, len (_options))
+				for _, _option := range _options {
+					if strings.HasPrefix (_option, _prefix) {
+						_filtered = append (_filtered, _option)
+					}
+				}
+				return _filtered
+			}
+		_liner.SetCompleter (_completer)
+		_liner.SetTabCompletionStyle (liner.TabPrints)
+	}
 	
 	if _sensitive {
 		_input, _error = _liner.PasswordPrompt (_prompt)
