@@ -27,6 +27,8 @@ type InputMainFlags struct {
 	
 	Default *string `long:"default" short:"d" value-name:"{default}" description:"contents to be used as the default input; \n (not allowed with sensitive, repeat or confirm modes;)"`
 	Options *[]string `long:"option" short:"o" value-name:"{option}" description:"contents to be used for auto-completing the input; \n if the default input is desired for auto-completion, then include it in the options; \n (not allowed with sensitive or confirm modes;)"`
+	OptionsFiles *[]string `long:"options-file" value-name:"{path}" description:"contents to be used for auto-completion the input, read from the given file, each separated by newline; (multiple allowed;)"`
+	OptionsFilesZero *[]string `long:"options-file-zero" value-name:"{path}" description:"contents to be used for auto-completion the input, read from the given file, each separated by '\\0'; (multiple allowed;)"`
 	
 	Sensitive *bool `long:"sensitive" short:"s" description:"enables a mode that hides the input; \n useful for entering passwords and other sensitive information;"`
 	Repeat *bool `long:"repeat" short:"r" description:"enables asking the user to renter the input; \n (not allowed with default or confirm modes;)"`
@@ -73,7 +75,9 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	_prompt := FlagStringOrDefault (_flags.Prompt, ">> ")
 	_promptRepeat := FlagStringOrDefault (_flags.PromptRepeat, "")
 	_default := FlagStringOrDefault (_flags.Default, "")
-	_options := FlagStringsOrDefault (_flags.Options, nil)
+	_optionsValues := FlagStringsOrDefault (_flags.Options, nil)
+	_optionsFiles := FlagStringsOrDefault (_flags.OptionsFiles, nil)
+	_optionsFilesZero := FlagStringsOrDefault (_flags.OptionsFilesZero, nil)
 	_sensitive := FlagBoolOrDefault (_flags.Sensitive, false)
 	_repeat := FlagBoolOrDefault (_flags.Repeat, false)
 	_retries := FlagUint16OrDefault (_flags.Retries, 0)
@@ -93,8 +97,37 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	if (_flags.Default != nil) && (_sensitive || _repeat || _confirm) {
 		return Errorf (0x64a90a9f, "`--default` not allowed with `--sensitive`, `--repeat` or `--confirm`!")
 	}
-	if (_flags.Options != nil) && (_sensitive || _confirm) {
-		return Errorf (0xe06e39d2, "`--option` not allowed with `--sensitive` or `--confirm`!")
+	if ((_flags.Options != nil) || (_flags.OptionsFiles != nil) || (_flags.OptionsFilesZero != nil)) && (_sensitive || _confirm) {
+		return Errorf (0xe06e39d2, "`--option`, `--option-file`, and `--option-file-zero` not allowed with `--sensitive` or `--confirm`!")
+	}
+	
+	_options := []string (nil)
+	_optionsSeen := make (map[string]bool, 1024)
+	_optionsAppend := func (_values []string) {
+			for _, _value := range _values {
+				if _, _exists := _optionsSeen[_value]; _exists {
+					continue
+				}
+				_options = append (_options, _value)
+				_optionsSeen[_value] = true
+			}
+		}
+	if _optionsValues != nil {
+		_optionsAppend (_optionsValues)
+	}
+	for _, _path := range _optionsFiles {
+		if _lines, _error := ReadFileLines (_path, '\n', true, true); _error == nil {
+			_optionsAppend (_lines)
+		} else {
+			return _error
+		}
+	}
+	for _, _path := range _optionsFilesZero {
+		if _lines, _error := ReadFileLines (_path, '\000', true, true); _error == nil {
+			_optionsAppend (_lines)
+		} else {
+			return _error
+		}
 	}
 	
 	if (_flags.ConfirmToken != nil) && !_confirm {
