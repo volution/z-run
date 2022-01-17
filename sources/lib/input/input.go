@@ -39,6 +39,10 @@ type InputMainFlags struct {
 	Confirm *bool `long:"confirm" short:"c" description:"enables a mode that displays a token (random or given), and asks the user to re-enter it correctly;"`
 	ConfirmToken *string `long:"confirm-token" short:"C" value-name:"{confirm}" description:"contents to be used as the confirm token; \n (will automatically enable confirm mode;  the contents will be automatically trimmed;)"`
 	
+	OutputSeparator *string `long:"output-separator" value-name:"{separator}" description:"overries the newline separator, written after each input contents;"`
+	OutputSeparatorNone *bool `long:"output-separator-none" short:"N" description:"overrides the newline separator with nothing, written after each input contents;"`
+	OutputSeparatorZero *bool `long:"output-separator-null" short:"Z" description:"overrides the newline separator with '\\0', written after each input contents;"`
+	
 	OutputFd *uint16 `long:"output-fd" value-name:"{fd}" description:"overrides input contents writing to the given file-descriptor;"`
 	TtyInputFd *uint16 `long:"tty-input-fd" value-name:"{fd}" description:"overrides terminal input from the given file-descriptor;"`
 	TtyOutputFd *uint16 `long:"tty-output-fd" value-name:"{fd}" description:"overrides terminal output to the given file-descriptor;"`
@@ -77,6 +81,9 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	_notEmpty := FlagBoolOrDefault (_flags.NotEmpty, false)
 	_confirm := FlagBoolOrDefault (_flags.Confirm, false)
 	_confirmToken := FlagStringOrDefault (_flags.ConfirmToken, "")
+	_outputSeparator := FlagStringOrDefault (_flags.OutputSeparator, "\n")
+	_outputSeparatorNone := FlagBoolOrDefault (_flags.OutputSeparatorNone, false)
+	_outputSeparatorZero := FlagBoolOrDefault (_flags.OutputSeparatorZero, false)
 	_outputFd := uintptr (FlagUint16OrDefault (_flags.OutputFd, 1))
 	_ttyInputFd := uintptr (FlagUint16OrDefault (_flags.TtyInputFd, 2))
 	_ttyOutputFd := uintptr (FlagUint16OrDefault (_flags.TtyOutputFd, 2))
@@ -108,6 +115,27 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	}
 	if _promptRepeat == "" {
 		_promptRepeat = _prompt
+	}
+	
+	if (_flags.OutputSeparator != nil) || (_flags.OutputSeparatorNone != nil) || (_flags.OutputSeparatorZero != nil) {
+		if (_flags.OutputSeparator != nil) && (_flags.OutputSeparatorZero != nil) {
+			return Errorf (0x86622151, "`--output-separator` and `--output-separator-null` are mutually exclusive!")
+		}
+		if (_flags.OutputSeparator != nil) && (_flags.OutputSeparatorNone != nil) {
+			return Errorf (0x86622151, "`--output-separator` and `--output-separator-none` are mutually exclusive!")
+		}
+		if (_flags.OutputSeparatorNone != nil) && (_flags.OutputSeparatorZero != nil) {
+			return Errorf (0x86622151, "`--output-separator-none` and `--output-separator-zero` are mutually exclusive!")
+		}
+		if _confirm {
+			return Errorf (0xee6fbcd7, "`--output-separator`, `--output-separator-none`, and `--output-separator-null` not allowed with `--confirm`!")
+		}
+		if _outputSeparatorNone {
+			_outputSeparator = ""
+		}
+		if _outputSeparatorZero {
+			_outputSeparator = "\000"
+		}
 	}
 	
 	
@@ -260,7 +288,12 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	}
 	
 	if _input != "" {
-		fmt.Fprintln (_outputStream, _input)
+		var _buffer strings.Builder
+		_buffer.WriteString (_input)
+		_buffer.WriteString (_outputSeparator)
+		if _, _error := io.WriteString (_outputStream, _buffer.String ()); _error != nil {
+			panic (AbortError (Errorw (0x2970f683, _error)))
+		}
 	}
 	
 	panic (ExitMainSucceeded ())
