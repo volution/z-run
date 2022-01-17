@@ -37,6 +37,11 @@ type InputMainFlags struct {
 	
 	Confirm *bool `long:"confirm" short:"c" description:"enables a mode that displays a token (random or given), and asks the user to re-enter it correctly;"`
 	ConfirmToken *string `long:"confirm-token" short:"C" value-name:"{confirm}" description:"contents to be used as the confirm token; \n (will automatically enable confirm mode;  the contents will be automatically trimmed;)"`
+	
+	UseTtyInputFd *uint16 `long:"use-tty-input-fd" value-name:"{fd}" description:"overrides terminal input from the given file-descriptor;"`
+	UseTtyOutputFd *uint16 `long:"use-tty-output-fd" value-name:"{fd}" description:"overrides terminal output to the given file-descriptor;"`
+	UseOutputFd *uint16 `long:"use-output-fd" value-name:"{fd}" description:"overrides input contents writing to the given file-descriptor;"`
+	IgnoreTtyChecks *bool `long:"ignore-tty-checks" description:"disable checking for a TTY on stderr, and a non-TTY on stdout;"`
 }
 
 
@@ -70,6 +75,10 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	_notEmpty := FlagBoolOrDefault (_flags.NotEmpty, false)
 	_confirm := FlagBoolOrDefault (_flags.Confirm, false)
 	_confirmToken := FlagStringOrDefault (_flags.ConfirmToken, "")
+	_useTtyInputFd := uintptr (FlagUint16OrDefault (_flags.UseTtyInputFd, 2))
+	_useTtyOutputFd := uintptr (FlagUint16OrDefault (_flags.UseTtyOutputFd, 2))
+	_useOutputFd := uintptr (FlagUint16OrDefault (_flags.UseOutputFd, 1))
+	_ignoreTtyChecks := FlagBoolOrDefault (_flags.IgnoreTtyChecks, false)
 	
 	
 	if (_flags.Default != nil) && (_sensitive || _repeat || _confirm) {
@@ -99,24 +108,56 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	
 	
-	if IsStdoutTerminal () {
-		return Errorf (0xbddf576d, "stdout is a TTY")
-	}
-	if ! IsStderrTerminal () {
-		return Errorf (0xf33f2d91, "stderr is not a TTY")
+	if !_ignoreTtyChecks {
+		if IsFdTerminal (_useOutputFd) {
+			return Errorf (0xbddf576d, "stdout is a TTY")
+		}
+		if ! IsFdTerminal (_useTtyInputFd) {
+			return Errorf (0xf33f2d91, "stderr is not a TTY")
+		}
+		if ! IsFdTerminal (_useTtyOutputFd) {
+			return Errorf (0xe8c5f8bc, "stderr is not a TTY")
+		}
 	}
 	
-	// FIXME:  Make `liner` work without `stdin` or `stdout`
-	_stdout := os.Stdout
-	os.Stdin = os.Stderr
-	os.Stdout = os.Stderr
-	syscall.Stdin = int (os.Stderr.Fd ())
-	syscall.Stdout = int (os.Stderr.Fd ())
-	syscall.Stderr = int (os.Stderr.Fd ())
+	{
+		if _fd_0, _error := syscall.Dup (int (_useOutputFd)); _error == nil {
+			_useOutputFd = uintptr (_fd_0)
+		} else {
+			return Errorw (0x59a1994e, _error)
+		}
+		if _fd_0, _error := syscall.Dup (int (_useTtyInputFd)); _error == nil {
+			_useTtyInputFd = uintptr (_fd_0)
+		} else {
+			return Errorw (0x0ceb87ec, _error)
+		}
+		if _fd_0, _error := syscall.Dup (int (_useTtyOutputFd)); _error == nil {
+			_useTtyOutputFd = uintptr (_fd_0)
+		} else {
+			return Errorw (0x8dc54e20, _error)
+		}
+	}
+	
+	// FIXME:  Make `liner` work without `stdin` or `stdout`!
+	
+	{
+		if _error := syscall.Dup2 (int (_useTtyInputFd), 0); _error != nil {
+			return Errorw (0x180f62b3, _error)
+		}
+		if _error := syscall.Dup2 (int (_useTtyOutputFd), 1); _error != nil {
+			return Errorw (0xe252bec9, _error)
+		}
+	}
+	
+	_outputStream := os.NewFile (uintptr (_useOutputFd), "/dev/null")
+	os.Stdin = os.NewFile (uintptr (_useTtyInputFd), "/dev/stdin")
+	os.Stdout = os.NewFile (uintptr (_useTtyOutputFd), "/dev/stdout")
+	
+	
 	
 	
 	if _message != "" {
-		fmt.Fprintln (os.Stderr, _message)
+		fmt.Fprintln (os.Stdout, _message)
 	}
 	
 	var _input string
@@ -214,7 +255,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	}
 	
 	if _input != "" {
-		fmt.Fprintln (_stdout, _input)
+		fmt.Fprintln (_outputStream, _input)
 	}
 	
 	panic (ExitMainSucceeded ())
@@ -248,7 +289,7 @@ func input (_prompt string, _default string, _sensitive bool, _trim bool) (strin
 		}
 	} else {
 		if _error == io.EOF {
-			fmt.Fprintln (os.Stderr)
+			fmt.Fprintln (os.Stdout)
 			return "", true, Errorf (0x4f6d6f8d, "canceled")
 		} else if _error == liner.ErrPromptAborted {
 			return "", true, Errorf (0x5e488998, "canceled")

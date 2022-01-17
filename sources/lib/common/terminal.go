@@ -38,3 +38,7 @@ func IsStderrTerminal () (bool) {
 	return isatty.IsTerminal (os.Stderr.Fd ())
 }
 
+func IsFdTerminal (_descriptor uintptr) (bool) {
+	return isatty.IsTerminal (_descriptor)
+}
+
