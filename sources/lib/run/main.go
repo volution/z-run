@@ -461,18 +461,18 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 	if (_command == "parse-library") || (_command == "parse-library-without-output")  {
 		_cacheEnabled = false
 	}
-	if _cacheEnabled {
-		if _cacheRoot == "" {
-			if _cacheRoot_0, _error := resolveCache (); _error == nil {
-				_cacheRoot = _cacheRoot_0
-			} else {
-				return _error
-			}
-		}
-	} else {
+	if !_cacheEnabled {
 		if _libraryCacheUrl != "" {
 			Logf ('w', 0xdb80c4de, "library URL specified, but caching is disabled;  ignoring cached path!")
 			_libraryCacheUrl = ""
+		}
+	}
+	
+	if _cacheRoot == "" {
+		if _cacheRoot_0, _error := resolveCache (); _error == nil {
+			_cacheRoot = _cacheRoot_0
+		} else {
+			return _error
 		}
 	}
 	
