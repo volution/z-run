@@ -129,14 +129,13 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 	
 	if _workspace != "" {
 		_folders = append (_folders, folder { _workspace, false })
-		for _, _subfolder := range resolveWorkspaceSubfolders {
+		for _, _subfolder := range ResolveWorkspaceSubfolders {
 			_folders = append (_folders, folder { path.Join (_workspace, _subfolder), false })
 		}
 		for _, _folder := range _folders {
-			_folders = append (_folders,
-					folder { path.Join (_folder.path, "scriptlets"), _folder.fallback },
-					folder { path.Join (_folder.path, "scripts"), _folder.fallback },
-				)
+			for _, _subfolder := range ResolveSourceSubfolders {
+				_folders = append (_folders, folder { path.Join (_folder.path, _subfolder), _folder.fallback })
+			}
 		}
 	}
 	
@@ -144,24 +143,13 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 		_folders = append (_folders, folder { _lookupPath, true })
 	}
 	
-	_files := []string {
-			
-			"z-run",
-			".z-run",
-			"_z-run",
-			
-			"x-run",
-			".x-run",
-			"_x-run",
-		}
-	
 	_candidates := make ([]string, 0, 16)
 	
 	for _, _folder := range _folders {
 		if _folder.fallback && (len (_candidates) > 0) {
 			continue
 		}
-		for _, _file := range _files {
+		for _, _file := range ResolveSourceFiles {
 			_path := path.Join (_folder.path, _file)
 			if _, _error := os.Lstat (_path); _error == nil {
 				_candidates = append (_candidates, _path)
@@ -384,12 +372,27 @@ func checkLibraryCached (_library LibraryStore) (bool, *Error) {
 }
 
 
-var resolveWorkspaceSubfolders = []string {
+
+
+var ResolveWorkspaceSubfolders = []string {
 		"__",
 		".git",
 		".hg",
 		".svn",
 		".bzr",
 		".darcs",
+	}
+
+var ResolveSourceSubfolders = []string {
+		"z-run", "_z-run", ".z-run",
+		"zrun", "_zrun", ".zrun",
+		"scriptlets", "_scriptlets", ".scriptlets",
+		"scripts", "_scripts", ".scripts",
+		"bin", "_bin", ".bin",
+	}
+
+var ResolveSourceFiles = []string {
+			"z-run", "_z-run", ".z-run",
+			"zrun", "_zrun", ".zrun",
 	}
 

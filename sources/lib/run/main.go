@@ -361,6 +361,11 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 		if _scriptlet != "" {
 			return Errorf (0xb2b83ca4, "invalid arguments:  unexpected scriptlet")
 		}
+		if _path, _error := filepath.EvalSymlinks (_librarySourcePath); _error == nil {
+			_librarySourcePath = _path
+		} else {
+			return Errorw (0x8e43d808, _error)
+		}
 		if len (_cleanArguments) > 0 {
 			_scriptlet = _cleanArguments[0]
 			_cleanArguments = _cleanArguments[1:]
@@ -369,6 +374,13 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 			}
 		}
 		_workspace = path.Dir (_librarySourcePath)
+		for _, _subfolder := range ResolveSourceSubfolders {
+			_suffix := string (filepath.Separator) + _subfolder
+			if strings.HasSuffix (_workspace, _suffix) {
+				_workspace = _workspace[: len (_workspace) - len (_suffix)]
+				break
+			}
+		}
 	}
 	
 	if _invokeMode {
@@ -471,7 +483,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 			return Errorw (0x69daa060, _error)
 		}
 		var _insideVcs bool
-		for _, _subfolder := range resolveWorkspaceSubfolders {
+		for _, _subfolder := range ResolveWorkspaceSubfolders {
 			if _, _error := os.Lstat (path.Join (_workspace, _subfolder)); _error == nil {
 				_insideVcs = true
 				break
