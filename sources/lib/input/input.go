@@ -21,29 +21,55 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 type InputMainFlags struct {
 	
+	Prompt InputMainPromptFlags `group:"Prompt Options"`
+	Completion InputMainCompletionFlags `group:"Completion Options"`
+	Behaviour InputMainBehaviourFlags `group:"Behaviour Options"`
+	Output InputMainOutputFlags `group:"Output Options"`
+	Advanced InputMainAdvancedFlags `group:"Advanced Options"`
+}
+
+
+type InputMainPromptFlags struct {
+	
 	Message *string `long:"message" short:"m" value-name:"{message}" description:"message to be displayed on the first line, before the prompt line;"`
 	Prompt *string `long:"prompt" short:"p" value-name:"{prompt}" description:"message to de displayed on the prompt line, before the input contents; \n if spaces are desired between the message and the input, then include them in the message; \n if confirm or repeat modes are enabled then '&{EXPECTED}' is replaced by the expected input; \n if retry mode is enabled then '&{RETRY}' is replaced by the retry index;"`
-	PromptRepeat *string `long:"prompt-repeat" short:"P" value-name:"{prompt}" description:"(see the previous option;)"`
+	PromptRepeat *string `long:"prompt-repeat" value-name:"{prompt}" description:"(see the previous option;)"`
+}
+
+
+type InputMainBehaviourFlags struct {
 	
-	Default *string `long:"default" short:"d" value-name:"{default}" description:"contents to be used as the default input; \n (not allowed with sensitive, repeat or confirm modes;)"`
-	Options *[]string `long:"option" short:"o" value-name:"{option}" description:"contents to be used for auto-completing the input; \n if the default input is desired for auto-completion, then include it in the options; \n (not allowed with sensitive or confirm modes;)"`
-	OptionsFiles *[]string `long:"options-file" value-name:"{path}" description:"contents to be used for auto-completion the input, read from the given file, each separated by newline; (multiple allowed;)"`
-	OptionsFilesZero *[]string `long:"options-file-zero" value-name:"{path}" description:"contents to be used for auto-completion the input, read from the given file, each separated by '\\0'; (multiple allowed;)"`
-	
-	Sensitive *bool `long:"sensitive" short:"s" description:"enables a mode that hides the input; \n useful for entering passwords and other sensitive information;"`
 	Repeat *bool `long:"repeat" short:"r" description:"enables asking the user to renter the input; \n (not allowed with default or confirm modes;)"`
-	
-	Retries *uint16 `long:"retry" short:"R" value-name:"{retries}" description:"enables retrying the input, in case of not-empty, repeat or confirm modes;"`
-	
-	Trim *bool `long:"trim" short:"t" description:"enables triming prefix and suffix spaces from the input; \n useful for handling copy-pasted information;"`
-	NotEmpty *bool `long:"not-empty" short:"n" description:"enables checking if the input is not empty;"`
+	Sensitive *bool `long:"sensitive" short:"s" description:"enables a mode that hides the input; \n useful for entering passwords and other sensitive information;"`
 	
 	Confirm *bool `long:"confirm" short:"c" description:"enables a mode that displays a token (random or given), and asks the user to re-enter it correctly;"`
 	ConfirmToken *string `long:"confirm-token" short:"C" value-name:"{confirm}" description:"contents to be used as the confirm token; \n (will automatically enable confirm mode;  the contents will be automatically trimmed;)"`
 	
+	Trim *bool `long:"trim" short:"t" description:"enables triming prefix and suffix spaces from the input; \n useful for handling copy-pasted information;"`
+	NotEmpty *bool `long:"not-empty" short:"n" description:"enables checking if the input is not empty;"`
+	
+	Retries *uint16 `long:"retries" short:"R" value-name:"{retries}" description:"enables retrying the input, in case of not-empty, repeat or confirm modes;"`
+}
+
+
+type InputMainCompletionFlags struct {
+	
+	Default *string `group:"Completion-Options" long:"default" short:"d" value-name:"{default}" description:"contents to be used as the default input; \n (not allowed with sensitive, repeat or confirm modes;)"`
+	Options *[]string `long:"option" short:"o" value-name:"{option}" description:"contents to be used for auto-completing the input; \n if the default input is desired for auto-completion, then include it in the options; \n (not allowed with sensitive or confirm modes;)"`
+	OptionsFiles *[]string `long:"options-file" value-name:"{path}" description:"contents to be used for auto-completion the input, read from the given file, each separated by newline; (multiple allowed;)"`
+	OptionsFilesZero *[]string `long:"options-file-zero" value-name:"{path}" description:"contents to be used for auto-completion the input, read from the given file, each separated by '\\0'; (multiple allowed;)"`
+}
+
+
+type InputMainOutputFlags struct {
+	
 	OutputSeparator *string `long:"output-separator" value-name:"{separator}" description:"overries the newline separator, written after each input contents;"`
 	OutputSeparatorNone *bool `long:"output-separator-none" short:"N" description:"overrides the newline separator with nothing, written after each input contents;"`
 	OutputSeparatorZero *bool `long:"output-separator-null" short:"Z" description:"overrides the newline separator with '\\0', written after each input contents;"`
+}
+
+
+type InputMainAdvancedFlags struct {
 	
 	OutputFd *uint16 `long:"output-fd" value-name:"{fd}" description:"overrides input contents writing to the given file-descriptor;"`
 	TtyInputFd *uint16 `long:"tty-input-fd" value-name:"{fd}" description:"overrides terminal input from the given file-descriptor;"`
@@ -71,33 +97,37 @@ func InputMain (_arguments []string, _environment map[string]string) (*Error) {
 func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	
-	_message := FlagStringOrDefault (_flags.Message, "")
-	_prompt := FlagStringOrDefault (_flags.Prompt, ">> ")
-	_promptRepeat := FlagStringOrDefault (_flags.PromptRepeat, "")
-	_default := FlagStringOrDefault (_flags.Default, "")
-	_optionsValues := FlagStringsOrDefault (_flags.Options, nil)
-	_optionsFiles := FlagStringsOrDefault (_flags.OptionsFiles, nil)
-	_optionsFilesZero := FlagStringsOrDefault (_flags.OptionsFilesZero, nil)
-	_sensitive := FlagBoolOrDefault (_flags.Sensitive, false)
-	_repeat := FlagBoolOrDefault (_flags.Repeat, false)
-	_retries := FlagUint16OrDefault (_flags.Retries, 0)
-	_trim := FlagBoolOrDefault (_flags.Trim, false)
-	_notEmpty := FlagBoolOrDefault (_flags.NotEmpty, false)
-	_confirm := FlagBoolOrDefault (_flags.Confirm, false)
-	_confirmToken := FlagStringOrDefault (_flags.ConfirmToken, "")
-	_outputSeparator := FlagStringOrDefault (_flags.OutputSeparator, "\n")
-	_outputSeparatorNone := FlagBoolOrDefault (_flags.OutputSeparatorNone, false)
-	_outputSeparatorZero := FlagBoolOrDefault (_flags.OutputSeparatorZero, false)
-	_outputFd := uintptr (FlagUint16OrDefault (_flags.OutputFd, 1))
-	_ttyInputFd := uintptr (FlagUint16OrDefault (_flags.TtyInputFd, 2))
-	_ttyOutputFd := uintptr (FlagUint16OrDefault (_flags.TtyOutputFd, 2))
-	_ttyIgnoreChecks := FlagBoolOrDefault (_flags.TtyIgnoreChecks, false)
+	_message := FlagStringOrDefault (_flags.Prompt.Message, "")
+	_prompt := FlagStringOrDefault (_flags.Prompt.Prompt, ">> ")
+	_promptRepeat := FlagStringOrDefault (_flags.Prompt.PromptRepeat, "")
+	
+	_default := FlagStringOrDefault (_flags.Completion.Default, "")
+	_optionsValues := FlagStringsOrDefault (_flags.Completion.Options, nil)
+	_optionsFiles := FlagStringsOrDefault (_flags.Completion.OptionsFiles, nil)
+	_optionsFilesZero := FlagStringsOrDefault (_flags.Completion.OptionsFilesZero, nil)
+	
+	_repeat := FlagBoolOrDefault (_flags.Behaviour.Repeat, false)
+	_sensitive := FlagBoolOrDefault (_flags.Behaviour.Sensitive, false)
+	_confirm := FlagBoolOrDefault (_flags.Behaviour.Confirm, false)
+	_confirmToken := FlagStringOrDefault (_flags.Behaviour.ConfirmToken, "")
+	_trim := FlagBoolOrDefault (_flags.Behaviour.Trim, false)
+	_notEmpty := FlagBoolOrDefault (_flags.Behaviour.NotEmpty, false)
+	_retries := FlagUint16OrDefault (_flags.Behaviour.Retries, 0)
+	
+	_outputSeparator := FlagStringOrDefault (_flags.Output.OutputSeparator, "\n")
+	_outputSeparatorNone := FlagBoolOrDefault (_flags.Output.OutputSeparatorNone, false)
+	_outputSeparatorZero := FlagBoolOrDefault (_flags.Output.OutputSeparatorZero, false)
+	
+	_outputFd := uintptr (FlagUint16OrDefault (_flags.Advanced.OutputFd, 1))
+	_ttyInputFd := uintptr (FlagUint16OrDefault (_flags.Advanced.TtyInputFd, 2))
+	_ttyOutputFd := uintptr (FlagUint16OrDefault (_flags.Advanced.TtyOutputFd, 2))
+	_ttyIgnoreChecks := FlagBoolOrDefault (_flags.Advanced.TtyIgnoreChecks, false)
 	
 	
-	if (_flags.Default != nil) && (_sensitive || _repeat || _confirm) {
+	if (_flags.Completion.Default != nil) && (_sensitive || _repeat || _confirm) {
 		return Errorf (0x64a90a9f, "`--default` not allowed with `--sensitive`, `--repeat` or `--confirm`!")
 	}
-	if ((_flags.Options != nil) || (_flags.OptionsFiles != nil) || (_flags.OptionsFilesZero != nil)) && (_sensitive || _confirm) {
+	if ((_flags.Completion.Options != nil) || (_flags.Completion.OptionsFiles != nil) || (_flags.Completion.OptionsFilesZero != nil)) && (_sensitive || _confirm) {
 		return Errorf (0xe06e39d2, "`--option`, `--option-file`, and `--option-file-zero` not allowed with `--sensitive` or `--confirm`!")
 	}
 	
@@ -130,7 +160,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 		}
 	}
 	
-	if (_flags.ConfirmToken != nil) && !_confirm {
+	if (_flags.Behaviour.ConfirmToken != nil) && !_confirm {
 		_confirm = true
 	}
 	if _confirm {
@@ -140,7 +170,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 		return Errorf (0xba914320, "`--confirm` not allowed with `--sensitive` or `--repeat`!")
 	}
 	
-	if (_flags.PromptRepeat != nil) && (_flags.Prompt == nil) {
+	if (_flags.Prompt.PromptRepeat != nil) && (_flags.Prompt.Prompt == nil) {
 		return Errorf (0xf3b77f85, "`--prompt-repeat` not allowed without `--prompt`!")
 	}
 	if (_promptRepeat != "") && !_repeat {
@@ -150,14 +180,14 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 		_promptRepeat = _prompt
 	}
 	
-	if (_flags.OutputSeparator != nil) || (_flags.OutputSeparatorNone != nil) || (_flags.OutputSeparatorZero != nil) {
-		if (_flags.OutputSeparator != nil) && (_flags.OutputSeparatorZero != nil) {
+	if (_flags.Output.OutputSeparator != nil) || (_flags.Output.OutputSeparatorNone != nil) || (_flags.Output.OutputSeparatorZero != nil) {
+		if (_flags.Output.OutputSeparator != nil) && (_flags.Output.OutputSeparatorZero != nil) {
 			return Errorf (0x86622151, "`--output-separator` and `--output-separator-null` are mutually exclusive!")
 		}
-		if (_flags.OutputSeparator != nil) && (_flags.OutputSeparatorNone != nil) {
+		if (_flags.Output.OutputSeparator != nil) && (_flags.Output.OutputSeparatorNone != nil) {
 			return Errorf (0x86622151, "`--output-separator` and `--output-separator-none` are mutually exclusive!")
 		}
-		if (_flags.OutputSeparatorNone != nil) && (_flags.OutputSeparatorZero != nil) {
+		if (_flags.Output.OutputSeparatorNone != nil) && (_flags.Output.OutputSeparatorZero != nil) {
 			return Errorf (0x86622151, "`--output-separator-none` and `--output-separator-zero` are mutually exclusive!")
 		}
 		if _confirm {
