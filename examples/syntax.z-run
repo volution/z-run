@@ -1,6 +1,6 @@
 #!/dev/null
 
-&&== z-run ./.outputs/main--debug
+&&== z-run _/../.outputs/z-run--debug
 
 && _/environment.z-run
 && _/basic.z-run

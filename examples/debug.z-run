@@ -15,9 +15,9 @@
 :: lsof / loop :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ; exec -- "${ZRUN[@]}" ':: lsof / loop' "${@}"
 :: lsof / bomb :: printf -- '--------\n' ; lsof -p "${$}" -w ; sleep -- 1s ;         "${ZRUN[@]}" ':: lsof / bomb' "${@}"
 
-:: touch :: test "${#}" -eq 0 ; touch -- ./examples/touch.z-run
-:: touch / loop :: printf -- '.' ; touch -- ./examples/touch.z-run ; sleep 1s ; exec -- "${ZRUN[@]}" ':: touch / loop' "${@}"
-:: touch / bomb :: printf -- '.' ; touch -- ./examples/touch.z-run ; sleep 1s ;         "${ZRUN[@]}" ':: touch / bomb' "${@}"
+:: touch :: test "${#}" -eq 0 ; touch -- ./touch.z-run
+:: touch / loop :: printf -- '.' ; touch -- ./touch.z-run ; sleep 1s ; exec -- "${ZRUN[@]}" ':: touch / loop' "${@}"
+:: touch / bomb :: printf -- '.' ; touch -- ./touch.z-run ; sleep 1s ;         "${ZRUN[@]}" ':: touch / bomb' "${@}"
 &&__ _/touch.z-run
 
 :: true :: exec -- true "${@}"

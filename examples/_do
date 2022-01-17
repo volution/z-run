@@ -1,0 +1,4 @@
+#!/usr/bin/env -S z-run --exec
+
+&& _/syntax.z-run
+

@@ -3,15 +3,15 @@
 
 
 
-::~~ hello / one-line replacer (bash) :: cat -- ./examples/hello.bash
+::~~ hello / one-line replacer (bash) :: cat -- ./hello.bash
 
-::~~.. hello / one-line replacer (print) :: cat -- ./examples/hello.txt
+::~~.. hello / one-line replacer (print) :: cat -- ./hello.txt
 
 <<~~ hello / multi-line replacer (bash)
-	cat -- ./examples/hello.bash
+	cat -- ./hello.bash
 !!
 
 <<~~.. hello / multi-line replacer (print)
-	cat -- ./examples/hello.txt
+	cat -- ./hello.txt
 !!
 

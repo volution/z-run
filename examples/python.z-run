@@ -338,8 +338,8 @@
 			--warmup 20 \
 			--runs 200 \
 			--shell '' \
-			-n plain:python3 "python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/examples/python-noop.z-scriptlet" \
-			-n scriptlet:python3+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/examples/python-noop.z-scriptlet" \
+			-n plain:python3 "python3 -E -s -S -u -O -O -- ${ZRUN_WORKSPACE}/python-noop.z-scriptlet" \
+			-n scriptlet:python3+ "${ZRUN_EXECUTABLE} --scriptlet -- ${ZRUN_WORKSPACE}/python-noop.z-scriptlet" \
 	#
 !!
 
