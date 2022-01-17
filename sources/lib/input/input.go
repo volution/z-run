@@ -39,10 +39,10 @@ type InputMainFlags struct {
 	Confirm *bool `long:"confirm" short:"c" description:"enables a mode that displays a token (random or given), and asks the user to re-enter it correctly;"`
 	ConfirmToken *string `long:"confirm-token" short:"C" value-name:"{confirm}" description:"contents to be used as the confirm token; \n (will automatically enable confirm mode;  the contents will be automatically trimmed;)"`
 	
-	UseTtyInputFd *uint16 `long:"use-tty-input-fd" value-name:"{fd}" description:"overrides terminal input from the given file-descriptor;"`
-	UseTtyOutputFd *uint16 `long:"use-tty-output-fd" value-name:"{fd}" description:"overrides terminal output to the given file-descriptor;"`
-	UseOutputFd *uint16 `long:"use-output-fd" value-name:"{fd}" description:"overrides input contents writing to the given file-descriptor;"`
-	IgnoreTtyChecks *bool `long:"ignore-tty-checks" description:"disable checking for a TTY on stderr, and a non-TTY on stdout;"`
+	OutputFd *uint16 `long:"output-fd" value-name:"{fd}" description:"overrides input contents writing to the given file-descriptor;"`
+	TtyInputFd *uint16 `long:"tty-input-fd" value-name:"{fd}" description:"overrides terminal input from the given file-descriptor;"`
+	TtyOutputFd *uint16 `long:"tty-output-fd" value-name:"{fd}" description:"overrides terminal output to the given file-descriptor;"`
+	TtyIgnoreChecks *bool `long:"tty-ignore-checks" short:"T" description:"disable checking for a TTY on stderr, and a non-TTY on stdout;"`
 }
 
 
@@ -77,10 +77,10 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	_notEmpty := FlagBoolOrDefault (_flags.NotEmpty, false)
 	_confirm := FlagBoolOrDefault (_flags.Confirm, false)
 	_confirmToken := FlagStringOrDefault (_flags.ConfirmToken, "")
-	_useTtyInputFd := uintptr (FlagUint16OrDefault (_flags.UseTtyInputFd, 2))
-	_useTtyOutputFd := uintptr (FlagUint16OrDefault (_flags.UseTtyOutputFd, 2))
-	_useOutputFd := uintptr (FlagUint16OrDefault (_flags.UseOutputFd, 1))
-	_ignoreTtyChecks := FlagBoolOrDefault (_flags.IgnoreTtyChecks, false)
+	_outputFd := uintptr (FlagUint16OrDefault (_flags.OutputFd, 1))
+	_ttyInputFd := uintptr (FlagUint16OrDefault (_flags.TtyInputFd, 2))
+	_ttyOutputFd := uintptr (FlagUint16OrDefault (_flags.TtyOutputFd, 2))
+	_ttyIgnoreChecks := FlagBoolOrDefault (_flags.TtyIgnoreChecks, false)
 	
 	
 	if (_flags.Default != nil) && (_sensitive || _repeat || _confirm) {
@@ -113,31 +113,31 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	
 	
-	if !_ignoreTtyChecks {
-		if IsFdTerminal (_useOutputFd) {
+	if !_ttyIgnoreChecks {
+		if IsFdTerminal (_outputFd) {
 			return Errorf (0xbddf576d, "stdout is a TTY")
 		}
-		if ! IsFdTerminal (_useTtyInputFd) {
+		if ! IsFdTerminal (_ttyInputFd) {
 			return Errorf (0xf33f2d91, "stderr is not a TTY")
 		}
-		if ! IsFdTerminal (_useTtyOutputFd) {
+		if ! IsFdTerminal (_ttyOutputFd) {
 			return Errorf (0xe8c5f8bc, "stderr is not a TTY")
 		}
 	}
 	
 	{
-		if _fd_0, _error := syscall.Dup (int (_useOutputFd)); _error == nil {
-			_useOutputFd = uintptr (_fd_0)
+		if _fd_0, _error := syscall.Dup (int (_outputFd)); _error == nil {
+			_outputFd = uintptr (_fd_0)
 		} else {
 			return Errorw (0x59a1994e, _error)
 		}
-		if _fd_0, _error := syscall.Dup (int (_useTtyInputFd)); _error == nil {
-			_useTtyInputFd = uintptr (_fd_0)
+		if _fd_0, _error := syscall.Dup (int (_ttyInputFd)); _error == nil {
+			_ttyInputFd = uintptr (_fd_0)
 		} else {
 			return Errorw (0x0ceb87ec, _error)
 		}
-		if _fd_0, _error := syscall.Dup (int (_useTtyOutputFd)); _error == nil {
-			_useTtyOutputFd = uintptr (_fd_0)
+		if _fd_0, _error := syscall.Dup (int (_ttyOutputFd)); _error == nil {
+			_ttyOutputFd = uintptr (_fd_0)
 		} else {
 			return Errorw (0x8dc54e20, _error)
 		}
@@ -146,17 +146,17 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	// FIXME:  Make `liner` work without `stdin` or `stdout`!
 	
 	{
-		if _error := syscall.Dup2 (int (_useTtyInputFd), 0); _error != nil {
+		if _error := syscall.Dup2 (int (_ttyInputFd), 0); _error != nil {
 			return Errorw (0x180f62b3, _error)
 		}
-		if _error := syscall.Dup2 (int (_useTtyOutputFd), 1); _error != nil {
+		if _error := syscall.Dup2 (int (_ttyOutputFd), 1); _error != nil {
 			return Errorw (0xe252bec9, _error)
 		}
 	}
 	
-	_outputStream := os.NewFile (uintptr (_useOutputFd), "/dev/null")
-	os.Stdin = os.NewFile (uintptr (_useTtyInputFd), "/dev/stdin")
-	os.Stdout = os.NewFile (uintptr (_useTtyOutputFd), "/dev/stdout")
+	_outputStream := os.NewFile (uintptr (_outputFd), "/dev/null")
+	os.Stdin = os.NewFile (uintptr (_ttyInputFd), "/dev/stdin")
+	os.Stdout = os.NewFile (uintptr (_ttyOutputFd), "/dev/stdout")
 	
 	
 	
