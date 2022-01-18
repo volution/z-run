@@ -477,11 +477,23 @@ func inputKey (_prompt string) (string, bool, *Error) {
 		var _buffer [1]byte
 		if _, _error := os.Stdin.Read (_buffer[:]); _error == nil {
 			_input = append (_input, _buffer[0])
-			if _input[0] == '\x1b' {
+			_inputHead := _input[0]
+			_inputLen := len (_input)
+			if _inputHead == '\x1b' {
 				_shouldStop = true
-				continue
+			} else if (_inputHead >= 194) || (_inputHead < 245) {
+				if (_inputHead < 224) && (_inputLen < 2) {
+					_shouldStop = true
+				} else if (_inputHead < 240) && (_inputLen < 3) {
+					_shouldStop = true
+				} else if (_inputHead < 245) && (_inputLen < 4) {
+					_shouldStop = true
+				} else {
+					panic (0x1563fd7d)
+				}
+			} else {
+				break
 			}
-			break
 		} else if os.IsTimeout (_error) {
 			if _shouldStop {
 				break
