@@ -2,6 +2,11 @@
 # **z-run** -- lightweight Go-based scripts library tool
 
 
+> Table of contents:
+> * [Manual](#manual) and [Examples](#examples)
+> * [Installation](#installation) and [FAQ](#faq)
+> * [About](#about), [Status](#status) and [Copyright and licensing](#notice-copyright-and-licensing)
+
 
 
 ----
