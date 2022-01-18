@@ -12,6 +12,7 @@ import "strings"
 import "time"
 
 import "github.com/peterh/liner"
+import "golang.org/x/term"
 
 import . "github.com/cipriancraciun/z-run/lib/mainlib"
 import . "github.com/cipriancraciun/z-run/lib/common"
@@ -41,6 +42,7 @@ type InputMainBehaviourFlags struct {
 	
 	Repeat *bool `long:"repeat" short:"r" description:"enables asking the user to renter the input; \n (not allowed with default or confirm modes;)"`
 	Sensitive *bool `long:"sensitive" short:"s" description:"enables a mode that hides the input; \n useful for entering passwords and other sensitive information;"`
+	Keypress *bool `long:"keypress" short:"k" description:"enables a mode where only a single byte is read; \n useful for asking for confirmations or quick menus;"`
 	
 	Confirm *bool `long:"confirm" short:"c" description:"enables a mode that displays a token (random or given), and asks the user to re-enter it correctly;"`
 	ConfirmToken *string `long:"confirm-token" short:"C" value-name:"{confirm}" description:"contents to be used as the confirm token; \n (will automatically enable confirm mode;  the contents will be automatically trimmed;)"`
@@ -108,6 +110,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	_repeat := FlagBoolOrDefault (_flags.Behaviour.Repeat, false)
 	_sensitive := FlagBoolOrDefault (_flags.Behaviour.Sensitive, false)
+	_keypress := FlagBoolOrDefault (_flags.Behaviour.Keypress, false)
 	_confirm := FlagBoolOrDefault (_flags.Behaviour.Confirm, false)
 	_confirmToken := FlagStringOrDefault (_flags.Behaviour.ConfirmToken, "")
 	_trim := FlagBoolOrDefault (_flags.Behaviour.Trim, false)
@@ -124,8 +127,8 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	_ttyIgnoreChecks := FlagBoolOrDefault (_flags.Advanced.TtyIgnoreChecks, false)
 	
 	
-	if (_flags.Completion.Default != nil) && (_sensitive || _repeat || _confirm) {
-		return Errorf (0x64a90a9f, "`--default` not allowed with `--sensitive`, `--repeat` or `--confirm`!")
+	if (_flags.Completion.Default != nil) && (_sensitive || _keypress || _repeat || _confirm) {
+		return Errorf (0x64a90a9f, "`--default` not allowed with `--sensitive`, `--keypress`, `--repeat` or `--confirm`!")
 	}
 	if ((_flags.Completion.Options != nil) || (_flags.Completion.OptionsFiles != nil) || (_flags.Completion.OptionsFilesZero != nil)) && (_sensitive || _confirm) {
 		return Errorf (0xe06e39d2, "`--option`, `--option-file`, and `--option-file-zero` not allowed with `--sensitive` or `--confirm`!")
@@ -237,23 +240,29 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	// FIXME:  Make `liner` work without `stdin` or `stdout`!
 	
 	{
-		if _error := syscall.Dup2 (int (_ttyInputFd), 0); _error != nil {
+		if _error := syscall.Dup2 (int (_ttyInputFd), int (os.Stdin.Fd ())); _error != nil {
 			return Errorw (0x180f62b3, _error)
 		}
-		if _error := syscall.Dup2 (int (_ttyOutputFd), 1); _error != nil {
+		if _error := syscall.Dup2 (int (_ttyOutputFd), int (os.Stdout.Fd ())); _error != nil {
 			return Errorw (0xe252bec9, _error)
+		}
+		if _error := syscall.Dup2 (int (_ttyOutputFd), int (os.Stderr.Fd ())); _error != nil {
+			return Errorw (0x3c48c5b8, _error)
 		}
 	}
 	
 	_outputStream := os.NewFile (uintptr (_outputFd), "/dev/null")
-	os.Stdin = os.NewFile (uintptr (_ttyInputFd), "/dev/stdin")
-	os.Stdout = os.NewFile (uintptr (_ttyOutputFd), "/dev/stdout")
+	os.Stdin = os.NewFile (os.Stdin.Fd (), "/dev/stdin")
+	os.Stdout = os.NewFile (os.Stdout.Fd (), "/dev/stdout")
+	os.Stderr = os.NewFile (os.Stderr.Fd (), "/dev/stderr")
 	
 	
 	
 	
 	if _message != "" {
-		fmt.Fprintln (os.Stdout, _message)
+		if _, _error := fmt.Fprintln (os.Stdout, _message); _error != nil {
+			panic (AbortError (Errorw (0xeaa68641, _error)))
+		}
 	}
 	
 	var _input string
@@ -313,7 +322,14 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 			}
 		}
 		
-		_input_0, _canceled, _error := input (_prompt_0, _default, _options, _sensitive, _trim)
+		var _input_0 string
+		var _canceled bool
+		var _error *Error
+		if _keypress {
+			_input_0, _canceled, _error = inputKey (_prompt_0)
+		} else {
+			_input_0, _canceled, _error = inputLine (_prompt_0, _default, _options, _sensitive, _trim)
+		}
 		
 		if _canceled {
 			panic (ExitMainFailed ())
@@ -365,7 +381,7 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 
 
 
-func input (_prompt string, _default string, _options []string, _sensitive bool, _trim bool) (string, bool, *Error) {
+func inputLine (_prompt string, _default string, _options []string, _sensitive bool, _trim bool) (string, bool, *Error) {
 	
 	var _input string
 	var _error error
@@ -405,13 +421,49 @@ func input (_prompt string, _default string, _options []string, _sensitive bool,
 		}
 	} else {
 		if _error == io.EOF {
-			fmt.Fprintln (os.Stdout)
+			if _, _error := fmt.Fprintln (os.Stdout); _error != nil {
+				return "", false, Errorw (0xc4a6ef64, _error)
+			}
 			return "", true, Errorf (0x4f6d6f8d, "canceled")
 		} else if _error == liner.ErrPromptAborted {
 			return "", true, Errorf (0x5e488998, "canceled")
 		} else {
 			return "", false, Errorw (0xa6e02efc, _error)
 		}
+	}
+	
+	return _input, false, nil
+}
+
+
+
+
+func inputKey (_prompt string) (string, bool, *Error) {
+	
+	_state, _error := term.MakeRaw (int (os.Stdin.Fd ()))
+	if _error != nil {
+		return "", false, Errorw (0xae630e8a, _error)
+	}
+	defer term.Restore (int (os.Stdin.Fd ()), _state)
+	
+	if _, _error := fmt.Fprint (os.Stdout, _prompt); _error != nil {
+		return "", false, Errorw (0x80153b96, _error)
+	}
+	
+	var _buffer [1]byte
+	if _, _error := os.Stdin.Read (_buffer[:]); _error != nil {
+		return "", false, Errorw (0xb99c3c75, _error)
+	}
+	_byte := _buffer[0]
+	
+	_input := string (_byte)
+	
+	if _error := term.Restore (int (os.Stdin.Fd ()), _state); _error != nil {
+		return "", false, Errorw (0xe3419b97, _error)
+	}
+	
+	if _, _error := fmt.Fprintln (os.Stdout); _error != nil {
+		return "", false, Errorw (0xc4a6ef64, _error)
 	}
 	
 	return _input, false, nil
