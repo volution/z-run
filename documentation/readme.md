@@ -9,6 +9,7 @@
 
 
 
+
 ----
 
 
@@ -183,7 +184,7 @@ One can consult the following resources:
 * the `z-run` draft man page in <documentation/manual/z-run.1.ronn>;
 * the various example files in <examples>, which expose most of the basic and advanced `z-run` features;
 * the scripts folders linked-at in the [status](#status) section;
-* the simple scripts in the [examples](#examples) section;
+* the simple snippets in the [examples](#examples) section;
 
 
 
@@ -195,6 +196,126 @@ One can consult the following resources:
 
 ## Examples
 
+
+> **For the moment, this section shall also serve as a manual.**
+
+
+
+
+### Introduction
+
+
+Prerequisites:
+* having `z-run` deployed somewhere on the `$PATH`;
+  (it is recommended to place it in `/usr/local/bin`;)
+* nothing else!
+
+
+Terminology:
+
+* scriptlet
+  -- a small and simple script,
+  executed by an interpreter (`bash`, Python, `jq`, etc.),
+  focusing on one single well-defined task,
+  delegating more lower-level tasks to other scriptlets;
+  (you know, follow the old UNIX philosophy of KISS, "[keep-it-simple-stupid](https://en.wikipedia.org/wiki/KISS_principle)",
+  or its more civilized variant "[do one thing and do it well](https://en.wikipedia.org/wiki/Unix_philosophy#Do_One_Thing_and_Do_It_Well)",
+  and use a "[top-down structured programming](https://en.wikipedia.org/wiki/Top-down_and_bottom-up_design#Programming)" approach;)
+
+* scriptlet label
+  -- the identifier of the scriptlet,
+  usually in a hierarchical form like `category / subcategory / task`;
+  this is used when invoking a scriptlet as in `z-run ':: category / subcategory / task'`;
+
+* scriptlet body
+  -- the source code of the scriptlet,
+  passed by `z-run` to the delegated interpreter;
+  `z-run` doesn't look, change, or care what is inside the body;
+  it is taken verbatim, without any expansions or changes;
+  (it only must be a valid UTF-8 text;)
+
+* library
+  -- a set of related scriptlets,
+  managed by `z-run`;
+
+* workbench
+  -- `z-run` allows one to have multiple self-contained scriptlet libraries,
+  therefore, the folder where such library resides is called a workbench;
+  however a workbench can contain other files,
+  perhaps files the scriptlets require or operate on;
+  for example in case of development projects,
+  the library can be placed inside the `scripts` folder,
+  but the workbench is the entire project folder;
+
+* library source file
+  -- the library is compiled from a set of source files;
+  each can contain one or multiple scriptlets;
+  each can include one or multiple other source files;
+
+
+Behaviour:
+
+* `z-run` should be executed in the workbench folder;
+  (thus the current folder is usually workbench folder;)
+
+* `z-run` searches the workbench folder for scriptlets based on the following rules:
+  * first it tries to see if there is a `z-run`, `zrun`, `scriptlets`, `scripts`, or `bin` folder;
+    (perhaps prefixed by `_` or `.`, as in `z-run`, `_z-run`, or `.z-run`;)
+  * if none such folder exists, it assumes that the workbench folder is the basis for the library;
+  * then given the folder previously identified, it tries to see if there is a `z-run` or `zrun` file;
+    (perhaps prefixed by `_` or `.`, as in `z-run`, `_z-run`, or `.z-run`;)
+  * if none such file exists, it then tries from the first step, but looking into `.git`, `.hg`, `.svn`, `.bzr`, `.darcs`;
+    (this allows one to hide `z-run` scripts inside the VCS folder;)
+
+* `z-run` only accepts valid UTF-8 files for the library source;
+
+* `z-run` is quite "white-space" sensitive;
+  (inside the scriptlet body it doesn't care;)
+
+* `z-run` always handles source files relative to the workbench folder;
+
+* `z-run` always executes scriptlets in the workbench folder;
+
+
+Suggestions:
+
+* although scriptlets can take arguments,
+  if based on an argument the behaviour changes radically,
+  consider splitting that into two different scriptlets;
+
+* have each scriptlet focus on a single well defined task,
+  consider delegating lower-level tasks to other scriptlets;
+
+* instead of having complex shell pipe-lines,
+  consider extracting part of a pipe-line into a dedicated scriptlet;
+
+* if the same snippet of code repeats multiple times,
+  consider extracting it into a dedicated scriptlet;
+
+* if some scriptlets are not meant to be executed directly,
+  consider hiding them from the main menu,
+  by either catching them in sub-menus,
+  or by completely hiding them by prefixing them with `--`,
+  as in `--:: some-category / some-very-low-level-task :: ...`;
+
+* many times the main purpose of a scriptlet is
+  to just prepare the environment for another tool,
+  and as the last action just executing that tool;
+  in this case consider using `exec some-tool ...`,
+  thus replacing the interpreter process with that tool's process;
+  ( else one would end-up with a tree of processes that just wait for one-another;)
+
+
+
+
+### Creating the library of scriptlets
+
+**TBD**
+
+
+
+
+### Using the library of scriptlets
 
 **TBD**
 
