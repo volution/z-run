@@ -262,6 +262,11 @@ func menuPause (_context *Context) (bool, *Error) {
 	fmt.Fprintf (os.Stderr, "\n---- << press return to continue... >>")
 	os.Stderr.Sync ()
 	
+	if _error := keyboard.Open (); _error != nil {
+		return false, Errorw (0xcc4423a2, _error)
+	}
+	defer keyboard.Close ()
+	
 	_loop : for {
 		
 		var _key keyboard.Key
