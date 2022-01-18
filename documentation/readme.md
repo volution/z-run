@@ -165,6 +165,155 @@ I have even built a simple map-reduce framework to handle offline log processing
 
 
 
+----
+
+
+
+
+## Manual
+
+At the moment the documentation is quite scarce...
+
+One can consult the following resources:
+* the `z-run` draft man page in <documentation/manual/z-run.1.ronn>;
+* the various example files in <examples>, which expose most of the basic and advanced `z-run` features;
+* the scripts folders linked-at in the [status](#status) section;
+* the simple scripts in the [examples](#examples) section;
+
+
+
+
+----
+
+
+
+
+## Examples
+
+
+**TBD**
+
+
+
+
+----
+
+
+
+
+## Installation
+
+
+
+
+### Download prebuilt executables
+
+
+One should see the [releases page on GitHub](https://github.com/cipriancraciun/z-run/releases),
+where pre-built executables (only Intel 64bit architectures) are available for:
+* Linux (the main development and testing environment) -- <br/>
+  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1>
+* OSX (only Intel CPU's) (the second targeted environment) -- <br/>
+  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1>
+* OpenBSD (seldom tested) -- <br/>
+  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1>
+* FreeBSD (seldom tested) -- <br/>
+  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1>
+
+
+For example:
+~~~~
+curl \
+        -s -S -f -L \
+        -o /tmp/z-run \
+        https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
+#
+
+chmod a=rx /tmp/z-run
+
+sudo cp /tmp/z-run /usr/local/bin/z-run
+~~~~
+
+
+
+
+### Build from sources
+
+
+Go is a prerequisite;
+one can istall it from any Linux or BSD package manager,
+or OSX's `brew`,
+or just downloading it from <https://golang.org/dl>.
+
+The first step is preparing the environment:
+~~~~
+mkdir \
+        /tmp/z-run \
+        /tmp/z-run/bin \
+        /tmp/z-run/src \
+        /tmp/z-run/go \
+#
+~~~~
+
+The second step is cloning the Git repository:
+~~~~
+git clone \
+        --branch development \
+        --depth 1 \
+        http://github.com/cipriancraciun/z-run.git \
+        /tmp/z-run/src \
+#
+~~~~
+
+Alternatively, one can just fetch the sources bundle:
+~~~~
+curl \
+        -s -S -f -L \
+        -o /tmp/z-run/src.tar.gz \
+        https://github.com/cipriancraciun/z-run/archive/refs/heads/development.tar.gz \
+#
+
+tar \
+        -x -z \
+        -f /tmp/z-run/src.tar.gz \
+        -C /tmp/z-run/src \
+        --strip-components 1 \
+#
+~~~~
+
+Finally, compiling the `z-run` executable:
+~~~~
+cd /tmp/z-run/src/sources
+
+env \
+        GOPATH=/tmp/z-run/go \
+go build \
+        -tags 'netgo' \
+        -gcflags 'all=-l=4' \
+        -ldflags 'all=-s' \
+        -trimpath \
+        -o /tmp/z-run/bin/z-run \
+        ./cmd/z-run.go \
+#
+~~~~
+
+Optionally, deploying the `z-run` executable:
+~~~~
+sudo \
+cp \
+        /tmp/z-run/bin/z-run \
+        /usr/local/bin/z-run \
+#
+~~~~
+
+
+
+
+----
+
+
+
+
 ## FAQ
 
 
