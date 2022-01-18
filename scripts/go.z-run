@@ -91,11 +91,17 @@
 	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
+	if test -n "${GOOS:-}" ; then
+		_suffix="--${GOOS}"
+	else
+		_suffix=''
+	fi
+	
 	exec -- \
 		nice -n 19 -- \
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
-			-o "${_outputs}/${_main}--debug" \
+			-o "${_outputs}/${_main}--debug${_suffix}" \
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
@@ -170,6 +176,36 @@
 		mv -T -- "${_outputs}/${_main}--release${_suffix}.old" "${_outputs}/${_main}--release${_suffix}"
 		rm -- "${_outputs}/${_main}--release${_suffix}.new"
 	fi
+!!
+
+
+
+
+<< go / build / * / debug / all
+	"${ZRUN[@]}" ':: go / build / * / debug / linux' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / darwin' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / freebsd' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / openbsd' "${@}"
+!!
+
+<< go / build / * / debug / linux
+	export -- GOOS=linux
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
+!!
+
+<< go / build / * / debug / darwin
+	export -- GOOS=darwin
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
+!!
+
+<< go / build / * / debug / freebsd
+	export -- GOOS=freebsd
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
+!!
+
+<< go / build / * / debug / openbsd
+	export -- GOOS=openbsd
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
 
