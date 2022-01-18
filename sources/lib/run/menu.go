@@ -270,7 +270,7 @@ func menuPause (_context *Context) (bool, *Error) {
 	_loop : for {
 		
 		var _key keyboard.Key
-		if _, _key_0, _error := keyboard.GetSingleKey (); _error == nil {
+		if _, _key_0, _error := keyboard.GetKey (); _error == nil {
 			_key = _key_0
 		} else {
 			fmt.Fprintf (os.Stderr, "\n\n")
