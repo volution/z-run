@@ -223,7 +223,7 @@ Terminology:
   and use a "[top-down structured programming](https://en.wikipedia.org/wiki/Top-down_and_bottom-up_design#Programming)" approach;)
 
 * scriptlet label
-  -- the identifier of the scriptlet,
+  -- the unique identifier of the scriptlet,
   usually in a hierarchical form like `category / subcategory / task`;
   this is used when invoking a scriptlet as in `z-run ':: category / subcategory / task'`;
 
@@ -308,16 +308,249 @@ Suggestions:
 
 
 
+----
+
+
+
+
 ### Creating the library of scriptlets
 
-**TBD**
+
+`z-run` uses a simple syntax, one perhaps similar to `make`:
+
+* each library source file contains a sequence of scriptlets (label and body),
+  or a set of directives (including other source files, changing the enviroment, etc.);
+
+* scriptlets can be written in one line
+  by using the following syntax,
+  where the `scriptlet label` can't contain `::`,
+  and the interpreter is assumed to be `bash`:
+~~~~
+:: scriptlet label :: scriptlet body
+~~~~
+
+* scriptlets can be written on multiple lines
+  by using the following syntax,
+  where the `scriptlet label` can't contain `::`,
+  the `scriptlet body` must be indented
+  (tabs or spaces doesn't matter, just be consistent)
+  (the first indentation level will be removed when sent to the interpreter),
+  and the interpreter is assumed to be `bash`:
+~~~~
+<< scriptlet label
+	scriptlet body line 1
+	scriptlet body line 2
+	...
+!!
+~~~~
+
+* scriptlets can have other interpreters than `bash`
+  by using the following syntax,
+  just like the `#!` file header in normal scripts
+  (mind the spaces between `#!` and the rest of that line):
+~~~~
+<< something in bash (A)
+	...
+!!
+<< something in bash (B)
+	#! <bash>
+	...
+!!
+<< something in Python (A)
+	#! <python2>
+	...
+!!
+<< something in Python (B)
+	#! <python3>
+	...
+!!
+<< something in jq (with extra arguments)
+	#! <jq> --slurp --raw-output
+	...
+!!
+<< something in custom interpreter (A)
+	#! my-custom-interpreter
+	...
+!!
+<< something in custom interpreter (B)
+	#! /usr/local/bin/my-custom-interpreter
+!!
+~~~~
+
+* scriptlets can be excluded from the library
+  (mind the two `##` just before `::` or `<<`):
+~~~~
+##:: this scriptlet is ignored (A) :: ...
+
+##<< this scritplet is ignored (B)
+	...
+!!
+~~~~
+
+* arbitrary multi-line comments can be written
+  (mind the `##{{` and `##}}` that must start on the first column):
+~~~~
+##{{
+
+some text that doesn't contain ##}}
+
+##}}
+~~~~
+
+* scriptlets can be hidden from the main menu
+  (mind the two `--` just before `::` or `<<`):
+~~~~
+--:: this scriptlet is hidden (A) :: ...
+
+--<< this scriptlet is hidden (B)
+	...
+!!
+~~~~
+
+* scriptlets can be gathered in sub-menus
+  (mind the `//` just after the `::`);
+  the `...` suffix gathers all scriptlets having that prefix (except `...`)
+  under that sub-menu, and hides them from the main menu;
+  the `*` suffix also gathers all scriptlets having that prefix (except `*`),
+  under that sub-menu, but doesn't hide them from the main menu;
+  the `::// *` entry is just a sub-menu that contains all other scriptlets:
+~~~~
+::// category-a / ...
+::// category-b / *
+::// *
+
+:: category-a / scriptlet-1 :: ...
+:: category-a / scriptlet-2 :: ...
+:: category-b / scriptlet-1 :: ...
+:: category-b / scriptlet-2 :: ...
+~~~~
+
+* scriptlets can be forced in the main menu
+  (mind the `++` just before `::` or `<<`):
+~~~~
+++:: this scriptlet is forced (A) :: ...
+
+++<< this scriptlet is forced (B)
+!!
+~~~~
+
+* environment variables can be defined to string values:
+~~~~
+&&== env SOME_ENV some-value
+~~~~
+* environment variables can be defined to absolute paths:
+~~~~
+&&== env SOME_PATH ./relative-path
+~~~~
+* the `$PATH` environment variable can be appended with absolute paths:
+~~~~
+&&== path ./bin
+~~~~
+* environment variables, similar to `$PATH`, can be appended with absolute paths:
+~~~~
+&&== env-path-append ./bin
+~~~~
+* environment variables can be removed:
+~~~~
+&&== env-exclude SOME_ENV_1 SOME_ENV_2
+~~~~
+
+* other library source files can be included:
+~~~~
+&& _/file-relative-to-the-current-source-file-parent
+&& ./file-relative-to-the-current-workbench-folder
+&& /file-with-absolute-path
+
+&&?? _/file-that-might-not-exist
+&&?? ./file-that-might-not-exist
+~~~~
+
+
+**TBD:**
+* scriptlets bodies from files;
+* scriptlets replacement bodies;
+* single-line scriptlets with custom interpreter;
+* complex sub-menus;
+* scriptlets generators;
+* depending on files or folders without including them (useful for generators);
+* using print scriptlets;
+* using template scriptlets;
+* using `bash+` interpreter extension;
+* using `python3+` interpreter extension;
+* using `go` interpreter;
+* using `go+` interpreter;
+* using `starlark` interpreter;
+* environment variables values substitutions;
+* included source file paths substitutions;
+
+
+
+----
 
 
 
 
-### Using the library of scriptlets
+### Using the library of scriptlets from the console
 
-**TBD**
+
+* showing the main menu:
+~~~~
+z-run
+~~~~
+
+* showing a sub-menu
+  (the label must exactly match how it was defined,
+  that is with `...` or `*` suffix):
+~~~~
+z-run ':: category-a / ...'
+z-run ':: category-b / *'
+z-run ':: *'
+~~~~
+
+* executing a scriptlet
+  (the `::` is mandatory, regardless of how the scriptlet was defined,
+  with `::` or `<<`):
+~~~~
+z-run ':: category-a / scriptlet-1'
+z-run ':: category-b / scriptlet-2' some-argument ...
+~~~~
+
+* listing all the scriptlet labels:
+~~~~
+z-run list
+~~~~
+
+* select a scriptlet from the menu,
+  and print its label:
+~~~~
+z-run select-label
+~~~~
+
+* select a scriptlet from the menu,
+  and print its body:
+~~~~
+z-run select-body
+~~~~
+
+
+
+
+**TBD:**
+* compiling libraries and using them;
+* executing remote scriptlets over SSH;
+* using a library as a standalone tool with `z-run --exec`;
+* executing standalone scriptlets with `z-run --scriptlet`;
+* executing standalone scriptlets with `z-run --scriptlet-exec`;
+* executing standalone templates with `z-run --template`;
+* `z-run --input`, `z-run --select`, and `z-run --fzf`;
+* `z-run --shell`;
+* `z-run --export=shell-functions`;
+* `z-run --version`;
+* `z-run --help`;
+* `z-run --manual`;
+* `z-run --sources-md5`;
+* `z-run --sources-cpio | gunzip | cpio -i -t`;
+
 
 
 
