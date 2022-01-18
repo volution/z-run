@@ -14,7 +14,7 @@
 
 
 
-++:: run / exec :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-run "${@}"
+--:: run / exec :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-run "${@}"
 
 :: run / shell :: exec -- "${ZRUN[@]}" ':: run / exec' --shell "${@}"
 :: run / shell / untainted :: exec -- "${ZRUN[@]}" ':: run / exec' --shell-untainted "${@}"
@@ -51,13 +51,14 @@
 
 
 
-:: run / wrapper / input :: exec -- "${ZRUN[@]}" ':: run / exec' --input "${@}"
-:: run / wrapper / select :: exec -- "${ZRUN[@]}" ':: run / exec' --select "${@}"
-:: run / wrapper / fzf :: exec -- "${ZRUN[@]}" ':: run / exec' --fzf "${@}"
+:: run / wrapper / z-input :: exec -- "${ZRUN[@]}" ':: run / exec' --input "${@}"
+:: run / wrapper / z-select :: exec -- "${ZRUN[@]}" ':: run / exec' --select "${@}"
+:: run / wrapper / z-fzf :: exec -- "${ZRUN[@]}" ':: run / exec' --fzf "${@}"
 
-++:: run / tools / input :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-input "${@}"
-++:: run / tools / select :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-select "${@}"
-++:: run / tools / fzf :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-fzf "${@}"
+++:: run / tools / z-input :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-input "${@}"
+++:: run / tools / z-select :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-select "${@}"
+++:: run / tools / z-fzf :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-fzf "${@}"
+++:: run / tools / z-run :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-run "${@}"
 
 
 

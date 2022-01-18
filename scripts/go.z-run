@@ -9,6 +9,7 @@
 
 
 :: watch / go / build / * / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / build / * / debug' "${@}"
+:: watch / go / execute / * / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / execute / * / debug' "${@}"
 
 
 

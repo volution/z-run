@@ -1,0 +1,28 @@
+#!/dev/null
+
+
+<<== _ / generate
+	test "${#}" -eq 0
+	for _main in z-run z-input z-select z-fzf ; do
+		
+		printf -- ':: watch / go / build / %s / debug :: exec -- "${ZRUN[@]}" ":: watch / go / build / * / debug" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: watch / go / execute / %s / debug :: exec -- "${ZRUN[@]}" ":: watch / go / execute / * / debug" %q "${@}"\n' "${_main}" "${_main}"
+		
+		printf -- '++:: go / execute / %s / debug :: exec -- "${ZRUN[@]}" ":: go / execute / * / debug" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: go / execute / %s / release :: exec -- "${ZRUN[@]}" ":: go / execute / * / release" %q "${@}"\n' "${_main}" "${_main}"
+		
+		printf -- '++:: go / build / %s / debug :: exec -- "${ZRUN[@]}" ":: go / build / * / debug" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: go / build / %s / release / all :: exec -- "${ZRUN[@]}" ":: go / build / * / release / all" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: go / build / %s / release :: exec -- "${ZRUN[@]}" ":: go / build / * / release" %q "${@}"\n' "${_main}" "${_main}"
+		
+		for _os in linux darwin freebsd openbsd ; do
+			
+			printf -- ':: go / build / %s / release / %s :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q" %q "${@}"\n' "${_main}" "${_os}" "${_main}" "${_os}"
+			
+			printf -- ':: deploy / rsync / %s / %s :: exec -- "${ZRUN[@]}" ":: deploy / rsync" %q %q "${@}"\n' "${_os}" "${_main}" "${_os}" "${_main}"
+			printf -- ':: deploy / release / %s / %s :: exec -- "${ZRUN[@]}" ":: deploy / rsync" %q %q "${@}"\n' "${_os}" "${_main}" "${_os}" "${_main}"
+			
+		done
+	done
+!!
+

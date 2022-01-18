@@ -18,5 +18,7 @@
 
 && _/deploy.z-run
 
+&& _/generate.z-run
+
 &&?? _/.local.z-run
 
