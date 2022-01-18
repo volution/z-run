@@ -388,7 +388,7 @@ However `z-run` takes it a step further by offering the following functionalitie
 
 
 
-### Caching
+### What is the performance?
 
 
 `z-run` is designed to support thousands (and in extreme cases tens of thousands) of scriptlets,
@@ -419,17 +419,71 @@ it thus trip if the script is changed beyond the currently executed line).
 
 
 
+### Why Go?
+
+
+Because Go is highly portable, highly stable,
+and especially because it can easily support
+cross-compiling statically linked executables
+to any platform it supports.
+
+
+
+
+### Why not Rust?
+
+
+Because Rust fails to easily support
+cross-compiling (statically or dynamically linked) executables
+to any platform it supports.
+
+Because Rust is less portable than Go;
+for example Rust doesn't consider OpenBSD as a "tier-1" platform.
+
+
+
+
+----
+
+
+
+
 ## Notice (copyright and licensing)
+
+
+### Authors
+
+
+Ciprian Dorin Craciun:
+* <ciprian@volution.ro> or <ciprian.craciun@gmail.com>
+* <https://volution.ro/ciprian>
+* <https://github.com/cipriancraciun>
+
+
 
 
 ### Notice -- short version
 
+
 The code is licensed under GPL 3 or later.
+
+This is the same license as used by
+Linux, Git, MySQL/MariaDB, WordPress, F-Droid,
+and many other projects.
+
+If you **change** the code within this repository
+and use it for **non-personal** purposes,
+you'll have to release the changed source code as per GPL.
+
+
 
 
 ### Notice -- long version
 
-For details about the copyright and licensing, please consult the `notice.txt` file in the `documentation/licensing` folder.
+
+For details about the copyright and licensing,
+please consult the [notice.txt](./documentation/licensing/notice.txt) file
+in the [documentation/licensing](./documentation/licensing) folder.
 
 If someone requires the sources and/or documentation to be released
 under a different license, please send an email to the authors,
