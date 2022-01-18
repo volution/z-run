@@ -100,8 +100,10 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	
 	_message := FlagStringOrDefault (_flags.Prompt.Message, "")
-	_prompt := FlagStringOrDefault (_flags.Prompt.Prompt, ">> ")
+	_prompt := FlagStringOrDefault (_flags.Prompt.Prompt, "")
+	_promptSet := _flags.Prompt.Prompt != nil
 	_promptRepeat := FlagStringOrDefault (_flags.Prompt.PromptRepeat, "")
+	_promptRepeatSet := _flags.Prompt.PromptRepeat != nil
 	
 	_default := FlagStringOrDefault (_flags.Completion.Default, "")
 	_optionsValues := FlagStringsOrDefault (_flags.Completion.Options, nil)
@@ -178,9 +180,6 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	}
 	if (_promptRepeat != "") && !_repeat {
 		return Errorf (0x9dcc574c, "`--prompt-repeat` not allowed without `--repeat`!")
-	}
-	if _promptRepeat == "" {
-		_promptRepeat = _prompt
 	}
 	
 	if (_flags.Output.OutputSeparator != nil) || (_flags.Output.OutputSeparatorNone != nil) || (_flags.Output.OutputSeparatorZero != nil) {
@@ -293,11 +292,21 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 			}
 		}
 		
-		_prompt_0 := _prompt
+		_prompt_0 := ""
+		if _promptSet {
+			_prompt_0 = _prompt
+		} else if _keypress {
+			_prompt_0 = "?? "
+			if !_confirmEnabled && (len (_options) > 0) {
+				_prompt_0 = fmt.Sprintf ("[press `%s`] %s", strings.Join (_options, "` `"), _prompt_0)
+			}
+		} else {
+			_prompt_0 = ">> "
+		}
 		if _confirmEnabled {
-			_prompt_1 := _promptRepeat
-			if _prompt_1 == "" {
-				_prompt_1 = _prompt
+			_prompt_1 := _prompt_0
+			if _promptRepeatSet {
+				_prompt_1 = _promptRepeat
 			}
 			_prompt_2 := strings.ReplaceAll (_prompt_1, "&{EXPECTED}", _confirmTokenOutput)
 			if _prompt_2 != _prompt_1 {
@@ -339,6 +348,12 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 		}
 		if _notEmpty && (_input_0 == "") {
 			continue
+		}
+		if _keypress && (len (_optionsSeen) != 0) {
+			_, _exists := _optionsSeen[_input_0]
+			if !_exists {
+				continue
+			}
 		}
 		
 		if _confirmEnabled && (_input_0 != _confirmTokenExpected) {
@@ -446,17 +461,36 @@ func inputKey (_prompt string) (string, bool, *Error) {
 	}
 	defer term.Restore (int (os.Stdin.Fd ()), _state)
 	
+	// FIXME:  We assume that the terminal is in blocking mode;  we should save the previous state!
+	if _error := syscall.SetNonblock (int (os.Stdin.Fd ()), true); _error != nil {
+		return "", false, Errorw (0xf7463d85, _error)
+	}
+	defer syscall.SetNonblock (int (os.Stdin.Fd ()), false)
+	
 	if _, _error := fmt.Fprint (os.Stdout, _prompt); _error != nil {
 		return "", false, Errorw (0x80153b96, _error)
 	}
 	
-	var _buffer [1]byte
-	if _, _error := os.Stdin.Read (_buffer[:]); _error != nil {
-		return "", false, Errorw (0xb99c3c75, _error)
+	_input := make ([]byte, 0, 16)
+	_shouldStop := false
+	for {
+		var _buffer [1]byte
+		if _, _error := os.Stdin.Read (_buffer[:]); _error == nil {
+			_input = append (_input, _buffer[0])
+			if _input[0] == '\x1b' {
+				_shouldStop = true
+				continue
+			}
+			break
+		} else if os.IsTimeout (_error) {
+			if _shouldStop {
+				break
+			}
+			time.Sleep (10 * time.Millisecond)
+		} else {
+			return "", false, Errorw (0xb99c3c75, _error)
+		}
 	}
-	_byte := _buffer[0]
-	
-	_input := string (_byte)
 	
 	if _error := term.Restore (int (os.Stdin.Fd ()), _state); _error != nil {
 		return "", false, Errorw (0xe3419b97, _error)
@@ -466,7 +500,15 @@ func inputKey (_prompt string) (string, bool, *Error) {
 		return "", false, Errorw (0xc4a6ef64, _error)
 	}
 	
-	return _input, false, nil
+	_inputEscaped := ""
+	if (len (_input) > 1) || (_input[0] < ' ') || (_input[0] > '~') {
+		_inputEscaped = fmt.Sprintf ("%q", _input)
+		_inputEscaped = _inputEscaped [1 : len (_inputEscaped) - 1]
+	} else {
+		_inputEscaped = string (_input[0])
+	}
+	
+	return _inputEscaped, false, nil
 }
 
 
