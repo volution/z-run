@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "Z\-RUN" "1" "2021-10-03" "volution.ro" "z-run"
+.TH "Z\-RUN" "1" "2022-01-18" "volution.ro" "z-run"
 .
 .SH "NAME"
 \fBz\-run\fR \- lightweight scripts library tool
@@ -412,63 +412,6 @@ an alternative folder to the default \fB$HOME/\.cache/z\-run\fR, where various f
 \fBTBD\fR
 .
 .SH "NOTES"
-.
-.SS "Why <code>z\-run</code> vs classical scripts?"
-What sets \fBz\-run\fR aside from a "classical" scripts is:
-.
-.IP "\(bu" 4
-first it allows one to easily mix multiple languages; for example one can easily write a Bash script that chains together a Python, Ruby and another Bash script, all within the same file; (with classical scripts one would have had to create multiple files, one for each language, and explicitly invoke them via the interpreter;)
-.
-.IP "\(bu" 4
-it allows one to easily bundle together unrelated scripts; for example say one uses \fBz\-run\fR to aid in the development process, then one could bundle together scripts related to compiling, testing, deploying, and other single\-shot shortcuts in the same file; (again, with classical scripts, one would have usually put each of these in separate files, or by using \fBcase\fR or \fBfunction\fR try to manage them inside a reduced set of files;)
-.
-.IP "\(bu" 4
-it allows one to easily invoke scriptlets from within the same library, without caring what language they are written in, or where their source code is stored; (with classical scripts one has to take care of getting the paths to other scripts right, especially when running from a different folder than the original one;)
-.
-.IP "" 0
-.
-.P
-However \fBz\-run\fR takes it a step further by offering the following functionalities:
-.
-.IP "\(bu" 4
-environment variables management \-\- by allowing certain environment variables to be overriden, removed or appended (like in the case of \fB$PATH\fR); (with classical scripts one has to manage these by themselves, resort to various "envdir" tools, or interact with shell magic;)
-.
-.IP "\(bu" 4
-hierarchical menus \-\- by simply calling \fBz\-run\fR without any arguments, it presents one with a selectable menu of all the scriptlets in the library, and after one selects a scriptlet it executes it; moreover one can group various scriptlets under other sub\-menus, thus allowing arbitrary nesting and navigation; (when used from a terminal, \fBz\-run\fR uses and embedded \fBfzf\fR\-based UI; when used from outside a terminal, \fBz\-run\fR tries to use \fBz\-run\-\-select\fR (any system), \fBrofi\fR or \fBdmenu\fR (under Linux and BSD\'s) or \fBchoose\fR (under OSX);)
-.
-.IP "\(bu" 4
-SSH\-based remote execution \-\- one can easily execute a given scriptlet on a remote server without having to previously copy anything there; moreover once the scriptlet is executing on the remote server, it can invoke other scriptlets from the library that are also to be executed remotely; (the only requirement is having \fBz\-run\fR installed on the remote machine;)
-.
-.IP "\(bu" 4
-scriptlets generation \-\- one can easily write a scriptlet that generates \fBz\-run\fR compliant source, thus generating other scriptlets based on arbitrary criteria; (for example one could write a scriptlet, that generates other scriptlets specific for each file in a given folder;)
-.
-.IP "\(bu" 4
-library compiling \-\- one can easily create a single file that contains the entire library, which can then be moved and used in another place;
-.
-.IP "\(bu" 4
-Go\-based templates \-\- that are useful especially in generating other scriptlets;
-.
-.IP "" 0
-.
-.SS "Caching"
-\fBz\-run\fR is designed to support thousands (and in extreme cases tens of thousands) of scriptlets, especially when scriptlet generation is used\.
-.
-.P
-Therefore \fBz\-run\fR has built\-in optimizations to cache the library contents (without any regeneration) unless any of the following conditions are met:
-.
-.IP "\(bu" 4
-any of the files that comprise the source code of the library are changed; (based both on file timestamps and contents hashing;)
-.
-.IP "\(bu" 4
-any of the environment variables change;
-.
-.IP "\(bu" 4
-a different version of \fBz\-run\fR is installed; (this covers both upgrading and downgrading;)
-.
-.IP "" 0
-.
-.P
-However once a scriptlet is executed, it and any other invoked scriptlets will use exactly the same cached library contents\. Thus it is safe to change the source code of the library, while a scriptlet is executing\.
 .
 .SH "EXAMPLES"
 \fBTBD\fR
