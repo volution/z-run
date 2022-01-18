@@ -3,10 +3,57 @@
 
 
 
-
 ## About
 
 (TO-BE-CONTINUED...)
+
+
+
+
+## Status
+
+Currently, `z-run` is still in a pre-release state,
+perhaps somewhere between a beta and a release-candidate.
+
+There is no promisse of backward or forward compatibility,
+there is little documentation (besides the examples),
+there is no testing harness,
+and there is no roadmap.
+
+However, **I do use it personally for all my scripting tasks**,
+from project development to automation.
+Also, **I do also use it in production for various operational tasks**,
+from driving Ansible and LetsEncrypt, to remote execution.
+
+Here are some examples of where it is used:
+
+* [z-run](https://github.com/cipriancraciun/z-run/tree/development/scripts)
+  (this tool itself)
+  -- used for all project development tasks (from building and testing to publishing);
+* [z-scratchpad](https://github.com/cipriancraciun/z-scratchpad/tree/master/scripts)
+  (wiki-like and notes tool)
+  -- used for all project development tasks;
+* [kawipiko](https://github.com/volution/kawipiko/tree/development/scripts)
+  (static HTTP server using CDB)
+  -- used for all project development tasks;
+* [vonuvoli](https://github.com/volution/vonuvoli-scheme/tree/development/scripts)
+  (R7RS Scheme interpreter)
+  -- used for all project development tasks, plus building remote building;
+* [md5-tools](https://github.com/volution/volution-md5-tools/tree/master/scripts)
+  (MD5/SHA*/Blake*/etc. recursive parallel hasher)
+  -- used for all project development tasks;
+* [covid19-datasets](https://github.com/cipriancraciun/covid19-datasets/tree/master/scripts)
+  (derived and augmented COVID19 datasets based on JHU and NY-Times)
+  -- used for all workflow aspects, frow downloading, cleaning, merging, and publishing;
+  (it drives `ninja`, `jq`, Python and Julia;  running everything remotely on a dedicated server;)
+* [hyper-simple-server](https://github.com/console9/hyper-simple-server/tree/master/scripts) and
+  [hyper-static-server](https://github.com/console9/hyper-static-server/tree/master/scripts)
+  (low-level HTTP servers written in Rust based on `hyper`)
+  -- used for all project development tasks;
+
+Besides these few public examples, all my development projects (personal or professional)
+have their `z-run` scripts.
+I have even built a simple map-reduce framework to handle offline log processing.
 
 
 
