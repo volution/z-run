@@ -5,7 +5,7 @@ package common
 
 import "os"
 
-import isatty "github.com/mattn/go-isatty"
+import "golang.org/x/term"
 
 
 
@@ -27,18 +27,22 @@ func CheckStdioTerminal () (*Error) {
 
 
 func IsStdinTerminal () (bool) {
-	return isatty.IsTerminal (os.Stdin.Fd ())
+	return IsFileTerminal (os.Stdin)
 }
 
 func IsStdoutTerminal () (bool) {
-	return isatty.IsTerminal (os.Stdout.Fd ())
+	return IsFileTerminal (os.Stdout)
 }
 
 func IsStderrTerminal () (bool) {
-	return isatty.IsTerminal (os.Stderr.Fd ())
+	return IsFileTerminal (os.Stderr)
+}
+
+func IsFileTerminal (_file *os.File) (bool) {
+	return IsFdTerminal (_file.Fd ())
 }
 
 func IsFdTerminal (_descriptor uintptr) (bool) {
-	return isatty.IsTerminal (_descriptor)
+	return term.IsTerminal (int (_descriptor))
 }
 
