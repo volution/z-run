@@ -3,9 +3,107 @@
 
 
 
+
+----
+
+
+
+
 ## About
 
-(TO-BE-CONTINUED...)
+
+The best way to describe `z-run`, is to look at a simple example
+(you know, "a snippet is worth a thousand man-pages"):
+~~~~
+<< hello world (in shell)
+	echo "hello world!"
+!!
+<< hello world (in Python)
+	#! <python3>
+	print("hello world!")
+!!
+<< hello world (in PHP)
+	#! <php>
+	<?php print("hello world!") ?>
+!!
+
+:: ping / google :: z-run ':: ping / *' 8.8.8.8
+:: ping / cloudflare :: z-run ':: ping / *' 1.1.1.1
+--<< ping / *
+	ping "${@}"
+!!
+
+<< ip / addr / show
+	ip --json addr show \
+	| z-run ':: ip / addr / show / jq'
+!!
+--<< ip / addr / show / jq
+	#! <jq> -r
+	.[]
+	| select (.addr_info != [])
+	| .ifname as $ifname
+	| .addr_info[]
+	| [$ifname, .family, .local]
+	| @tsv
+!!
+~~~~
+
+
+Provided that
+one has saved the above into `_z-run` (in the current folder),
+and has copied the `z-run` executable somewhere in the `$PATH`,
+then one can just run `z-run` (in the current folder),
+and be presented with the following menu,
+from where one can select a scriptlet to be executed:
+~~~~
+  ping / google
+  ping / cloudflare
+  ip / addr / show
+  hello world (in shell)
+  hello world (in Python)
+> hello world (in PHP)
+  7/7
+: _
+~~~~
+
+
+In a few sentences,
+`z-run` is a lightweight and portable tool
+that allows one to create and execute a library of scripts,
+by mix-and-matching multiple languages,
+from `bash`, Python, Ruby, PHP, up-to `jq`, `make` and `ninja`.
+
+
+It works based on the observation that
+the majority of interpreters can take as argument
+a path that points to the file to be executed.
+Based on this, when `z-run` is called to execute a scriptlet,
+it creates a temporary file (and if small enough just a pipe),
+and then calls the delegated interpreter.
+
+
+Thus `z-run` fulfills the following basic goals:
+* allows one to easily author small scriptlets,
+  independent of the interpreter,
+  all in one file (or a small set of files);
+* presents the user with a `fzf`-based menu,
+  that allows one to easily select a scriptlet for execution;
+* bootstraps the required script and environment for the actual interpreter;
+* delegates the scriptlet execution to the actual interpreter;
+
+Besides this, `z-run` also fulfills the following advanced goals:
+* allows generating the library at compile-time;
+  (sort of like macro expansion, but at a much lower level;)
+* provides a built-in templating language;
+  (especially useful in the previous feature;)
+* provides remote execution of scriptlets over SSH,
+  without any additional requirements than
+  having `z-run` deployed on the remote machine;
+
+
+
+
+----
 
 
 
