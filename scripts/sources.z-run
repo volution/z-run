@@ -52,10 +52,6 @@
 	
 	test "${#}" -eq 0
 	
-	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--help.txt ; then
-		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--help.txt
-	fi
-	
 	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--manual.txt ; then
 		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--manual.txt
 	fi
