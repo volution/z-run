@@ -98,7 +98,7 @@ documentation (besides the examples), there is no testing harness, and there is
 no roadmap.
 
 However, I do use it personally for all my scripting tasks, from project
-development to automation. Also, I do also use it in production for various
+development to automation. Moreover, I do also use it in production for various
 operational tasks, from driving Ansible and LetsEncrypt, to remote execution.
 
 Also see the "How is it tested?", "How quick are issues fixed?", "How to ask
@@ -199,7 +199,7 @@ Terminology:
 Behavior:
 
   * z-run should be executed in the workbench folder; (thus the current folder
-    is usually workbench folder;)
+    is usually the workbench folder;)
 
   * z-run searches the workbench folder for scriptlets based on the following
     rules:

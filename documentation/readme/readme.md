@@ -128,7 +128,7 @@ and there is no roadmap.
 
 However, **I do use it personally for all my scripting tasks**,
 from project development to automation.
-Also, **I do also use it in production for various operational tasks**,
+Moreover, **I do also use it in production for various operational tasks**,
 from driving Ansible and LetsEncrypt, to remote execution.
 
 Also see the "[How is it tested?](#how-is-it-tested)",
@@ -267,7 +267,7 @@ Terminology:
 Behavior:
 
 * `z-run` should be executed in the workbench folder;
-  (thus the current folder is usually workbench folder;)
+  (thus the current folder is usually the workbench folder;)
 
 * `z-run` searches the workbench folder for scriptlets based on the following rules:
   * first it tries to see if there is a `z-run`, `zrun`, `scriptlets`, `scripts`, or `bin` folder;
