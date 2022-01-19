@@ -51,9 +51,10 @@
 		
 		
 		for _os in linux darwin freebsd openbsd ; do
-			printf -- ':: deploy / rsync / %s / %s :: exec -- "${ZRUN[@]}" ":: deploy / rsync" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: deploy / rsync / %s / %s :: exec -- "${ZRUN[@]}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 			printf -- ':: deploy / release / %s / %s :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
+		printf -- ':: deploy / release / %s / all :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" all "${_main}"
 		
 		
 		
