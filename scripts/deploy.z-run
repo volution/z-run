@@ -41,8 +41,10 @@
 	
 	test -d ./.publish/
 	
+	
 	"${ZRUN[@]}" ':: sources / embedded / bundle'
 	"${ZRUN[@]}" ':: documentation / all / render / forced'
+	
 	
 	_build_version="$( exec -- cat -- ./sources/embedded/build/version.txt )"
 	case "${_build_version}" in
@@ -56,14 +58,6 @@
 		;;
 	esac
 	
-	if ! git diff --quiet ; then
-		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
-		exit -- 1
-	fi
-	if ! git diff --cached --quiet ; then
-		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
-		exit -- 1
-	fi
 	
 	if test "${_build_release}" == true ; then
 		for _main in z-run z-input z-select z-fzf ; do
@@ -79,9 +73,21 @@
 		done
 	fi
 	
+	
+	if ! git diff --quiet ; then
+		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
+		exit -- 1
+	fi
+	if ! git diff --cached --quiet ; then
+		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
+		exit -- 1
+	fi
+	
+	
 	printf -- '[ii]  releasing all for `%s`...\n' "${_build_version}${_build_suffix}" >&2
 	
 	"${ZRUN[@]}" ':: deploy / release' all "${_main_0}"
+	
 	
 	if ! git diff --quiet ; then
 		printf -- '[ee]  dirty repository (after build);  aborting!\n' >&2
@@ -92,15 +98,20 @@
 		exit -- 1
 	fi
 	
+	
 	printf -- '[ii]  tagging and pushing for `%s`...\n' "${_build_version}${_build_suffix}" >&2
+	printf -- '[--]\n' >&2
 	
 	if test "${_build_release}" == true ; then
-		git tag --sign -m "[release]  Release \`v${_build_version}`." "v${_build_version}"
+		git tag --sign -m "[release]  Release \`v${_build_version}\`." -- "v${_build_version}" HEAD
 	else
-		git tag --sign -m "[preview]  Preview \`v${_build_version}`." --force preview
+		git tag --sign -m "[preview]  Preview \`v${_build_version}\`." --force -- preview HEAD
 	fi
 	
 	"${ZRUN[@]}" ':: github / push'
+	
+	printf -- '[--]\n' >&2
+	
 	
 	printf -- '[ii]  publishing all for `%s`...\n' "${_build_version}${_build_suffix}" >&2
 	
@@ -112,6 +123,11 @@
 			fi
 			
 			printf -- '[ii]  publishing `%s` for `%s` for `%s`...\n' "${_main}" "${_os}" "${_build_version}${_build_suffix}" >&2
+			printf -- '[--]\n' >&2
+			
+			if test -f "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" ; then
+				rm -- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc"
+			fi
 			
 			rsync -i -t -p --chmod=0555 -- \
 					"./.outputs/${_main}--release--${_os}" \
@@ -135,8 +151,10 @@
 				ln -s -T -f -- "./${_main}--${_os}--v${_build_version}${_build_suffix}.asc" "./.publish/${_os}/${_main}${_build_suffix}.asc"
 			fi
 			
+			printf -- '[--]\n' >&2
 		done
 	done
+	
 	
 	printf -- '[ii]  publishing all for `%s` (on GitHub)...\n' "${_build_version}${_build_suffix}" >&2
 	
@@ -151,13 +169,13 @@
 			
 			if test "${_build_release}" == true ; then
 				gh release upload --clobber -- "v${_build_version}" \
-						"./.publish/${_os}/${_main}${_build_suffix}" \
-						"./.publish/${_os}/${_main}${_build_suffix}.asc" \
+						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
+						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
 				#
 			else
 				gh release upload --clobber -- preview \
-						"./.publish/${_os}/${_main}${_build_suffix}" \
-						"./.publish/${_os}/${_main}${_build_suffix}.asc" \
+						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
+						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
 				#
 			fi
 			
