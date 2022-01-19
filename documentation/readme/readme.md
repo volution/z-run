@@ -181,7 +181,11 @@ I have even built a simple map-reduce framework to handle offline log processing
 At the moment, the documentation is quite scarce...
 
 One can consult the following resources:
-* the `z-run` draft man page in [z-run.1.ronn](documentation/manual/z-run.1.ronn);
+* the `z-run` draft help in [documentation/help/z-run.txt](./documentation/help/z-run.txt);
+* the `z-run` draft manual in [documentation/manual/z-run.1.ronn](./documentation/manual/z-run.1.ronn);
+* `z-run --help`, `z-run --manual`, and `z-run --readme`;
+  (the above files and this readme are embedded in the executable itself;)
+  (there is also `--manual-man`, `--manual-html`, and `--readme-html` for `man` / HTML formats;)
 * the various example files in [examples](./examples), which expose most of the basic and advanced `z-run` features;
 * the scripts folders linked-at in the [status](#status) section;
 * the simple snippets in the [examples](#examples) section;
@@ -548,9 +552,12 @@ z-run select-body
 * `z-run --version`;
 * `z-run --help`;
 * `z-run --manual`;
+* `z-run --manual-man`;
+* `z-run --manual-html`;
+* `z-run --readme`;
+* `z-run --readme-html`;
 * `z-run --sources-md5`;
 * `z-run --sources-cpio | gunzip | cpio -i -t`;
-
 
 
 
