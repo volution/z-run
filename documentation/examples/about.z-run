@@ -1,0 +1,32 @@
+
+<< hello world (in shell)
+	echo "hello world!"
+!!
+<< hello world (in Python)
+	#! <python3>
+	print("hello world!")
+!!
+<< hello world (in PHP)
+	#! <php>
+	<?php print("hello world!") ?>
+!!
+
+:: ping / google :: z-run ':: ping / *' 8.8.8.8
+:: ping / cloudflare :: z-run ':: ping / *' 1.1.1.1
+<< ping / *
+	ping "${@}"
+!!
+
+<< ip / addr / show
+	ip --json addr show \
+	| z-run ':: ip / addr / show / jq'
+!!
+--<< ip / addr / show / jq
+	#! <jq> -r
+	.[]
+	| select (.addr_info != [])
+	| .ifname as $ifname
+	| .addr_info[]
+	| [$ifname, .family, .local]
+	| @tsv
+!!

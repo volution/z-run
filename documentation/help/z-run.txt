@@ -1,0 +1,131 @@
+
+--------------------------------------------------------------------------------
+=== How to execute scriptlets? ===
+
+Basic commands to select and execute scriptlets:
+>> z-run                              ## show main-menu, select, execute
+>> z-run ':: menu'                    ## show sub-menu,  select, execute
+>> z-run ':: scriptlet' argument ...  ## just execute
+
+Alternative commands to select and execute scriptlets:
+>> z-run select-execute                       ## (as above)
+>> z-run select-execute ':: menu'             ## (as above)
+>> z-run execute ':: scriptlet' argument ...  ## (as above)
+>> z-run execute-ssh user@node ':: scriptlet' argument ...
+
+Advanced commands to interact with scriptlets:
+>> z-run list                        ## print labels
+>> z-run select-label                ## show main-menu, select, print label
+>> z-run select-label ':: menu'      ## show sub-menu,  select, print label
+>> z-run select-body                 ## show main-menu, select, print body
+>> z-run select-body ':: menu'       ## show sub-menu,  select, print body
+>> z-run export-body ':: scriptlet'  ## just print body
+
+Advanced commands to interact with the library:
+>> z-run export-library-json         ## pipe through `jq` for processing
+
+Useful commands:
+>> z-run --shell     ## starts a custom `bash` shell with a custom rc;
+>> source <( z-run --export=shell-functions )  ## exports only `_`;
+>> source <( z-run --export=shell-rc-only )    ## exports custom rc witout `_`;
+>> source <( z-run --export=shell-rc )         ## exports custom rc with `_`;
+>> _                 ## runs `z-run` inside the custom shell, with history;
+
+Low-level execution modes:
+>> z-run --exec ./path/to/project/scripts/z-run
+>> z-run --exec ./path/to/project/scripts/z-run ':: scriptlet' argument ...
+>> z-run --workspace=./path/to/project ...
+## ^^ use the given path instead of the current folder
+>> z-run --untainted ...
+## ^^ use another library from within a scriptlet
+
+Low-level SSH mode:
+>> z-run --ssh \
+    --ssh-target=user@node \
+    --ssh-workspace=/mnt/something \
+    --ssh-export=NAME=value \
+    --ssh-path=/opt/something/bin \
+    --ssh-terminal=dumb \
+    ':: scriptlet' argument ...
+
+Other utilities:
+>> z-run --input --help
+>> z-run --select --help
+>> z-run --fzf --help
+
+--------------------------------------------------------------------------------
+=== How to create scriptlets? ===
+
+Place your scriptlets in a source file named like:
+* `z-run`, `_z-run`, `.z-run`;
+* `zrun`, `_zrun`, `.zrun`;
+* another source file included with `&&` in one of the above;
+
+Place your source files in a folder named like:
+* `z-run`, `zrun`, `scriptlets`, `scripts`, `bin`;
+* perhaps prefix the folder with `_` or `.`;
+* perhaps hide them in the `.git`, `.hg`, `.svn` folders;
+* else just put them in `${HOME}`;
+
+--------------------------------------------------------------------------------
+=== How to write scriptlets? ===
+
+:: hello world :: echo "hello world"
+
+::// *
+::// helo world / ...
+
+<< hello world / in Bash
+    echo 'hello world!'
+!!
+<< hello world / in Python
+    #! <python3>
+    print("hello world!")
+!!
+
+##{{
+      * obviously this section is a comment;
+      * `::// *` defines a sub menu that
+        doesn't hide scriptlets from the main menu;
+      * `::// hello world / ...` defines a sub menu that
+        does hide scriptlets from the main menu;
+      * prefix scriptlets with `##` to comment them;
+      * prefix scriptlets with `--` to
+        hide them from all menus;
+      * prefix scriptlets with `++` to
+        forcibly show them in the main menu;
+##}}
+
+&& path ./tools/bin
+&& path /opt/local/bin
+&& env NAME value
+&& env-exclude NAME_NOT_NEEDED
+&& env-path FOLDER_ABSOLUTE_PATH ./.outputs
+&& env-path-append CUSTOM_PATH ./tools/bin
+&& env-path-append CUSTOM_PATH /opt/local/bin
+
+&& _/include-file-relative-to-this-source
+&& ./scripts/include-file-relative-to-the-workspace
+&&?? ./scripts/.local-scriptlets-that-might-not-exist
+
+<<== generate scriptlets
+    for _environment in production staging development ; do
+        cat << EOS
+    << git / push / ${_environment}
+        git push github
+        echo '[ii] deploying to ${_environment}' >&2
+        git push server/${_environment} HEAD:master
+    !!
+    EOS
+    done
+!!
+
+--------------------------------------------------------------------------------
+=== How to get more information?
+
+>> z-run --version
+>> z-run --help
+>> z-run --manual
+>> man <( z-run --manual-man )
+>> lynx --force-html <( z-run --manual-html )
+
