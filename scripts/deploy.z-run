@@ -41,6 +41,9 @@
 	
 	test -d ./.publish/
 	
+	"${ZRUN[@]}" ':: sources / embedded / bundle'
+	"${ZRUN[@]}" ':: documentation / all / render / forced'
+	
 	_build_version="$( exec -- cat -- ./sources/embedded/build/version.txt )"
 	case "${_build_version}" in
 		( 0.0.0 | *.0 )
@@ -89,11 +92,15 @@
 		exit -- 1
 	fi
 	
+	printf -- '[ii]  tagging and pushing for `%s`...\n' "${_build_version}${_build_suffix}" >&2
+	
 	if test "${_build_release}" == true ; then
-		git tag --sign -m "[release]  Release \`v${_build_version}${_build_suffix}`." "v${_build_version}${_build_suffix}"
+		git tag --sign -m "[release]  Release \`v${_build_version}`." "v${_build_version}"
 	else
-		git tag --sign -m "[preview]  Preview \`v${_build_version}${_build_suffix}`." preview --force
+		git tag --sign -m "[preview]  Preview \`v${_build_version}`." --force preview
 	fi
+	
+	"${ZRUN[@]}" ':: github / push'
 	
 	printf -- '[ii]  publishing all for `%s`...\n' "${_build_version}${_build_suffix}" >&2
 	
@@ -126,6 +133,32 @@
 			if test "${_build_release}" == true ; then
 				ln -s -T -f -- "./${_main}--${_os}--v${_build_version}${_build_suffix}" "./.publish/${_os}/${_main}${_build_suffix}"
 				ln -s -T -f -- "./${_main}--${_os}--v${_build_version}${_build_suffix}.asc" "./.publish/${_os}/${_main}${_build_suffix}.asc"
+			fi
+			
+		done
+	done
+	
+	printf -- '[ii]  publishing all for `%s` (on GitHub)...\n' "${_build_version}${_build_suffix}" >&2
+	
+	for _os in linux darwin freebsd openbsd ; do
+		for _main in z-run z-input z-select z-fzf ; do
+			
+			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
+				continue
+			fi
+			
+			printf -- '[ii]  publishing `%s` for `%s` for `%s` (on GitHub)...\n' "${_main}" "${_os}" "${_build_version}${_build_suffix}" >&2
+			
+			if test "${_build_release}" == true ; then
+				gh release upload --clobber -- "v${_build_version}" \
+						"./.publish/${_os}/${_main}${_build_suffix}" \
+						"./.publish/${_os}/${_main}${_build_suffix}.asc" \
+				#
+			else
+				gh release upload --clobber -- preview \
+						"./.publish/${_os}/${_main}${_build_suffix}" \
+						"./.publish/${_os}/${_main}${_build_suffix}.asc" \
+				#
 			fi
 			
 		done
