@@ -393,7 +393,7 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		_interpreterExecutable = ""
 		_interpreterArguments = nil
 		_interpreterArgumentsExtraDash = false
-		_interpreterArgumentsExtraAllowed = false
+		_interpreterArgumentsExtraAllowed = true
 		_interpreterEnvironment = nil
 		
 	} else if strings.HasPrefix (_scriptletHeader, "<go>") || strings.HasPrefix (_scriptletHeader, "<go+>") {

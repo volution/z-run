@@ -22,8 +22,20 @@ import . "github.com/cipriancraciun/z-run/lib/common"
 
 func MenuMain (_executable string, _arguments []string, _environment map[string]string) (*Error) {
 	
-	if len (_arguments) != 1 {
+	if (len (_arguments) < 1) || (len (_arguments) > 2) {
 		return Errorf (0x6b439ede, "invalid arguments")
+	}
+	
+	_export := false
+	if len (_arguments) == 2 {
+		switch _arguments[1] {
+			case "--export" :
+				_export = true
+			case "--select" :
+				_export = false
+			default :
+				return Errorf (0x75072c65, "invalid arguments")
+		}
 	}
 	
 	_inputs := make ([]string, 0, 1024)
@@ -46,28 +58,39 @@ func MenuMain (_executable string, _arguments []string, _environment map[string]
 		}
 	}
 	
-	_context := & Context {
-			selfExecutable : _executable,
-			cleanEnvironment : _environment,
-		}
+	var _outputs []string
 	
-	if _paths, _ok := _environment["PATH"]; _ok {
-		_context.executablePaths = filepath.SplitList (_paths)
-	}
-	if _terminal, _ok := _environment["TERM"]; _ok {
-		_context.terminal = _terminal
-	}
-	
-	if _outputs, _error := menuSelect (_inputs, _context); _error == nil {
-		for _, _output := range _outputs {
-			if _, _error := io.WriteString (os.Stdout, _output + "\n"); _error != nil {
-				return Errorw (0xeb4af0b7, _error)
+	if !_export {
+		
+		_context := & Context {
+				selfExecutable : _executable,
+				cleanEnvironment : _environment,
 			}
+		
+		if _paths, _ok := _environment["PATH"]; _ok {
+			_context.executablePaths = filepath.SplitList (_paths)
 		}
-		panic (ExitMainSucceeded ())
+		if _terminal, _ok := _environment["TERM"]; _ok {
+			_context.terminal = _terminal
+		}
+		
+		if _outputs_0, _error := menuSelect (_inputs, _context); _error == nil {
+			_outputs = _outputs_0
+		} else {
+			return _error
+		}
+		
 	} else {
-		return _error
+		_outputs = _inputs
 	}
+	
+	for _, _output := range _outputs {
+		if _, _error := io.WriteString (os.Stdout, _output + "\n"); _error != nil {
+			return Errorw (0xeb4af0b7, _error)
+		}
+	}
+	
+	panic (ExitMainSucceeded ())
 }
 
 
