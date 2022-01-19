@@ -92,6 +92,7 @@
 	_html_body="$(
 			exec -- cmark-gfm \
 					--to html \
+					--extension autolink \
 					--validate-utf8 \
 					--unsafe \
 				< ./documentation/readme/readme.md \
@@ -201,6 +202,7 @@
 	_html_body="$(
 			exec -- cmark-gfm \
 					--to html \
+					--extension autolink \
 					--validate-utf8 \
 					--unsafe \
 				< ./documentation/readme/readme.md \
