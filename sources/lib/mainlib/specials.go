@@ -57,8 +57,15 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 			panic (ExitMainSucceeded ())
 		}
 		
-		if (_argument == "--help") || (_argument == "-h") || (_argument == "--manual") || (_argument == "--manual-text") || (_argument == "--manual-html") || (_argument == "--manual-man") {
-			_manual := ""
+		if (_argument == "-h") ||
+				(_argument == "--help") ||
+				(_argument == "--manual") ||
+				(_argument == "--manual-text") || (_argument == "--manual-txt") ||
+				(_argument == "--manual-html") ||
+				(_argument == "--manual-man") ||
+				(_argument == "--readme") ||
+				(_argument == "--readme-text") || (_argument == "--readme-txt") ||
+				(_argument == "--readme-html") {
 			_replacements := map[string]string {
 					"@{PROJECT_URL}" : PROJECT_URL,
 					"@{BUILD_TARGET}" : BUILD_TARGET,
@@ -79,21 +86,33 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 					"@{UNAME_MACHINE}" : UNAME_MACHINE,
 					"@{UNAME_FINGERPRINT}" : UNAME_FINGERPRINT,
 				}
+			_manual := ""
+			_useDecorations := false
 			switch _argument {
 				case "--help", "-h" :
 					_manual = _helpText
-				case "--manual", "--manual-text" :
+					_useDecorations = true
+				case "--manual", "--manual-text", "--manual-txt" :
 					_manual = _manualText
+					_useDecorations = true
 				case "--manual-html" :
 					_manual = _manualHtml
 				case "--manual-man" :
 					_manual = _manualMan
+				case "--readme", "--readme-text", "--readme-txt" :
+					_manual = ReadmeTxt
+					_useDecorations = true
+				case "--readme-html" :
+					_manual = ReadmeHtml
 				default :
 					panic (0x41b79a1d)
 			}
 			if _manual != "__custom__" {
 				if _manual == "" {
 					panic (AbortError (Errorf (0x7f11c1ac, "manual not available")))
+				}
+				if _useDecorations {
+					_manual = HelpHeader + _manual + HelpFooter
 				}
 				for _key, _replacement := range _replacements {
 					_manual = strings.ReplaceAll (_manual, _key, _replacement)
