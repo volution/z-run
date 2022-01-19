@@ -3,68 +3,68 @@
 
 
 
-::// manual / ...
+::// documentation / manual / ...
 
 
 
 
-<< manual / open / * / html / firefox
+<< documentation / manual / open / * / html / firefox
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www firefox-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / * / html / chromium
+<< documentation / manual / open / * / html / chromium
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www chromium-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / * / html / webview
+<< documentation / manual / open / * / html / webview
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www webview open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / * / html / links
+<< documentation / manual / open / * / html / links
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- links file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / * / man
+<< documentation / manual / open / * / man
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- man -- "./documentation/manual/${_manual}.man"
 !!
 
-<< manual / open / * / text
+<< documentation / manual / open / * / text
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- less -- "./documentation/manual/${_manual}.txt"
 !!
 
 
 
 
-<< watch / manual / render / *
+<< watch / documentation / manual / render / *
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	exec -- watchexec \
 			--watch="./documentation/manual/${_manual}.ronn" \
 			--no-shell \
 			-- \
-			"${ZRUN[@]}" ':: manual / render / *' "${_manual}" "${@}" \
+			"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}" "${@}" \
 	#
 !!
 
 
-<< manual / render / *
+<< documentation / manual / render / *
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	if test \
 			"./documentation/manual/${_manual}.ronn" -ot "./documentation/manual/${_manual}.man" -a \
@@ -75,13 +75,13 @@
 		exit -- 0
 	fi
 	printf -- '[ii]  rendering `%s`...\n' "${_manual}" >&2
-	exec -- "${ZRUN[@]}" ':: manual / render / * / forced' "${_manual}" "${@}"
+	exec -- "${ZRUN[@]}" ':: documentation / manual / render / * / forced' "${_manual}" "${@}"
 !!
 
 
 
 
-<< manual / render / * / forced
+<< documentation / manual / render / * / forced
 	
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
