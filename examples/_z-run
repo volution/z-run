@@ -1,18 +1,4 @@
 #!/dev/null
 
-&& _/environment.z-run
-&& _/basic.z-run
-&& _/menus.z-run
-&& _/includes.z-run
-&& _/replacers.z-run
-&& _/generators.z-run
-&& _/interpreters.z-run
-&& _/templates.z-run
-&& _/debug.z-run
-&& _/comments.z-run
-&& _/ssh.z-run
-&& _/python.z-run
-&& _/bash.z-run
-&& _/starlark.z-run
-&& _/os-${ZRUN_OS}.z-run
+&& _/all.z-run
 

@@ -2,27 +2,5 @@
 
 &&== z-run _/../.outputs/z-run--debug
 
-&& _/environment.z-run
-&& _/basic.z-run
-&& _/menus.z-run
-&& _/includes.z-run
-&& _/replacers.z-run
-&& _/generators.z-run
-&& _/interpreters.z-run
-&& _/templates.z-run
-&& _/debug.z-run
-&& _/comments.z-run
-&& _/ssh.z-run
-&& _/python.z-run
-&& _/bash.z-run
-&& _/starlark.z-run
-&& _/os-${ZRUN_OS}.z-run
-
-
-&&?? _/does-not-exist
-&&?? ./tmp/does-not-exist
-&&?? ../tmp/does-not-exist
-&&?? /tmp/does-not-exist
-
-&&??__ _/does-not-exist
+&& _/all.z-run
 

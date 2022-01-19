@@ -1,0 +1,26 @@
+#!/dev/null
+
+
+&&?? _/does-not-exist--1
+&&?? ./tmp/does-not-exist--1
+&&?? ../tmp/does-not-exist--1
+&&?? /tmp/does-not-exist--1
+
+
+&&??__ _/does-not-exist--2
+&&??__ ./tmp/does-not-exist--2
+&&??__ ../tmp/does-not-exist--2
+&&??__ /tmp/does-not-exist--2
+
+
+##&& _/does-not-exist--3
+##&& ./tmp/does-not-exist--3
+##&& ../tmp/does-not-exist--3
+##&& /tmp/does-not-exist--3
+
+
+##&&__ _/does-not-exist--4
+##&&__ ./tmp/does-not-exist--4
+##&&__ ../tmp/does-not-exist--4
+##&&__ /tmp/does-not-exist--4
+
