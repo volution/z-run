@@ -46,6 +46,9 @@
 :: run / flags / manual / text :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-text "${@}"
 :: run / flags / manual / html :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-html "${@}"
 :: run / flags / manual / man :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-man "${@}"
+:: run / flags / readme :: exec -- "${ZRUN[@]}" ':: run / exec' --readme "${@}"
+:: run / flags / readme / text :: exec -- "${ZRUN[@]}" ':: run / exec' --readme-text "${@}"
+:: run / flags / readme / html :: exec -- "${ZRUN[@]}" ':: run / exec' --readme-html "${@}"
 :: run / flags / help :: exec -- "${ZRUN[@]}" ':: run / exec' --help "${@}"
 
 

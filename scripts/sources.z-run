@@ -52,6 +52,18 @@
 	
 	test "${#}" -eq 0
 	
+	if ! cmp -s -- ./documentation/readme/readme.txt ./sources/embedded/manual/readme.txt ; then
+		cp -T -- ./documentation/readme/readme.txt ./sources/embedded/manual/readme.txt
+	fi
+	
+	if ! cmp -s -- ./documentation/readme/readme.html ./sources/embedded/manual/readme.html ; then
+		cp -T -- ./documentation/readme/readme.html ./sources/embedded/manual/readme.html
+	fi
+	
+	if ! cmp -s -- ./documentation/help/z-run.txt ./sources/embedded/manual/z-run--help.txt ; then
+		cp -T -- ./documentation/help/z-run.txt ./sources/embedded/manual/z-run--help.txt
+	fi
+	
 	if ! cmp -s -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--manual.txt ; then
 		cp -T -- ./documentation/manual/z-run.1.txt ./sources/embedded/manual/z-run--manual.txt
 	fi
@@ -236,5 +248,22 @@
 	_timestamp="$( exec -- date -- '+%H:%M:%S' )"
 	printf -- '\n[--]  --------[ %s ]------------------------------------------------------\n\n' "${_timestamp}" >&2
 	exec -- "${@}"
+!!
+
+
+
+
+<< documentation / render
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: readme / render'
+	"${ZRUN[@]}" ':: manual / render / *' z-run.1
+	"${ZRUN[@]}" ':: sources / embedded / manual'
+!!
+
+<< documentation / render / forced
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: readme / render / forced'
+	"${ZRUN[@]}" ':: manual / render / * / forced' z-run.1
+	"${ZRUN[@]}" ':: sources / embedded / manual'
 !!
 

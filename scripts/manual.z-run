@@ -8,82 +8,89 @@
 
 
 
-<< manual / open / html / firefox
+<< manual / open / * / html / firefox
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render'
-	exec -- x-www firefox-guest:z-run open file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	exec -- x-www firefox-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / html / chromium
+<< manual / open / * / html / chromium
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render'
-	exec -- x-www chromium-guest:z-run open file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	exec -- x-www chromium-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / html / webview
+<< manual / open / * / html / webview
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render'
-	exec -- x-www webview open file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	exec -- x-www webview open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / html / links
+<< manual / open / * / html / links
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render'
-	exec -- links file:"$( exec -- readlink -e -- ./documentation/manual/z-run.1.html )"
+	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	exec -- links file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< manual / open / man
+<< manual / open / * / man
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render'
-	exec -- man -- ./documentation/manual/z-run.1.man
+	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	exec -- man -- "./documentation/manual/${_manual}.man"
 !!
 
-<< manual / open / text
+<< manual / open / * / text
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: manual / render'
-	exec -- less -- ./documentation/manual/z-run.1.txt
+	"${ZRUN[@]}" ':: manual / render / *' "${_manual}"
+	exec -- less -- "./documentation/manual/${_manual}.txt"
 !!
 
 
 
 
-<< watch / manual / render
-	test "${#}" -eq 0
+<< watch / manual / render / *
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	exec -- watchexec \
-			--watch=./documentation/manual/z-run.1.ronn \
+			--watch="./documentation/manual/${_manual}.ronn" \
 			--no-shell \
 			-- \
-			"${ZRUN[@]}" ':: manual / render' "${@}" \
+			"${ZRUN[@]}" ':: manual / render / *' "${_manual}" "${@}" \
 	#
 !!
 
 
-<< manual / render
-	test "${#}" -eq 0
+<< manual / render / *
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	if test \
-			./documentation/manual/z-run.1.ronn -ot ./documentation/manual/z-run.1.man -a \
-			./documentation/manual/z-run.1.ronn -ot ./documentation/manual/z-run.1.html -a \
-			./documentation/manual/z-run.1.ronn -ot ./documentation/manual/z-run.1.txt \
+			"./documentation/manual/${_manual}.ronn" -ot "./documentation/manual/${_manual}.man" -a \
+			"./documentation/manual/${_manual}.ronn" -ot "./documentation/manual/${_manual}.html" -a \
+			"./documentation/manual/${_manual}.ronn" -ot "./documentation/manual/${_manual}.txt" \
 	; then
-		printf -- '[ii]  skipping rendering manual!\n' >&2
+		printf -- '[ii]  skipping rendering `%s`!\n' "${_manual}" >&2
 		exit -- 0
 	fi
-	printf -- '[ii]  rendering manual...\n' >&2
-	exec -- "${ZRUN[@]}" ':: manual / render / forced' "${@}"
+	printf -- '[ii]  rendering `%s`...\n' "${_manual}" >&2
+	exec -- "${ZRUN[@]}" ':: manual / render / * / forced' "${_manual}" "${@}"
 !!
 
 
 
 
-<< manual / render / forced
+<< manual / render / * / forced
 	
+	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
 	
 	_build_timestamp="$( exec -- cat -- ./sources/embedded/build/timestamp.txt )"
 	_build_date="${_build_timestamp:0:10}"
 	
 	_ronn_arguments=(
-			--manual=z-run
+			--manual="${_manual%%.*}"
 			--organization=volution.ro
 			--date='1970-12-01'
 			--warnings
@@ -92,26 +99,26 @@
 	ronn \
 			--roff --pipe "${_ronn_arguments[@]}" \
 			-- \
-			./documentation/manual/z-run.1.ronn \
+			"./documentation/manual/${_manual}.ronn" \
 	| sed -r -e "s#December 1970#${_build_date}#g" \
-		>| ./documentation/manual/z-run.1.man.tmp \
+		>| "./documentation/manual/${_manual}.man.tmp" \
 	#
 	mv -T -- \
-			./documentation/manual/z-run.1.man.tmp \
-			./documentation/manual/z-run.1.man \
+			"./documentation/manual/${_manual}.man.tmp" \
+			"./documentation/manual/${_manual}.man" \
 	#
 	
 	ronn \
 			--html --pipe "${_ronn_arguments[@]}" \
 			--style man,dark,print \
 			-- \
-			./documentation/manual/z-run.1.ronn \
+			"./documentation/manual/${_manual}.ronn" \
 	| sed -r -e "s#December 1970#${_build_date}#g" \
-		>| ./documentation/manual/z-run.1.html.tmp \
+		>| "./documentation/manual/${_manual}.html.tmp" \
 	#
 	mv -T -- \
-			./documentation/manual/z-run.1.html.tmp \
-			./documentation/manual/z-run.1.html \
+			"./documentation/manual/${_manual}.html.tmp" \
+			"./documentation/manual/${_manual}.html" \
 	#
 	
 	mandoc \
@@ -122,13 +129,13 @@
 			-O indent=2 \
 			-O width=78 \
 			-W all \
-		< ./documentation/manual/z-run.1.man \
+		< "./documentation/manual/${_manual}.man" \
 	| col -b -x \
-		>| ./documentation/manual/z-run.1.txt.tmp \
+		>| "./documentation/manual/${_manual}.txt.tmp" \
 	#
 	mv -T -- \
-			./documentation/manual/z-run.1.txt.tmp \
-			./documentation/manual/z-run.1.txt \
+			"./documentation/manual/${_manual}.txt.tmp" \
+			"./documentation/manual/${_manual}.txt" \
 	#
 !!
 
