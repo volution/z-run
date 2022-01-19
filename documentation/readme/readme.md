@@ -6,7 +6,7 @@
 > * [Manual](#manual) and [Examples](#examples)
 > * [Installation](#installation) and [FAQ](#faq)
 > * [About](#about), [Status](#status) and [Copyright and licensing](#notice-copyright-and-licensing)
-> * [chat on Discord](https://discord.gg/WjBfs8rz), [discuss on GitHub](https://github.com/cipriancraciun/z-run/discussions/categories/discussions), or [email author](ciprian.craciun@gmail.com)
+> * [chat on Discord](https://discord.gg/WjBfs8rz), [discuss on GitHub](https://github.com/cipriancraciun/z-run/discussions/categories/discussions), or [email author](mailto:ciprian.craciun@gmail.com)
 
 
 
@@ -737,7 +737,7 @@ If you want to use `z-run` in production,
 and want to be sure that you are using it correctly,
 or just want to be sure that issues (or features) that you need get prioritized,
 I own a European limited-liability company
-so just [email me](ciprian.craciun@gmail.com),
+so just [email me](mailto:ciprian.craciun@gmail.com),
 and we can discuss the options.
 
 
