@@ -1,0 +1,8 @@
+
+|| z-run, @{BUILD_VERSION}, @{BUILD_TIMESTAMP}
+||   code & issues at <@{PROJECT_URL}>
+||   git hash @{BUILD_GIT_HASH}
+|| Ciprian Dorin Craciun, <https://volution.ro/ciprian>
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+

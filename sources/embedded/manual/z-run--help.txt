@@ -1,9 +1,5 @@
 
 --------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-|| z-run -- lightweight scriptlets library
-
---------------------------------------------------------------------------------
 === How to execute scriptlets? ===
 
 Basic commands to select and execute scriptlets:
@@ -132,11 +128,4 @@ Place your source files in a folder named like:
 >> z-run --manual
 >> man <( z-run --manual-man )
 >> lynx --force-html <( z-run --manual-html )
-
-|| z-run, @{BUILD_VERSION}, @{BUILD_TIMESTAMP}
-||   code & issues at <@{PROJECT_URL}>
-||   git hash @{BUILD_GIT_HASH}
-|| Ciprian Dorin Craciun, <https://volution.ro/ciprian>
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 
