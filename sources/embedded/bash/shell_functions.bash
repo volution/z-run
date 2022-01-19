@@ -15,7 +15,7 @@ function _ () {
 	fi
 	_select_wrapper=()
 	if test -n "${TMUX:-}" -a "${TERM:-dumb}" != dumb -a "$( type -P -- tmux-popup )" ; then
-		_select_wrapper+=( tmux-popup -- )
+		_select_wrapper+=( env ZFZF_FULLSCREEN=true tmux-popup -- )
 	fi
 	
 	local -- _history_command _history_save

@@ -49,6 +49,16 @@ func FzfMain (_embedded bool, _fullscreen bool, _arguments []string, _environmen
 	}
 	
 	
+	switch _fullscreenEnv, _ := _environment["ZFZF_FULLSCREEN"]; _fullscreenEnv {
+		case "true" :
+			_fullscreen = true
+		case "false" :
+			_fullscreen = false
+		default :
+			// NOP
+	}
+	
+	
 	fzf.MinimalMain (_arguments, _fullscreen, BUILD_VERSION, "z-fzf")
 	
 	panic (0x4716a580)
