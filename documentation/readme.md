@@ -88,7 +88,7 @@ it creates a temporary file (and if small enough just a pipe),
 and then calls the delegated interpreter.
 
 
-Thus `z-run` fulfills the following basic goals:
+Thus, `z-run` fulfills the following basic goals:
 * allows one to easily author small scriptlets,
   independent of the interpreter,
   all in one file (or a small set of files);
@@ -120,7 +120,7 @@ Besides this, `z-run` also fulfills the following advanced goals:
 Currently, `z-run` is still in a pre-release state,
 perhaps somewhere between a beta and a release-candidate.
 
-There is no promisse of backward or forward compatibility,
+There is no promise of backward or forward compatibility,
 there is little documentation (besides the examples),
 there is no testing harness,
 and there is no roadmap.
@@ -155,7 +155,7 @@ Here are some examples of where it is used:
 
 * [covid19-datasets](https://github.com/cipriancraciun/covid19-datasets/tree/master/scripts)
   (derived and augmented COVID19 datasets based on JHU and NY-Times)
-  -- used for all workflow aspects, frow downloading, cleaning, merging, and publishing;
+  -- used for all workflow aspects, from downloading, cleaning, merging, and publishing;
   (it drives `ninja`, `jq`, Python and Julia;  running everything remotely on a dedicated server;)
 
 * [hyper-simple-server](https://github.com/console9/hyper-simple-server/tree/master/scripts) and
@@ -178,11 +178,11 @@ I have even built a simple map-reduce framework to handle offline log processing
 
 ## Manual
 
-At the moment the documentation is quite scarce...
+At the moment, the documentation is quite scarce...
 
 One can consult the following resources:
-* the `z-run` draft man page in <documentation/manual/z-run.1.ronn>;
-* the various example files in <examples>, which expose most of the basic and advanced `z-run` features;
+* the `z-run` draft man page in [z-run.1.ronn](documentation/manual/z-run.1.ronn);
+* the various example files in [examples](./examples), which expose most of the basic and advanced `z-run` features;
 * the scripts folders linked-at in the [status](#status) section;
 * the simple snippets in the [examples](#examples) section;
 
@@ -253,7 +253,7 @@ Terminology:
   each can include one or multiple other source files;
 
 
-Behaviour:
+Behavior:
 
 * `z-run` should be executed in the workbench folder;
   (thus the current folder is usually workbench folder;)
@@ -280,10 +280,10 @@ Behaviour:
 Suggestions:
 
 * although scriptlets can take arguments,
-  if based on an argument the behaviour changes radically,
+  if based on an argument the behavior changes radically,
   consider splitting that into two different scriptlets;
 
-* have each scriptlet focus on a single well defined task,
+* have each scriptlet focus on a single well-defined task,
   consider delegating lower-level tasks to other scriptlets;
 
 * instead of having complex shell pipe-lines,
@@ -319,7 +319,7 @@ Suggestions:
 `z-run` uses a simple syntax, one perhaps similar to `make`:
 
 * each library source file contains a sequence of scriptlets (label and body),
-  or a set of directives (including other source files, changing the enviroment, etc.);
+  or a set of directives (including other source files, changing the environment, etc.);
 
 * scriptlets can be written in one line
   by using the following syntax,
@@ -382,7 +382,7 @@ Suggestions:
 ~~~~
 ##:: this scriptlet is ignored (A) :: ...
 
-##<< this scritplet is ignored (B)
+##<< this scriptlet is ignored (B)
 	...
 !!
 ~~~~
@@ -475,11 +475,11 @@ some text that doesn't contain ##}}
 * depending on files or folders without including them (useful for generators);
 * using print scriptlets;
 * using template scriptlets;
-* using `bash+` interpreter extension;
-* using `python3+` interpreter extension;
-* using `go` interpreter;
-* using `go+` interpreter;
-* using `starlark` interpreter;
+* using the `bash+` interpreter extension;
+* using the `python3+` interpreter extension;
+* using the `go` interpreter;
+* using the `go+` interpreter;
+* using the `starlark` interpreter;
 * environment variables values substitutions;
 * included source file paths substitutions;
 
@@ -600,7 +600,7 @@ sudo cp /tmp/z-run /usr/local/bin/z-run
 
 
 Go is a prerequisite;
-one can istall it from any Linux or BSD package manager,
+one can install it from any Linux or BSD package manager,
 or OSX's `brew`,
 or just downloading it from <https://golang.org/dl>.
 
@@ -704,7 +704,7 @@ What sets `z-run` aside from a classical scripts is this:
   especially when running from a different folder than the original one;)
 
 
-However `z-run` takes it a step further by offering the following functionalities:
+However, `z-run` takes it a step further by offering the following functionalities:
 
 * hierarchical menus
   -- by simply calling `z-run` without any arguments,
@@ -720,7 +720,7 @@ However `z-run` takes it a step further by offering the following functionalitie
 
 * environment variables management
   -- by allowing certain environment variables to be
-  overriden, removed or appended (like in the case of `$PATH`);
+  overridden, removed or appended (like in the case of `$PATH`);
   (with classical scripts, one has to manage these by themselves,
   resort to various "envdir" tools,
   or interact with shell magic;)
@@ -728,7 +728,7 @@ However `z-run` takes it a step further by offering the following functionalitie
 * SSH-based remote execution
   -- one can easily execute a given scriptlet on a remote server
   without having to previously copy anything there;
-  moreover once the scriptlet is executing on the remote server,
+  moreover, once the scriptlet is executing on the remote server,
   it can invoke other scriptlets from the library that are also to be executed remotely;
   (the only requirement is having `z-run` installed on the remote machine;)
 
@@ -757,7 +757,7 @@ For example:
 * my own photography workbench has ~47K scriptlets;
 * and a production operations workbench has ~4K scriptlets;
 
-Therefore `z-run` has built-in optimizations
+Therefore, `z-run` has built-in optimizations
 to cache the library contents (without any regeneration),
 unless any of the following conditions are met:
 * any of the files that comprise the source code of the library are changed;
@@ -766,14 +766,14 @@ unless any of the following conditions are met:
 * a different version of `z-run` is installed;
   (this covers both upgrading and downgrading;)
 
-However once a scriptlet is executed,
+However, once a scriptlet is executed,
 it and any other invoked scriptlets
 will use exactly the same cached library contents.
 Thus, it is safe to change the source code of the library
 while a scriptlet is executing
 (unlike shell scripts,
 that because the shell reads one line at a time in a read-eval-loop,
-it thus trip if the script is changed beyond the currently executed line).
+it thus trips if the script is changed beyond the currently executed line).
 
 
 
@@ -797,7 +797,7 @@ cross-compiling (statically or dynamically linked) executables
 to any platform it supports.
 
 Because Rust is less portable than Go;
-for example Rust doesn't consider OpenBSD as a "tier-1" platform.
+for example, Rust doesn't consider OpenBSD as a "tier-1" platform.
 
 
 
@@ -845,8 +845,8 @@ please consult the [notice.txt](./documentation/licensing/notice.txt) file
 in the [documentation/licensing](./documentation/licensing) folder.
 
 If someone requires the sources and/or documentation to be released
-under a different license, please send an email to the authors,
-stating the licensing requirements, accompanied with the reasons
+under a different license, please email the authors,
+stating the licensing requirements, accompanied by the reasons
 and other details; then, depending on the situation, the authors might
 release the sources and/or documentation under a different license.
 
