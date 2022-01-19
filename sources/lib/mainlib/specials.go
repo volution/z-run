@@ -14,7 +14,7 @@ import . "github.com/cipriancraciun/z-run/embedded"
 
 
 
-func InterceptMainSpecialFlags (_executableName string, _executable0 string, _executable string, _helpText string, _manualText string, _manualHtml string, _manualMan string) (*Error) {
+func InterceptMainSpecialFlags (_executableName string, _executable0 string, _executable string, _helpText string, _manualText string, _manualHtml string, _manualMan string, _environment map[string]string) (*Error) {
 	
 	if (len (os.Args) == 2) {
 		_argument := os.Args[1]
@@ -87,23 +87,30 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 					"@{UNAME_FINGERPRINT}" : UNAME_FINGERPRINT,
 				}
 			_manual := ""
+			_useType := ""
 			_useDecorations := false
 			switch _argument {
 				case "--help", "-h" :
 					_manual = _helpText
+					_useType = "text"
 					_useDecorations = true
 				case "--manual", "--manual-text", "--manual-txt" :
 					_manual = _manualText
+					_useType = "text"
 					_useDecorations = true
 				case "--manual-html" :
 					_manual = _manualHtml
+					_useType = "html"
 				case "--manual-man" :
 					_manual = _manualMan
+					_useType = "man"
 				case "--readme", "--readme-text", "--readme-txt" :
 					_manual = ReadmeTxt
+					_useType = "text"
 					_useDecorations = true
 				case "--readme-html" :
 					_manual = ReadmeHtml
+					_useType = "html"
 				default :
 					panic (0x41b79a1d)
 			}
@@ -111,16 +118,38 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 				if _manual == "" {
 					panic (AbortError (Errorf (0x7f11c1ac, "manual not available")))
 				}
+				_chunks := make ([]string, 0, 8)
 				if _useDecorations {
-					_manual = HelpHeader + _manual + HelpFooter
+					_chunks = append (_chunks, HelpHeader, _manual, HelpFooter)
+				} else {
+					_chunks = append (_chunks, _manual)
 				}
-				for _key, _replacement := range _replacements {
-					_manual = strings.ReplaceAll (_manual, _key, _replacement)
+				for _index := range _chunks {
+					for _key, _replacement := range _replacements {
+						_chunks[_index] = strings.ReplaceAll (_chunks[_index], _key, _replacement)
+					}
 				}
-				if _, _error := os.Stdout.WriteString (_manual); _error != nil {
-					panic (AbortError (Errorw (0x52ba17e7, _error)))
+				_buffer := bytes.NewBuffer (nil)
+				for _, _chunk := range _chunks {
+					_buffer.WriteString (_chunk)
 				}
-				panic (ExitMainSucceeded ())
+				switch _useType {
+					case "text" :
+						if _error := ExecPagerPerhaps ("less", []string {"-f", "@{PATH}"}, "@{PATH}", _environment, _buffer.Bytes ()); _error != nil {
+							panic (AbortError (_error))
+						}
+					case "man" :
+						if _error := ExecPagerPerhaps ("man", []string {"@{PATH}"}, "@{PATH}", _environment, _buffer.Bytes ()); _error != nil {
+							panic (AbortError (_error))
+						}
+					case "html" :
+						// if _error := ExecPagerPerhaps ("w3m", []string {"-T", "text/html", "-I", "UTF-8", "@{PATH}"}, "@{PATH}", _environment, _buffer.Bytes ()); _error != nil {
+						// if _error := ExecPagerPerhaps ("links", []string {"-force-html", "@{PATH}"}, "@{PATH}", _environment, _buffer.Bytes ()); _error != nil {
+						if _error := ExecPagerPerhaps ("lynx", []string {"-force-html", "@{PATH}"}, "@{PATH}", _environment, _buffer.Bytes ()); _error != nil {
+							panic (AbortError (_error))
+						}
+				}
+				panic (0xacd19d57)
 			}
 		}
 	}

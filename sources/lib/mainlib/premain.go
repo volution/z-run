@@ -66,7 +66,16 @@ func PreMainWith (_descriptor *MainDescriptor) () {
 		panic (AbortError (_error))
 	}
 	
-	if _error := InterceptMainSpecialFlags (_descriptor.ExecutableName, _executable0, _executable, _descriptor.HelpTxt, _descriptor.ManualTxt, _descriptor.ManualHtml, _descriptor.ManualMan); _error != nil {
+	var _environmentMap map[string]string
+	var _environmentList []string
+	if _environmentMap_0, _environmentList_0, _error := ResolveMainEnvironment (); _error == nil {
+		_environmentMap = _environmentMap_0
+		_environmentList = _environmentList_0
+	} else {
+		panic (AbortError (_error))
+	}
+	
+	if _error := InterceptMainSpecialFlags (_descriptor.ExecutableName, _executable0, _executable, _descriptor.HelpTxt, _descriptor.ManualTxt, _descriptor.ManualHtml, _descriptor.ManualMan, _environmentMap); _error != nil {
 		panic (AbortError (_error))
 	}
 	
@@ -75,15 +84,6 @@ func PreMainWith (_descriptor *MainDescriptor) () {
 	if _argument0_0, _arguments_0, _error := ResolveMainArguments (_executable0, _executable); _error == nil {
 		_argument0 = _argument0_0
 		_arguments = _arguments_0
-	} else {
-		panic (AbortError (_error))
-	}
-	
-	var _environmentMap map[string]string
-	var _environmentList []string
-	if _environmentMap_0, _environmentList_0, _error := ResolveMainEnvironment (); _error == nil {
-		_environmentMap = _environmentMap_0
-		_environmentList = _environmentList_0
 	} else {
 		panic (AbortError (_error))
 	}
