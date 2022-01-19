@@ -11,8 +11,8 @@ b7bd2ebef5fe1e6977b63c341c02fda1 *embedded/build.go
 dd69f9b65b2dafaabdf9ebd82923e3a3 *embedded/documentation.go
 c3b76b61baa2fd78b28460c7fab83d59 *embedded/documentation/help--footer.txt
 0e9cb89d642e013ed3dd94ae045be082 *embedded/documentation/help--header.txt
-23127bcde0813deed887a1286f2b7715 *embedded/documentation/readme.html
-cd7f908a698ebe19dc621f7ff570b14d *embedded/documentation/readme.txt
+3428ca62b5fc0d22d51ef389ec99e9f5 *embedded/documentation/readme.html
+a84f1a94fc792d63a515858f0afa495a *embedded/documentation/readme.txt
 4881148dcc58d58dbac0b4d804e8fefe *embedded/documentation/z-run--help.txt
 23dfe87b14f21eef6b68a714184fac39 *embedded/documentation/z-run--manual.html
 2a29076ac1ec3ae662783e2a083fa45f *embedded/documentation/z-run--manual.man
