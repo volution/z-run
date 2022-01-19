@@ -149,6 +149,15 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 		if _folder.fallback && (len (_candidates) > 0) {
 			continue
 		}
+		if _stat, _error := os.Lstat (_folder.path); _error == nil {
+			if ! _stat.IsDir () {
+				continue
+			}
+		} else if os.IsNotExist (_error) {
+			continue
+		} else {
+			return "", nil, Errorw (0x336d65f9, _error)
+		}
 		for _, _file := range ResolveSourceFiles {
 			_path := path.Join (_folder.path, _file)
 			if _, _error := os.Lstat (_path); _error == nil {
