@@ -6,6 +6,7 @@
 > * [Manual](#manual) and [Examples](#examples)
 > * [Installation](#installation) and [FAQ](#faq)
 > * [About](#about), [Status](#status) and [Copyright and licensing](#notice-copyright-and-licensing)
+> * [chat on Discord](https://discord.gg/WjBfs8rz), [discuss on GitHub](https://github.com/cipriancraciun/z-run/discussions/categories/discussions), or [email author](ciprian.craciun@gmail.com)
 
 
 
@@ -129,6 +130,12 @@ However, **I do use it personally for all my scripting tasks**,
 from project development to automation.
 Also, **I do also use it in production for various operational tasks**,
 from driving Ansible and LetsEncrypt, to remote execution.
+
+Also see the "[How is it tested?](#how-is-it-tested)",
+"[How quick are issues fixed?](#how-quick-are-issues-fixed)",
+"[How to ask for help?](#how-to-ask-for-help)",
+and "[How to get commercial support?](#how-to-get-commercial-support)"
+questions in the FAQ section.
 
 
 Here are some examples of where it is used:
@@ -685,6 +692,57 @@ cp \
 
 
 
+### How to ask for help?
+
+If you have encountered a bug,
+just use the [GitHub issues](https://github.com/cipriancraciun/z-run/issues).
+
+If you are not sure about something,
+want to give feedback,
+or request new features,
+just use the [GitHub discussions](https://github.com/cipriancraciun/z-run/discussions/categories/discussions).
+
+If you want to ask a quick question,
+or just have a quick chat,
+just head over to the [Discord channel](https://discord.gg/WjBfs8rz).
+
+
+### How is it tested?
+
+I use it myself every day,
+in almost every task that involves my laptop,
+from projects development,
+to production operations,
+application launching,
+and even for auto-completion in the editor.
+
+Most of my use-cases use many of the advanced features,
+thus most corner-cases are well covered.
+
+
+### How quick are issues fixed?
+
+As stated in the previous answer,
+because I use `z-run` myself for everything,
+any major issue means I can't do my work;
+thus I need to stop everything
+and just fix the issue.
+
+As a consequence, the turn-around-time is quite small.
+
+
+### How to get commercial support?
+
+If you want to use `z-run` in production,
+and want to be sure that you are using it correctly,
+or just want to be sure that issues (or features) that you need get prioritized,
+I own a European limited-liability company
+so just [email me](ciprian.craciun@gmail.com),
+and we can discuss the options.
+
+
+
+
 ### Why `z-run` instead of classical scripts?
 
 
@@ -805,6 +863,27 @@ to any platform it supports.
 
 Because Rust is less portable than Go;
 for example, Rust doesn't consider OpenBSD as a "tier-1" platform.
+
+
+
+
+### What other open-source code does it depend on?
+
+* [fzf](https://github.com/junegunn/fzf)
+  (via my custom [fork](https://github.com/cipriancraciun/fzf));
+* [cdb](https://github.com/colinmarc/cdb)
+  (via my custom [fork](github.com/cipriancraciun/go-cdb-lib);
+* [go-flags](github.com/jessevdk/go-flags);
+* [liner](github.com/peterh/liner);
+* also see the [go.mod](./sources/go.mod) file
+  for other minor dependencies;
+
+
+
+
+### Some related readings...
+
+* [Development Environments at Slack](https://slack.engineering/development-environments-at-slack/)
 
 
 
