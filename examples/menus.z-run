@@ -26,3 +26,9 @@
 	*~ ^menu / .*$
 !!
 
+<< custom menu
+	#! <menu>
+	a
+	b
+	c
+!!
