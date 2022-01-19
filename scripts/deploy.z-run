@@ -29,31 +29,105 @@
 
 
 << deploy / publish
+	
+	if test "${#}" -eq 0 ; then
+		_main_0=all
+	else
+		_main_0="${1}"
+		shift -- 1
+	fi
+	
 	test "${#}" -eq 0
+	
 	test -d ./.publish/
-	"${ZRUN[@]}" ':: deploy / release'
+	
 	_build_version="$( exec -- cat -- ./sources/embedded/build/version.txt )"
-	printf -- '[ii]  publishing `%s`...\n' "${_build_version}" >&2
-	for _os in linux darwin freebsd openbsd ; do
+	case "${_build_version}" in
+		( 0.0.0 | *.0 )
+			_build_release=false
+			_build_suffix='--preview'
+		;;
+		( * )
+			_build_release=true
+			_build_suffix=''
+		;;
+	esac
+	
+	if ! git diff --quiet ; then
+		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
+		exit -- 1
+	fi
+	if ! git diff --cached --quiet ; then
+		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
+		exit -- 1
+	fi
+	
+	if test "${_build_release}" == true ; then
 		for _main in z-run z-input z-select z-fzf ; do
-			if test -e "./.publish/${_os}/${_main}--${_os}--v${_build_version}" -a "${_build_version}" != 0.0.0 ; then
-				printf -- '[ee]  release already exists for `%s` for `%s`!\n' "${_main}" "${_os}" >&2
+			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 				continue
 			fi
+			for _os in linux darwin freebsd openbsd ; do
+				if test -e "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" ; then
+					printf -- '[ee]  release already exists for `%s` for `%s`!\n' "${_main}" "${_os}" >&2
+					exit -- 1
+				fi
+			done
+		done
+	fi
+	
+	printf -- '[ii]  releasing all for `%s`...\n' "${_build_version}${_build_suffix}" >&2
+	
+	"${ZRUN[@]}" ':: deploy / release' all "${_main_0}"
+	
+	if ! git diff --quiet ; then
+		printf -- '[ee]  dirty repository (after build);  aborting!\n' >&2
+		exit -- 1
+	fi
+	if ! git diff --cached --quiet ; then
+		printf -- '[ee]  dirty repository (after build);  aborting!\n' >&2
+		exit -- 1
+	fi
+	
+	if test "${_build_release}" == true ; then
+		git tag --sign -m "[release]  Release \`v${_build_version}${_build_suffix}`." "v${_build_version}${_build_suffix}"
+	else
+		git tag --sign -m "[preview]  Preview \`v${_build_version}${_build_suffix}`." preview --force
+	fi
+	
+	printf -- '[ii]  publishing all for `%s`...\n' "${_build_version}${_build_suffix}" >&2
+	
+	for _os in linux darwin freebsd openbsd ; do
+		for _main in z-run z-input z-select z-fzf ; do
+			
+			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
+				continue
+			fi
+			
+			printf -- '[ii]  publishing `%s` for `%s` for `%s`...\n' "${_main}" "${_os}" "${_build_version}${_build_suffix}" >&2
+			
 			rsync -i -t -p --chmod=0555 -- \
 					"./.outputs/${_main}--release--${_os}" \
-					"./.publish/${_os}/${_main}--${_os}--v${_build_version}" \
+					"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
 			#
-			gpg2 --sign --detach-sign --armor \
-					--default-key 58FC2194FCC2478399CB220C5A974037A6FD8839 \
-					--output "./.publish/${_os}/${_main}--${_os}--v${_build_version}.asc" \
-					-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}" \
-			#
+			
+			for _retry in 1 2 3 4 ; do
+				if gpg2 --sign --detach-sign --armor \
+						--default-key 58FC2194FCC2478399CB220C5A974037A6FD8839 \
+						--output "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
+						-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
+				; then break ; fi
+			done
+			
 			gpg2 --verify \
-					-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}.asc" \
+					-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
 			#
-			ln -s -T -f -- "./${_main}--${_os}--v${_build_version}" "./.publish/${_os}/${_main}"
-			ln -s -T -f -- "./${_main}--${_os}--v${_build_version}.asc" "./.publish/${_os}/${_main}.asc"
+			
+			if test "${_build_release}" == true ; then
+				ln -s -T -f -- "./${_main}--${_os}--v${_build_version}${_build_suffix}" "./.publish/${_os}/${_main}${_build_suffix}"
+				ln -s -T -f -- "./${_main}--${_os}--v${_build_version}${_build_suffix}.asc" "./.publish/${_os}/${_main}${_build_suffix}.asc"
+			fi
+			
 		done
 	done
 !!
@@ -69,31 +143,31 @@
 		_os='all'
 	fi
 	if test "${#}" -ge 1 ; then
-		_main="${1}"
+		_main_0="${1}"
 		shift -- 1
 	else
-		_main=all
+		_main_0=all
 	fi
 	test "${#}" -eq 0
 	if test "${__DEPLOY_NORELEASE:-}" == true ; then
 		exit -- 0
 	fi
-	for _main_0 in z-run z-input z-select z-fzf ; do
-		if test "${_main}" != all -a "${_main}" != "${_main_0}" ; then
+	for _main in z-run z-input z-select z-fzf ; do
+		if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 			continue
 		fi
 		case "${_os}" in
 			( all | linux )
-				"${ZRUN[@]}" ':: go / build / * / release / linux' "${_main_0}"
+				"${ZRUN[@]}" ':: go / build / * / release / linux' "${_main}"
 			;;&
 			( all | darwin )
-				"${ZRUN[@]}" ':: go / build / * / release / darwin' "${_main_0}"
+				"${ZRUN[@]}" ':: go / build / * / release / darwin' "${_main}"
 			;;&
 			( all | freebsd )
-				"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${_main_0}"
+				"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${_main}"
 			;;&
 			( all | openbsd )
-				"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${_main_0}"
+				"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${_main}"
 			;;&
 			( all | linux | darwin | freebsd | openbsd )
 			;;
