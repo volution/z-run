@@ -149,9 +149,13 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 		if _folder.fallback && (len (_candidates) > 0) {
 			continue
 		}
-		if _stat, _error := os.Lstat (_folder.path); _error == nil {
-			if ! _stat.IsDir () {
-				continue
+		if _, _error := os.Lstat (_folder.path); _error == nil {
+			if _stat, _error := os.Stat (_folder.path); _error == nil {
+				if ! _stat.IsDir () {
+					continue
+				}
+			} else {
+				return "", nil, Errorw (0x8c151dc4, _error)
 			}
 		} else if os.IsNotExist (_error) {
 			continue
@@ -161,7 +165,11 @@ func resolveSourcePath_1 (_workspace string, _lookupPaths []string) (string, os.
 		for _, _file := range ResolveSourceFiles {
 			_path := path.Join (_folder.path, _file)
 			if _, _error := os.Lstat (_path); _error == nil {
-				_candidates = append (_candidates, _path)
+				if _, _error := os.Stat (_path); _error == nil {
+					_candidates = append (_candidates, _path)
+				} else {
+					return "", nil, Errorw (0xe1cc83e6, _error)
+				}
 			} else if os.IsNotExist (_error) {
 				// NOP
 			} else {
