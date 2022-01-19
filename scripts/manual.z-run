@@ -3,47 +3,47 @@
 
 
 
-::// documentation / manual / ...
+++::// documentation / manual / ...
 
 
 
 
-<< documentation / manual / open / * / html / firefox
+--<< documentation / manual / open / * / html / firefox
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www firefox-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< documentation / manual / open / * / html / chromium
+--<< documentation / manual / open / * / html / chromium
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www chromium-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< documentation / manual / open / * / html / webview
+--<< documentation / manual / open / * / html / webview
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www webview open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< documentation / manual / open / * / html / links
+--<< documentation / manual / open / * / html / links
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- links file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
-<< documentation / manual / open / * / man
+--<< documentation / manual / open / * / man
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- man -- "./documentation/manual/${_manual}.man"
 !!
 
-<< documentation / manual / open / * / text
+--<< documentation / manual / open / * / text
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
@@ -53,7 +53,7 @@
 
 
 
-<< watch / documentation / manual / render / *
+--<< watch / documentation / manual / render / *
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	exec -- watchexec \
 			--watch="./documentation/manual/${_manual}.ronn" \
@@ -64,7 +64,7 @@
 !!
 
 
-<< documentation / manual / render / *
+--<< documentation / manual / render / *
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	if test \
 			"./documentation/manual/${_manual}.ronn" -ot "./documentation/manual/${_manual}.man" -a \
@@ -81,7 +81,7 @@
 
 
 
-<< documentation / manual / render / * / forced
+--<< documentation / manual / render / * / forced
 	
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0

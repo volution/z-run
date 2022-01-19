@@ -8,8 +8,8 @@
 
 
 
-:: watch / run / exec :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec' "${@}"
-:: watch / run / exec / * :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec / *' "${@}"
+--:: watch / run / exec :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec' "${@}"
+--:: watch / run / exec / * :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec / *' "${@}"
 
 
 
@@ -51,22 +51,14 @@
 :: run / flags / readme / html :: exec -- "${ZRUN[@]}" ':: run / exec' --readme-html "${@}"
 :: run / flags / help :: exec -- "${ZRUN[@]}" ':: run / exec' --help "${@}"
 
-
-
-
 :: run / wrapper / z-input :: exec -- "${ZRUN[@]}" ':: run / exec' --input "${@}"
 :: run / wrapper / z-select :: exec -- "${ZRUN[@]}" ':: run / exec' --select "${@}"
 :: run / wrapper / z-fzf :: exec -- "${ZRUN[@]}" ':: run / exec' --fzf "${@}"
 
-++:: run / tools / z-input :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-input "${@}"
-++:: run / tools / z-select :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-select "${@}"
-++:: run / tools / z-fzf :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-fzf "${@}"
-++:: run / tools / z-run :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-run "${@}"
 
 
 
-
-<< run / exec / *
+--<< run / exec / *
 	
 	test "${#}" -ge 1
 	_main="${1}"

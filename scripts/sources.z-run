@@ -250,20 +250,3 @@
 	exec -- "${@}"
 !!
 
-
-
-
-<< documentation / render
-	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / readme / render'
-	"${ZRUN[@]}" ':: documentation / manual / render / *' z-run.1
-	"${ZRUN[@]}" ':: sources / embedded / documentation'
-!!
-
-<< documentation / render / forced
-	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / readme / render / forced'
-	"${ZRUN[@]}" ':: documentation / manual / render / * / forced' z-run.1
-	"${ZRUN[@]}" ':: sources / embedded / documentation'
-!!
-

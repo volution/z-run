@@ -11,6 +11,7 @@
 
 && _/manual.z-run
 && _/readme.z-run
+&& _/documentation.z-run
 
 && _/workspace.z-run
 && _/sources.z-run

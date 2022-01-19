@@ -8,13 +8,13 @@
 
 
 
-:: watch / go / build / * / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / build / * / debug' "${@}"
-:: watch / go / execute / * / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / execute / * / debug' "${@}"
+--:: watch / go / build / * / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / build / * / debug' "${@}"
+--:: watch / go / execute / * / debug :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: go / execute / * / debug' "${@}"
 
 
 
 
-<< go / execute / * / debug
+--<< go / execute / * / debug
 	
 	test "${#}" -ge 1
 	_main="${1}"
@@ -36,7 +36,7 @@
 !!
 
 
-<< go / execute / * / release
+--<< go / execute / * / release
 	
 	test "${#}" -ge 1
 	_main="${1}"
@@ -60,7 +60,7 @@
 
 
 
-<< go / build / * / debug
+--<< go / build / * / debug
 	
 	test "${#}" -ge 1
 	_main="${1}"
@@ -113,7 +113,7 @@
 
 
 
-<< go / build / * / release
+--<< go / build / * / release
 	
 	test "${#}" -ge 1
 	_main="${1}"
@@ -181,29 +181,29 @@
 
 
 
-<< go / build / * / debug / all
+--<< go / build / * / debug / all
 	"${ZRUN[@]}" ':: go / build / * / debug / linux' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / debug / darwin' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / debug / freebsd' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / debug / openbsd' "${@}"
 !!
 
-<< go / build / * / debug / linux
+--<< go / build / * / debug / linux
 	export -- GOOS=linux
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
-<< go / build / * / debug / darwin
+--<< go / build / * / debug / darwin
 	export -- GOOS=darwin
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
-<< go / build / * / debug / freebsd
+--<< go / build / * / debug / freebsd
 	export -- GOOS=freebsd
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
-<< go / build / * / debug / openbsd
+--<< go / build / * / debug / openbsd
 	export -- GOOS=openbsd
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
@@ -211,29 +211,29 @@
 
 
 
-<< go / build / * / release / all
+--<< go / build / * / release / all
 	"${ZRUN[@]}" ':: go / build / * / release / linux' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / darwin' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${@}"
 !!
 
-<< go / build / * / release / linux
+--<< go / build / * / release / linux
 	export -- GOOS=linux
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
-<< go / build / * / release / darwin
+--<< go / build / * / release / darwin
 	export -- GOOS=darwin
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
-<< go / build / * / release / freebsd
+--<< go / build / * / release / freebsd
 	export -- GOOS=freebsd
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
-<< go / build / * / release / openbsd
+--<< go / build / * / release / openbsd
 	export -- GOOS=openbsd
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
