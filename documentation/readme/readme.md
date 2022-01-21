@@ -1,4 +1,17 @@
 
+
+
+
+![logo](./documentation/logo.png)
+
+
+
+
+----
+
+
+
+
 # **z-run** -- lightweight Go-based scripts library tool
 
 
