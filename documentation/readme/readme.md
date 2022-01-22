@@ -606,8 +606,22 @@ where pre-built executables (only Intel 64bit architectures) are available for:
 * FreeBSD (seldom tested) -- <br/>
   <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1>
 
+Also, each of these files are signed with my PGP key `5A974037A6FD8839`, thus do check the signature.
+
 
 For example:
+
+* import my PGP key:
+~~~~
+curl -s https://github.com/cipriancraciun.gpg | gpg2 --import
+~~~~
+~~~~
+gpg: key 5A974037A6FD8839: public key "Ciprian Dorin Craciun <ciprian@volution.ro>" imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+~~~~
+
+* download the executable and signature (replace the `linux` token with `darwin` (for OSX), `freebsd` or `openbsd`):
 ~~~~
 curl \
         -s -S -f -L \
@@ -615,9 +629,56 @@ curl \
         https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
 #
 
-chmod a=rx /tmp/z-run
+curl \
+        -s -S -f -L \
+        -o /tmp/z-run.asc \
+        https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1.asc \
+#
+~~~~
 
+* verify the executable:
+~~~~
+gpg2 --verify /tmp/z-run.asc /tmp/z-run
+~~~~
+
+* **check that the key is `58FC2194FCC2478399CB220C5A974037A6FD8839`**:
+~~~~
+gpg: assuming signed data in '/tmp/z-run'
+gpg: Signature made Sun Oct  3 21:49:50 2021 EEST
+gpg:                using DSA key 58FC2194FCC2478399CB220C5A974037A6FD8839
+gpg: Good signature from "Ciprian Dorin Craciun <ciprian@volution.ro>" [unknown]
+gpg:                 aka "Ciprian Dorin Craciun <ciprian.craciun@gmail.com>" [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 58FC 2194 FCC2 4783 99CB  220C 5A97 4037 A6FD 8839
+~~~~
+
+* change the executable permissions:
+~~~~
+chmod a=rx /tmp/z-run
+~~~~
+
+* copy the executable on the `$PATH`:
+~~~~
 sudo cp /tmp/z-run /usr/local/bin/z-run
+~~~~
+
+* check that it works:
+~~~~
+z-run --version
+~~~~
+~~~~
+* tool          : z-run
+* version       : 0.19.0
+* executable    : /usr/local/bin/z-run
+* build target  : release, linux-amd64, go1.17.6, gc
+* build number  : 12170, 2022-01-19-23-30-43
+* code & issues : https://github.com/volution/z-run
+* sources git   : a6e6ce1dbd63eb871ad0280d6dbafdbc9e7960d9
+* sources hash  : d7ba8be84e85329ac187984750ecd242
+* uname node    : some-workstation
+* uname system  : Linux, 5.15.6-1-default, x86_64
+* uname hash    : 7c8643e588e6fbb4063d2643de27c39b
 ~~~~
 
 
@@ -690,6 +751,24 @@ cp \
         /tmp/z-run/bin/z-run \
         /usr/local/bin/z-run \
 #
+~~~~
+
+Optionally, check that `z-run` works:
+~~~~
+z-run --version
+~~~~
+~~~~
+* tool          : z-run
+* version       : 0.19.0
+* executable    : /usr/local/bin/z-run
+* build target  : release, linux-amd64, go1.17.6, gc
+* build number  : 12170, 2022-01-19-23-30-43
+* code & issues : https://github.com/volution/z-run
+* sources git   : a6e6ce1dbd63eb871ad0280d6dbafdbc9e7960d9
+* sources hash  : d7ba8be84e85329ac187984750ecd242
+* uname node    : some-workstation
+* uname system  : Linux, 5.15.6-1-default, x86_64
+* uname hash    : 7c8643e588e6fbb4063d2643de27c39b
 ~~~~
 
 
