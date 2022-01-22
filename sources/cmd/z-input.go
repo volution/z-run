@@ -3,7 +3,7 @@
 package main
 
 
-import . "github.com/cipriancraciun/z-run/lib/input"
+import . "github.com/volution/z-run/lib/input"
 
 
 

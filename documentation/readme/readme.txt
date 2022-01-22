@@ -473,16 +473,16 @@ One should see the releases page on GitHub, where pre-built executables (only
 Intel 64bit architectures) are available for:
 
   * Linux (the main development and testing environment) --
-    https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/
+    https://github.com/volution/z-run/releases/download/v0.18.1/
     z-run--linux--v0.18.1
   * OSX (only Intel CPU's) (the second targeted environment) --
-    https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/
+    https://github.com/volution/z-run/releases/download/v0.18.1/
     z-run--darwin--v0.18.1
   * OpenBSD (seldom tested) --
-    https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/
+    https://github.com/volution/z-run/releases/download/v0.18.1/
     z-run--openbsd--v0.18.1
   * FreeBSD (seldom tested) --
-    https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/
+    https://github.com/volution/z-run/releases/download/v0.18.1/
     z-run--freebsd--v0.18.1
 
 For example:
@@ -490,7 +490,7 @@ For example:
 curl \
         -s -S -f -L \
         -o /tmp/z-run \
-        https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
+        https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
 #
 
 chmod a=rx /tmp/z-run
@@ -516,7 +516,7 @@ The second step is cloning the Git repository:
 git clone \
         --branch development \
         --depth 1 \
-        http://github.com/cipriancraciun/z-run.git \
+        http://github.com/volution/z-run.git \
         /tmp/z-run/src \
 #
 
@@ -525,7 +525,7 @@ Alternatively, one can just fetch the sources bundle:
 curl \
         -s -S -f -L \
         -o /tmp/z-run/src.tar.gz \
-        https://github.com/cipriancraciun/z-run/archive/refs/heads/development.tar.gz \
+        https://github.com/volution/z-run/archive/refs/heads/development.tar.gz \
 #
 
 tar \
@@ -714,6 +714,7 @@ Ciprian Dorin Craciun:
 
   * ciprian@volution.ro or ciprian.craciun@gmail.com
   * https://volution.ro/ciprian
+  * https://github.com/volution
   * https://github.com/cipriancraciun
 
 Notice -- short version

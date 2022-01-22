@@ -14,9 +14,9 @@ import "strconv"
 import "strings"
 import "text/template"
 
-import . "github.com/cipriancraciun/z-run/lib/library"
-import . "github.com/cipriancraciun/z-run/lib/mainlib"
-import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/volution/z-run/lib/library"
+import . "github.com/volution/z-run/lib/mainlib"
+import . "github.com/volution/z-run/lib/common"
 
 
 

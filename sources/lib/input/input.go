@@ -14,8 +14,8 @@ import "time"
 import "github.com/peterh/liner"
 import "golang.org/x/term"
 
-import . "github.com/cipriancraciun/z-run/lib/mainlib"
-import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/volution/z-run/lib/mainlib"
+import . "github.com/volution/z-run/lib/common"
 
 
 

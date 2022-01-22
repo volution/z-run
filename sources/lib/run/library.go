@@ -5,8 +5,8 @@ package zrun
 
 import "strings"
 
-import . "github.com/cipriancraciun/z-run/lib/library"
-import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/volution/z-run/lib/library"
+import . "github.com/volution/z-run/lib/common"
 
 
 

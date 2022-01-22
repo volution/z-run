@@ -19,8 +19,8 @@ import "unicode/utf8"
 import mpb "github.com/vbauerster/mpb/v5"
 import mpb_decor "github.com/vbauerster/mpb/v5/decor"
 
-import . "github.com/cipriancraciun/z-run/lib/library"
-import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/volution/z-run/lib/library"
+import . "github.com/volution/z-run/lib/common"
 
 
 

@@ -19,7 +19,7 @@
 > * [Manual](#manual) and [Examples](#examples)
 > * [Installation](#installation) and [FAQ](#faq)
 > * [About](#about), [Status](#status) and [Copyright and licensing](#notice-copyright-and-licensing)
-> * [chat on Discord](https://discord.gg/WjBfs8rz), [discuss on GitHub](https://github.com/cipriancraciun/z-run/discussions/categories/discussions), or [email author](mailto:ciprian.craciun@gmail.com)
+> * [chat on Discord](https://discord.gg/WjBfs8rz), [discuss on GitHub](https://github.com/volution/z-run/discussions/categories/discussions), or [email author](mailto:ciprian.craciun@gmail.com)
 
 
 
@@ -153,11 +153,11 @@ questions in the FAQ section.
 
 Here are some examples of where it is used:
 
-* [z-run](https://github.com/cipriancraciun/z-run/tree/development/scripts)
+* [z-run](https://github.com/volution/z-run/tree/development/scripts)
   (this tool itself)
   -- used for all project development tasks (from building and testing to publishing);
 
-* [z-scratchpad](https://github.com/cipriancraciun/z-scratchpad/tree/master/scripts)
+* [z-scratchpad](https://github.com/volution/z-scratchpad/tree/master/scripts)
   (wiki-like and notes tool)
   -- used for all project development tasks;
 
@@ -595,16 +595,16 @@ z-run select-body
 ### Download prebuilt executables
 
 
-One should see the [releases page on GitHub](https://github.com/cipriancraciun/z-run/releases),
+One should see the [releases page on GitHub](https://github.com/volution/z-run/releases),
 where pre-built executables (only Intel 64bit architectures) are available for:
 * Linux (the main development and testing environment) -- <br/>
-  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1>
 * OSX (only Intel CPU's) (the second targeted environment) -- <br/>
-  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1>
 * OpenBSD (seldom tested) -- <br/>
-  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1>
 * FreeBSD (seldom tested) -- <br/>
-  <https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1>
 
 
 For example:
@@ -612,7 +612,7 @@ For example:
 curl \
         -s -S -f -L \
         -o /tmp/z-run \
-        https://github.com/cipriancraciun/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
+        https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
 #
 
 chmod a=rx /tmp/z-run
@@ -646,7 +646,7 @@ The second step is cloning the Git repository:
 git clone \
         --branch development \
         --depth 1 \
-        http://github.com/cipriancraciun/z-run.git \
+        http://github.com/volution/z-run.git \
         /tmp/z-run/src \
 #
 ~~~~
@@ -656,7 +656,7 @@ Alternatively, one can just fetch the sources bundle:
 curl \
         -s -S -f -L \
         -o /tmp/z-run/src.tar.gz \
-        https://github.com/cipriancraciun/z-run/archive/refs/heads/development.tar.gz \
+        https://github.com/volution/z-run/archive/refs/heads/development.tar.gz \
 #
 
 tar \
@@ -708,12 +708,12 @@ cp \
 ### How to ask for help?
 
 If you have encountered a bug,
-just use the [GitHub issues](https://github.com/cipriancraciun/z-run/issues).
+just use the [GitHub issues](https://github.com/volution/z-run/issues).
 
 If you are not sure about something,
 want to give feedback,
 or request new features,
-just use the [GitHub discussions](https://github.com/cipriancraciun/z-run/discussions/categories/discussions).
+just use the [GitHub discussions](https://github.com/volution/z-run/discussions/categories/discussions).
 
 If you want to ask a quick question,
 or just have a quick chat,
@@ -915,6 +915,7 @@ for example, Rust doesn't consider OpenBSD as a "tier-1" platform.
 Ciprian Dorin Craciun:
 * <ciprian@volution.ro> or <ciprian.craciun@gmail.com>
 * <https://volution.ro/ciprian>
+* <https://github.com/volution>
 * <https://github.com/cipriancraciun>
 
 

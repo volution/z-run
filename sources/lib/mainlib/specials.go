@@ -8,8 +8,8 @@ import "fmt"
 import "os"
 import "strings"
 
-import . "github.com/cipriancraciun/z-run/lib/common"
-import . "github.com/cipriancraciun/z-run/embedded"
+import . "github.com/volution/z-run/lib/common"
+import . "github.com/volution/z-run/embedded"
 
 
 

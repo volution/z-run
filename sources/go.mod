@@ -1,4 +1,4 @@
-module github.com/cipriancraciun/z-run
+module github.com/volution/z-run
 
 go 1.17
 

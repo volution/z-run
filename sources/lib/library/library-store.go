@@ -3,8 +3,8 @@
 package library
 
 
-import . "github.com/cipriancraciun/z-run/lib/store"
-import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/volution/z-run/lib/store"
+import . "github.com/volution/z-run/lib/common"
 
 
 

@@ -8,7 +8,7 @@ import "path"
 import "path/filepath"
 import "os"
 
-import . "github.com/cipriancraciun/z-run/embedded"
+import . "github.com/volution/z-run/embedded"
 
 
 

@@ -3,7 +3,7 @@
 package main
 
 
-import . "github.com/cipriancraciun/z-run/lib/fzf"
+import . "github.com/volution/z-run/lib/fzf"
 
 
 

@@ -9,7 +9,7 @@ import "os"
 
 import "github.com/jessevdk/go-flags"
 
-import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/volution/z-run/lib/common"
 
 
 

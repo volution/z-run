@@ -14,8 +14,8 @@ import "sync"
 
 import "github.com/eiannone/keyboard"
 
-import . "github.com/cipriancraciun/z-run/lib/mainlib"
-import . "github.com/cipriancraciun/z-run/lib/common"
+import . "github.com/volution/z-run/lib/mainlib"
+import . "github.com/volution/z-run/lib/common"
 
 
 

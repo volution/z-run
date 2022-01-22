@@ -11,12 +11,12 @@ import "sort"
 import "strings"
 import "syscall"
 
-import . "github.com/cipriancraciun/z-run/lib/run"
-import . "github.com/cipriancraciun/z-run/lib/fzf"
-import . "github.com/cipriancraciun/z-run/lib/input"
-import . "github.com/cipriancraciun/z-run/lib/mainlib"
-import . "github.com/cipriancraciun/z-run/lib/common"
-import . "github.com/cipriancraciun/z-run/embedded"
+import . "github.com/volution/z-run/lib/run"
+import . "github.com/volution/z-run/lib/fzf"
+import . "github.com/volution/z-run/lib/input"
+import . "github.com/volution/z-run/lib/mainlib"
+import . "github.com/volution/z-run/lib/common"
+import . "github.com/volution/z-run/embedded"
 
 
 
