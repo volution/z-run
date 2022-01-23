@@ -172,6 +172,7 @@
 		mv -T -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}"
 	elif ! cmp -s -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}.old" ; then
 		mv -T -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}"
+		rm -- "${_outputs}/${_main}--release${_suffix}.old"
 	else
 		mv -T -- "${_outputs}/${_main}--release${_suffix}.old" "${_outputs}/${_main}--release${_suffix}"
 		rm -- "${_outputs}/${_main}--release${_suffix}.new"
