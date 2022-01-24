@@ -167,7 +167,9 @@ func ProcessExecuteGetStdout (_command *exec.Cmd) (int, []byte, *Error) {
 	}
 	
 	if _waitError != nil {
-		if _command.ProcessState.Exited () {
+		if _command.ProcessState == nil {
+			return -1, nil, Errorw (0x8d75a347, _waitError)
+		} else if _command.ProcessState.Exited () {
 			if _exitCode := _command.ProcessState.ExitCode (); _exitCode >= 0 {
 				return _exitCode, _stdout.Bytes (), nil
 			} else {
