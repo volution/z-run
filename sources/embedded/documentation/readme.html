@@ -246,15 +246,44 @@ and print its label:</li></ul><pre><code>z-run select-label
 </code></pre><ul><li>select a scriptlet from the menu,
 and print its body:</li></ul><pre><code>z-run select-body
 </code></pre><p><strong>TBD:</strong></p><ul><li>compiling libraries and using them;</li><li>executing remote scriptlets over SSH;</li><li>using a library as a standalone tool with <code>z-run --exec</code>;</li><li>executing standalone scriptlets with <code>z-run --scriptlet</code>;</li><li>executing standalone scriptlets with <code>z-run --scriptlet-exec</code>;</li><li>executing standalone templates with <code>z-run --template</code>;</li><li><code>z-run --input</code>, <code>z-run --select</code>, and <code>z-run --fzf</code>;</li><li><code>z-run --shell</code>;</li><li><code>z-run --export=shell-functions</code>;</li><li><code>z-run --version</code>;</li><li><code>z-run --help</code>;</li><li><code>z-run --manual</code>;</li><li><code>z-run --manual-man</code>;</li><li><code>z-run --manual-html</code>;</li><li><code>z-run --readme</code>;</li><li><code>z-run --readme-html</code>;</li><li><code>z-run --sources-md5</code>;</li><li><code>z-run --sources-cpio | gunzip | cpio -i -t</code>;</li></ul><hr><h2>Installation</h2><h3>Download prebuilt executables</h3><p>One should see the <a href=https://github.com/volution/z-run/releases>releases page on GitHub</a>,
-where pre-built executables (only Intel 64bit architectures) are available for:</p><ul><li>Linux (the main development and testing environment) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1</a></li><li>OSX (only Intel CPU's) (the second targeted environment) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1</a></li><li>OpenBSD (seldom tested) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1</a></li><li>FreeBSD (seldom tested) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1</a></li></ul><p>For example:</p><pre><code>curl \
+where pre-built executables (only Intel 64bit architectures) are available for:</p><ul><li>Linux (the main development and testing environment) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1</a></li><li>OSX (only Intel CPU's) (the second targeted environment) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1</a></li><li>OpenBSD (seldom tested) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1</a></li><li>FreeBSD (seldom tested) --<br><a href=https://github.com/volution/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1>https://github.com/volution/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1</a></li></ul><p>Also, each of these files are signed with my PGP key <code>5A974037A6FD8839</code>, thus do check the signature.</p><p>For example:</p><ul><li>import my PGP key:</li></ul><pre><code>curl -s https://github.com/cipriancraciun.gpg | gpg2 --import
+</code></pre><pre><code>gpg: key 5A974037A6FD8839: public key &quot;Ciprian Dorin Craciun &lt;ciprian@volution.ro&gt;&quot; imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+</code></pre><ul><li>download the executable and signature (replace the <code>linux</code> token with <code>darwin</code> (for OSX), <code>freebsd</code> or <code>openbsd</code>):</li></ul><pre><code>curl \
         -s -S -f -L \
         -o /tmp/z-run \
         https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
 #
 
-chmod a=rx /tmp/z-run
-
-sudo cp /tmp/z-run /usr/local/bin/z-run
+curl \
+        -s -S -f -L \
+        -o /tmp/z-run.asc \
+        https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1.asc \
+#
+</code></pre><ul><li>verify the executable:</li></ul><pre><code>gpg2 --verify /tmp/z-run.asc /tmp/z-run
+</code></pre><ul><li><strong>check that the key is <code>58FC2194FCC2478399CB220C5A974037A6FD8839</code></strong>:</li></ul><pre><code>gpg: assuming signed data in '/tmp/z-run'
+gpg: Signature made Sun Oct  3 21:49:50 2021 EEST
+gpg:                using DSA key 58FC2194FCC2478399CB220C5A974037A6FD8839
+gpg: Good signature from &quot;Ciprian Dorin Craciun &lt;ciprian@volution.ro&gt;&quot; [unknown]
+gpg:                 aka &quot;Ciprian Dorin Craciun &lt;ciprian.craciun@gmail.com&gt;&quot; [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 58FC 2194 FCC2 4783 99CB  220C 5A97 4037 A6FD 8839
+</code></pre><ul><li>change the executable permissions:</li></ul><pre><code>chmod a=rx /tmp/z-run
+</code></pre><ul><li>copy the executable on the <code>$PATH</code>:</li></ul><pre><code>sudo cp /tmp/z-run /usr/local/bin/z-run
+</code></pre><ul><li>check that it works:</li></ul><pre><code>z-run --version
+</code></pre><pre><code>* tool          : z-run
+* version       : 0.19.0
+* executable    : /usr/local/bin/z-run
+* build target  : release, linux-amd64, go1.17.6, gc
+* build number  : 12170, 2022-01-19-23-30-43
+* code &amp; issues : https://github.com/volution/z-run
+* sources git   : a6e6ce1dbd63eb871ad0280d6dbafdbc9e7960d9
+* sources hash  : d7ba8be84e85329ac187984750ecd242
+* uname node    : some-workstation
+* uname system  : Linux, 5.15.6-1-default, x86_64
+* uname hash    : 7c8643e588e6fbb4063d2643de27c39b
 </code></pre><h3>Build from sources</h3><p>Go is a prerequisite;
 one can install it from any Linux or BSD package manager,
 or OSX's <code>brew</code>,
@@ -299,6 +328,18 @@ cp \
         /tmp/z-run/bin/z-run \
         /usr/local/bin/z-run \
 #
+</code></pre><p>Optionally, check that <code>z-run</code> works:</p><pre><code>z-run --version
+</code></pre><pre><code>* tool          : z-run
+* version       : 0.19.0
+* executable    : /usr/local/bin/z-run
+* build target  : release, linux-amd64, go1.17.6, gc
+* build number  : 12170, 2022-01-19-23-30-43
+* code &amp; issues : https://github.com/volution/z-run
+* sources git   : a6e6ce1dbd63eb871ad0280d6dbafdbc9e7960d9
+* sources hash  : d7ba8be84e85329ac187984750ecd242
+* uname node    : some-workstation
+* uname system  : Linux, 5.15.6-1-default, x86_64
+* uname hash    : 7c8643e588e6fbb4063d2643de27c39b
 </code></pre><hr><h2>FAQ</h2><h3>How to ask for help?</h3><p>If you have encountered a bug,
 just use the <a href=https://github.com/volution/z-run/issues>GitHub issues</a>.</p><p>If you are not sure about something,
 want to give feedback,

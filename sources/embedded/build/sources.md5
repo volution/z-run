@@ -11,12 +11,12 @@ b7bd2ebef5fe1e6977b63c341c02fda1 *embedded/build.go
 dd69f9b65b2dafaabdf9ebd82923e3a3 *embedded/documentation.go
 c3b76b61baa2fd78b28460c7fab83d59 *embedded/documentation/help--footer.txt
 0e9cb89d642e013ed3dd94ae045be082 *embedded/documentation/help--header.txt
-8845d429f1648c2354278eed430b9116 *embedded/documentation/readme.html
-832b94ae35bba6ba1504ced6d322a812 *embedded/documentation/readme.txt
+4e97bff31e0f62e9db1b74adc63083e8 *embedded/documentation/readme.html
+d9e1df940ebf21a97c32a571160a9281 *embedded/documentation/readme.txt
 4881148dcc58d58dbac0b4d804e8fefe *embedded/documentation/z-run--help.txt
-1136858bb67a5a50296d39edd30757b3 *embedded/documentation/z-run--manual.html
-43b5b30d139b7a66e9afb47a09d52d63 *embedded/documentation/z-run--manual.man
-e47c9e11de6ac96ffe8b3ed49c04d3c6 *embedded/documentation/z-run--manual.txt
+0dcdb8f27ab560aa81c0fc10b5eaada9 *embedded/documentation/z-run--manual.html
+7f3e37edc1ebce442cbd61ea6c15e5ca *embedded/documentation/z-run--manual.man
+be68a6be7b696af679fdb5b678ca3b25 *embedded/documentation/z-run--manual.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
 e10d543f2543579be161515405b52ac1 *embedded/prologues/python3.py0
@@ -29,7 +29,7 @@ e59f2e16d009a96b0a8b098cf850939e *lib/common/environment.go
 c09e9f3a31cdd83afba31db9eeb58107 *lib/common/fingerprints.go
 b0f17303038763298da1abfe568d67a1 *lib/common/pipes_linux.go
 24d00c38bcec92bfe3f9fce38b70d1da *lib/common/pipes_others.go
-9477abaad3f95c84c9a80a6de1587a51 *lib/common/processes.go
+533b85b556b3e3079226106b036573c3 *lib/common/processes.go
 2f38b564bc4318d7aad39a6d48775ab8 *lib/common/resolution.go
 25bd1299724fb10d9be5466ef6c8eb41 *lib/common/terminal.go
 919dd70e6b7f98a45c7886868255b0e4 *lib/common/tokens.go
