@@ -23,13 +23,17 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
-require github.com/jessevdk/go-flags v1.5.0
+require (
+	github.com/jessevdk/go-flags v1.5.0
+	github.com/zeebo/xxh3 v1.0.1
+)
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/gdamore/tcell v1.4.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/saracen/walker v0.1.2 // indirect
 )
 
