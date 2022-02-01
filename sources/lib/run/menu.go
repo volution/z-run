@@ -13,6 +13,7 @@ import "strings"
 import "sync"
 
 import "github.com/eiannone/keyboard"
+import "github.com/zeebo/xxh3"
 
 import . "github.com/volution/z-run/lib/mainlib"
 import . "github.com/volution/z-run/lib/common"
@@ -98,6 +99,25 @@ func MenuMain (_executable string, _arguments []string, _environment map[string]
 
 func menuSelect (_inputs []string, _context *Context) ([]string, *Error) {
 	
+	_prefixHash := true
+	_prefixStrip := 0
+	_suffixStrip := 0
+	
+	if _prefixHash {
+		_prefixStrip = 11
+		_suffixStrip = 1
+		_inputs_0 := _inputs
+		_inputs = make ([]string, len (_inputs_0))
+		for _index, _input := range _inputs_0 {
+			_hash := xxh3.Hash ([]byte (_input))
+			if _input == "*" {
+				_hash = 0
+			}
+			_input = fmt.Sprintf (" |%06d|  %s ", _hash % 1000000, _input)
+			_inputs[_index] = _input
+		}
+	}
+	
 	_inputsChannel := make (chan string, 1024)
 	_outputsChannel := make (chan string, 1024)
 	_outputs := make ([]string, 0, 1024)
@@ -132,6 +152,12 @@ func menuSelect (_inputs []string, _context *Context) ([]string, *Error) {
 	_waiter.Wait ()
 	
 	if _error == nil {
+		if (_prefixStrip > 0) || (_suffixStrip > 0) {
+			for _index, _output := range _outputs {
+				_output = _output[_prefixStrip : len (_output) - _suffixStrip]
+				_outputs[_index] = _output
+			}
+		}
 		return _outputs, nil
 	} else {
 		return nil, _error
