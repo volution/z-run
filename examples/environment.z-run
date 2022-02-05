@@ -2,7 +2,10 @@
 
 
 &&== path .
+
 &&== env ENV_KEY_1 value
+&&== env-fallback ENV_KEY_2 default
+
 &&== env-path ENV_KEY_3 .
 &&== env-path ENV_KEY_4 _
 &&== env-path ENV_KEY_5 ./sources
@@ -14,6 +17,6 @@
 
 <<== generator / env
 	
-	printf -- '&&== env ENV_KEY_2 %s\n' "${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+	printf -- '&&== env ENV_KEY_7 %s\n' "${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
 !!
 
