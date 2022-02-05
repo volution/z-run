@@ -22,7 +22,7 @@ import . "github.com/volution/z-run/embedded"
 
 
 
-func prepareEnvironment (_context *Context, _overrides ... map[string]string) ([]string) {
+func prepareEnvironment (_context *Context, _overrides []map[string]string, _fallbacks []map[string]string) ([]string) {
 	
 	_extraEnvironment := make (map[string]string, 16)
 	
@@ -43,11 +43,11 @@ func prepareEnvironment (_context *Context, _overrides ... map[string]string) ([
 	_overrides_0 = append (_overrides_0, _extraEnvironment)
 	_overrides_0 = append (_overrides_0, _overrides ...)
 	
-	return prepareEnvironment_0 (_context.cleanEnvironment, _overrides_0 ...)
+	return prepareEnvironment_0 (_context.cleanEnvironment, _overrides_0, _fallbacks)
 }
 
 
-func prepareEnvironment_0 (_environment map[string]string, _overrides ... map[string]string) ([]string) {
+func prepareEnvironment_0 (_environment map[string]string, _overrides []map[string]string, _fallbacks []map[string]string) ([]string) {
 	
 	_environmentMap := make (map[string]string, len (_environment))
 	
@@ -55,7 +55,21 @@ func prepareEnvironment_0 (_environment map[string]string, _overrides ... map[st
 	_environmentMap["TERM"] = "dumb"
 	
 	for _name, _value := range _environment {
+		if _value == "" {
+			continue
+		}
 		_environmentMap[_name] = _value
+	}
+	for _, _fallbacks := range _fallbacks {
+		for _name, _value := range _fallbacks {
+			if _value == "" {
+				continue
+			}
+			if _, _exists := _environmentMap[_name]; _exists {
+				continue
+			}
+			_environmentMap[_name] = _value
+		}
 	}
 	for _, _overrides := range _overrides {
 		for _name, _value := range _overrides {
@@ -94,10 +108,12 @@ func prepareExecution (_libraryUrl string, _libraryIdentifier string, _libraryFi
 	}
 	
 	var _scriptletExecutablePaths []string
-	var _scriptletEnvironment map[string]string
+	var _scriptletEnvironmentOverrides map[string]string
+	var _scriptletEnvironmentFallbacks map[string]string
 	if _scriptlet.Context != nil {
 		_scriptletExecutablePaths = _scriptlet.Context.ExecutablePaths
-		_scriptletEnvironment = _scriptlet.Context.Environment
+		_scriptletEnvironmentOverrides = _scriptlet.Context.EnvironmentOverrides
+		_scriptletEnvironmentFallbacks = _scriptlet.Context.EnvironmentFallbacks
 	}
 	
 	var _cleanArguments []string
@@ -116,7 +132,8 @@ func prepareExecution (_libraryUrl string, _libraryIdentifier string, _libraryFi
 			_scriptlet.InterpreterArguments,
 			_scriptlet.InterpreterArgumentsExtraDash,
 			_scriptlet.InterpreterArgumentsExtraAllowed,
-			_scriptlet.InterpreterEnvironment,
+			_scriptlet.InterpreterEnvironmentOverrides,
+			_scriptlet.InterpreterEnvironmentFallbacks,
 			
 			_scriptlet.Fingerprint,
 			_scriptlet.Label,
@@ -127,7 +144,8 @@ func prepareExecution (_libraryUrl string, _libraryIdentifier string, _libraryFi
 			_scriptlet.Source.LineEnd,
 			
 			_scriptletExecutablePaths,
-			_scriptletEnvironment,
+			_scriptletEnvironmentOverrides,
+			_scriptletEnvironmentFallbacks,
 			
 			_context.selfExecutable,
 			_cleanArguments,
@@ -153,7 +171,8 @@ func prepareExecution_0 (
 			_scriptletInterpreterArguments []string,
 			_scriptletInterpreterArgumentsExtraDash bool,
 			_scriptletInterpreterArgumentsExtraAllowed bool,
-			_scriptletInterpreterEnvironment map[string]string,
+			_scriptletInterpreterEnvironmentOverrides map[string]string,
+			_scriptletInterpreterEnvironmentFallbacks map[string]string,
 			
 			_scriptletFingerprint string,
 			_scriptletLabel string,
@@ -164,7 +183,8 @@ func prepareExecution_0 (
 			_scriptletSourceLineEnd uint,
 			
 			_scriptletExecutablePaths []string,
-			_scriptletEnvironment map[string]string,
+			_scriptletEnvironmentOverrides map[string]string,
+			_scriptletEnvironmentFallbacks map[string]string,
 			
 			_selfExecutable string,
 			_cleanArguments []string,
@@ -189,7 +209,8 @@ func prepareExecution_0 (
 	var _interpreterExecutable string
 	var _interpreterArgument0 string
 	var _interpreterArguments []string = make ([]string, 1, len (_cleanArguments) + 32)
-	var _interpreterEnvironment map[string]string
+	var _interpreterEnvironmentOverrides map[string]string
+	var _interpreterEnvironmentFallbacks map[string]string
 	
 	var _executablePaths []string = make ([]string, 0, 128)
 	var _environment map[string]string = make (map[string]string, 128)
@@ -222,7 +243,6 @@ func prepareExecution_0 (
 		
 		case "<exec>" :
 			_interpreterExecutable = _scriptletInterpreterExecutable
-			_interpreterEnvironment = _scriptletInterpreterEnvironment
 			_interpreterArgument0 = _scriptletInterpreterExecutable
 			_interpreterArguments = append (
 					_interpreterArguments,
@@ -595,9 +615,15 @@ func prepareExecution_0 (
 	
 	_interpreterEnvironment_0 := prepareEnvironment_0 (
 			_cleanEnvironment,
-			_interpreterEnvironment,
-			_scriptletEnvironment,
-			_environment,
+			[]map[string]string {
+				_interpreterEnvironmentOverrides,
+				_scriptletEnvironmentOverrides,
+				_environment,
+			},
+			[]map[string]string {
+				_interpreterEnvironmentFallbacks,
+				_scriptletEnvironmentFallbacks,
+			},
 		)
 	
 	if _interpreterExecutable_0, _error := ResolveExecutable (_interpreterExecutable, _executablePaths); _error == nil {

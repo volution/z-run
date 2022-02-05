@@ -225,7 +225,7 @@ func menuSelect_0 (_inputsChannel <-chan string, _outputsChannel chan<- string, 
 	}
 	
 	if _command.Env == nil {
-		_command.Env = prepareEnvironment (_context)
+		_command.Env = prepareEnvironment (_context, nil, nil)
 	}
 	
 //	Logf ('d', 0x5cbde167, "%v", _command.Path)

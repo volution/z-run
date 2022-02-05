@@ -101,7 +101,7 @@ func ScriptletMain (_selfExecutable string, _arguments []string, _environment ma
 		}
 	}
 	
-	_body, _bodyOffsetParse, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _errorParse := parseInterpreter_0 (_label, _body, _header, "")
+	_body, _bodyOffsetParse, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironmentOverrides, _interpreterEnvironmentFallbacks, _errorParse := parseInterpreter_0 (_label, _body, _header, "")
 	if _errorParse != nil {
 		return _errorParse
 	}
@@ -118,7 +118,8 @@ func ScriptletMain (_selfExecutable string, _arguments []string, _environment ma
 			_interpreterArguments,
 			_interpreterArgumentsExtraDash,
 			_interpreterArgumentsExtraAllowed,
-			_interpreterEnvironment,
+			_interpreterEnvironmentOverrides,
+			_interpreterEnvironmentFallbacks,
 			
 			_fingerprint,
 			_label,
@@ -128,6 +129,7 @@ func ScriptletMain (_selfExecutable string, _arguments []string, _environment ma
 			_bodyOffset,
 			0,
 			
+			nil,
 			nil,
 			nil,
 			

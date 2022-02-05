@@ -17,7 +17,8 @@ type Scriptlet struct {
 	InterpreterArguments []string `json:"interpreter_arguments,omitempty"`
 	InterpreterArgumentsExtraDash bool `json:"interpreter_arguments_extra_dash,omitempty"`
 	InterpreterArgumentsExtraAllowed bool `json:"interpreter_arguments_extra_allowed,omitempty"`
-	InterpreterEnvironment map[string]string `json:"interpreter_environment,omitempty"`
+	InterpreterEnvironmentOverrides map[string]string `json:"interpreter_environment_overrides,omitempty"`
+	InterpreterEnvironmentFallbacks map[string]string `json:"interpreter_environment_fallbacks,omitempty"`
 	Body string `json:"body,omitempty"`
 	BodyFingerprint string `json:"body_fingerprint,omitempty"`
 	Context *ScriptletContext `json:"-"`
@@ -44,7 +45,8 @@ type ScriptletSource struct {
 type ScriptletContext struct {
 	Identifier string `json:"identifier"`
 	ExecutablePaths []string `json:"executable_paths"`
-	Environment map[string]string `json:"environment"`
+	EnvironmentOverrides map[string]string `json:"environment_overrides"`
+	EnvironmentFallbacks map[string]string `json:"environment_fallbacks"`
 }
 
 

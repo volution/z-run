@@ -35,7 +35,7 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 		default :
 			return Errorf (0xbf289098, "invalid scriptlet interpreter `%s`", _scriptlet.Interpreter)
 	}
-	if (_scriptlet.InterpreterExecutable != "") || (_scriptlet.InterpreterArguments != nil) || (_scriptlet.InterpreterEnvironment != nil) || _scriptlet.InterpreterArgumentsExtraDash || _scriptlet.InterpreterArgumentsExtraAllowed {
+	if (_scriptlet.InterpreterExecutable != "") || (_scriptlet.InterpreterArguments != nil) || (_scriptlet.InterpreterEnvironmentOverrides != nil) || (_scriptlet.InterpreterEnvironmentFallbacks != nil) || _scriptlet.InterpreterArgumentsExtraDash || _scriptlet.InterpreterArgumentsExtraAllowed {
 		return Errorf (0x901675e8, "invalid scriptlet interpreter state")
 	}
 	
@@ -62,7 +62,8 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 			StringsWithLen (_scriptlet.InterpreterArguments) .
 			Bool (_scriptlet.InterpreterArgumentsExtraDash) .
 			Bool (_scriptlet.InterpreterArgumentsExtraAllowed) .
-			StringsMap (_scriptlet.InterpreterEnvironment) .
+			StringsMap (_scriptlet.InterpreterEnvironmentOverrides) .
+			StringsMap (_scriptlet.InterpreterEnvironmentFallbacks) .
 			StringWithLen (_scriptlet.BodyFingerprint) .
 			StringWithLen (_scriptlet.ContextIdentifier) .
 			Build ()

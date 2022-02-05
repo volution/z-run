@@ -39,7 +39,8 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 	_parseContext.scriptletContext = & ScriptletContext {
 			Identifier : "00000000000000000000000000000000",
 			ExecutablePaths : make ([]string, 0, 16),
-			Environment : make (map[string]string, 128),
+			EnvironmentOverrides : make (map[string]string, 128),
+			EnvironmentFallbacks : make (map[string]string, 128),
 		}
 	
 	_library := NewLibrary ()
@@ -148,7 +149,8 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 					}
 					_scriptlet.InterpreterExecutable = ""
 					_scriptlet.InterpreterArguments = nil
-					_scriptlet.InterpreterEnvironment = nil
+					_scriptlet.InterpreterEnvironmentOverrides = nil
+					_scriptlet.InterpreterEnvironmentFallbacks = nil
 //					Logf ('d', 0x50ec5e25, "parsed replacer `%s` (`%s` / `%s`)...", _scriptlet.Label, _scriptlet.Kind, _scriptlet.Interpreter)
 					continue _loop
 				} else {
@@ -259,7 +261,7 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 			return Errorf (0xf65704dd, "invalid state `%s`", _scriptlet.Interpreter)
 	}
 	
-	_scriptletBody, _scriptletBodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironment, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "", "<bash>")
+	_scriptletBody, _scriptletBodyOffset, _interpreter, _interpreterExecutable, _interpreterArguments, _interpreterArgumentsExtraDash, _interpreterArgumentsExtraAllowed, _interpreterEnvironmentOverrides, _interpreterEnvironmentFallbacks, _error := parseInterpreter_0 (_scriptlet.Label, _scriptlet.Body, "", "<bash>")
 	if _error == nil {
 		
 		_scriptlet.Body = _scriptletBody
@@ -269,7 +271,8 @@ func parseInterpreter (_scriptlet *Scriptlet) (*Error) {
 		_scriptlet.InterpreterArguments = _interpreterArguments
 		_scriptlet.InterpreterArgumentsExtraDash = _interpreterArgumentsExtraDash
 		_scriptlet.InterpreterArgumentsExtraAllowed = _interpreterArgumentsExtraAllowed
-		_scriptlet.InterpreterEnvironment = _interpreterEnvironment
+		_scriptlet.InterpreterEnvironmentOverrides = _interpreterEnvironmentOverrides
+		_scriptlet.InterpreterEnvironmentFallbacks = _interpreterEnvironmentFallbacks
 		
 		return nil
 		
@@ -287,7 +290,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 			_interpreterArguments []string,
 			_interpreterArgumentsExtraDash bool,
 			_interpreterArgumentsExtraAllowed bool,
-			_interpreterEnvironment map[string]string,
+			_interpreterEnvironmentOverrides map[string]string,
+			_interpreterEnvironmentFallbacks map[string]string,
 			_errorReturn *Error,
 		) {
 	
@@ -343,7 +347,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		_interpreterArguments = nil
 		_interpreterArgumentsExtraDash = false
 		_interpreterArgumentsExtraAllowed = true
-		_interpreterEnvironment = nil
+		_interpreterEnvironmentOverrides = nil
+		_interpreterEnvironmentFallbacks = nil
 		
 	} else if strings.HasPrefix (_scriptletHeader, "<starlark>") {
 		
@@ -360,7 +365,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		_interpreterArguments = nil
 		_interpreterArgumentsExtraDash = false
 		_interpreterArgumentsExtraAllowed = true
-		_interpreterEnvironment = nil
+		_interpreterEnvironmentOverrides = nil
+		_interpreterEnvironmentFallbacks = nil
 		
 	} else if strings.HasPrefix (_scriptletHeader, "<print>") {
 		
@@ -377,7 +383,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		_interpreterArguments = nil
 		_interpreterArgumentsExtraDash = false
 		_interpreterArgumentsExtraAllowed = false
-		_interpreterEnvironment = nil
+		_interpreterEnvironmentOverrides = nil
+		_interpreterEnvironmentFallbacks = nil
 		
 	} else if strings.HasPrefix (_scriptletHeader, "<menu>") {
 		
@@ -394,7 +401,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		_interpreterArguments = nil
 		_interpreterArgumentsExtraDash = false
 		_interpreterArgumentsExtraAllowed = true
-		_interpreterEnvironment = nil
+		_interpreterEnvironmentOverrides = nil
+		_interpreterEnvironmentFallbacks = nil
 		
 	} else if strings.HasPrefix (_scriptletHeader, "<go>") || strings.HasPrefix (_scriptletHeader, "<go+>") {
 		
@@ -417,7 +425,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		_interpreterArguments = nil
 		_interpreterArgumentsExtraDash = false
 		_interpreterArgumentsExtraAllowed = true
-		_interpreterEnvironment = nil
+		_interpreterEnvironmentOverrides = nil
+		_interpreterEnvironmentFallbacks = nil
 		
 	} else {
 		
@@ -440,7 +449,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 		_interpreterArgumentsExtraAllowed = false
 		_interpreterArgumentsExtraDash = false
 		_interpreterArgumentsExtraDashNow := false
-		_interpreterEnvironment = nil
+		_interpreterEnvironmentOverrides = nil
+		_interpreterEnvironmentFallbacks = nil
 		
 		if strings.HasPrefix (_interpreterExecutable, "<") && strings.HasSuffix (_interpreterExecutable, ">") {
 			_interpreterExecutable = _interpreterExecutable[1 : len (_interpreterExecutable) - 1]
@@ -1038,6 +1048,49 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					switch _kind {
 						
 						case "path" :
+							_kind = "path"
+						
+						case "environment", "env" :
+							_kind = "environment-override"
+						case "environment-override", "env-override" :
+							_kind = "environment-override"
+						case "environment-fallback", "env-fallback" :
+							_kind = "environment-fallback"
+						
+						case "environment-path", "env-path" :
+							_kind = "environment-override-path"
+						case "environment-override-path", "env-override-path", "environment-path-override", "env-path-override" :
+							_kind = "environment-override-path"
+						case "environment-fallback-path", "env-fallback-path", "environment-path-fallback", "env-path-fallback" :
+							_kind = "environment-fallback-path"
+						
+						case "environment-append", "env-append" :
+							_kind = "environment-override-append"
+						case "environment-override-append", "env-override-append" :
+							_kind = "environment-override-append"
+						case "environment-fallback-append", "env-fallback-append" :
+							_kind = "environment-fallback-append"
+						
+						case "environment-append-path", "env-append-path", "env-path-append" :
+							_kind = "environment-override-append-path"
+						case "environment-override-append-path", "env-override-append-path", "env-path-override-append" :
+							_kind = "environment-override-append-path"
+						case "environment-fallback-append-path", "env-fallback-append-path", "env-path-fallback-append" :
+							_kind = "environment-fallback-append-path"
+						
+						case "environment-exclude", "env-exclude" :
+							_kind = "environment-exclude"
+						
+						case "z-run" :
+							_kind = "z-run"
+						
+						default :
+							return Errorf (0x5b8c6ee2, "invalid syntax (%d):  invalid statement | %s", _lineIndex, _line)
+					}
+					
+					switch _kind {
+						
+						case "path" :
 							
 							if _descriptor == "" {
 								return Errorf (0x8c2e1bf8, "invalid syntax (%d):  empty statement path descriptor | %s", _lineIndex, _line)
@@ -1064,7 +1117,9 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								_parseContext.scriptletContext.ExecutablePaths = append (_parseContext.scriptletContext.ExecutablePaths, _path)
 							}
 							
-						case "environment", "env", "environment-path", "env-path", "environment-append", "env-append", "environment-path-append", "env-path-append" :
+						case "environment-override", "environment-fallback",
+								"environment-override-path", "environment-fallback-path",
+								"environment-override-append-path", "environment-fallback-append-path" :
 							
 							if _descriptor == "" {
 								return Errorf (0xa36b04fa, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
@@ -1083,7 +1138,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							} else {
 								_value = _value_0
 							}
-							if (_kind == "environment-path") || (_kind == "env-path") || (_kind == "environment-path-append") || (_kind == "env-path-append") {
+							if (_kind == "environment-override-path") || (_kind == "environment-fallback-path") || (_kind == "environment-override-append-path") || (_kind == "environment-fallback-append-path") {
 								if _value == "" {
 									return Errorf (0x2124d511, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 								}
@@ -1094,8 +1149,17 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								}
 							}
 							if !_disabled {
-								_valueExisting, _exists := _parseContext.scriptletContext.Environment[_name]
-								if (_kind == "environment-append") || (_kind == "env-append") || (_kind == "environment-path-append") || (_kind == "env-path-append") {
+								var _environment map[string]string
+								switch _kind {
+									case "environment-override", "environment-override-path", "environment-override-append", "environment-override-append-path" :
+										_environment = _parseContext.scriptletContext.EnvironmentOverrides
+									case "environment-fallback", "environment-fallback-path", "environment-fallback-append", "environment-fallback-append-path" :
+										_environment = _parseContext.scriptletContext.EnvironmentFallbacks
+									default :
+										panic (0xb8623b38)
+								}
+								_valueExisting, _exists := _environment[_name]
+								if (_kind == "environment-override-append") || (_kind == "environment-override-append-path") || (_kind == "environment-fallback-append") || (_kind == "environment-fallback-append-path") {
 									if _exists {
 										_value = _valueExisting + string (os.PathListSeparator) + _value
 									}
@@ -1104,10 +1168,10 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 										return Errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
 									}
 								}
-								_parseContext.scriptletContext.Environment[_name] = _value
+								_environment[_name] = _value
 							}
 							
-						case "environment-exclude", "env-exclude" :
+						case "environment-exclude" :
 							if _descriptor == "" {
 								return Errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 							}
@@ -1116,11 +1180,11 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								if _name == "" {
 									continue
 								}
-								if _, _exists := _parseContext.scriptletContext.Environment[_name]; _exists && !_disabled {
+								if _, _exists := _parseContext.scriptletContext.EnvironmentOverrides[_name]; _exists && !_disabled {
 									return Errorf (0x0ed5990f, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
 								}
 								if !_disabled {
-									_parseContext.scriptletContext.Environment[_name] = ""
+									_parseContext.scriptletContext.EnvironmentOverrides[_name] = ""
 								}
 							}
 						
@@ -1319,7 +1383,7 @@ func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (s
 				Args : []string {
 						"[z-run:generator]",
 					},
-				Env : prepareEnvironment (_context),
+				Env : prepareEnvironment (_context, nil, nil),
 				Stdin : nil,
 				Stdout : nil,
 				Stderr : os.Stderr,
