@@ -13,12 +13,11 @@
 --:: deploy / rsync / * / freebsd :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' freebsd "${@}"
 --:: deploy / rsync / * / openbsd :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' openbsd "${@}"
 
+
+
+
 --<< deploy / rsync / *
-	test "${#}" -eq 3
-	_os="${1}"
-	_main="${2}"
-	_target="${3}"
-	shift -- 3
+	test "${#}" -eq 3 ; _os="${1}" ; _main="${2}" ; _target="${3}" ; shift -- 3
 	"${ZRUN[@]}" ':: deploy / release' "${_os}" "${_main}"
 	_source="./.outputs/${_main}--release--${_os}"
 	printf -- '[ii]  deploying `%s` for `%s` to `%s`...\n' "${_main}" "${_os}" "${_target}" >&2
@@ -125,22 +124,29 @@
 			printf -- '[ii]  publishing `%s` for `%s` for `%s`...\n' "${_main}" "${_os}" "${_build_version}${_build_suffix}" >&2
 			printf -- '[--]\n' >&2
 			
-			if test -f "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" ; then
-				rm -- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc"
-			fi
-			
 			rsync -i -t -p --chmod=0555 -- \
 					"./.outputs/${_main}--release--${_os}" \
 					"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
 			#
 			
-			for _retry in 1 2 3 4 ; do
-				if gpg2 --sign --detach-sign --armor \
-						--default-key 58FC2194FCC2478399CB220C5A974037A6FD8839 \
-						--output "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
-						-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
-				; then break ; fi
-			done
+			if test -e "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" ; then
+				if ! gpg2 --verify -- \
+						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
+						< /dev/null > /dev/null 2> /dev/null \
+				; then
+					rm -- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc"
+				fi
+			fi
+			
+			if test ! -e "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" ; then
+				for _retry in 1 2 3 4 ; do
+					if gpg2 --sign --detach-sign --armor \
+							--default-key 58FC2194FCC2478399CB220C5A974037A6FD8839 \
+							--output "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
+							-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
+					; then break ; fi
+				done
+			fi
 			
 			gpg2 --verify \
 					-- "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
@@ -188,10 +194,10 @@
 
 << deploy / release
 	if test "${#}" -ge 1 ; then
-		_os="${1}"
+		_os_0="${1}"
 		shift -- 1
 	else
-		_os='all'
+		_os_0='all'
 	fi
 	if test "${#}" -ge 1 ; then
 		_main_0="${1}"
@@ -207,25 +213,25 @@
 		if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 			continue
 		fi
-		case "${_os}" in
-			( all | linux )
-				"${ZRUN[@]}" ':: go / build / * / release / linux' "${_main}"
-			;;&
-			( all | darwin )
-				"${ZRUN[@]}" ':: go / build / * / release / darwin' "${_main}"
-			;;&
-			( all | freebsd )
-				"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${_main}"
-			;;&
-			( all | openbsd )
-				"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${_main}"
-			;;&
-			( all | linux | darwin | freebsd | openbsd )
-			;;
-			( * )
-				printf -- '[ee]  invalid os `%s`;  aborting!\n' "${_os}" >&2
-			;;
-		esac
+		for _os in linux darwin freebsd openbsd ; do
+			if test "${_os_0}" != all -a "${_os_0}" != "${_os}" ; then
+				continue
+			fi
+			case "${_os}" in
+				( linux )
+					"${ZRUN[@]}" ':: go / build / * / release / linux' "${_main}"
+				;;
+				( darwin )
+					"${ZRUN[@]}" ':: go / build / * / release / darwin' "${_main}"
+				;;
+				( freebsd )
+					"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${_main}"
+				;;
+				( openbsd )
+					"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${_main}"
+				;;
+			esac
+		done
 	done
 !!
 
