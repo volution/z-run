@@ -224,6 +224,7 @@ the <code>::// *</code> entry is just a sub-menu that contains all other scriptl
 </code></pre><ul><li>the <code>$PATH</code> environment variable can be appended with absolute paths:</li></ul><pre><code>&amp;&amp;== path ./bin
 </code></pre><ul><li>environment variables, similar to <code>$PATH</code>, can be appended with absolute paths:</li></ul><pre><code>&amp;&amp;== env-path-append ./bin
 </code></pre><ul><li>environment variables can be removed:</li></ul><pre><code>&amp;&amp;== env-exclude SOME_ENV_1 SOME_ENV_2
+</code></pre><ul><li>environment variables can be provided with defaults:</li></ul><pre><code>&amp;&amp;== env-fallback SOME_ENV default-value
 </code></pre><ul><li>other library source files can be included:</li></ul><pre><code>&amp;&amp; _/file-relative-to-the-current-source-file-parent
 &amp;&amp; ./file-relative-to-the-current-workbench-folder
 &amp;&amp; /file-with-absolute-path

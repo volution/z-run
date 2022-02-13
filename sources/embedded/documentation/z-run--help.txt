@@ -96,13 +96,14 @@ Place your source files in a folder named like:
         forcibly show them in the main menu;
 ##}}
 
-&& path ./tools/bin
-&& path /opt/local/bin
-&& env NAME value
-&& env-exclude NAME_NOT_NEEDED
-&& env-path FOLDER_ABSOLUTE_PATH ./.outputs
-&& env-path-append CUSTOM_PATH ./tools/bin
-&& env-path-append CUSTOM_PATH /opt/local/bin
+&&== path ./tools/bin
+&&== path /opt/local/bin
+&&== env NAME value
+&&== env-fallback NAME default
+&&== env-exclude NAME_NOT_NEEDED
+&&== env-path FOLDER_ABSOLUTE_PATH ./.outputs
+&&== env-path-append CUSTOM_PATH ./tools/bin
+&&== env-path-append CUSTOM_PATH /opt/local/bin
 
 && _/include-file-relative-to-this-source
 && ./scripts/include-file-relative-to-the-workspace

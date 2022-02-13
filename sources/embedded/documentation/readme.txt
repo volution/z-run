@@ -381,6 +381,10 @@ some text that doesn't contain ##}}
 
 &&== env-exclude SOME_ENV_1 SOME_ENV_2
 
+  * environment variables can be provided with defaults:
+
+&&== env-fallback SOME_ENV default-value
+
   * other library source files can be included:
 
 && _/file-relative-to-the-current-source-file-parent
