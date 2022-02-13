@@ -14,7 +14,7 @@ import "golang.org/x/sys/unix"
 
 
 
-var PROJECT_URL = "https://github.com/volution/z-run"
+var PROJECT_URL string = "https://github.com/volution/z-run"
 
 var BUILD_TARGET string = "{unknown-target}"
 var BUILD_TARGET_ARCH string = runtime.GOARCH
