@@ -225,6 +225,7 @@
 			--filter="${_sources}/embedded/*.go" \
 			--filter="${_sources}/embedded/bash/**" \
 			--filter="${_sources}/embedded/prologues/**" \
+			--filter="${_sources}/embedded/documentation/**" \
 			\
 			--restart \
 			\
