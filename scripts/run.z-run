@@ -107,8 +107,7 @@
 			_command=( "./.outputs/${_main}--release" "${_extra_arguments[@]}" "${@}" )
 		;;
 		( installed )
-			test "${_main}" == main
-			_command=( "$( type -P -- z-run )" "${_extra_arguments[@]}" "${@}" )
+			_command=( "$( type -P -- "${_main}" )" "${_extra_arguments[@]}" "${@}" )
 		;;
 		( * )
 			printf -- '[ee]  invalid target `%s`;  aborting!\n' "${_target}" >&2

@@ -64,7 +64,7 @@
 
 
 << documentation / readme / render / html
-	if test ./documentation/readme.md -ot ./documentation/readme/readme.html ; then
+	if test ./documentation/readme/readme.md -ot ./documentation/readme/readme.html ; then
 		printf -- '[ii]  skipping rendering `readme.html`!\n' >&2
 		exit -- 0
 	fi
@@ -74,7 +74,7 @@
 
 
 << documentation / readme / render / text
-	if test ./documentation/readme.md -ot ./documentation/readme/readme.txt ; then
+	if test ./documentation/readme/readme.md -ot ./documentation/readme/readme.txt ; then
 		printf -- '[ii]  skipping rendering `readme.txt`!\n' >&2
 		exit -- 0
 	fi
