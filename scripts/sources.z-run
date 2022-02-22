@@ -254,12 +254,12 @@
 
 
 
-<< sources / generate / bom
+<< sources / generate / sbom
 	test "${#}" -eq 0
 	
 	execline-cd ./sources \
 	cyclonedx-gomod mod -json -licenses \
-		>| ./documentation/bom.json \
+		>| ./documentation/sbom/cyclonedx.json \
 	#
 	
 	jq \
@@ -285,7 +285,7 @@
 					| (if . != null then .[0].url else "" end)
 				)
 			' \
-		< ./documentation/bom.json \
+		< ./documentation/sbom/cyclonedx.json \
 	| jq \
 			'
 				. as $component
@@ -323,7 +323,10 @@
 				}
 			' \
 	| jq --slurp . \
-	| gomplate \
+		>| ./documentation/sbom/sbom.json \
+	#
+	
+	gomplate \
 			-c .=stdin:///.json \
 			--in \
 	'
@@ -332,10 +335,35 @@
 	| Dependency | Version | License (SPDX) | VCS URL |
 	| ---        | ---     | ---            | ---     |
 	{{ range $_, $_component := . -}}
-	| {{ $_component.name }} | {{ $_component.version }} | {{ $_component.license }} | {{ $_component.vcs }} |
+	| `{{ $_component.name }}` | `{{ $_component.version }}` | `{{ $_component.license }}` | <{{ $_component.vcs }}> |
 	{{ end }}
 	' \
-		>| ./documentation/bom.md \
+		< ./documentation/sbom/sbom.json \
+		>| ./documentation/sbom/sbom.md \
+	#
+	
+	cmark-gfm \
+			--to html \
+			--extension autolink \
+			--extension table \
+			--validate-utf8 \
+			--unsafe \
+		< ./documentation/sbom/sbom.md \
+		>| ./documentation/sbom/sbom.html \
+	#
+	
+	w3m \
+			-dump \
+			-T text/html \
+			-cols 160 \
+			-no-graph \
+			-I utf-8 \
+			-O utf-8 \
+			-o tabstop=4 \
+			-o indent_incr=4 \
+			-o display_link_number=false \
+		< ./documentation/sbom/sbom.html \
+		>| ./documentation/sbom/sbom.txt \
 	#
 !!
 
