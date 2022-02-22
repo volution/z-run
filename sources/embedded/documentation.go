@@ -34,3 +34,15 @@ var HelpHeader string
 //go:embed documentation/help--footer.txt
 var HelpFooter string
 
+
+
+
+//go:embed documentation/sbom.txt
+var SbomTxt string
+
+//go:embed documentation/sbom.html
+var SbomHtml string
+
+//go:embed documentation/sbom.json
+var SbomJson string
+

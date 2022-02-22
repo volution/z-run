@@ -42,6 +42,7 @@
 	test "${#}" -eq 0
 	
 	"${ZRUN[@]}" ':: sources / embedded / documentation'
+	"${ZRUN[@]}" ':: sources / embedded / sbom'
 	"${ZRUN[@]}" ':: sources / embedded / hash'
 !!
 
@@ -74,6 +75,26 @@
 	
 	if ! cmp -s -- ./documentation/manual/z-run.1.man ./sources/embedded/documentation/z-run--manual.man ; then
 		cp -T -- ./documentation/manual/z-run.1.man ./sources/embedded/documentation/z-run--manual.man
+	fi
+!!
+
+
+
+
+<< sources / embedded / sbom
+	
+	test "${#}" -eq 0
+	
+	if ! cmp -s -- ./documentation/sbom/sbom.txt ./sources/embedded/documentation/sbom.txt ; then
+		cp -T -- ./documentation/sbom/sbom.txt ./sources/embedded/documentation/sbom.txt
+	fi
+	
+	if ! cmp -s -- ./documentation/sbom/sbom.html ./sources/embedded/documentation/sbom.html ; then
+		cp -T -- ./documentation/sbom/sbom.html ./sources/embedded/documentation/sbom.html
+	fi
+	
+	if ! cmp -s -- ./documentation/sbom/cyclonedx.json ./sources/embedded/documentation/sbom.json ; then
+		cp -T -- ./documentation/sbom/cyclonedx.json ./sources/embedded/documentation/sbom.json
 	fi
 !!
 

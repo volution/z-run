@@ -49,6 +49,10 @@
 :: run / flags / readme :: exec -- "${ZRUN[@]}" ':: run / exec' --readme "${@}"
 :: run / flags / readme / text :: exec -- "${ZRUN[@]}" ':: run / exec' --readme-text "${@}"
 :: run / flags / readme / html :: exec -- "${ZRUN[@]}" ':: run / exec' --readme-html "${@}"
+:: run / flags / sbom :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom "${@}"
+:: run / flags / sbom / text :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom-text "${@}"
+:: run / flags / sbom / html :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom-html "${@}"
+:: run / flags / sbom / json :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom-json "${@}"
 :: run / flags / help :: exec -- "${ZRUN[@]}" ':: run / exec' --help "${@}"
 
 :: run / wrapper / z-input :: exec -- "${ZRUN[@]}" ':: run / exec' --input "${@}"
