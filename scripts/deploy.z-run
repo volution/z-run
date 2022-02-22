@@ -41,8 +41,8 @@
 	test -d ./.publish/
 	
 	
-	"${ZRUN[@]}" ':: sources / embedded / bundle'
 	"${ZRUN[@]}" ':: documentation / all / render / forced'
+	"${ZRUN[@]}" ':: sources / embedded / bundle'
 	
 	
 	_build_version="$( exec -- cat -- ./sources/embedded/build/version.txt )"
