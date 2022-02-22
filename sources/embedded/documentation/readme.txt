@@ -3,7 +3,7 @@
 
       + Manual and Examples
       + Installation and FAQ
-      + About, Status and Copyright and licensing
+      + About, Status, Copyright and licensing and SBOM
       + chat on Discord, discuss on GitHub, or email author
 
 -------------------------------------------------------------------------------
@@ -464,6 +464,9 @@ TBD:
   * z-run --manual-html;
   * z-run --readme;
   * z-run --readme-html;
+  * z-run --sbom;
+  * z-run --sbom-html;
+  * z-run --sbom-json;
   * z-run --sources-md5;
   * z-run --sources-cpio | gunzip | cpio -i -t;
 
@@ -792,6 +795,9 @@ Ciprian Dorin Craciun:
   * https://github.com/volution
   * https://github.com/cipriancraciun
 
+Please also see the SBOM (Software Bill of Materials) for links this project's
+dependencies and their authors.
+
 Notice -- short version
 
 The code is licensed under GPL 3 or later.
@@ -812,4 +818,14 @@ different license, please email the authors, stating the licensing
 requirements, accompanied by the reasons and other details; then, depending on
 the situation, the authors might release the sources and/or documentation under
 a different license.
+
+SBOM (Software Bill of Materials)
+
+This project, like many other open-source projects, incorporates code from
+other open-source projects (besides other tools used to develop, build and
+test).
+
+Strictly related to the project's dependencies (direct and transitive), please
+see the SBOM (Software Bill of Materials) for links to these dependencies and
+their licenses.
 
