@@ -251,3 +251,91 @@
 	exec -- "${@}"
 !!
 
+
+
+
+<< sources / generate / bom
+	test "${#}" -eq 0
+	
+	execline-cd ./sources \
+	cyclonedx-gomod mod -json -licenses \
+		>| ./documentation/bom.json \
+	#
+	
+	jq \
+			'
+				.components[]
+				| .licenses = [
+					(.evidence // {})
+					| (.licenses // [])
+					| .[]
+					| .license.id
+				]
+				| .externalReferences = (
+					(.externalReferences // [])
+					| group_by (.type)
+					| map ({
+						key : .[0].type,
+						value : . | map (del (.type))
+					})
+					| from_entries
+				)
+				| .vcs_url = (
+					.externalReferences.vcs
+					| (if . != null then .[0].url else "" end)
+				)
+			' \
+		< ./documentation/bom.json \
+	| jq \
+			'
+				. as $component
+				| {
+					name : .name,
+					version : .version,
+					purl : .purl,
+					license :
+						.licenses
+						| join (" | ")
+						| (
+							({
+							}[$component.name])
+							// ({
+								"" : "{unknown}",
+							}[.])
+							// .
+						),
+					vcs :
+						.vcs_url
+						| (
+							({
+								"go.starlark.net" : "https://github.com/google/starlark-go",
+								"golang.org/x/sync" : "https://github.com/golang/sync",
+								"golang.org/x/sys" : "https://github.com/golang/sys",
+								"golang.org/x/term" : "https://github.com/golang/term",
+								"golang.org/x/text" : "https://github.com/golang/text",
+							}[$component.name])
+							// ({
+								"" : "{unknown}",
+								"<no value>" : "{unknown}",
+							}[.])
+							// .
+						),
+				}
+			' \
+	| jq --slurp . \
+	| gomplate \
+			-c .=stdin:///.json \
+			--in \
+	'
+	## SBOM (Software Bill of Materials)
+	
+	| Dependency | Version | License (SPDX) | VCS URL |
+	| ---        | ---     | ---            | ---     |
+	{{ range $_, $_component := . -}}
+	| {{ $_component.name }} | {{ $_component.version }} | {{ $_component.license }} | {{ $_component.vcs }} |
+	{{ end }}
+	' \
+		>| ./documentation/bom.md \
+	#
+!!
+

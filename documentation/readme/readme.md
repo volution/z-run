@@ -18,7 +18,7 @@
 > Table of contents:
 > * [Manual](#manual) and [Examples](#examples)
 > * [Installation](#installation) and [FAQ](#faq)
-> * [About](#about), [Status](#status) and [Copyright and licensing](#notice-copyright-and-licensing)
+> * [About](#about), [Status](#status), [Copyright and licensing](#notice-copyright-and-licensing) and [SBOM](#sbom-software-bill-of-materials)
 > * [chat on Discord](https://discord.gg/WjBfs8rz), [discuss on GitHub](https://github.com/volution/z-run/discussions/categories/discussions), or [email author](mailto:ciprian.craciun@gmail.com)
 
 
@@ -1002,6 +1002,10 @@ Ciprian Dorin Craciun:
 * <https://github.com/cipriancraciun>
 
 
+Please also see the [SBOM (Software Bill of Materials)](./documentation/bom.md)
+for links this project's dependencies and their authors.
+
+
 
 
 ### Notice -- short version
@@ -1032,4 +1036,18 @@ under a different license, please email the authors,
 stating the licensing requirements, accompanied by the reasons
 and other details; then, depending on the situation, the authors might
 release the sources and/or documentation under a different license.
+
+
+
+
+### SBOM (Software Bill of Materials)
+
+
+This project, like many other open-source projects,
+incorporates code from other open-source projects
+(besides other tools used to develop, build and test).
+
+Strictly related to the project's dependencies (direct and transitive),
+please see the [SBOM (Software Bill of Materials)](./documentation/bom.md)
+for links to these dependencies and their licenses.
 
