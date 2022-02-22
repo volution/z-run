@@ -597,7 +597,7 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*
 			switch _matcher[0] {
 				case '*', '+' :
 					// NOP
-				case '^', '~' :
+				case '=', '^', '~' :
 					_matcher = "+" + _matcher
 				default :
 					return Errorf (0x11ca1466, "invalid menu mode `%s`", _matcher)
