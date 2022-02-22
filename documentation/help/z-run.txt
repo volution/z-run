@@ -125,10 +125,12 @@ Place your source files in a folder named like:
 === How to get more information?
 
 >> z-run --version
->> z-run --help | less
->> z-run --manual | less
->> z-run --readme | less
->> man <( z-run --manual-man )
->> lynx --force-html <( z-run --manual-html )
->> lynx --force-html <( z-run --readme-html )
+>> z-run --help
+>> z-run --manual
+>> z-run --manual-man
+>> z-run --manual-html
+>> z-run --readme
+>> z-run --readme-html
+>> z-run --sbom
+>> z-run --sbom-json
 

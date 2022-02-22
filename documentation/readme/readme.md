@@ -580,6 +580,9 @@ z-run select-body
 * `z-run --manual-html`;
 * `z-run --readme`;
 * `z-run --readme-html`;
+* `z-run --sbom`;
+* `z-run --sbom-html`;
+* `z-run --sbom-json`;
 * `z-run --sources-md5`;
 * `z-run --sources-cpio | gunzip | cpio -i -t`;
 
