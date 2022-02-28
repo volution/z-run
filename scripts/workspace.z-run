@@ -49,10 +49,16 @@
 	test "${#}" -eq 0
 	
 	if test ! -d ./.outputs ; then
-		_outputs_store="${TMPDIR:-/tmp}/z-run--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+		if test -h ./.outputs ; then
+			_outputs_store="$( exec -- readlink -f -- ./.outputs )"
+		else
+			_outputs_store="${TMPDIR:-/tmp}/workspace--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
+		fi
 		mkdir -- "${_outputs_store}"
-		_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
-		ln -s -f -T -- "${_outputs_store}" ./.outputs
+		if test ! -e ./.outputs ; then
+			_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
+			ln -s -f -T -- "${_outputs_store}" ./.outputs
+		fi
 	fi
 !!
 
