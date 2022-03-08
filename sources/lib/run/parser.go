@@ -471,7 +471,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 					_interpreterArgumentsExtraAllowed = true
 				
 				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9" :
-					_interpreterArguments = append (_interpreterArguments, "-E", "-s", "-S", "-u", "-O", "-O")
+					_interpreterArguments = append (_interpreterArguments, "-E", "-s", "-S", "-u")
+//!					_interpreterArguments = append (_interpreterArguments, "-O", "-O")
 					_interpreterArgumentsExtraDash = false
 					_interpreterArgumentsExtraDashNow = true
 					_interpreterArgumentsExtraAllowed = true
@@ -479,7 +480,8 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 				case "python3+" :
 					_interpreter = "<" + _interpreterExecutable + ">"
 					_interpreterExecutable = _interpreterExecutable[0 : len (_interpreterExecutable) - 1]
-					_interpreterArguments = append (_interpreterArguments, "-E", "-s", "-S", "-u", "-O", "-O")
+					_interpreterArguments = append (_interpreterArguments, "-E", "-s", "-S", "-u")
+//!					_interpreterArguments = append (_interpreterArguments, "-O", "-O")
 					_interpreterArgumentsExtraDash = false
 					_interpreterArgumentsExtraDashNow = true
 					_interpreterArgumentsExtraAllowed = true
