@@ -1312,6 +1312,13 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		else :
 			Z.panic (0x2b7f5aca, "invalid quoting (no tokens): %r", _value)
 	
+	@_inject
+	def __Z__python_quote (_value) :
+		if PY.isinstance (_value, PY.bytes) :
+			_value = _value.decode ("utf-8")
+		assert PY.isinstance (_value, PY.str), "[1014d33d]"
+		return repr (_value)
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
