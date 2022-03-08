@@ -28,6 +28,8 @@
 :: examples / select-export-scriptlet-label-and-body :: exec -- "${ZRUN[@]}" ':: examples / exec' select-export-scriptlet-label-and-body "${@}"
 
 :: examples / export-scriptlet-labels :: exec -- "${ZRUN[@]}" ':: examples / exec' export-scriptlet-labels "${@}"
+:: examples / export-scriptlet-labels-all :: exec -- "${ZRUN[@]}" ':: examples / exec' export-scriptlet-labels-all "${@}"
+:: examples / export-scriptlet-labels-top :: exec -- "${ZRUN[@]}" ':: examples / exec' export-scriptlet-labels-top "${@}"
 
 :: examples / export-library-json :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-json "${@}"
 :: examples / export-library-cdb :: exec -- "${ZRUN[@]}" ':: examples / exec' export-library-cdb "${@}"

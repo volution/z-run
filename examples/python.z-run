@@ -211,6 +211,12 @@
 	Z.exists ("/dev/log", enforce = 0xc83ed2ae)
 	Z.is_file_not_empty ("/etc/hosts", enforce = 0xec23876b)
 	Z.is_file_empty ("/proc/self/environ", enforce = 0x80a8c78c)
+	Z.is_newer_than ("/proc/self/environ", "/proc", strict = True, enforce = 0xa603aaba)
+	Z.is_newer_than ("/proc/self/environ", "/proc", strict = False, enforce = 0xeda4edca)
+	Z.is_older_than ("/proc", "/proc/self/environ", strict = True, enforce = 0x5e3556b9)
+	Z.is_older_than ("/proc", "/proc/self/environ", strict = False, enforce = 0x8813f51a)
+	Z.is_newer_than ("/proc", "/proc", strict = False, enforce = 0xa762ec5c)
+	Z.is_older_than ("/proc", "/proc", strict = False, enforce = 0x305faabd)
 !!
 
 << python / test / environment
