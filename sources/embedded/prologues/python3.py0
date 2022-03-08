@@ -576,7 +576,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		Z._log_write ("dd", _code, _message, _arguments)
 	
 	@_inject
-	def __Z__log_cut (*, _important = True) :
+	def __Z__log_cut (*, _important = None) :
 		if not Z.log_notice_enabled : return
 		if _important :
 			Z.stderr.write (("\n[z-run:%08d] [%s]  " % (Z.pid, "--")) + ("-" * 60) + "\n\n")
