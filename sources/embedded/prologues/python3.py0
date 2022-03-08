@@ -77,6 +77,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	PY.path = __import__lazy ("posixpath")
 	PY.random = __import__lazy ("random", (lambda _module : _module.SystemRandom ()))
 	PY.re = __import__lazy ("re")
+	PY.shlex = __import__lazy ("shlex")
 	PY.signal = __import__lazy ("signal")
 	PY.stat = __import__lazy ("stat")
 	PY.subprocess = __import__lazy ("subprocess")
@@ -1288,6 +1289,28 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z__chdir (_path) :
 		PY.os.chdir (_path)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __Z__shell_quote (_value) :
+		if PY.isinstance (_value, PY.bytes) :
+			_value = _value.decode ("utf-8")
+		assert PY.isinstance (_value, PY.str), "[e679246b]"
+		return PY.shlex.quote (_value)
+	
+	@_inject
+	def __Z__shell_unquote (_value) :
+		if PY.isinstance (_value, PY.bytes) :
+			_value = _value.decode ("utf-8")
+		assert PY.isinstance (_value, PY.str), "[235f25ad]"
+		_tokens = PY.shlex.split (_value)
+		if len (_tokens) == 1 :
+			return _tokens[0]
+		elif len (_tokens) > 1 :
+			Z.panic (0x92ee8b77, "invalid quoting (multiple tokens): %r", _value)
+		else :
+			Z.panic (0x2b7f5aca, "invalid quoting (no tokens): %r", _value)
 	
 	## --------------------------------------------------------------------------------
 	
