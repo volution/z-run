@@ -22,20 +22,30 @@ import . "github.com/volution/z-run/embedded"
 
 
 
-func doExportScriptletLabels (_library LibraryStore, _stream io.Writer, _context *Context) (*Error) {
-	if _labels, _error := _library.SelectLabelsAll (); _error == nil {
-		_buffer := bytes.NewBuffer (nil)
-		for _, _label := range _labels {
-			_buffer.WriteString (_label)
-			_buffer.WriteByte ('\n')
-		}
-		if _, _error := _stream.Write (_buffer.Bytes ()) ; _error == nil {
-			return nil
+func doExportScriptletLabels (_library LibraryStore, _all bool, _stream io.Writer, _context *Context) (*Error) {
+	var _labels []string
+	if _all {
+		if _labels_0, _error := _library.SelectLabelsAll (); _error == nil {
+			_labels = _labels_0
 		} else {
-			return Errorw (0x1215e523, _error)
+			return _error
 		}
 	} else {
-		return _error
+		if _labels_0, _error := _library.SelectLabels (); _error == nil {
+			_labels = _labels_0
+		} else {
+			return _error
+		}
+	}
+	_buffer := bytes.NewBuffer (nil)
+	for _, _label := range _labels {
+		_buffer.WriteString (_label)
+		_buffer.WriteByte ('\n')
+	}
+	if _, _error := _stream.Write (_buffer.Bytes ()) ; _error == nil {
+		return nil
+	} else {
+		return Errorw (0x1215e523, _error)
 	}
 }
 

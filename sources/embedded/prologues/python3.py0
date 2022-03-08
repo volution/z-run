@@ -885,70 +885,75 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	@_inject
 	def __Z__exists (_path, *, _follow = True, _enforce = False) :
-		_stat = Z.stat (_path, _follow = _follow)
+		_stat = Z.stat (_path, _follow = _follow, _enforce = False)
 		if _stat is None and _enforce :
 			Z.panic ((_enforce, 0x383d3cc5), "file-system path does not exist `%s`", _path)
 		return _stat is not None
 	
 	@_inject
 	def __Z__not_exists (_path, *, _follow = True, _enforce = False) :
-		_stat = Z.stat (_path, _follow = _follow)
+		_stat = Z.stat (_path, _follow = _follow, _enforce = False)
 		if _stat is not None and _enforce :
 			Z.panic ((_enforce, 0x9064abfc), "file-system path already exists `%s`", _path)
 		return _stat is None
 	
 	@_inject
 	def __Z__is_file (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_file_empty (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size == 0), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size == 0), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_file_not_empty (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size > 0), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) and _stat.st_size > 0), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_folder (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_file_or_folder (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) or PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISREG (_stat.st_mode) or PY.stat.S_ISDIR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_symlink (_path, *, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISLNK (_stat.st_mode)), _follow = False, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISLNK (_stat.st_mode)), _follow = False, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_pipe (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_socket (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISSOCK (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISSOCK (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_dev_block (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISBLK (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISBLK (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_dev_char (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
 	def __Z__is_special (_path, *, _follow = True, _enforce = False) :
-		return Z._stat_check (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode) or PY.stat.S_ISSOCK (_stat.st_mode) or PY.stat.S_ISBLK (_stat.st_mode) or PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
+		return Z._stat_check_1 (_path, (lambda _stat : PY.stat.S_ISFIFO (_stat.st_mode) or PY.stat.S_ISSOCK (_stat.st_mode) or PY.stat.S_ISBLK (_stat.st_mode) or PY.stat.S_ISCHR (_stat.st_mode)), _follow = _follow, _enforce = _enforce)
 	
 	@_inject
-	def __Z___stat_check (_path, _check, *, _follow = True, _enforce = False) :
-		_stat = Z.stat (_path, _follow = _follow)
+	def __Z__is_newer_than (_path, _target, *, _strict = True, _follow = True, _enforce = False) :
+		return Z._stat_check_2 (_path, _target, (lambda _stat_1, _stat_2 : _stat_1.st_mtime > _stat_2.st_mtime if _strict else _stat_1.st_mtime >= _stat_2.st_mtime), _follow = _follow, _enforce = _enforce)
+	
+	@_inject
+	def __Z__is_older_than (_path, _target, *, _strict = True, _follow = True, _enforce = False) :
+		return Z._stat_check_2 (_path, _target, (lambda _stat_1, _stat_2 : _stat_1.st_mtime < _stat_2.st_mtime if _strict else _stat_1.st_mtime <= _stat_2.st_mtime), _follow = _follow, _enforce = _enforce)
+	
+	@_inject
+	def __Z___stat_check_1 (_path, _check, *, _follow = True, _enforce = False) :
+		_stat = Z.stat (_path, _follow = _follow, _enforce = _enforce)
 		if _stat is None :
-			if _enforce :
-				Z.panic ((_enforce, 0xa23c577e), "file-system path not found `%s`", _path)
-			else :
-				return None
+			return None
 		if _check (_stat) :
 			return True
 		else :
@@ -958,7 +963,21 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				return False
 	
 	@_inject
-	def __Z__stat (_path, *, _follow = True) :
+	def __Z___stat_check_2 (_path_1, _path_2, _check, *, _follow = True, _enforce = False) :
+		_stat_1 = Z.stat (_path_1, _follow = _follow, _enforce = _enforce)
+		_stat_2 = Z.stat (_path_2, _follow = _follow, _enforce = _enforce)
+		if _stat_1 is None or _stat_2 is None :
+			return None
+		if _check (_stat_1, _stat_2) :
+			return True
+		else :
+			if _enforce :
+				Z.panic ((_enforce, 0x27a7f2ae), "file-system stat check failed for `%s` and `%s`", _path_1, _path_2)
+			else :
+				return False
+	
+	@_inject
+	def __Z__stat (_path, *, _follow = True, _enforce = False) :
 		if _follow :
 			_delegate = PY.os.stat
 		else :
@@ -967,7 +986,10 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_stat = _delegate (_path)
 		except PY.OSError as _error :
 			if _error.errno == PY.errno.ENOENT :
-				_stat = None
+				if _enforce :
+					Z.panic ((_enforce, 0x358ef720), "file-system path not found `%s`", _path)
+				else :
+					_stat = None
 			else :
 				raise
 		return _stat
