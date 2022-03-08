@@ -10,6 +10,8 @@
 	"${ZRUN[@]}" ':: python / test / exit'
 	"${ZRUN[@]}" ':: python / test / log' 2> /dev/null
 	"${ZRUN[@]}" ':: python / test / panic' 2> /dev/null || true
+	"${ZRUN[@]}" ':: python / test / zrun_spawn'
+	"${ZRUN[@]}" ':: python / test / zrun_exec'
 	"${ZRUN[@]}" ':: python / test / zspawn'
 	"${ZRUN[@]}" ':: python / test / zexec'
 	"${ZRUN[@]}" ':: python / test / spawn'
@@ -63,11 +65,28 @@
 	Z.panic (0x943040e7, "panic")
 !!
 
+<< python / test / zrun_spawn
+	#! <python3+>
+	Z.expect_no_arguments ()
+	Z.zrun_spawn ("--version", stdout = False)
+	Z.zrun_spawn (command = "execute-scriptlet", scriptlet = ":: true")
+	Z.zrun_spawn_capture ("--version", lines = True)
+	Z.zrun_spawn_capture (command = "execute-scriptlet", scriptlet = ":: true", lines = True)
+!!
+
+<< python / test / zrun_exec
+	#! <python3+>
+	Z.expect_no_arguments ()
+	Z.zrun_exec ("--version", stdout = False)
+!!
+
 << python / test / zspawn
 	#! <python3+>
 	Z.expect_no_arguments ()
 	Z.zspawn (":: true")
 	Z.zspawn (":: false", enforce = False)
+	Z.zspawn_capture (":: true", lines = True)
+	Z.zspawn_capture (":: false", enforce = False, lines = True)
 !!
 
 << python / test / zexec
@@ -81,6 +100,8 @@
 	Z.expect_no_arguments ()
 	Z.spawn ("true")
 	Z.spawn ("false", enforce = False)
+	Z.spawn_capture ("true", lines = True)
+	Z.spawn_capture ("false", enforce = False, lines = True)
 !!
 
 << python / test / exec
