@@ -161,6 +161,34 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
+	def __Z__zrun_spawn (*_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _enforce = True, **_options) :
+		_descriptor = Z._zrun_exec_prepare (_arguments, **_options)
+		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
+	
+	@_inject
+	def __Z__zrun_spawn_capture (*_arguments, _stdin_data = False, _stderr = None, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, **_options) :
+		_output = Z.zrun_spawn (*_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = PY.str, _stderr = _stderr, _enforce = True, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user)
+		return Z._file_read_process (_output, **_options)
+	
+	@_inject
+	def __Z__zrun_exec (*_arguments, _fd_close = True, **_options) :
+		_descriptor = Z._zrun_exec_prepare (_arguments, **_options)
+		return Z.exec_0 (_descriptor, _fd_close = _fd_close)
+	
+	@_inject
+	def __Z__zrun_cmd (*_arguments, **_options) :
+		return Z._zrun_exec_prepare (_arguments, **_options)
+	
+	@_inject
+	def __Z___zrun_exec_prepare (_arguments, **_options) :
+		_executable = Z.executable
+		_arguments_all = [_executable]
+		_arguments_all.extend (_arguments)
+		return Z._exec_prepare_0 (_executable, False, _arguments_all, **_options)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
 	def __Z__spawn (_executable, *_arguments, _wait = True, _stdin_data = None, _stdout_data = None, _stderr_data = None, _fd_close = False, _enforce = True, **_options) :
 		_descriptor = Z._exec_prepare (_executable, _arguments, **_options)
 		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
