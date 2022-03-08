@@ -180,9 +180,25 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return Z._zrun_exec_prepare (_arguments, **_options)
 	
 	@_inject
-	def __Z___zrun_exec_prepare (_arguments, **_options) :
+	def __Z___zrun_exec_prepare (_arguments, _exec = False, _untainted = False, _command = None, _scriptlet = None, _library_source = None, _library_url = None, _workspace = None, **_options) :
 		_executable = Z.executable
 		_arguments_all = [_executable]
+		if _exec :
+			_arguments_all.append ("--exec")
+		if _untainted :
+			_arguments_all.append ("--untainted")
+		if _library_source is not None :
+			_arguments_all.append ("--library-source=" + _library_source)
+		if _library_url is not None :
+			_arguments_all.append ("--library-url=" + _library_url)
+		if _workspace is not None :
+			_arguments_all.append ("--workspace=" + _workspace)
+		if _command is not None :
+			assert (_command != "") and (_command[0] != "-"), "[9ac4fb1b]"
+			_arguments_all.append (_command)
+		if _scriptlet is not None :
+			assert (_scriptlet != "") and (_scriptlet[:2] == "::"), "[8f06e907]"
+			_arguments_all.append (_scriptlet)
 		_arguments_all.extend (_arguments)
 		return Z._exec_prepare_0 (_executable, False, _arguments_all, **_options)
 	
