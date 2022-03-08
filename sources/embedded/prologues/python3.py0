@@ -1133,7 +1133,11 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if _fd is None :
 			return False
 		if _json :
-			_data = PY.json.dumps (_data)
+			if _json == "pretty" :
+				_data = PY.json.dumps (_data, sort_keys = True, indent = 2, separators = (",", ": "))
+				_data += "\n"
+			else :
+				_data = PY.json.dumps (_data)
 		if _data is None :
 			_buffer = b""
 		elif PY.isinstance (_data, PY.str) :
