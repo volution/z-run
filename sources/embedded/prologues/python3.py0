@@ -24,6 +24,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	
 	PY.bytes = PY.builtins.bytes
 	PY.str = PY.builtins.str
+	PY.bool = PY.builtins.bool
 	PY.int = PY.builtins.int
 	PY.float = PY.builtins.float
 	PY.tuple = PY.builtins.tuple
@@ -673,14 +674,14 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	@_inject
 	def __Z___panic_code (_code) :
 		_code_fallback = 0xee4006b2
-		if PY.isinstance (_code, PY.int) :
+		if PY.isinstance (_code, PY.int) and not PY.isinstance (_code, PY.bool) :
 			pass
 		elif _code is None :
 			_code = _code_fallback
 		elif PY.isinstance (_code, PY.tuple) :
 			_code_0 = _code_fallback
 			for _code_0 in _code :
-				if PY.isinstance (_code, PY.int) :
+				if PY.isinstance (_code_0, PY.int) and not PY.isinstance (_code_0, PY.bool) :
 					break
 				_code_0 = _code_fallback
 			_code = _code_0
