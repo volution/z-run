@@ -30,6 +30,7 @@
 	"${ZRUN[@]}" ':: python / test / files'
 	"${ZRUN[@]}" ':: python / test / random'
 	"${ZRUN[@]}" ':: python / test / hash'
+	"${ZRUN[@]}" ':: python / test / arguments'
 	"${ZRUN[@]}" ':: python / test / quoting / shell'
 	"${ZRUN[@]}" ':: python / test / quoting / python'
 !!
@@ -388,6 +389,26 @@
 	Z.expect_no_arguments ()
 	Z.sudo_prepare ("root")
 	Z.spawn ("whoami", sudo = True)
+!!
+
+<< python / test / arguments
+	#! <python3+>
+	Z.expect_no_arguments ()
+	Z.arguments = ["--"]
+	assert Z.extract_arguments_flag (enforce = False) == False
+	Z.arguments = []
+	assert Z.extract_arguments_flag (enforce = False) == None
+	Z.arguments = ["abc"]
+	assert Z.extract_arguments_flag (enforce = False) == False
+	Z.arguments = ["--lulu"]
+	assert Z.extract_arguments_flag (enforce = False) == "lulu"
+	assert Z.arguments == []
+	Z.arguments = ["--lulu"]
+	assert Z.extract_arguments_flag (expected = ["lulu"], enforce = False) == "lulu"
+	assert Z.arguments == []
+	Z.arguments = ["--lala"]
+	assert Z.extract_arguments_flag (expected = ["lulu"], enforce = False) == None
+	assert Z.arguments == ["--lala"]
 !!
 
 << python / benchmark / noop
