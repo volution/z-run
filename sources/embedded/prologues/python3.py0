@@ -746,25 +746,42 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 				return PY.tuple (Z.arguments)
 	
 	@_inject
-	def __Z__extract_arguments_flag () :
+	def __Z__extract_arguments_flag (*, _expected = None, _enforce = True) :
 		if PY.len (Z.arguments) == 0 :
+			if _enforce :
+				Z.panic ((_enforce, 0xa696670c), "expected flag, received no arguments!")
 			return None
 		_argument = Z.arguments[0]
 		if _argument == "--" :
+			if _enforce :
+				Z.panic ((_enforce, 0x06e9f4d5), "expected flag, received no arguments!")
 			Z.arguments = Z.arguments[1:]
 			return False
 		if not _argument.startswith ("--") :
-			Z.panic (0xcd34d66e, "invalid arguments:  expected flag, received `%s`!", _argument)
-		else :
-			_argument = _argument[2:]
+			if _enforce :
+				Z.panic ((_enforce, 0xcd34d66e), "invalid arguments:  expected flag, received `%s`!", _argument)
+			return False
+		_argument = _argument[2:]
+		if _expected is not None :
+			if _argument not in _expected :
+				if _enforce :
+					Z.panic ((_enforce, 0x3b5e8cac), "invalid arguments:  expected flag, received `--%s`!", _argument)
+				return None
 		Z.arguments = Z.arguments[1:]
 		return _argument
 	
 	@_inject
-	def __Z__extract_arguments_value () :
+	def __Z__extract_argument (*, _expected = None, _enforce = True) :
 		if PY.len (Z.arguments) == 0 :
-			Z.panic (0x7f1cfd35, "invalid arguments:  expected at least one, received none!")
+			if _enforce :
+				Z.panic ((_enforce, 0x7f1cfd35), "invalid arguments:  expected at least one, received none!")
+			return None
 		_argument = Z.arguments[0]
+		if _expected is not None :
+			if _argument not in _expected :
+				if _enforce :
+					Z.panic ((_enforce, 0x9b16a981), "invalid arguments:  expected some, received `%s`!", _argument)
+				return None
 		Z.arguments = Z.arguments[1:]
 		return _argument
 	
