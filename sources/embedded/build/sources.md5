@@ -17,12 +17,12 @@ e2ec2ca9b0e908ea5635a2c70938c3aa *embedded/documentation/sbom.html
 c35ec07dce11d78b720334c881a7c69c *embedded/documentation/sbom.json
 1d3c2ce3941de54437dc857c091a78f7 *embedded/documentation/sbom.txt
 35585845c8b1c58f8748791c618b9869 *embedded/documentation/z-run--help.txt
-c8209f29d2ffad73ccee24ae189b3cc3 *embedded/documentation/z-run--manual.html
-6a1e9219b762c78b9f175e82e8a92c87 *embedded/documentation/z-run--manual.man
-88266c91bc219a4535ff5e1543bc6523 *embedded/documentation/z-run--manual.txt
+89ca741ab7b430f62a56c68cd978023a *embedded/documentation/z-run--manual.html
+37ae32e8113f3208e63579f7421a91e1 *embedded/documentation/z-run--manual.man
+eb4b43ecc65546aa4f3909762bd34dbf *embedded/documentation/z-run--manual.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
-6f936d6bb7d7b8a2f01f9c301fddf84c *embedded/prologues/python3.py0
+67186e03764c63329fbbdeae8247c444 *embedded/prologues/python3.py0
 4020cbc245695fbb4ab1deff2d7e2920 *embedded/variables.go
 954508fca0debacc1396feb0f72514c8 *go.mod
 31a3509d8207edde9e578d4817f06a64 *go.sum
