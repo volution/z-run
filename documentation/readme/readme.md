@@ -472,7 +472,7 @@ some text that doesn't contain ##}}
 ~~~~
 * environment variables, similar to `$PATH`, can be appended with absolute paths:
 ~~~~
-&&== env-path-append ./bin
+&&== env-path-append SOME_ENV_LIKE_PATH ./bin
 ~~~~
 * environment variables can be removed:
 ~~~~
@@ -971,7 +971,7 @@ for example, Rust doesn't consider OpenBSD as a "tier-1" platform.
 * [fzf](https://github.com/junegunn/fzf)
   (via my custom [fork](https://github.com/cipriancraciun/fzf));
 * [cdb](https://github.com/colinmarc/cdb)
-  (via my custom [fork](github.com/cipriancraciun/go-cdb-lib);
+  (via my custom [fork](github.com/cipriancraciun/go-cdb-lib));
 * [go-flags](github.com/jessevdk/go-flags);
 * [liner](github.com/peterh/liner);
 * also see the [go.mod](./sources/go.mod) file
