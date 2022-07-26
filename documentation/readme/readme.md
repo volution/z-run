@@ -605,13 +605,13 @@ z-run select-body
 One should see the [releases page on GitHub](https://github.com/volution/z-run/releases),
 where pre-built executables (only Intel 64bit architectures) are available for:
 * Linux (the main development and testing environment) -- <br/>
-  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.19.1/z-run--linux--v0.19.1>
 * OSX (only Intel CPU's) (the second targeted environment) -- <br/>
-  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--darwin--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.19.1/z-run--darwin--v0.19.1>
 * OpenBSD (seldom tested) -- <br/>
-  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--openbsd--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.19.1/z-run--openbsd--v0.19.1>
 * FreeBSD (seldom tested) -- <br/>
-  <https://github.com/volution/z-run/releases/download/v0.18.1/z-run--freebsd--v0.18.1>
+  <https://github.com/volution/z-run/releases/download/v0.19.1/z-run--freebsd--v0.19.1>
 
 Also, each of these files are signed with my PGP key `5A974037A6FD8839`, thus do check the signature.
 
@@ -633,13 +633,13 @@ gpg:               imported: 1
 curl \
         -s -S -f -L \
         -o /tmp/z-run \
-        https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1 \
+        https://github.com/volution/z-run/releases/download/v0.19.1/z-run--linux--v0.19.1 \
 #
 
 curl \
         -s -S -f -L \
         -o /tmp/z-run.asc \
-        https://github.com/volution/z-run/releases/download/v0.18.1/z-run--linux--v0.18.1.asc \
+        https://github.com/volution/z-run/releases/download/v0.19.1/z-run--linux--v0.19.1.asc \
 #
 ~~~~
 
@@ -676,16 +676,16 @@ z-run --version
 ~~~~
 ~~~~
 * tool          : z-run
-* version       : 0.19.0
+* version       : 0.19.1
 * executable    : /usr/local/bin/z-run
-* build target  : release, linux-amd64, go1.17.6, gc
-* build number  : 12170, 2022-01-19-23-30-43
+* build target  : release, linux-amd64, go1.18.3, gc
+* build number  : 12286, 2022-07-26-10-01-10
 * code & issues : https://github.com/volution/z-run
-* sources git   : a6e6ce1dbd63eb871ad0280d6dbafdbc9e7960d9
-* sources hash  : d7ba8be84e85329ac187984750ecd242
+* sources git   : 4420e1f27c2480595ac98e409727c6810498710b
+* sources hash  : daf4d73647bc52c3efe3f60f7711439a
 * uname node    : some-workstation
-* uname system  : Linux, 5.15.6-1-default, x86_64
-* uname hash    : 7c8643e588e6fbb4063d2643de27c39b
+* uname system  : Linux, 5.18.4-1-default, x86_64
+* uname hash    : 636fe534b72441e2ccb478f9bd56d653
 ~~~~
 
 
