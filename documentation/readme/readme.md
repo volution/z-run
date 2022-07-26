@@ -803,7 +803,7 @@ just use the [GitHub discussions](https://github.com/volution/z-run/discussions/
 
 If you want to ask a quick question,
 or just have a quick chat,
-just head over to the [Discord channel](https://discord.gg/WjBfs8rz).
+just head over to the [Discord channel](https://discord.gg/d5J8bfUnxW).
 
 
 ### How is it tested?
