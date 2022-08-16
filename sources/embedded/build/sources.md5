@@ -11,7 +11,7 @@ b7bd2ebef5fe1e6977b63c341c02fda1 *embedded/build.go
 e0529455b4b50e667909e37e7ac8d439 *embedded/documentation.go
 c3b76b61baa2fd78b28460c7fab83d59 *embedded/documentation/help--footer.txt
 0e9cb89d642e013ed3dd94ae045be082 *embedded/documentation/help--header.txt
-00f1631bd9bc634dece6c4440fe7a6a3 *embedded/documentation/readme.html
+da5b5a7a8161c1a7caacbeb835663bd9 *embedded/documentation/readme.html
 388502f37a04a2a05c122d3478b99bbd *embedded/documentation/readme.txt
 e2ec2ca9b0e908ea5635a2c70938c3aa *embedded/documentation/sbom.html
 c35ec07dce11d78b720334c881a7c69c *embedded/documentation/sbom.json
