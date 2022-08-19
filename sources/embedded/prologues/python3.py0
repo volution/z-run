@@ -1541,7 +1541,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	Z.log_notice_enabled = True
 	Z.log_debug_enabled = False
 	
-	Z.python_version = PY.sys.version_info[0] * 100 + PY.sys.version_info[1]
+	Z.python_version = PY.sys.version_info[0] * 1000 + PY.sys.version_info[1]
 	
 	## --------------------------------------------------------------------------------
 	
