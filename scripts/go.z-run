@@ -166,7 +166,6 @@
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
-			-buildmode exe \
 			-trimpath \
 			-- \
 			"./cmd/${_main}.go" \
@@ -187,11 +186,18 @@
 
 
 --<< go / build / * / debug / all
+	printf -- '[ii]  building for `%s`...\n' 'linux / amd64' >&2
 	"${ZRUN[@]}" ':: go / build / * / debug / linux / amd64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'darwin / amd64' >&2
 	"${ZRUN[@]}" ':: go / build / * / debug / darwin / amd64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'darwin / arm64' >&2
 	"${ZRUN[@]}" ':: go / build / * / debug / darwin / arm64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'freebsd / amd64' >&2
 	"${ZRUN[@]}" ':: go / build / * / debug / freebsd / amd64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'openbsd / amd64' >&2
 	"${ZRUN[@]}" ':: go / build / * / debug / openbsd / amd64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'android / arm64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / android / arm64' "${@}"
 !!
 
 --<< go / build / * / debug / linux / amd64
@@ -224,6 +230,12 @@
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
+--<< go / build / * / debug / android / arm64
+	export -- GOOS=android
+	export -- GOARCH=arm64
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
+!!
+
 
 
 
@@ -233,6 +245,7 @@
 	"${ZRUN[@]}" ':: go / build / * / release / darwin / arm64' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / freebsd / amd64' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / openbsd / amd64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / android / arm64' "${@}"
 !!
 
 --<< go / build / * / release / linux / amd64
@@ -262,6 +275,12 @@
 --<< go / build / * / release / openbsd / amd64
 	export -- GOOS=openbsd
 	export -- GOARCH=amd64
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / android / arm64
+	export -- GOOS=android
+	export -- GOARCH=arm64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
