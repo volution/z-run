@@ -264,8 +264,10 @@ func WrapperMain (_context *MainContext) (*Error) {
 				panic (ExitMainFailed ())
 			}
 			if _argument00, _error := filepath.EvalSymlinks (_argument0); (_error != nil) || (_argument00 != _executable) {
-				Logf ('e', 0xf1f1a024, "invalid argument0: `%s`, expected `%s`;  aborting!", _argument0, _executable)
-				panic (ExitMainFailed ())
+				if _argument00, _error := filepath.Abs (_argument00); (_error != nil) || (_argument00 != _executable) {
+					Logf ('e', 0xf1f1a024, "invalid argument0: `%s`, expected `%s`;  aborting!", _argument0, _executable)
+					panic (ExitMainFailed ())
+				}
 			}
 			_argument0IsTool = false
 	}
