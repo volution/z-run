@@ -22,7 +22,7 @@ c35ec07dce11d78b720334c881a7c69c *embedded/documentation/sbom.json
 ada4858ffaa2bdf21348829977c7d60d *embedded/documentation/z-run--manual.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
-67186e03764c63329fbbdeae8247c444 *embedded/prologues/python3.py0
+84cef23d72f6bcb4dbb65cdce0f6bc19 *embedded/prologues/python3.py0
 4020cbc245695fbb4ab1deff2d7e2920 *embedded/variables.go
 954508fca0debacc1396feb0f72514c8 *go.mod
 31a3509d8207edde9e578d4817f06a64 *go.sum
@@ -59,8 +59,8 @@ f76af2d801f0eb01800b53ab3380b306 *lib/run/parser.go
 3b785f575c821c860f25ae3df1678e28 *lib/run/resolution.go
 aeb77fe0a6c226e493d7f2c1f3866599 *lib/run/scriptlet.go
 34600019e39ab1353b454255fd4b9ead *lib/run/starlark.go
-0316dd7b12e486866676e6c367593e58 *lib/run/template.go
+337cc7bfc1035246314751b3cbbdc7d8 *lib/run/template.go
 225f96d2b07b2ce15e4326669a67f545 *lib/store/store-cdb.go
 e99403356fd6027a7b93590ee7a8931a *lib/store/store-json.go
 0f2ade192db9ba93d19bbe5e41b6b584 *lib/store/store.go
-a7e88e90d9568ec54b40c1df5739796a *lib/wrapper/main.go
+8925f4f84f56ffc4a57e525775c3db52 *lib/wrapper/main.go
