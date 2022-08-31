@@ -8,10 +8,11 @@
 
 
 
---:: deploy / rsync / * / linux :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' linux--amd64 "${@}"
---:: deploy / rsync / * / darwin :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--amd64 "${@}"
---:: deploy / rsync / * / freebsd :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' freebsd--amd64 "${@}"
---:: deploy / rsync / * / openbsd :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' openbsd--amd64 "${@}"
+--:: deploy / rsync / * / linux / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' linux--amd64 "${@}"
+--:: deploy / rsync / * / darwin / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--amd64 "${@}"
+--:: deploy / rsync / * / darwin / arm64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--arm64 "${@}"
+--:: deploy / rsync / * / freebsd / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' freebsd--amd64 "${@}"
+--:: deploy / rsync / * / openbsd / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' openbsd--amd64 "${@}"
 
 
 
