@@ -26,8 +26,8 @@
 		printf -- ':: go / build / %s / release / all :: exec -- "${ZRUN[@]}" ":: go / build / * / release / all" %q "${@}"\n' "${_main}" "${_main}"
 		
 		for _os in linux darwin freebsd openbsd ; do
-			printf -- ':: go / build / %s / debug / %s :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
-			printf -- ':: go / build / %s / release / %s :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / debug / %s :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / amd64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / release / %s :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / amd64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
 		

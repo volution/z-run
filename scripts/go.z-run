@@ -91,10 +91,12 @@
 	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
+	_suffix=''
 	if test -n "${GOOS:-}" ; then
-		_suffix="--${GOOS}"
-	else
-		_suffix=''
+		_suffix="${_suffix}--${GOOS}"
+	fi
+	if test -n "${GOARCH:-}" ; then
+		_suffix="${_suffix}--${GOARCH}"
 	fi
 	
 	exec -- \
@@ -142,13 +144,15 @@
 	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
+	_suffix=''
 	if test -n "${GOOS:-}" ; then
-		_suffix="--${GOOS}"
-	else
-		_suffix=''
+		_suffix="${_suffix}--${GOOS}"
+	fi
+	if test -n "${GOARCH:-}" ; then
+		_suffix="${_suffix}--${GOARCH}"
 	fi
 	
-	printf -- '[ii]  building `%s` release for `%s`...\n' "${_main}" "${GOOS:-native}" >&2
+	printf -- '[ii]  building `%s` release for `%s`...\n' "${_main}" "${_suffix:-native}" >&2
 	
 	if test -f "${_outputs}/${_main}--release${_suffix}" ; then
 		mv -T -- "${_outputs}/${_main}--release${_suffix}" "${_outputs}/${_main}--release${_suffix}.old"
@@ -183,29 +187,40 @@
 
 
 --<< go / build / * / debug / all
-	"${ZRUN[@]}" ':: go / build / * / debug / linux' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / debug / darwin' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / debug / freebsd' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / debug / openbsd' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / linux / amd64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / darwin / amd64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / darwin / arm64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / freebsd / amd64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / debug / openbsd / amd64' "${@}"
 !!
 
---<< go / build / * / debug / linux
+--<< go / build / * / debug / linux / amd64
 	export -- GOOS=linux
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / darwin
+--<< go / build / * / debug / darwin / amd64
 	export -- GOOS=darwin
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / freebsd
+--<< go / build / * / debug / darwin / arm64
+	export -- GOOS=darwin
+	export -- GOARCH=arm64
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
+!!
+
+--<< go / build / * / debug / freebsd / amd64
 	export -- GOOS=freebsd
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / openbsd
+--<< go / build / * / debug / openbsd / amd64
 	export -- GOOS=openbsd
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
@@ -213,29 +228,40 @@
 
 
 --<< go / build / * / release / all
-	"${ZRUN[@]}" ':: go / build / * / release / linux' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / darwin' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / freebsd' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / openbsd' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / linux / amd64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / darwin / amd64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / darwin / arm64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / freebsd / amd64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / openbsd / amd64' "${@}"
 !!
 
---<< go / build / * / release / linux
+--<< go / build / * / release / linux / amd64
 	export -- GOOS=linux
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / darwin
+--<< go / build / * / release / darwin / amd64
 	export -- GOOS=darwin
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / freebsd
+--<< go / build / * / release / darwin / arm64
+	export -- GOOS=darwin
+	export -- GOARCH=arm64
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / freebsd / amd64
 	export -- GOOS=freebsd
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / openbsd
+--<< go / build / * / release / openbsd / amd64
 	export -- GOOS=openbsd
+	export -- GOARCH=amd64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
