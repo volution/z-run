@@ -52,6 +52,9 @@ func ResolveMainExecutable (_executableHint string, _environmentHint string) (st
 			case "freebsd", "openbsd" :
 				// NOP
 			
+			case "android" :
+				// NOP
+			
 			case "netbsd", "dragonfly" :
 				Logf ('i', 0xc8f30933, "this tool was not tested on your OS;  please be cautions!")
 			

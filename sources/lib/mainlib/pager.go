@@ -69,10 +69,10 @@ func ExecPager (_executable string, _arguments []string, _argumentsPathReplaceme
 	
 	_environmentList := EnvironmentMapToList (_environment)
 	
-	if _error := syscall.Dup2 (int (os.Stderr.Fd ()), int (os.Stdin.Fd ())); _error != nil {
+	if _error := Syscall_Dup2or3 (int (os.Stderr.Fd ()), int (os.Stdin.Fd ())); _error != nil {
 		return Errorw (0x99bfeed4, _error)
 	}
-	if _error := syscall.Dup2 (int (os.Stderr.Fd ()), int (os.Stdout.Fd ())); _error != nil {
+	if _error := Syscall_Dup2or3 (int (os.Stderr.Fd ()), int (os.Stdout.Fd ())); _error != nil {
 		return Errorw (0x3cc9c54c, _error)
 	}
 	

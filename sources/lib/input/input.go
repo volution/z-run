@@ -239,13 +239,13 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	// FIXME:  Make `liner` work without `stdin` or `stdout`!
 	
 	{
-		if _error := syscall.Dup2 (int (_ttyInputFd), int (os.Stdin.Fd ())); _error != nil {
+		if _error := Syscall_Dup2or3 (int (_ttyInputFd), int (os.Stdin.Fd ())); _error != nil {
 			return Errorw (0x180f62b3, _error)
 		}
-		if _error := syscall.Dup2 (int (_ttyOutputFd), int (os.Stdout.Fd ())); _error != nil {
+		if _error := Syscall_Dup2or3 (int (_ttyOutputFd), int (os.Stdout.Fd ())); _error != nil {
 			return Errorw (0xe252bec9, _error)
 		}
-		if _error := syscall.Dup2 (int (_ttyOutputFd), int (os.Stderr.Fd ())); _error != nil {
+		if _error := Syscall_Dup2or3 (int (_ttyOutputFd), int (os.Stderr.Fd ())); _error != nil {
 			return Errorw (0x3c48c5b8, _error)
 		}
 	}
