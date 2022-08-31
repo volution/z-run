@@ -99,16 +99,18 @@
 	
 	case "${_target}" in
 		( debug-build )
+			export -- __BUILD_SUFFIX=native
 			"${ZRUN[@]}" ':: go / build / * / debug' "${_main}"
 		;;&
 		( release-build )
+			export -- __BUILD_SUFFIX=native
 			"${ZRUN[@]}" ':: go / build / * / release' "${_main}"
 		;;&
 		( debug | debug-build )
-			_command=( "./.outputs/${_main}--debug" "${_extra_arguments[@]}" "${@}" )
+			_command=( "./.outputs/binaries/${_main}--debug--native" "${_extra_arguments[@]}" "${@}" )
 		;;
 		( release | release-build )
-			_command=( "./.outputs/${_main}--release" "${_extra_arguments[@]}" "${@}" )
+			_command=( "./.outputs/binaries/${_main}--release--native" "${_extra_arguments[@]}" "${@}" )
 		;;
 		( installed )
 			_command=( "$( type -P -- "${_main}" )" "${_extra_arguments[@]}" "${@}" )

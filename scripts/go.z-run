@@ -20,6 +20,8 @@
 	_main="${1}"
 	shift -- 1
 	
+	export -- __BUILD_SUFFIX=native
+	
 	"${ZRUN[@]}" ':: go / build / * / debug' "${_main}"
 	
 	export -n -- \
@@ -32,7 +34,7 @@
 			ZRUN_CACHE= \
 	#
 	
-	exec -- "./.outputs/${_main}--debug" "${@}"
+	exec -- "./.outputs/binaries/${_main}--debug--native" "${@}"
 !!
 
 
@@ -41,6 +43,8 @@
 	test "${#}" -ge 1
 	_main="${1}"
 	shift -- 1
+	
+	export -- __BUILD_SUFFIX=native
 	
 	"${ZRUN[@]}" ':: go / build / * / release' "${_main}"
 	
@@ -54,7 +58,7 @@
 			ZRUN_CACHE= \
 	#
 	
-	exec -- "./.outputs/${_main}--release" "${@}"
+	exec -- "./.outputs/binaries/${_main}--release--native" "${@}"
 !!
 
 
@@ -70,7 +74,7 @@
 	
 	"${ZRUN[@]}" ':: sources / embedded / prepare'
 	
-	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	_binaries="$( exec -- readlink -e -- ./.outputs/binaries )"
 	
 	_build_target=development
 	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
@@ -91,19 +95,13 @@
 	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
-	_suffix=''
-	if test -n "${GOOS:-}" ; then
-		_suffix="${_suffix}--${GOOS}"
-	fi
-	if test -n "${GOARCH:-}" ; then
-		_suffix="${_suffix}--${GOARCH}"
-	fi
+	_suffix="${__BUILD_SUFFIX}"
 	
 	exec -- \
 		nice -n 19 -- \
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
-			-o "${_outputs}/${_main}--debug${_suffix}" \
+			-o "${_binaries}/${_main}--debug--${_suffix}" \
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
@@ -125,7 +123,7 @@
 	
 	"${ZRUN[@]}" ':: sources / embedded / bundle'
 	
-	_outputs="$( exec -- readlink -e -- ./.outputs )"
+	_binaries="$( exec -- readlink -e -- ./.outputs/binaries )"
 	
 	_build_target=release
 	_build_git_hash="$( exec -- cat -- ./.outputs/markers/build-git-hash.txt )"
@@ -144,24 +142,18 @@
 	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
-	_suffix=''
-	if test -n "${GOOS:-}" ; then
-		_suffix="${_suffix}--${GOOS}"
-	fi
-	if test -n "${GOARCH:-}" ; then
-		_suffix="${_suffix}--${GOARCH}"
-	fi
+	_suffix="${__BUILD_SUFFIX}"
 	
-	printf -- '[ii]  building `%s` release for `%s`...\n' "${_main}" "${_suffix:-native}" >&2
+	printf -- '[ii]  building `%s` release for `%s`...\n' "${_main}" "${_suffix}" >&2
 	
-	if test -f "${_outputs}/${_main}--release${_suffix}" ; then
-		mv -T -- "${_outputs}/${_main}--release${_suffix}" "${_outputs}/${_main}--release${_suffix}.old"
+	if test -f "${_binaries}/${_main}--release--${_suffix}" ; then
+		mv -T -- "${_binaries}/${_main}--release--${_suffix}" "${_binaries}/${_main}--release--${_suffix}.old"
 	fi
 	
 	nice -n 19 -- \
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
-			-o "${_outputs}/${_main}--release${_suffix}.new" \
+			-o "${_binaries}/${_main}--release--${_suffix}.new" \
 			-a \
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
@@ -171,14 +163,14 @@
 			"./cmd/${_main}.go" \
 	#
 	
-	if test ! -e "${_outputs}/${_main}--release${_suffix}.old" ; then
-		mv -T -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}"
-	elif ! cmp -s -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}.old" ; then
-		mv -T -- "${_outputs}/${_main}--release${_suffix}.new" "${_outputs}/${_main}--release${_suffix}"
-		rm -- "${_outputs}/${_main}--release${_suffix}.old"
+	if test ! -e "${_binaries}/${_main}--release--${_suffix}.old" ; then
+		mv -T -- "${_binaries}/${_main}--release--${_suffix}.new" "${_binaries}/${_main}--release--${_suffix}"
+	elif ! cmp -s -- "${_binaries}/${_main}--release--${_suffix}.new" "${_binaries}/${_main}--release--${_suffix}.old" ; then
+		mv -T -- "${_binaries}/${_main}--release--${_suffix}.new" "${_binaries}/${_main}--release--${_suffix}"
+		rm -- "${_binaries}/${_main}--release--${_suffix}.old"
 	else
-		mv -T -- "${_outputs}/${_main}--release${_suffix}.old" "${_outputs}/${_main}--release${_suffix}"
-		rm -- "${_outputs}/${_main}--release${_suffix}.new"
+		mv -T -- "${_binaries}/${_main}--release--${_suffix}.old" "${_binaries}/${_main}--release--${_suffix}"
+		rm -- "${_binaries}/${_main}--release--${_suffix}.new"
 	fi
 !!
 
@@ -186,53 +178,59 @@
 
 
 --<< go / build / * / debug / all
-	printf -- '[ii]  building for `%s`...\n' 'linux / amd64' >&2
-	"${ZRUN[@]}" ':: go / build / * / debug / linux / amd64' "${@}"
-	printf -- '[ii]  building for `%s`...\n' 'darwin / amd64' >&2
-	"${ZRUN[@]}" ':: go / build / * / debug / darwin / amd64' "${@}"
-	printf -- '[ii]  building for `%s`...\n' 'darwin / arm64' >&2
-	"${ZRUN[@]}" ':: go / build / * / debug / darwin / arm64' "${@}"
-	printf -- '[ii]  building for `%s`...\n' 'freebsd / amd64' >&2
-	"${ZRUN[@]}" ':: go / build / * / debug / freebsd / amd64' "${@}"
-	printf -- '[ii]  building for `%s`...\n' 'openbsd / amd64' >&2
-	"${ZRUN[@]}" ':: go / build / * / debug / openbsd / amd64' "${@}"
-	printf -- '[ii]  building for `%s`...\n' 'android / arm64' >&2
-	"${ZRUN[@]}" ':: go / build / * / debug / android / arm64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'linux / x86_64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / linux / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'darwin / x86_64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / darwin / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'darwin / aarch64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / darwin / aarch64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'freebsd / x86_64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / freebsd / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'openbsd / x86_64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / openbsd / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'android / aarch64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / android / aarch64' "${@}"
 !!
 
---<< go / build / * / debug / linux / amd64
+--<< go / build / * / debug / linux / x86_64
 	export -- GOOS=linux
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=linux--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / darwin / amd64
+--<< go / build / * / debug / darwin / x86_64
 	export -- GOOS=darwin
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=darwin--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / darwin / arm64
+--<< go / build / * / debug / darwin / aarch64
 	export -- GOOS=darwin
 	export -- GOARCH=arm64
+	export -- __BUILD_SUFFIX=darwin--aarch64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / freebsd / amd64
+--<< go / build / * / debug / freebsd / x86_64
 	export -- GOOS=freebsd
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=freebsd--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / openbsd / amd64
+--<< go / build / * / debug / openbsd / x86_64
 	export -- GOOS=openbsd
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=openbsd--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
---<< go / build / * / debug / android / arm64
+--<< go / build / * / debug / android / aarch64
 	export -- GOOS=android
 	export -- GOARCH=arm64
+	export -- __BUILD_SUFFIX=android--aarch64
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
@@ -240,47 +238,53 @@
 
 
 --<< go / build / * / release / all
-	"${ZRUN[@]}" ':: go / build / * / release / linux / amd64' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / darwin / amd64' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / darwin / arm64' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / freebsd / amd64' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / openbsd / amd64' "${@}"
-	"${ZRUN[@]}" ':: go / build / * / release / android / arm64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / linux / x86_64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / darwin / x86_64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / darwin / aarch64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / freebsd / x86_64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / openbsd / x86_64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / android / aarch64' "${@}"
 !!
 
---<< go / build / * / release / linux / amd64
+--<< go / build / * / release / linux / x86_64
 	export -- GOOS=linux
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=linux--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / darwin / amd64
+--<< go / build / * / release / darwin / x86_64
 	export -- GOOS=darwin
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=darwin--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / darwin / arm64
+--<< go / build / * / release / darwin / aarch64
 	export -- GOOS=darwin
 	export -- GOARCH=arm64
+	export -- __BUILD_SUFFIX=darwin--aarch64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / freebsd / amd64
+--<< go / build / * / release / freebsd / x86_64
 	export -- GOOS=freebsd
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=freebsd--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / openbsd / amd64
+--<< go / build / * / release / openbsd / x86_64
 	export -- GOOS=openbsd
 	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=openbsd--x86_64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
---<< go / build / * / release / android / arm64
+--<< go / build / * / release / android / aarch64
 	export -- GOOS=android
 	export -- GOARCH=arm64
+	export -- __BUILD_SUFFIX=android--aarch64
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 

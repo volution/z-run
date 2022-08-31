@@ -26,13 +26,13 @@
 		printf -- ':: go / build / %s / release / all :: exec -- "${ZRUN[@]}" ":: go / build / * / release / all" %q "${@}"\n' "${_main}" "${_main}"
 		
 		for _os in linux darwin freebsd openbsd ; do
-			printf -- ':: go / build / %s / debug / %s / amd64 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / amd64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
-			printf -- ':: go / build / %s / release / %s / amd64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / amd64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / debug / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / x86_64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / release / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / x86_64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
 		for _os in darwin android ; do
-			printf -- ':: go / build / %s / debug / %s / arm64 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / arm64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
-			printf -- ':: go / build / %s / release / %s / arm64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / arm64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / debug / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / release / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
 		
@@ -55,17 +55,17 @@
 		
 		
 		
-		printf -- ':: deploy / publish / %s / all :: exec -- "${ZRUN[@]}" ":: deploy / publish" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: deploy / publish / %s / all :: exec -- "${ZRUN[@]}" ":: deploy / publish / no-github" %q "${@}"\n' "${_main}" "${_main}"
 		printf -- ':: deploy / release / %s / all :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" all "${_main}"
 		
 		for _os in linux darwin freebsd openbsd ; do
-			printf -- ':: deploy / rsync / %s / %s / amd64 :: exec -- "${ZRUN[@]}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--amd64" "${_main}"
-			printf -- ':: deploy / release / %s / %s / amd64 :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--amd64" "${_main}"
+			printf -- ':: deploy / rsync / %s / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--x86_64" "${_main}"
+			printf -- ':: deploy / release / %s / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--x86_64" "${_main}"
 		done
 		
 		for _os in darwin android ; do
-			printf -- ':: deploy / rsync / %s / %s / arm64 :: exec -- "${ZRUN[@]}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--arm64" "${_main}"
-			printf -- ':: deploy / release / %s / %s / arm64 :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--arm64" "${_main}"
+			printf -- ':: deploy / rsync / %s / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--aarch64" "${_main}"
+			printf -- ':: deploy / release / %s / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--aarch64" "${_main}"
 		done
 		
 		

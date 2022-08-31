@@ -8,12 +8,12 @@
 
 
 
---:: deploy / rsync / * / linux / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' linux--amd64 "${@}"
---:: deploy / rsync / * / darwin / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--amd64 "${@}"
---:: deploy / rsync / * / darwin / arm64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--arm64 "${@}"
---:: deploy / rsync / * / freebsd / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' freebsd--amd64 "${@}"
---:: deploy / rsync / * / openbsd / amd64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' openbsd--amd64 "${@}"
---:: deploy / rsync / * / android / arm64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' android--arm64 "${@}"
+--:: deploy / rsync / * / linux / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' linux--x86_64 "${@}"
+--:: deploy / rsync / * / darwin / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--x86_64 "${@}"
+--:: deploy / rsync / * / darwin / aarch64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--aarch64 "${@}"
+--:: deploy / rsync / * / freebsd / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' freebsd--x86_64 "${@}"
+--:: deploy / rsync / * / openbsd / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' openbsd--x86_64 "${@}"
+--:: deploy / rsync / * / android / aarch64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' android--aarch64 "${@}"
 
 
 
@@ -21,12 +21,18 @@
 --<< deploy / rsync / *
 	test "${#}" -eq 3 ; _os="${1}" ; _main="${2}" ; _target="${3}" ; shift -- 3
 	"${ZRUN[@]}" ':: deploy / release' "${_os}" "${_main}"
-	_source="./.outputs/${_main}--release--${_os}"
+	_source="./.outputs/binaries/${_main}--release--${_os}"
 	printf -- '[ii]  deploying `%s` for `%s` to `%s`...\n' "${_main}" "${_os}" "${_target}" >&2
 	exec -- rsync -i -t -p --chmod=0555 -- "${_source}" "${_target}"
 !!
 
 
+
+
+<< deploy / publish / no-github
+	export -- __DEPLOY_NOGITHUB=true
+	exec -- "${ZRUN[@]}" ':: deploy / publish' "${@}"
+!!
 
 
 << deploy / publish
@@ -41,6 +47,13 @@
 	test "${#}" -eq 0
 	
 	test -d ./.publish/
+	
+	
+	if test "${__DEPLOY_NOGITHUB:-}" == true ; then
+		_github_publish=false
+	else
+		_github_publish=true
+	fi
 	
 	
 	"${ZRUN[@]}" ':: documentation / all / render / forced'
@@ -65,7 +78,7 @@
 			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 				continue
 			fi
-			for _os in linux--amd64 darwin--amd64 darwin--arm64 freebsd--amd64 openbsd--amd64 android--arm64 ; do
+			for _os in linux--x86_64 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
 				if test -e "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" ; then
 					printf -- '[ee]  release already exists for `%s` for `%s`!\n' "${_main}" "${_os}" >&2
 					exit -- 1
@@ -75,13 +88,15 @@
 	fi
 	
 	
-	if ! git diff --quiet ; then
-		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
-		exit -- 1
-	fi
-	if ! git diff --cached --quiet ; then
-		printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
-		exit -- 1
+	if test "${_github_publish}" == true ; then
+		if ! git diff --quiet ; then
+			printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
+			exit -- 1
+		fi
+		if ! git diff --cached --quiet ; then
+			printf -- '[ee]  dirty repository (before build);  aborting!\n' >&2
+			exit -- 1
+		fi
 	fi
 	
 	
@@ -90,33 +105,35 @@
 	"${ZRUN[@]}" ':: deploy / release' all "${_main_0}"
 	
 	
-	if ! git diff --quiet ; then
-		printf -- '[ee]  dirty repository (after build);  aborting!\n' >&2
-		exit -- 1
+	if test "${_github_publish}" == true ; then
+		
+		if ! git diff --quiet ; then
+			printf -- '[ee]  dirty repository (after build);  aborting!\n' >&2
+			exit -- 1
+		fi
+		if ! git diff --cached --quiet ; then
+			printf -- '[ee]  dirty repository (after build);  aborting!\n' >&2
+			exit -- 1
+		fi
+		
+		printf -- '[ii]  tagging and pushing for `%s`...\n' "${_build_version}${_build_suffix}" >&2
+		printf -- '[--]\n' >&2
+		
+		if test "${_build_release}" == true ; then
+			git tag --sign -m "[release]  Release \`v${_build_version}\`." -- "v${_build_version}" HEAD
+		else
+			git tag --sign -m "[preview]  Preview \`v${_build_version}\`." --force -- preview HEAD
+		fi
+		
+		"${ZRUN[@]}" ':: github / push'
+		
+		printf -- '[--]\n' >&2
 	fi
-	if ! git diff --cached --quiet ; then
-		printf -- '[ee]  dirty repository (after build);  aborting!\n' >&2
-		exit -- 1
-	fi
-	
-	
-	printf -- '[ii]  tagging and pushing for `%s`...\n' "${_build_version}${_build_suffix}" >&2
-	printf -- '[--]\n' >&2
-	
-	if test "${_build_release}" == true ; then
-		git tag --sign -m "[release]  Release \`v${_build_version}\`." -- "v${_build_version}" HEAD
-	else
-		git tag --sign -m "[preview]  Preview \`v${_build_version}\`." --force -- preview HEAD
-	fi
-	
-	"${ZRUN[@]}" ':: github / push'
-	
-	printf -- '[--]\n' >&2
 	
 	
 	printf -- '[ii]  publishing all for `%s`...\n' "${_build_version}${_build_suffix}" >&2
 	
-	for _os in linux--amd64 darwin--amd64 darwin--arm64 freebsd--amd64 openbsd--amd64 android--arm64 ; do
+	for _os in linux--x86_64 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
 		for _main in z-run z-input z-select z-fzf ; do
 			
 			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
@@ -127,7 +144,7 @@
 			printf -- '[--]\n' >&2
 			
 			rsync -i -t -p --chmod=0555 -- \
-					"./.outputs/${_main}--release--${_os}" \
+					"./.outputs/binaries/${_main}--release--${_os}" \
 					"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
 			#
 			
@@ -164,31 +181,34 @@
 	done
 	
 	
-	printf -- '[ii]  publishing all for `%s` (on GitHub)...\n' "${_build_version}${_build_suffix}" >&2
-	
-	for _os in linux--amd64 darwin--amd64 darwin--arm64 freebsd--amd64 openbsd--amd64 android--arm64 ; do
-		for _main in z-run z-input z-select z-fzf ; do
-			
-			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
-				continue
-			fi
-			
-			printf -- '[ii]  publishing `%s` for `%s` for `%s` (on GitHub)...\n' "${_main}" "${_os}" "${_build_version}${_build_suffix}" >&2
-			
-			if test "${_build_release}" == true ; then
-				gh release upload --clobber -- "v${_build_version}" \
-						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
-						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
-				#
-			else
-				gh release upload --clobber -- preview \
-						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
-						"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
-				#
-			fi
-			
+	if test "${_github_publish}" == true ; then
+		
+		printf -- '[ii]  publishing all for `%s` (on GitHub)...\n' "${_build_version}${_build_suffix}" >&2
+		
+		for _os in linux--x86_64 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
+			for _main in z-run z-input z-select z-fzf ; do
+				
+				if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
+					continue
+				fi
+				
+				printf -- '[ii]  publishing `%s` for `%s` for `%s` (on GitHub)...\n' "${_main}" "${_os}" "${_build_version}${_build_suffix}" >&2
+				
+				if test "${_build_release}" == true ; then
+					gh release upload --clobber -- "v${_build_version}" \
+							"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
+							"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
+					#
+				else
+					gh release upload --clobber -- preview \
+							"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" \
+							"./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}.asc" \
+					#
+				fi
+				
+			done
 		done
-	done
+	fi
 !!
 
 
@@ -215,28 +235,31 @@
 		if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 			continue
 		fi
-		for _os in linux--amd64 darwin--amd64 darwin--arm64 freebsd--amd64 openbsd--amd64 android--arm64 ; do
+		for _os in linux--x86_64 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
 			if test "${_os_0}" != all -a "${_os_0}" != "${_os}" ; then
 				continue
 			fi
 			case "${_os}" in
-				( linux--amd64 )
-					"${ZRUN[@]}" ':: go / build / * / release / linux / amd64' "${_main}"
+				( linux--x86_64 )
+					"${ZRUN[@]}" ':: go / build / * / release / linux / x86_64' "${_main}"
 				;;
-				( darwin--amd64 )
-					"${ZRUN[@]}" ':: go / build / * / release / darwin / amd64' "${_main}"
+				( darwin--x86_64 )
+					"${ZRUN[@]}" ':: go / build / * / release / darwin / x86_64' "${_main}"
 				;;
-				( darwin--arm64 )
-					"${ZRUN[@]}" ':: go / build / * / release / darwin / arm64' "${_main}"
+				( darwin--aarch64 )
+					"${ZRUN[@]}" ':: go / build / * / release / darwin / aarch64' "${_main}"
 				;;
-				( freebsd--amd64 )
-					"${ZRUN[@]}" ':: go / build / * / release / freebsd / amd64' "${_main}"
+				( freebsd--x86_64 )
+					"${ZRUN[@]}" ':: go / build / * / release / freebsd / x86_64' "${_main}"
 				;;
-				( openbsd--amd64 )
-					"${ZRUN[@]}" ':: go / build / * / release / openbsd / amd64' "${_main}"
+				( openbsd--x86_64 )
+					"${ZRUN[@]}" ':: go / build / * / release / openbsd / x86_64' "${_main}"
 				;;
-				( android--arm64 )
-					"${ZRUN[@]}" ':: go / build / * / release / android / arm64' "${_main}"
+				( android--aarch64 )
+					"${ZRUN[@]}" ':: go / build / * / release / android / aarch64' "${_main}"
+				;;
+				( * )
+					exit -- 1
 				;;
 			esac
 		done

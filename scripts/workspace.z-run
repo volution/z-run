@@ -32,9 +32,10 @@
 	GOCACHE="${_outputs}/go/cache"
 	_gosrc="${_outputs}/go/src"
 	_gopkg="${_outputs}/go/pkg"
+	_binaries="${_outputs}/binaries"
 	_markers="${_outputs}/markers"
 	
-	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" "${_markers}" ; do
+	for _folder in "${GOPATH}" "${GOBIN}" "${GOTMPDIR}" "${GOTMPDIR}" "${GOCACHE}" "${_gosrc}" "${_gopkg}" "${_binaries}" "${_markers}" ; do
 		if test ! -e "${_folder}" ; then
 			mkdir -- "${_folder}"
 		fi
