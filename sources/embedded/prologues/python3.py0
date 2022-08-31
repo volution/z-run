@@ -69,6 +69,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	PY.binascii = __import__lazy ("binascii")
+	PY.collections = __import__lazy ("collections")
 	PY.errno = __import__lazy ("errno")
 	PY.fcntl = __import__lazy ("fcntl")
 	PY.fnmatch = __import__lazy ("fnmatch")
@@ -618,9 +619,12 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 	## --------------------------------------------------------------------------------
 	
 	@_inject
-	def __Z__panic (_code, _message, *_arguments) :
+	def __Z__panic (_code, _message = None, *_arguments) :
 		_code = Z._panic_code (_code)
-		Z._log_write ("!!", _code, _message, _arguments)
+		if _message is not None :
+			Z._log_write ("!!", _code, _message, _arguments)
+		else :
+			Z._log_write ("!!", _code)
 		Z.exit (1)
 	
 	@_inject
@@ -1066,6 +1070,50 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			else :
 				raise
 		return _stat
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __Z__find (_root, *, _recurse = True, _follow_symlinks = False, _follow_mounts = True, _enforce = False) :
+		_entry_yield_class = PY.collections.namedtuple ("FindEntry", ["path", "name", "depth", "stat", "direntry", "is_file", "is_folder", "is_symlink", "is_special", "skip"])
+		_root_stat = Z.stat (_root, _follow = _follow_symlinks, _enforce = _enforce)
+		if _root_stat is None :
+			return
+		def _walk (_subroot, _depth) :
+			with Z.py.os.scandir (_subroot) as _scan :
+				for _entry in _scan :
+					if not _follow_symlinks and _entry.is_symlink () :
+						continue
+					_stat = _entry.stat (follow_symlinks = _follow_symlinks)
+					if not _follow_mounts and _stat.st_dev != _root_stat.st_dev :
+						continue
+					_entry_path = _entry.path
+					_is_file = PY.stat.S_ISREG (_stat.st_mode)
+					_is_folder = PY.stat.S_ISDIR (_stat.st_mode)
+					_entry_should_skip = []
+					_entry_yield = _entry_yield_class (
+							path = _entry.path,
+							name = _entry.name,
+							depth = _depth + 1,
+							stat = _stat,
+							direntry = _entry,
+							is_file = _is_file,
+							is_folder = _is_folder,
+							is_symlink = _entry.is_symlink (),
+							is_special = PY.stat.S_ISFIFO (_stat.st_mode) or PY.stat.S_ISSOCK (_stat.st_mode) or PY.stat.S_ISBLK (_stat.st_mode) or PY.stat.S_ISCHR (_stat.st_mode),
+							skip = lambda : _entry_should_skip.append (True),
+						)
+					yield _entry_yield
+					if not _is_folder :
+						continue
+					if not _recurse :
+						continue
+					if len (_entry_should_skip) > 0 :
+						continue
+					for _recursive_entry in _walk (_entry_path, _depth + 1) :
+						yield _recursive_entry
+		for _recursive_entry in _walk (_root, 0) :
+			yield _recursive_entry
 	
 	## --------------------------------------------------------------------------------
 	

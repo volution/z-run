@@ -24,6 +24,7 @@
 	"${ZRUN[@]}" ':: python / test / paths / join'
 	"${ZRUN[@]}" ':: python / test / paths / split'
 	"${ZRUN[@]}" ':: python / test / stat'
+	"${ZRUN[@]}" ':: python / test / walk' > /dev/null
 	"${ZRUN[@]}" ':: python / test / touch'
 	"${ZRUN[@]}" ':: python / test / environment' > /dev/null
 	"${ZRUN[@]}" ':: python / test / sleep'
@@ -241,6 +242,15 @@
 	Z.is_older_than ("/proc", "/proc/self/environ", strict = False, enforce = 0x8813f51a)
 	Z.is_newer_than ("/proc", "/proc", strict = False, enforce = 0xa762ec5c)
 	Z.is_older_than ("/proc", "/proc", strict = False, enforce = 0x305faabd)
+!!
+
+<< python / test / walk
+	#! <python3+>
+	Z.expect_no_arguments ()
+	for _entry in Z.find (".") :
+		print (_entry.depth, _entry.path)
+		if _entry.is_folder :
+			_entry.skip ()
 !!
 
 << python / test / environment
