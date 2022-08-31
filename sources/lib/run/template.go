@@ -406,6 +406,15 @@ func templateFunctions () (map[string]interface{}) {
 					return strings.Join (_input, _separator), nil
 				},
 			
+			"array_contains" : func (_object interface{}, _inputs []interface{}) (bool) {
+					for _, _input := range _inputs {
+						if _object == _input {
+							return true
+						}
+					}
+					return false
+				},
+			
 			
 			// --------------------------------------------------------------------------------
 			
