@@ -82,6 +82,7 @@
 	_tags=(
 			netgo
 		)
+	_flags=()
 	_gcflags=(
 			-N
 			-l
@@ -105,6 +106,7 @@
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
+			"${_flags[@]}" \
 			-- \
 			"./cmd/${_main}.go" \
 	#
@@ -131,9 +133,19 @@
 	_tags=(
 			netgo
 		)
+	_flags=(
+		#?	-buildmode exe
+		)
 	_gcflags=()
-	_ldflags=(
-			all=-s
+	_ldflags=()
+	
+	if test "${__BUILD_QUICK:-false}" != true ; then
+		_flags+=( -a )
+		_gcflags+=( 'all=-l=4' )
+		_ldflags+=( 'all=-s' )
+	fi
+	
+	_ldflags+=(
 			-X "github.com/volution/z-run/embedded.BUILD_TARGET=${_build_target}"
 			-X "github.com/volution/z-run/embedded.BUILD_GIT_HASH=${_build_git_hash}"
 		)
@@ -154,10 +166,10 @@
 	"${ZRUN[@]}" ':: go / tool' \
 			build \
 			-o "${_binaries}/${_main}--release--${_suffix}.new" \
-			-a \
 			-tags "${_tags}" \
 			-gcflags "${_gcflags}" \
 			-ldflags "${_ldflags}" \
+			"${_flags[@]}" \
 			-trimpath \
 			-- \
 			"./cmd/${_main}.go" \
@@ -176,6 +188,13 @@
 
 
 
+
+++<< go / build / all / debug
+	for _main in z-run z-input z-select z-fzf ; do
+		printf -- '[ii]  building `%s`...\n' "${_main}" >&2
+		"${ZRUN[@]}" ':: go / build / * / debug / all' "${_main}" "${@}"
+	done
+!!
 
 --<< go / build / * / debug / all
 	printf -- '[ii]  building for `%s`...\n' 'linux / x86_64' >&2
@@ -236,6 +255,18 @@
 
 
 
+
+++<< go / build / all / release / quick
+	export -- __BUILD_QUICK=true
+	exec -- "${ZRUN[@]}" ':: go / build / all / release' "${@}"
+!!
+
+++<< go / build / all / release
+	for _main in z-run z-input z-select z-fzf ; do
+		printf -- '[ii]  building `%s`...\n' "${_main}" >&2
+		"${ZRUN[@]}" ':: go / build / * / release / all' "${_main}" "${@}"
+	done
+!!
 
 --<< go / build / * / release / all
 	"${ZRUN[@]}" ':: go / build / * / release / linux / x86_64' "${@}"
@@ -335,6 +366,23 @@
 !!
 
 
+<< go / dependencies / verify
+	test "${#}" -eq 0
+	exec -- "${ZRUN[@]}" ':: go / tool' \
+			mod verify \
+	#
+!!
+
+
+<< go / dependencies / upgrade
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: go / dependencies / update'
+	"${ZRUN[@]}" ':: go / dependencies / tidy'
+	"${ZRUN[@]}" ':: go / dependencies / verify'
+	"${ZRUN[@]}" ':: go / dependencies / list'
+!!
+
+
 
 
 << go / dependencies / vendor
@@ -385,6 +433,16 @@
 	
 	test "${#}" -ge 1
 	
+	export -n -- \
+			ZRUN_LIBRARY_SOURCE= \
+			ZRUN_LIBRARY_URL= \
+			ZRUN_LIBRARY_IDENTIFIER= \
+			ZRUN_LIBRARY_FINGERPRINT= \
+			ZRUN_EXECUTABLE= \
+			ZRUN_WORKSPACE= \
+			ZRUN_CACHE= \
+	#
+	
 	_outputs="$( exec -- readlink -e -- ./.outputs )"
 	_sources="$( exec -- readlink -e -- ./sources )"
 	
@@ -400,16 +458,6 @@
 	fi
 	
 	cd -- "${_sources}"
-	
-	export -n -- \
-			ZRUN_LIBRARY_SOURCE= \
-			ZRUN_LIBRARY_URL= \
-			ZRUN_LIBRARY_IDENTIFIER= \
-			ZRUN_LIBRARY_FINGERPRINT= \
-			ZRUN_EXECUTABLE= \
-			ZRUN_WORKSPACE= \
-			ZRUN_CACHE= \
-	#
 	
 	exec -- "${_go}" "${@}"
 !!
