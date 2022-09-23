@@ -138,8 +138,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
 	
 	@_inject
-	def __Z__zspawn_capture (_scriptlet, *_arguments, _stdin_data = False, _stderr = None, _enforce = True, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, _data = None, _line = None, _lines = None, _separator = None, _json = None, **_options) :
-		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = PY.str, _stderr = _stderr, _enforce = _enforce, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user, **_options)
+	def __Z__zspawn_capture (_scriptlet, *_arguments, _stdin_data = False, _stdout_data = None, _stderr = None, _enforce = True, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, _data = None, _line = None, _lines = None, _separator = None, _json = None, **_options) :
+		if _stdout_data is None : _stdout_data = PY.str
+		_output = Z.zspawn (_scriptlet, *_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr = _stderr, _enforce = _enforce, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user, **_options)
 		return Z._spawn_capture_0_read (_output, _enforce = _enforce, _data = _data, _line = _line, _lines = _lines, _separator = _separator, _json = _json)
 	
 	@_inject
@@ -168,8 +169,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
 	
 	@_inject
-	def __Z__zrun_spawn_capture (*_arguments, _stdin_data = False, _stderr = None, _enforce = True, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, _data = None, _line = None, _lines = None, _separator = None, _json = None, **_options) :
-		_output = Z.zrun_spawn (*_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = PY.str, _stderr = _stderr, _enforce = _enforce, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user, **_options)
+	def __Z__zrun_spawn_capture (*_arguments, _stdin_data = False, _stdout_data = None, _stderr = None, _enforce = True, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, _data = None, _line = None, _lines = None, _separator = None, _json = None, **_options) :
+		if _stdout_data is None : _stdout_data = PY.str
+		_output = Z.zrun_spawn (*_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr = _stderr, _enforce = _enforce, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user, **_options)
 		return Z._spawn_capture_0_read (_output, _enforce = _enforce, _data = _data, _line = _line, _lines = _lines, _separator = _separator, _json = _json)
 	
 	@_inject
@@ -212,8 +214,9 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return Z.spawn_0 (_descriptor, _wait = _wait, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr_data = _stderr_data, _fd_close = _fd_close, _enforce = _enforce)
 	
 	@_inject
-	def __Z__spawn_capture (_executable, *_arguments, _stdin_data = False, _stderr = None, _enforce = True, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, _data = None, _line = None, _lines = None, _separator = None, _json = None, **_options) :
-		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = PY.str, _stderr = _stderr, _enforce = _enforce, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user, **_options)
+	def __Z__spawn_capture (_executable, *_arguments, _stdin_data = False, _stdout_data = None, _stderr = None, _enforce = True, _fd_close = False, _env = None, _env_overrides = None, _path = None, _path_prepend = None, _chdir = None, _sudo = None, _sudo_user = None, _data = None, _line = None, _lines = None, _separator = None, _json = None, **_options) :
+		if _stdout_data is None : _stdout_data = PY.str
+		_output = Z.spawn (_executable, *_arguments, _wait = True, _stdin_data = _stdin_data, _stdout_data = _stdout_data, _stderr = _stderr, _enforce = _enforce, _fd_close = _fd_close, _env = _env, _env_overrides = _env_overrides, _path = _path, _path_prepend = _path_prepend, _chdir = _chdir, _sudo = _sudo, _sudo_user = _sudo_user, **_options)
 		return Z._spawn_capture_0_read (_output, _enforce = _enforce, _data = _data, _line = _line, _lines = _lines, _separator = _separator, _json = _json)
 	
 	@_inject
