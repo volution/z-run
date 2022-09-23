@@ -1449,6 +1449,33 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		assert PY.isinstance (_value, PY.str), "[1014d33d]"
 		return repr (_value)
 	
+	@_inject
+	def __Z__xml_quote (_value) :
+		if PY.isinstance (_value, PY.bytes) :
+			_value = _value.decode ("utf-8")
+		assert PY.isinstance (_value, PY.str), "[8743dea0]"
+		# NOTE:  Perhaps use `xml.sax.utils.escape`
+		_string = _value
+		_string = _string.replace ("&", "&amp;")
+		_string = _string.replace ("<", "&lt;")
+		_string = _string.replace (">", "&gt;")
+		_string = _string.replace ("'", "&apos;")
+		_string = _string.replace ("\"", "&quot;")
+		return _string
+	
+	@_inject
+	def __Z__xml_unquote (_value) :
+		if PY.isinstance (_value, PY.bytes) :
+			_value = _value.decode ("utf-8")
+		assert PY.isinstance (_value, PY.str), "[5588e8b1]"
+		_string = _value
+		_string = _string.replace ("&lt;", "<")
+		_string = _string.replace ("&gt;", ">")
+		_string = _string.replace ("&apos;", "'")
+		_string = _string.replace ("&quot;", "\"")
+		_string = _string.replace ("&amp;", "&")
+		return _string
+	
 	## --------------------------------------------------------------------------------
 	
 	@_inject
