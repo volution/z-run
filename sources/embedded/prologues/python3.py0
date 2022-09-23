@@ -1247,9 +1247,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			elif _lines :
 				_output = [PY.json.loads (_output) for _output in _output]
 			else :
-				if PY.isinstance (_output, PY.bytes) :
-					_output = _output.decode ("utf-8")
-				_output = PY.json.loads (_output)
+				_output = Z.json_decode (_output)
 		return _output
 	
 	@_inject
@@ -1270,11 +1268,7 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if _fd is None :
 			return False
 		if _json :
-			if _json == "pretty" :
-				_data = PY.json.dumps (_data, sort_keys = True, indent = 2, separators = (",", ": "))
-				_data += "\n"
-			else :
-				_data = PY.json.dumps (_data)
+			_data = Z.json_encode (_data, _pretty = (_json == "pretty"))
 		if _data is None :
 			_buffer = b""
 		elif PY.isinstance (_data, PY.str) :
@@ -1454,6 +1448,25 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 			_value = _value.decode ("utf-8")
 		assert PY.isinstance (_value, PY.str), "[1014d33d]"
 		return repr (_value)
+	
+	## --------------------------------------------------------------------------------
+	
+	@_inject
+	def __Z__json_encode (_value, *, _pretty = False) :
+		if _pretty :
+			_data = PY.json.dumps (_value, sort_keys = True, indent = 2, separators = (",", ": "))
+			_data += "\n"
+		else :
+			_data = PY.json.dumps (_value)
+		return _data
+	
+	@_inject
+	def __Z__json_decode (_data) :
+		if PY.isinstance (_data, PY.bytes) :
+			_data = _data.decode ("utf-8")
+		assert PY.isinstance (_data, PY.str), "[2b945c6b]"
+		_value = PY.json.loads (_data)
+		return _value
 	
 	## --------------------------------------------------------------------------------
 	
