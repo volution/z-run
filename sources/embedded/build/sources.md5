@@ -22,7 +22,7 @@ c35ec07dce11d78b720334c881a7c69c *embedded/documentation/sbom.json
 df44ccc14a3a5b17712539ba59db799b *embedded/documentation/z-run--manual.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
-84cef23d72f6bcb4dbb65cdce0f6bc19 *embedded/prologues/python3.py0
+717e3274a1f055a3a3dbe97cad5962dc *embedded/prologues/python3.py0
 4020cbc245695fbb4ab1deff2d7e2920 *embedded/variables.go
 954508fca0debacc1396feb0f72514c8 *go.mod
 31a3509d8207edde9e578d4817f06a64 *go.sum
