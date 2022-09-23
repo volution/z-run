@@ -631,6 +631,19 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		Z.exit (1)
 	
 	@_inject
+	def __Z__panic_with_message (_code, _message) :
+		_code = Z._panic_code (_code)
+		if _message is None :
+			Z._log_write ("!!", _code)
+		elif PY.isinstance (_message, PY.str) :
+			Z._log_write ("!!", _code, "%s", (_message,))
+		elif PY.isinstance (_message, PY.tuple) :
+			Z._log_write ("!!", _code, _message[0], _message[1:])
+		else :
+			Z._log_write ("!!", _code, "%r", (_message,))
+		Z.exit (1)
+	
+	@_inject
 	def __Z__panic_not_implemented (_code) :
 		Z.panic (_code, "not implemented")
 	
@@ -799,11 +812,11 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		if _message is None : _message = "enforcement failed"
 		if not PY.isinstance (_condition, PY.builtins.bool) :
 			if _enforce is None : _enforce = 0x97ee7cf1
-			Z.panic (_enforce, _message)
+			Z.panic_with_message (_enforce, _message)
 		if not _condition :
 			if _enforce is None : _enforce = 0x0e36cc55
-			Z.panic (_enforce, _message)
-		return _condition
+			Z.panic_with_message (_enforce, _message)
+		return _value
 	
 	@_inject
 	def __Z__enforce_prefix (_value, _prefix, **_options) :
