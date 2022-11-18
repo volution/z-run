@@ -708,6 +708,8 @@ func parseFromStream (_library *Library, _stream io.Reader, _sourcePath string, 
 
 func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _context *Context, _parseContext *parseContext) (*Error) {
 	
+	_workspaceIdentifier := NewFingerprinter () .String (_context.workspace) .Build ()
+	
 	var _source string
 	if utf8.Valid (_sourceData) {
 		_source = string (_sourceData)
@@ -875,6 +877,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					
 					if _include {
 						_includePath := _body
+						_includePath = strings.ReplaceAll (_includePath, "${ZRUN_LIBRARY_IDENTIFIER}", _library.LibraryIdentifier)
+						_includePath = strings.ReplaceAll (_includePath, "${ZRUN_WORKSPACE_IDENTIFIER}", _workspaceIdentifier)
 						if _includePath_0, _error := ReplaceVariables (_includePath); _error != nil {
 							return _error
 						} else {
@@ -981,6 +985,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&?? ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
+					_includePath = strings.ReplaceAll (_includePath, "${ZRUN_LIBRARY_IDENTIFIER}", _library.LibraryIdentifier)
+					_includePath = strings.ReplaceAll (_includePath, "${ZRUN_WORKSPACE_IDENTIFIER}", _workspaceIdentifier)
 					if _includePath_0, _error := ReplaceVariables (_includePath); _error != nil {
 						return _error
 					} else {
@@ -1011,6 +1017,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 					_ignoreError := strings.HasPrefix (_lineTrimmed, "&&??__ ")
 					
 					_includePath := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
+					_includePath = strings.ReplaceAll (_includePath, "${ZRUN_LIBRARY_IDENTIFIER}", _library.LibraryIdentifier)
+					_includePath = strings.ReplaceAll (_includePath, "${ZRUN_WORKSPACE_IDENTIFIER}", _workspaceIdentifier)
 					if _includePath_0, _error := ReplaceVariables (_includePath); _error != nil {
 						return _error
 					} else {
@@ -1098,6 +1106,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								return Errorf (0x8c2e1bf8, "invalid syntax (%d):  empty statement path descriptor | %s", _lineIndex, _line)
 							}
 							_path := _descriptor
+							_path = strings.ReplaceAll (_path, "${ZRUN_LIBRARY_IDENTIFIER}", _library.LibraryIdentifier)
+							_path = strings.ReplaceAll (_path, "${ZRUN_WORKSPACE_IDENTIFIER}", _workspaceIdentifier)
 							if _path_0, _error := ReplaceVariables (_path); _error != nil {
 								return _error
 							} else {
@@ -1135,6 +1145,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							if _name == "" {
 								return Errorf (0x6bce31bb, "invalid syntax (%d):  empty statement environment key | %s", _lineIndex, _line)
 							}
+							_value = strings.ReplaceAll (_value, "${ZRUN_LIBRARY_IDENTIFIER}", _library.LibraryIdentifier)
+							_value = strings.ReplaceAll (_value, "${ZRUN_WORKSPACE_IDENTIFIER}", _workspaceIdentifier)
 							if _value_0, _error := ReplaceVariables (_value); _error != nil {
 								return _error
 							} else {
@@ -1195,6 +1207,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								return Errorf (0x2abc5316, "invalid syntax (%d):  empty statement `z-run` executable descriptor | %s", _lineIndex, _line)
 							}
 							_newExecutable := _descriptor
+							_newExecutable = strings.ReplaceAll (_newExecutable, "${ZRUN_LIBRARY_IDENTIFIER}", _library.LibraryIdentifier)
+							_newExecutable = strings.ReplaceAll (_newExecutable, "${ZRUN_WORKSPACE_IDENTIFIER}", _workspaceIdentifier)
 							if _newExecutable_0, _error := ReplaceVariables (_newExecutable); _error != nil {
 								return _error
 							} else {
