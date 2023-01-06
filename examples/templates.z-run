@@ -65,22 +65,24 @@
 
 <<~~.. templates / fingerprint / template / compile-time
 	#! {{}}
+	template-compile-time (WI): {{ .ZRUN_WORKSPACE_IDENTIFIER }}
 	template-compile-time (LI): {{ .ZRUN_LIBRARY_IDENTIFIER }}
 	template-compile-time (LF): {{ .ZRUN_LIBRARY_FINGERPRINT }}
 !!
 
 << templates / fingerprint / template / execute-time
 	#! {{}}
+	template-execute-time (WI): {{ .ZRUN_WORKSPACE_IDENTIFIER }}
 	template-execute-time (LI): {{ .ZRUN_LIBRARY_IDENTIFIER }}
 	template-execute-time (LF): {{ .ZRUN_LIBRARY_FINGERPRINT }}
 !!
 
 <<~~.. templates / fingerprint / script / compile-time
-	printf -- 'script-compile-time: %s %s %s\n' "${ZRUN_LIBRARY_IDENTIFIER}" "${ZRUN_LIBRARY_FINGERPRINT}" "$( exec -- date -Iseconds )"
+	printf -- 'script-compile-time: %s %s %s %s\n' "${ZRUN_WORKSPACE_IDENTIFIER}" "${ZRUN_LIBRARY_IDENTIFIER}" "${ZRUN_LIBRARY_FINGERPRINT}" "$( exec -- date -Iseconds )"
 !!
 
 << templates / fingerprint / script / execute-time
-	printf -- 'script-execute-time: %s %s %s\n' "${ZRUN_LIBRARY_IDENTIFIER}" "${ZRUN_LIBRARY_FINGERPRINT}" "$( exec -- date -Iseconds )"
+	printf -- 'script-execute-time: %s %s %s %s\n' "${ZRUN_WORKSPACE_IDENTIFIER}" "${ZRUN_LIBRARY_IDENTIFIER}" "${ZRUN_LIBRARY_FINGERPRINT}" "$( exec -- date -Iseconds )"
 !!
 
 <<~~.. templates / fingerprint / all / compile-time
