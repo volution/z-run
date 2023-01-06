@@ -2,29 +2,36 @@
 
 
 
-![logo](./documentation/logo.png)
+![banner](./documentation/assets/github-banner.png)
 
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
 
-# **z-run** -- lightweight Go-based scripts library tool
+# `z-run` -- lightweight Go-based scripts library tool
 
 
-> Table of contents:
-> * [Manual](#manual) and [Examples](#examples)
-> * [Installation](#installation) and [FAQ](#faq)
-> * [About](#about), [Status](#status), [Copyright and licensing](#notice-copyright-and-licensing) and [SBOM](#sbom-software-bill-of-materials)
-> * [chat on Discord](https://discord.gg/WjBfs8rz), [discuss on GitHub](https://github.com/volution/z-run/discussions/categories/discussions), or [email author](mailto:ciprian.craciun@gmail.com)
+> * [about](#about);
+>   [status](#status);
+> * [manual](#manual);
+>   [examples](#examples);
+>   [FAQ](#faq);
+> * [installation](#installation);
+> * [licensing](#notice-copyright-and-licensing);
+>   [SBOM](#sbom-software-bill-of-materials)
+> * [chat on Discord](https://discord.gg/WjBfs8rz);
+>   [discuss on GitHub](https://github.com/volution/z-run/discussions/categories/discussions);
+>   [email author](mailto:ciprian.craciun@gmail.com);
+> * source code at <https://github.com/volution/z-run>
 
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
@@ -123,7 +130,7 @@ Besides this, `z-run` also fulfills the following advanced goals:
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
@@ -191,7 +198,7 @@ I have even built a simple map-reduce framework to handle offline log processing
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
@@ -213,7 +220,7 @@ One can consult the following resources:
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
@@ -332,7 +339,7 @@ Suggestions:
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
@@ -513,7 +520,8 @@ some text that doesn't contain ##}}
 
 
 
-----
+
+------------------------------------------------------------------------------
 
 
 
@@ -589,7 +597,7 @@ z-run select-body
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
@@ -781,7 +789,7 @@ z-run --version
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
@@ -987,7 +995,7 @@ for example, Rust doesn't consider OpenBSD as a "tier-1" platform.
 
 
 
-----
+------------------------------------------------------------------------------
 
 
 
