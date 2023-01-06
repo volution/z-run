@@ -121,7 +121,8 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 					_librarySourcePath = _value
 				case "ZRUN_LIBRARY_URL" :
 					_libraryCacheUrl = _value
-				case "ZRUN_LIBRARY_IDENTIFIER", "ZRUN_LIBRARY_FINGERPRINT" :
+				
+				case "ZRUN_LIBRARY_IDENTIFIER", "ZRUN_LIBRARY_FINGERPRINT", "ZRUN_WORKSPACE_IDENTIFIER" :
 					// FIXME:  Validate that this value actually matches given library.
 					_top = false
 				
@@ -135,6 +136,9 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 				
 				case "ZRUN_CACHE" :
 					_cacheRoot = _value
+				
+				case "ZRUN_OS", "ZRUN_ARCH", "ZRUN_VERSION" :
+					// FIXME:  Validate that this value actually matches given library.
 				
 				default :
 					Logf ('w', 0xafe247b0, "environment variable unknown:  `%s` with value `%s`", _nameCanonical, _value)

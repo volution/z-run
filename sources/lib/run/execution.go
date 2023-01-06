@@ -598,7 +598,9 @@ func prepareExecution_0 (
 		_environment["ZRUN_EXECUTABLE"] = _selfExecutable
 	}
 	if _contextWorkspace != "" {
+		_workspaceIdentifier := NewFingerprinter () .String (_contextWorkspace) .Build ()
 		_environment["ZRUN_WORKSPACE"] = _contextWorkspace
+		_environment["ZRUN_WORKSPACE_IDENTIFIER"] = _workspaceIdentifier
 	}
 	if _contextCacheRoot != "" {
 		_environment["ZRUN_CACHE"] = _contextCacheRoot
@@ -612,6 +614,17 @@ func prepareExecution_0 (
 	if _libraryFingerprint != "" {
 		_environment["ZRUN_LIBRARY_FINGERPRINT"] = _libraryFingerprint
 	}
+	
+	_environment["ZRUN_OS"] = BUILD_TARGET_OS
+	_environment["ZRUN_ARCH"] = BUILD_TARGET_ARCH
+	_environment["ZRUN_VERSION"] = BUILD_VERSION
+	
+	_environment["UNAME_NODE"] = UNAME_NODE
+	_environment["UNAME_SYSTEM"] = UNAME_SYSTEM
+	_environment["UNAME_RELEASE"] = UNAME_RELEASE
+	_environment["UNAME_VERSION"] = UNAME_VERSION
+	_environment["UNAME_MACHINE"] = UNAME_MACHINE
+	_environment["UNAME_FINGERPRINT"] = UNAME_FINGERPRINT
 	
 	_interpreterEnvironment_0 := prepareEnvironment_0 (
 			_cleanEnvironment,

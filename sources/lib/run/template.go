@@ -176,11 +176,14 @@ func executeTemplate_0 (
 		return Errorw (0xad3804cc, _error)
 	}
 	
+	_workspaceIdentifier := NewFingerprinter () .String (_workspace) .Build ()
+	
 	_data := map[string]interface{} {
 			"arguments" : _arguments,
 			"environment" : _environment,
 			"ZRUN_EXECUTABLE" : _selfExecutable,
 			"ZRUN_WORKSPACE" : _workspace,
+			"ZRUN_WORKSPACE_IDENTIFIER" : _workspaceIdentifier,
 			"ZRUN_LIBRARY_URL" : _libraryUrl,
 			"ZRUN_LIBRARY_IDENTIFIER" : _libraryIdentifier,
 			"ZRUN_LIBRARY_FINGERPRINT" : _libraryFingerprint,

@@ -73,7 +73,11 @@ func WrapperMain (_context *MainContext) (*Error) {
 			}
 			
 			if _argument == "--shell-untainted" {
+				delete (_environmentMap, "ZRUN_OS")
+				delete (_environmentMap, "ZRUN_ARCH")
+				delete (_environmentMap, "ZRUN_VERSION")
 				delete (_environmentMap, "ZRUN_WORKSPACE")
+				delete (_environmentMap, "ZRUN_WORKSPACE_IDENTIFIER")
 				delete (_environmentMap, "ZRUN_LIBRARY_SOURCE")
 				delete (_environmentMap, "ZRUN_LIBRARY_URL")
 				delete (_environmentMap, "ZRUN_LIBRARY_IDENTIFIER")
