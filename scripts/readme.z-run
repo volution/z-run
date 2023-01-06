@@ -171,8 +171,8 @@
 	
 	_html="$(
 			exec -- sed -r \
-					-e 's#\./documentation/assets/github-banner\.png#https://github.com/volution/z-run/raw/development/documentation/assets/github-banner.png#g' \
 					-e 's#href="\./#href="https://github.com/volution/z-run/tree/development/#g' \
+					-e 's#src="\./#src="https://github.com/volution/z-run/raw/development/#g' \
 				<<<"${_html}" \
 			#
 		)"
