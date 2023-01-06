@@ -1177,6 +1177,10 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 									if _exists {
 										_value = _valueExisting + string (os.PathListSeparator) + _value
 									}
+								} else if (_kind == "environment-fallback") || (_kind == "environment-fallback-path") {
+									if _exists {
+//										return Errorf (0xb6ca1ce7, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
+									}
 								} else {
 									if _exists {
 										return Errorf (0x774b50de, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
