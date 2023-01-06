@@ -1,10 +1,12 @@
 
-    Table of contents:
+z-run -- lightweight Go-based scripts library tool
 
-      + Manual and Examples
-      + Installation and FAQ
-      + About, Status, Copyright and licensing and SBOM
-      + chat on Discord, discuss on GitHub, or email author
+      + about; status;
+      + manual; examples; FAQ;
+      + installation;
+      + licensing; SBOM
+      + chat on Discord; discuss on GitHub; email author;
+      + source code at https://github.com/volution/z-run
 
 -------------------------------------------------------------------------------
 
