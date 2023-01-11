@@ -49,17 +49,24 @@
 	
 	test "${#}" -eq 0
 	
-	if test ! -d ./.outputs ; then
-		if test -h ./.outputs ; then
-			_outputs_store="$( exec -- readlink -f -- ./.outputs )"
-		else
-			_outputs_store="${TMPDIR:-/tmp}/workspace--${UID}--${RANDOM}-${RANDOM}-${RANDOM}-${RANDOM}"
-		fi
-		mkdir -- "${_outputs_store}"
-		if test ! -e ./.outputs ; then
-			_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
-			ln -s -f -T -- "${_outputs_store}" ./.outputs
-		fi
+	if test -e ./.scratch ; then
+		_scratch_store="$( exec -- readlink -e -- ./.scratch )"
+	elif test -h ./.scratch ; then
+		_scratch_store="$( exec -- readlink -f -- ./.scratch )"
+		mkdir -- "${_scratch_store}"
+	elif test -e "${HOME}/go/.scratch" ; then
+		_scratch_store="$( exec -- readlink -e -- "${HOME}/go/.scratch" )"
+	else
+		_scratch_store="${TMPDIR:-/tmp}/go--scratch--${UID}"
 	fi
+	_scratch_store="$( exec -- readlink -e -- "${_scratch_store}" )"
+	
+	_outputs_store="${_scratch_store}/${UNAME_NODE}--${UNAME_FINGERPRINT}--${ZRUN_WORKSPACE_IDENTIFIER}"
+	if test ! -d "${_outputs_store}" ; then
+		mkdir -- "${_outputs_store}"
+	fi
+	_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
+	
+	ln -s -f -T -- "${_outputs_store}" ./.outputs
 !!
 

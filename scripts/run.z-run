@@ -18,6 +18,7 @@
 
 :: run / shell :: exec -- "${ZRUN[@]}" ':: run / exec' --shell "${@}"
 :: run / shell / untainted :: exec -- "${ZRUN[@]}" ':: run / exec' --shell-untainted "${@}"
+:: run / exec / untainted :: exec -- "${ZRUN[@]}" ':: run / exec' --exec-untainted "${@}"
 
 :: run / interpreter / scriptlet / bash :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<bash>' -- "${@}"
 :: run / interpreter / scriptlet / bash+ :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<bash+>' -- "${@}"
