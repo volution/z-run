@@ -184,13 +184,13 @@ func InputMainWithFlags (_flags *InputMainFlags) (*Error) {
 	
 	if (_flags.Output.OutputSeparator != nil) || (_flags.Output.OutputSeparatorNone != nil) || (_flags.Output.OutputSeparatorZero != nil) {
 		if (_flags.Output.OutputSeparator != nil) && (_flags.Output.OutputSeparatorZero != nil) {
-			return Errorf (0x86622151, "`--output-separator` and `--output-separator-null` are mutually exclusive!")
+			return Errorf (0x0da20e2e, "`--output-separator` and `--output-separator-null` are mutually exclusive!")
 		}
 		if (_flags.Output.OutputSeparator != nil) && (_flags.Output.OutputSeparatorNone != nil) {
-			return Errorf (0x86622151, "`--output-separator` and `--output-separator-none` are mutually exclusive!")
+			return Errorf (0x87eb10d7, "`--output-separator` and `--output-separator-none` are mutually exclusive!")
 		}
 		if (_flags.Output.OutputSeparatorNone != nil) && (_flags.Output.OutputSeparatorZero != nil) {
-			return Errorf (0x86622151, "`--output-separator-none` and `--output-separator-zero` are mutually exclusive!")
+			return Errorf (0x45ee7e6c, "`--output-separator-none` and `--output-separator-zero` are mutually exclusive!")
 		}
 		if _confirm {
 			return Errorf (0xee6fbcd7, "`--output-separator`, `--output-separator-none`, and `--output-separator-null` not allowed with `--confirm`!")
@@ -437,7 +437,7 @@ func inputLine (_prompt string, _default string, _options []string, _sensitive b
 	} else {
 		if _error == io.EOF {
 			if _, _error := fmt.Fprintln (os.Stdout); _error != nil {
-				return "", false, Errorw (0xc4a6ef64, _error)
+				return "", false, Errorw (0x32162919, _error)
 			}
 			return "", true, Errorf (0x4f6d6f8d, "canceled")
 		} else if _error == liner.ErrPromptAborted {
@@ -509,7 +509,7 @@ func inputKey (_prompt string) (string, bool, *Error) {
 	}
 	
 	if _, _error := fmt.Fprintln (os.Stdout); _error != nil {
-		return "", false, Errorw (0xc4a6ef64, _error)
+		return "", false, Errorw (0x64843acc, _error)
 	}
 	
 	_inputEscaped := ""

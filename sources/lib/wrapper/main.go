@@ -118,7 +118,7 @@ func WrapperMain (_context *MainContext) (*Error) {
 			if _error := syscall.Exec (_bash, _arguments, _environmentList); _error != nil {
 				panic (AbortError (Errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
 			}
-			panic (0xf4813cc2)
+			panic (0x5d99b611)
 		}
 		
 		
