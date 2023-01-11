@@ -61,18 +61,31 @@ func WrapperMain (_context *MainContext) (*Error) {
 	
 	
 	
-	if (len (_arguments) == 1) {
+	if (len (_arguments) >= 1) {
 		_argument := _arguments[0]
 		
 		
-		if (_argument == "--shell") || (_argument == "--shell-untainted") {
+		if (_argument == "--shell") || (_argument == "--shell-untainted") || (_argument == "--exec-untainted") {
 			
-			if _error := CheckStdioTerminal (); _error != nil {
-				Logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
-				panic (ExitMainFailed ())
+			if (_argument == "--shell") || (_argument == "--shell-untainted") {
+				if (len (_arguments) != 1) {
+					Logf ('e', 0x5b6263d4, "unexpected arguments;  aborting!")
+					panic (ExitMainFailed ())
+				}
+				if _error := CheckStdioTerminal (); _error != nil {
+					Logf ('e', 0xf2f72641, "stdin, stdout or stderr are not a TTY;  aborting!")
+					panic (ExitMainFailed ())
+				}
+			} else if (_argument == "--exec-untainted") {
+				if (len (_arguments) == 1) {
+					Logf ('e', 0xcd5f0b64, "expected command and arguments;  aborting!")
+					panic (ExitMainFailed ())
+				}
+			} else {
+				panic (0x17403641)
 			}
 			
-			if _argument == "--shell-untainted" {
+			if ((_argument == "--shell-untainted") || (_argument == "--exec-untainted")) {
 				delete (_environmentMap, "ZRUN_OS")
 				delete (_environmentMap, "ZRUN_ARCH")
 				delete (_environmentMap, "ZRUN_VERSION")
@@ -82,47 +95,81 @@ func WrapperMain (_context *MainContext) (*Error) {
 				delete (_environmentMap, "ZRUN_LIBRARY_URL")
 				delete (_environmentMap, "ZRUN_LIBRARY_IDENTIFIER")
 				delete (_environmentMap, "ZRUN_LIBRARY_FINGERPRINT")
+				delete (_environmentMap, "ZRUN_EXECUTABLE")
+				delete (_environmentMap, "UNAME_FINGERPRINT")
+				delete (_environmentMap, "UNAME_NODE")
+				delete (_environmentMap, "UNAME_SYSTEM")
+				delete (_environmentMap, "UNAME_MACHINE")
+				delete (_environmentMap, "UNAME_RELEASE")
+				delete (_environmentMap, "UNAME_VERSION")
 				_environmentList = EnvironmentMapToList (_environmentMap)
 			}
 			
-			_rc := "\n" + BashShellRc + "\n" + BashShellFunctions + "\n"
-			
-			_input, _output, _error := CreatePipe (len (_rc) + 256, "/tmp")
-			if _error != nil {
-				panic (AbortError (_error))
-			}
-			_rc += fmt.Sprintf ("exec %d<&-\n", _input)
-			_rc += "printf -- '\n%s\n' '---- [z-run:shell] -------------------------------------------------------------' >&2\n\n"
-			if _, _error := _output.Write ([]byte (_rc)); _error != nil {
-				panic (AbortError (Errorw (0xc58e3fe6, _error)))
-			}
-			if _error := _output.Close (); _error != nil {
-				panic (AbortError (Errorw (0x8741d077, _error)))
-			}
-			
-			var _bash string
-			if _bash_0, _error := exec.LookPath ("bash"); _error == nil {
-				_bash = _bash_0
-			} else if _bash_0, _error := ResolveExecutable ("bash", []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
-				_bash = _bash_0
-			} else {
-				_bash = "/bin/bash"
-			}
-			
-			_arguments := []string {
-					"[z-run:shell]",
-					"--noprofile",
-					"--rcfile", fmt.Sprintf ("/dev/fd/%d", _input),
+			if ((_argument == "--shell") || (_argument == "--shell-untainted")) {
+				_rc := "\n" + BashShellRc + "\n" + BashShellFunctions + "\n"
+				
+				_input, _output, _error := CreatePipe (len (_rc) + 256, "/tmp")
+				if _error != nil {
+					panic (AbortError (_error))
 				}
-			
-			if _error := syscall.Exec (_bash, _arguments, _environmentList); _error != nil {
-				panic (AbortError (Errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
+				_rc += fmt.Sprintf ("exec %d<&-\n", _input)
+				_rc += "printf -- '\n%s\n' '---- [z-run:shell] -------------------------------------------------------------' >&2\n\n"
+				if _, _error := _output.Write ([]byte (_rc)); _error != nil {
+					panic (AbortError (Errorw (0xc58e3fe6, _error)))
+				}
+				if _error := _output.Close (); _error != nil {
+					panic (AbortError (Errorw (0x8741d077, _error)))
+				}
+				
+				var _bash string
+				if _bash_0, _error := exec.LookPath ("bash"); _error == nil {
+					_bash = _bash_0
+				} else if _bash_0, _error := ResolveExecutable ("bash", []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
+					_bash = _bash_0
+				} else {
+					_bash = "/bin/bash"
+				}
+				
+				_arguments := []string {
+						"[z-run:shell]",
+						"--noprofile",
+						"--rcfile", fmt.Sprintf ("/dev/fd/%d", _input),
+					}
+				
+				if _error := syscall.Exec (_bash, _arguments, _environmentList); _error != nil {
+					panic (AbortError (Errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
+				}
+				panic (0x5d99b611)
+				
+			} else if (_argument == "--exec-untainted") {
+				
+				_executable := _arguments[1]
+				
+				if _executable_0, _error := ResolveExecutable (_executable, []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
+					_executable = _executable_0
+				} else {
+					panic (AbortError (Errorf (0xc43b5571, "failed to exec `%s`  //  %v", _executable, _error)))
+				}
+				
+				_arguments := append ([]string { _executable }, _arguments[2:] ...)
+				
+				if _error := syscall.Exec (_executable, _arguments, _environmentList); _error != nil {
+					panic (AbortError (Errorf (0x154178b7, "failed to exec `%s`  //  %v", _argument0, _error)))
+				}
+				panic (0xf6e5605f)
+				
+			} else {
+				panic (0x81f9f4e3)
 			}
-			panic (0x5d99b611)
 		}
 		
 		
 		if strings.HasPrefix (_argument, "--export=") {
+			
+			if (len (_arguments) != 1) {
+				Logf ('e', 0x21d80345, "unexpected arguments;  aborting!")
+				panic (ExitMainFailed ())
+			}
 			
 			_what := _argument[len ("--export=") :]
 			var _chunks []string
