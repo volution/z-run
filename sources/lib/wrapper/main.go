@@ -145,7 +145,9 @@ func WrapperMain (_context *MainContext) (*Error) {
 				
 				_executable := _arguments[1]
 				
-				if _executable_0, _error := ResolveExecutable (_executable, []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
+				if _executable_0, _error := exec.LookPath (_executable); _error == nil {
+					_executable = _executable_0
+				} else if _executable_0, _error := ResolveExecutable (_executable, []string { "/usr/local/bin", "/usr/bin", "/bin" }); _error == nil {
 					_executable = _executable_0
 				} else {
 					panic (AbortError (Errorf (0xc43b5571, "failed to exec `%s`  //  %v", _executable, _error)))
