@@ -489,7 +489,7 @@ func inputKey (_prompt string) (string, bool, *Error) {
 				} else if (_inputHead < 245) && (_inputLen < 4) {
 					_shouldStop = true
 				} else {
-					panic (0x1563fd7d)
+					panic (AbortUnreachable (0x1563fd7d))
 				}
 			} else {
 				break

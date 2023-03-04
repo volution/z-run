@@ -145,7 +145,7 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 							_scriptlet.Kind = "executable-pending"
 							_scriptlet.Interpreter = "<print>"
 						default :
-							panic (0x6ff57d12)
+							panic (AbortUnreachable (0x6ff57d12))
 					}
 					_scriptlet.InterpreterExecutable = ""
 					_scriptlet.InterpreterArguments = nil
@@ -1170,7 +1170,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 									case "environment-fallback", "environment-fallback-path", "environment-fallback-append", "environment-fallback-append-path" :
 										_environment = _parseContext.scriptletContext.EnvironmentFallbacks
 									default :
-										panic (0xb8623b38)
+										panic (AbortUnreachable (0xb8623b38))
 								}
 								_valueExisting, _exists := _environment[_name]
 								if (_kind == "environment-override-append") || (_kind == "environment-override-append-path") || (_kind == "environment-fallback-append") || (_kind == "environment-fallback-append-path") {

@@ -39,7 +39,7 @@ func CreatePipe (_size int, _cacheRoot string) (int, *os.File, *Error) {
 	} else {
 		if _cacheRoot == "" {
 			// FIXME:  We should make sure that the cache path is never empty!
-			panic (0xd6f17610)
+			panic (AbortPanic (0xd6f17610))
 		}
 		if _error := MakeCacheFolder (_cacheRoot, "buffers"); _error != nil {
 			return -1, nil, _error

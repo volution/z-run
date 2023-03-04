@@ -150,6 +150,6 @@ func ScriptletMain (_selfExecutable string, _arguments []string, _environment ma
 		return _errorExecute
 	}
 	
-	panic (0xf5fd6b17)
+	panic (AbortUnreachable (0xf5fd6b17))
 }
 

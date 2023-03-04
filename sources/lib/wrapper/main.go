@@ -82,7 +82,7 @@ func WrapperMain (_context *MainContext) (*Error) {
 					panic (ExitMainFailed ())
 				}
 			} else {
-				panic (0x17403641)
+				panic (AbortUnreachable (0x17403641))
 			}
 			
 			if ((_argument == "--shell-untainted") || (_argument == "--exec-untainted")) {
@@ -139,7 +139,7 @@ func WrapperMain (_context *MainContext) (*Error) {
 				if _error := syscall.Exec (_bash, _arguments, _environmentList); _error != nil {
 					panic (AbortError (Errorf (0x8598d4c0, "failed to exec `%s`  //  %v", _bash, _error)))
 				}
-				panic (0x5d99b611)
+				panic (AbortUnreachable (0x5d99b611))
 				
 			} else if (_argument == "--exec-untainted") {
 				
@@ -158,10 +158,10 @@ func WrapperMain (_context *MainContext) (*Error) {
 				if _error := syscall.Exec (_executable, _arguments, _environmentList); _error != nil {
 					panic (AbortError (Errorf (0x154178b7, "failed to exec `%s`  //  %v", _argument0, _error)))
 				}
-				panic (0xf6e5605f)
+				panic (AbortUnreachable (0xf6e5605f))
 				
 			} else {
-				panic (0x81f9f4e3)
+				panic (AbortUnreachable (0x81f9f4e3))
 			}
 		}
 		
@@ -222,7 +222,7 @@ func WrapperMain (_context *MainContext) (*Error) {
 									strings.Trim (strings.TrimPrefix (strings.Trim (Python3Prolog, "\n"), "#!/dev/null\n"), "\n"),
 								)
 						default :
-							panic (0xaec5d2dd)
+							panic (AbortUnreachable (0xaec5d2dd))
 					}
 				
 				case "go+-prolog" :
@@ -388,7 +388,7 @@ func WrapperMain (_context *MainContext) (*Error) {
 			if _error := syscall.Exec (_delegateExecutable, _delegateArguments, _delegateEnvironment); _error != nil {
 				panic (AbortError (Errorf (0x05bd220d, "failed to exec `%s`  //  %v", _delegateExecutable, _error)))
 			} else {
-				panic (0xe13aab5f)
+				panic (AbortUnreachable (0xe13aab5f))
 			}
 		}
 	}
@@ -409,63 +409,63 @@ func WrapperMain (_context *MainContext) (*Error) {
 			if _error := ScriptletMain (_executable, _arguments, _environmentMap, false); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0xb305aa74)
+				panic (AbortUnreachable (0xb305aa74))
 			}
 		
 		case "[z-run:scriptlet-exec]" :
 			if _error := ScriptletMain (_executable, _arguments, _environmentMap, true); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0x8f827319)
+				panic (AbortUnreachable (0x8f827319))
 			}
 		
 		case "[z-run:input]" :
 			if _error := InputMain (_arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0xe62a9355)
+				panic (AbortUnreachable (0xe62a9355))
 			}
 		
 		case "[z-run:print]" :
 			if _error := PrintMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0xf2084070)
+				panic (AbortUnreachable (0xf2084070))
 			}
 		
 		case "[z-run:template]" :
 			if _error := TemplateMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0x32241835)
+				panic (AbortUnreachable (0x32241835))
 			}
 		
 		case "[z-run:starlark]" :
 			if _error := StarlarkMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0xd6f5b038)
+				panic (AbortUnreachable (0xd6f5b038))
 			}
 		
 		case "[z-run:menu]" :
 			if _error := MenuMain (_executable, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0x6b21e0ab)
+				panic (AbortUnreachable (0x6b21e0ab))
 			}
 		
 		case "[z-run:select]" :
 			if _error := FzfMain (true, false, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0x2346ca3f)
+				panic (AbortUnreachable (0x2346ca3f))
 			}
 		
 		case "[z-run:fzf]" :
 			if _error := FzfMain (false, true, _arguments, _environmentMap); _error != nil {
 				panic (AbortError (_error))
 			} else {
-				panic (0xfae3720e)
+				panic (AbortUnreachable (0xfae3720e))
 			}
 		
 		case "[z-run]" :

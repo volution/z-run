@@ -126,7 +126,7 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 					_manual = SbomJson
 					_useType = "json"
 				default :
-					panic (0x41b79a1d)
+					panic (AbortUnreachable (0x41b79a1d))
 			}
 			if _manual != "__custom__" {
 				if _manual == "" {
@@ -163,7 +163,7 @@ func InterceptMainSpecialFlags (_executableName string, _executable0 string, _ex
 							panic (AbortError (_error))
 						}
 				}
-				panic (0xacd19d57)
+				panic (AbortUnreachable (0xacd19d57))
 			}
 		}
 	}

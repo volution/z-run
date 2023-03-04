@@ -61,6 +61,6 @@ func FzfMain (_embedded bool, _fullscreen bool, _arguments []string, _environmen
 	
 	fzf.MinimalMain (_arguments, _fullscreen, BUILD_VERSION, "z-fzf")
 	
-	panic (0x4716a580)
+	panic (AbortUnreachable (0x4716a580))
 }
 

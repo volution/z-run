@@ -767,7 +767,7 @@ func executeScriptlet_0 (_scriptletLabel string, _command *exec.Cmd, _descriptor
 			_closeDescriptors ()
 			return Errorf (0x99b54af1, "failed to exec `%s`  //  %v", _command.Path, _error)
 		} else {
-			panic (0xb6dfe17e)
+			panic (AbortUnreachable (0xb6dfe17e))
 		}
 		
 	} else {

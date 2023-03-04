@@ -712,7 +712,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 				case "export-scriptlet-labels-top" :
 					return doExportScriptletLabels (_library, false, os.Stdout, _context)
 				default :
-					panic (0xe558fe68)
+					panic (AbortUnreachable (0xe558fe68))
 			}
 		
 		
@@ -783,7 +783,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 						return _error
 					}
 				default :
-					panic (0xddb85cc9)
+					panic (AbortUnreachable (0xddb85cc9))
 			}
 		
 		case "" :

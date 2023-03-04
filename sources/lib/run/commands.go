@@ -397,7 +397,7 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 
 func doHandleExecuteScriptlet (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 	if _error := executeScriptlet (_library, _scriptlet, false, _context); _error == nil {
-		panic (0x64a96e7f)
+		panic (AbortUnreachable (0x64a96e7f))
 	} else {
 		return false, _error
 	}

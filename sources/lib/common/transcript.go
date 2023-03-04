@@ -60,7 +60,15 @@ func abortErrorf (_error *Error, _code uint32, _format string, _arguments ... in
 	logErrorf ('!', _code, _error, _format, _arguments ...)
 //	Logf ('!', 0xb7a5fb86, "aborting!")
 	os.Exit (1)
-	panic (0xa235deea)
+	panic (AbortUnreachable (0xa235deea))
+}
+
+func AbortPanic (_code uint32) (*Error) {
+	return abortErrorf (nil, _code, "")
+}
+
+func AbortUnreachable (_code uint32) (*Error) {
+	return abortErrorf (nil, _code, "")
 }
 
 
@@ -76,7 +84,7 @@ func Errorf (_code uint32, _format string, _arguments ... interface{}) (*Error) 
 
 func Errorw (_code uint32, _error error) (*Error) {
 	if _code == 0 {
-		panic (0xa4ddfd33)
+		panic (AbortPanic (0xa4ddfd33))
 	}
 	_error_0 := & Error {
 			Code : _code,
