@@ -30,9 +30,14 @@
 			printf -- ':: go / build / %s / release / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / x86_64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
-		for _os in darwin android ; do
+		for _os in linux darwin android ; do
 			printf -- ':: go / build / %s / debug / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 			printf -- ':: go / build / %s / release / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+		done
+		
+		for _os in linux ; do
+			printf -- ':: go / build / %s / debug / %s / armv6 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / armv6" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / release / %s / armv6 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / armv6" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
 		
@@ -63,9 +68,14 @@
 			printf -- ':: deploy / release / %s / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--x86_64" "${_main}"
 		done
 		
-		for _os in darwin android ; do
+		for _os in linux darwin android ; do
 			printf -- ':: deploy / rsync / %s / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--aarch64" "${_main}"
 			printf -- ':: deploy / release / %s / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--aarch64" "${_main}"
+		done
+		
+		for _os in linux ; do
+			printf -- ':: deploy / rsync / %s / %s / armv6 :: exec -- "${ZRUN[@]}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--armv6" "${_main}"
+			printf -- ':: deploy / release / %s / %s / armv6 :: exec -- "${ZRUN[@]}" ":: deploy / release" %q %q "${@}"\n' "${_main}" "${_os}" "${_os}--armv6" "${_main}"
 		done
 		
 		

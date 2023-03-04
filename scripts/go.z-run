@@ -201,6 +201,10 @@
 --<< go / build / * / debug / all
 	printf -- '[ii]  building for `%s`...\n' 'linux / x86_64' >&2
 	"${ZRUN[@]}" ':: go / build / * / debug / linux / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'linux / aarch64' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / linux / aarch64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'linux / armv6' >&2
+	"${ZRUN[@]}" ':: go / build / * / debug / linux / armv6' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'darwin / x86_64' >&2
 	"${ZRUN[@]}" ':: go / build / * / debug / darwin / x86_64' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'darwin / aarch64' >&2
@@ -217,6 +221,21 @@
 	export -- GOOS=linux
 	export -- GOARCH=amd64
 	export -- __BUILD_SUFFIX=linux--x86_64
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
+!!
+
+--<< go / build / * / debug / linux / aarch64
+	export -- GOOS=linux
+	export -- GOARCH=arm64
+	export -- __BUILD_SUFFIX=linux--aarch64
+	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
+!!
+
+--<< go / build / * / debug / linux / armv6
+	export -- GOOS=linux
+	export -- GOARCH=arm
+	export -- GOARM=6
+	export -- __BUILD_SUFFIX=linux--armv6
 	exec -- "${ZRUN[@]}" ':: go / build / * / debug' "${@}"
 !!
 
@@ -272,6 +291,8 @@
 
 --<< go / build / * / release / all
 	"${ZRUN[@]}" ':: go / build / * / release / linux / x86_64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / linux / aarch64' "${@}"
+	"${ZRUN[@]}" ':: go / build / * / release / linux / armv6' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / darwin / x86_64' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / darwin / aarch64' "${@}"
 	"${ZRUN[@]}" ':: go / build / * / release / freebsd / x86_64' "${@}"
@@ -283,6 +304,21 @@
 	export -- GOOS=linux
 	export -- GOARCH=amd64
 	export -- __BUILD_SUFFIX=linux--x86_64
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / linux / aarch64
+	export -- GOOS=linux
+	export -- GOARCH=arm64
+	export -- __BUILD_SUFFIX=linux--aarch64
+	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / linux / armv6
+	export -- GOOS=linux
+	export -- GOARCH=arm
+	export -- GOARM=6
+	export -- __BUILD_SUFFIX=linux--armv6
 	exec -- "${ZRUN[@]}" ':: go / build / * / release' "${@}"
 !!
 
