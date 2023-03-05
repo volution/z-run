@@ -158,8 +158,6 @@
 	
 	_suffix="${__BUILD_SUFFIX}"
 	
-	printf -- '[ii]  building `%s` release for `%s`...\n' "${_main}" "${_suffix}" >&2
-	
 	if test -f "${_binaries}/${_main}--release--${_suffix}" ; then
 		mv -T -- "${_binaries}/${_main}--release--${_suffix}" "${_binaries}/${_main}--release--${_suffix}.old"
 	fi

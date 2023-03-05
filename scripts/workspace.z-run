@@ -3,28 +3,31 @@
 
 
 
-::// workspace / ...
+::// workbench / ...
 
 
 
 
-<< workspace / initialize
+<< workbench / initialize
 	
 	test "${#}" -eq 0
 	
-	"${ZRUN[@]}" ':: workspace / initialize / outputs'
-	"${ZRUN[@]}" ':: workspace / initialize / go'
+	"${ZRUN[@]}" ':: workbench / initialize / outputs'
+	"${ZRUN[@]}" ':: workbench / initialize / go'
 !!
 
 
 
 
-<< workspace / initialize / go
+<< workbench / initialize / go
 	
 	test "${#}" -eq 0
 	
-	_outputs="$( exec -- readlink -e -- ./.outputs )"
-	_sources="$( exec -- readlink -e -- ./sources )"
+	_outputs="${__OUTPUTS}"
+	test -d "${_outputs}"
+	
+	_sources="${__SOURCES}"
+	test -d "${_sources}"
 	
 	GOPATH="${_outputs}/go"
 	GOBIN="${_outputs}/go/bin"
@@ -45,28 +48,77 @@
 
 
 
-<< workspace / initialize / outputs
+<< workbench / initialize / outputs
+	
+	test "${#}" -eq 0
+	
+	_outputs="$( exec -- "${ZRUN}" ':: workbench / outputs' )"
+	
+	for _folder in binaries markers tests ; do
+		if test ! -d "${_outputs}/${_folder}" ; then
+			mkdir -- "${_outputs}/${_folder}"
+		fi
+	done
+!!
+
+
+
+
+--<< workbench / scratch
 	
 	test "${#}" -eq 0
 	
 	if test -e ./.scratch ; then
-		_scratch_store="$( exec -- readlink -e -- ./.scratch )"
+		_scratch="$( exec -- readlink -e -- ./.scratch )"
 	elif test -h ./.scratch ; then
-		_scratch_store="$( exec -- readlink -f -- ./.scratch )"
-		mkdir -- "${_scratch_store}"
+		_scratch="$( exec -- readlink -f -- ./.scratch )"
+		mkdir -- "${_scratch}"
 	elif test -e "${HOME}/go/.scratch" ; then
-		_scratch_store="$( exec -- readlink -e -- "${HOME}/go/.scratch" )"
+		_scratch="$( exec -- readlink -e -- "${HOME}/go/.scratch" )"
 	else
-		_scratch_store="${TMPDIR:-/tmp}/go--scratch--${UID}"
+		_scratch="${TMPDIR:-/tmp}/go--scratch--${UID}"
 	fi
-	_scratch_store="$( exec -- readlink -e -- "${_scratch_store}" )"
 	
-	_outputs_store="${_scratch_store}/${UNAME_NODE}--${UNAME_FINGERPRINT}--${ZRUN_WORKSPACE_IDENTIFIER}"
-	if test ! -d "${_outputs_store}" ; then
-		mkdir -- "${_outputs_store}"
-	fi
-	_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
+	_scratch="$( exec -- readlink -e -- "${_scratch}" )"
 	
-	ln -s -f -T -- "${_outputs_store}" ./.outputs
+	printf -- '%s\n' "${_outputs}"
 !!
+
+
+
+
+--<< workbench / outputs
+	
+	test "${#}" -eq 0
+	
+	_outputs="${__OUTPUTS}"
+	
+	if test ! -e "${_outputs}" ; then
+		
+		_scratch="$( exec -- "${ZRUN}" ':: workbench / scratch' )"
+		_outputs_store="${_scratch}/${UNAME_NODE}--${UNAME_FINGERPRINT}--${ZRUN_WORKSPACE_IDENTIFIER}"
+		if test ! -d "${_outputs_store}" ; then
+			mkdir -- "${_outputs_store}"
+		fi
+		_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
+		
+		ln -s -f -T -- "${_scratch}/outputs" "${_outputs}"
+	fi
+	
+	test -d "${_outputs}"
+	
+	printf -- '%s\n' "${_outputs}"
+!!
+
+
+
+
+--<< workbench / publish
+	
+	_publish="${__PUBLISH}"
+	test -d "${_publish}"
+	
+	printf -- '%s\n' "${_publish}"
+!!
+
 
