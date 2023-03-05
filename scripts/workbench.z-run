@@ -12,7 +12,6 @@
 	
 	test "${#}" -eq 0
 	
-	"${ZRUN[@]}" ':: workbench / initialize / outputs'
 	"${ZRUN[@]}" ':: workbench / initialize / go'
 !!
 
@@ -23,7 +22,7 @@
 	
 	test "${#}" -eq 0
 	
-	_outputs="${__OUTPUTS}"
+	_outputs="$( exec -- "${ZRUN[@]}" ':: workbench / outputs' )"
 	test -d "${_outputs}"
 	
 	_sources="${__SOURCES}"
@@ -48,22 +47,6 @@
 
 
 
-<< workbench / initialize / outputs
-	
-	test "${#}" -eq 0
-	
-	_outputs="$( exec -- "${ZRUN}" ':: workbench / outputs' )"
-	
-	for _folder in binaries markers tests ; do
-		if test ! -d "${_outputs}/${_folder}" ; then
-			mkdir -- "${_outputs}/${_folder}"
-		fi
-	done
-!!
-
-
-
-
 --<< workbench / scratch
 	
 	test "${#}" -eq 0
@@ -81,7 +64,7 @@
 	
 	_scratch="$( exec -- readlink -e -- "${_scratch}" )"
 	
-	printf -- '%s\n' "${_outputs}"
+	printf -- '%s\n' "${_scratch}"
 !!
 
 
@@ -93,7 +76,7 @@
 	
 	_outputs="${__OUTPUTS}"
 	
-	if test ! -e "${_outputs}" ; then
+	if test ! -e "${_outputs}" -o -h "${_outputs}" ; then
 		
 		_scratch="$( exec -- "${ZRUN}" ':: workbench / scratch' )"
 		_outputs_store="${_scratch}/${UNAME_NODE}--${UNAME_FINGERPRINT}--${ZRUN_WORKSPACE_IDENTIFIER}"
@@ -102,7 +85,7 @@
 		fi
 		_outputs_store="$( exec -- readlink -e -- "${_outputs_store}" )"
 		
-		ln -s -f -T -- "${_scratch}/outputs" "${_outputs}"
+		ln -s -f -T -- "${_outputs_store}" "${_outputs}"
 	fi
 	
 	test -d "${_outputs}"

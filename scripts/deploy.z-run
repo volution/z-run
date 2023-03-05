@@ -108,6 +108,7 @@
 	
 	
 	"${ZRUN}" ':: documentation / all / render / forced'
+	"${ZRUN}" ':: sources / generate / sbom'
 	"${ZRUN}" ':: sources / embedded / bundle'
 	export -- __SOURCES__PREPARED=true
 	

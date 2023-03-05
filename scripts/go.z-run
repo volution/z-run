@@ -98,7 +98,7 @@
 	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
-	_suffix="${__BUILD_SUFFIX}"
+	_suffix="${__BUILD_SUFFIX:-native}"
 	
 	exec -- \
 		nice -n 19 -- \
@@ -156,7 +156,7 @@
 	_gcflags="$( printf -- '%s ' "${_gcflags[@]}" )"
 	_ldflags="$( printf -- '%s ' "${_ldflags[@]}" )"
 	
-	_suffix="${__BUILD_SUFFIX}"
+	_suffix="${__BUILD_SUFFIX:-native}"
 	
 	if test -f "${_binaries}/${_main}--release--${_suffix}" ; then
 		mv -T -- "${_binaries}/${_main}--release--${_suffix}" "${_binaries}/${_main}--release--${_suffix}.old"
