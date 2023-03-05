@@ -14,7 +14,10 @@
 --:: deploy / rsync / * / darwin / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--x86_64 "${@}"
 --:: deploy / rsync / * / darwin / aarch64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' darwin--aarch64 "${@}"
 --:: deploy / rsync / * / freebsd / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' freebsd--x86_64 "${@}"
+--:: deploy / rsync / * / freebsd / aarch64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' freebsd--aarch64 "${@}"
 --:: deploy / rsync / * / openbsd / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' openbsd--x86_64 "${@}"
+--:: deploy / rsync / * / openbsd / aarch64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' openbsd--aarch64 "${@}"
+--:: deploy / rsync / * / android / x86_64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' android--x86_64 "${@}"
 --:: deploy / rsync / * / android / aarch64 :: exec -- "${ZRUN[@]}" ':: deploy / rsync / *' android--aarch64 "${@}"
 
 
@@ -75,12 +78,31 @@
 	esac
 	
 	
+	_main_variants=(
+			z-run
+			z-input
+			z-select
+			z-fzf
+		)
+	
+	_os_variants=(
+			linux--x86_64
+			linux--aarch64
+			linux--armv6
+			darwin--x86_64
+			darwin--aarch64
+			freebsd--x86_64
+			openbsd--x86_64
+			android--aarch64
+		)
+	
+	
 	if test "${_build_release}" == true ; then
-		for _main in z-run z-input z-select z-fzf ; do
+		for _main in "${_main_variants[@]}" ; do
 			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 				continue
 			fi
-			for _os in linux--x86_64 linux--aarch64 linux--armv6 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
+			for _os in "${_os_variants[@]}" ; do
 				if test -e "./.publish/${_os}/${_main}--${_os}--v${_build_version}${_build_suffix}" ; then
 					printf -- '[ee]  release already exists for `%s` for `%s`!\n' "${_main}" "${_os}" >&2
 					exit -- 1
@@ -135,8 +157,8 @@
 	
 	printf -- '[ii]  publishing all for `%s`...\n' "${_build_version}${_build_suffix}" >&2
 	
-	for _os in linux--x86_64 linux--aarch64 linux--armv6 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
-		for _main in z-run z-input z-select z-fzf ; do
+	for _os in "${_os_variants[@]}" ; do
+		for _main in "${_main_variants[@]}" ; do
 			
 			if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 				continue
@@ -187,8 +209,8 @@
 		
 		printf -- '[ii]  publishing all for `%s` (on GitHub)...\n' "${_build_version}${_build_suffix}" >&2
 		
-		for _os in linux--x86_64 linux--aarch64 linux--armv6 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
-			for _main in z-run z-input z-select z-fzf ; do
+		for _os in "${_os_variants[@]}" ; do
+			for _main in "${_main_variants[@]}" ; do
 				
 				if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 					continue
@@ -233,11 +255,11 @@
 	if test "${__DEPLOY_NORELEASE:-}" == true ; then
 		exit -- 0
 	fi
-	for _main in z-run z-input z-select z-fzf ; do
+	for _main in "${_main_variants[@]}" ; do
 		if test "${_main_0}" != all -a "${_main_0}" != "${_main}" ; then
 			continue
 		fi
-		for _os in linux--x86_64 linux-aarch64 linux--armv6 darwin--x86_64 darwin--aarch64 freebsd--x86_64 openbsd--x86_64 android--aarch64 ; do
+		for _os in "${_os_variants[@]}" ; do
 			if test "${_os_0}" != all -a "${_os_0}" != "${_os}" ; then
 				continue
 			fi
