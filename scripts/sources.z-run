@@ -41,9 +41,9 @@
 	
 	test "${#}" -eq 0
 	
-	"${ZRUN[@]}" ':: sources / embedded / documentation'
-	"${ZRUN[@]}" ':: sources / embedded / sbom'
-	"${ZRUN[@]}" ':: sources / embedded / hash'
+	"${ZRUN}" ':: sources / embedded / documentation'
+	"${ZRUN}" ':: sources / embedded / sbom'
+	"${ZRUN}" ':: sources / embedded / hash'
 !!
 
 
@@ -176,7 +176,7 @@
 	
 	test "${#}" -eq 0
 	
-	"${ZRUN[@]}" ':: sources / embedded / prepare'
+	"${ZRUN}" ':: sources / embedded / prepare'
 	
 	if test -s ./sources/embedded/build/sources.cpio.gz ; then
 		rm -- ./sources/embedded/build/sources.cpio.gz
@@ -222,7 +222,7 @@
 	_delegate=()
 	case "${_command}" in
 		( '::'* )
-			_delegate+=( "${ZRUN[@]}" "${_command}" )
+			_delegate+=( "${ZRUN}" "${_command}" )
 		;;
 		( /* )
 			_delegate+=( "${_command}" )
@@ -258,7 +258,7 @@
 			\
 			-- \
 			\
-			"${ZRUN[@]}" ':: sources / watch / delegate' \
+			"${ZRUN}" ':: sources / watch / delegate' \
 			"${_delegate[@]}" \
 			"${@}" \
 	#

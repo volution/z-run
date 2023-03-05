@@ -9,20 +9,25 @@
 && _/environment.z-run
 
 
+&& _/workbench.z-run
+&& _/sources.z-run
+&& _/go.z-run
+
+
 && _/run.z-run
 && _/examples.z-run
+
 
 && _/manual.z-run
 && _/readme.z-run
 && _/documentation.z-run
 
-&& _/workbench.z-run
-&& _/sources.z-run
-&& _/go.z-run
 
 && _/deploy.z-run
 
+
 && _/generate.z-run
+
 
 &&?? _/.local.z-run
 

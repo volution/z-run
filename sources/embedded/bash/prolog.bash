@@ -53,7 +53,7 @@ function Z_zspawn () {
 	if test "${1:0:2}" != '::' ; then
 		Z_panic 0xf2d62e78 'failed to spawn `z-run`:  invalid scriptlet;  aborting!'
 	fi
-	if "${ZRUN[@]}" "${@}" ; then
+	if "${ZRUN}" "${@}" ; then
 		return -- 0
 	else
 		Z_panic 0x64aa44ac 'failed to spawn `%s` (with exit code `%d`);  aborting!' "${1}" "${?}"
@@ -67,7 +67,7 @@ function Z_zspawn_return () {
 	if test "${1:0:2}" != '::' ; then
 		Z_panic 0x122f147e 'failed to spawn `z-run`:  invalid scriptlet;  aborting!'
 	fi
-	if "${ZRUN[@]}" "${@}" ; then
+	if "${ZRUN}" "${@}" ; then
 		return -- 0
 	else
 		return -- "${?}"
@@ -81,7 +81,7 @@ function Z_zexec () {
 	if test "${1:0:2}" != '::' ; then
 		Z_panic 0x185a6b16 'failed to exec `z-run`:  invalid scriptlet;  aborting!'
 	fi
-	if exec -- "${ZRUN[@]}" "${@}" ; then
+	if exec -- "${ZRUN}" "${@}" ; then
 		return -- 0
 	else
 		Z_panic 0x143023c2 'failed to exec `z-run` (with exit code `%d`);  aborting!' "${?}"

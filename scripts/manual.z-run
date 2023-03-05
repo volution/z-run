@@ -11,42 +11,42 @@
 --<< documentation / manual / open / * / html / firefox
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
+	"${ZRUN}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www firefox-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
 --<< documentation / manual / open / * / html / chromium
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
+	"${ZRUN}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www chromium-guest:z-run open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
 --<< documentation / manual / open / * / html / webview
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
+	"${ZRUN}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- x-www webview open file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
 --<< documentation / manual / open / * / html / links
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
+	"${ZRUN}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- links file:"$( exec -- readlink -e -- "./documentation/manual/${_manual}.html" )"
 !!
 
 --<< documentation / manual / open / * / man
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
+	"${ZRUN}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- man -- "./documentation/manual/${_manual}.man"
 !!
 
 --<< documentation / manual / open / * / text
 	test "${#}" -ge 1 ; _manual="${1}" ; shift -- 1
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}"
+	"${ZRUN}" ':: documentation / manual / render / *' "${_manual}"
 	exec -- less -- "./documentation/manual/${_manual}.txt"
 !!
 
@@ -59,7 +59,7 @@
 			--watch="./documentation/manual/${_manual}.ronn" \
 			--no-shell \
 			-- \
-			"${ZRUN[@]}" ':: documentation / manual / render / *' "${_manual}" "${@}" \
+			"${ZRUN}" ':: documentation / manual / render / *' "${_manual}" "${@}" \
 	#
 !!
 
@@ -75,7 +75,7 @@
 		exit -- 0
 	fi
 	printf -- '[ii]  rendering `%s`...\n' "${_manual}" >&2
-	exec -- "${ZRUN[@]}" ':: documentation / manual / render / * / forced' "${_manual}" "${@}"
+	exec -- "${ZRUN}" ':: documentation / manual / render / * / forced' "${_manual}" "${@}"
 !!
 
 

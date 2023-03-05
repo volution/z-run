@@ -8,57 +8,57 @@
 
 
 
---:: watch / run / exec :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec' "${@}"
---:: watch / run / exec / * :: exec -- "${ZRUN[@]}" ':: sources / watch' ':: run / exec / *' "${@}"
+--:: watch / run / exec :: exec -- "${ZRUN}" ':: sources / watch' ':: run / exec' "${@}"
+--:: watch / run / exec / * :: exec -- "${ZRUN}" ':: sources / watch' ':: run / exec / *' "${@}"
 
 
 
 
---:: run / exec :: exec -- "${ZRUN[@]}" ':: run / exec / *' z-run "${@}"
+--:: run / exec :: exec -- "${ZRUN}" ':: run / exec / *' z-run "${@}"
 
-:: run / shell :: exec -- "${ZRUN[@]}" ':: run / exec' --shell "${@}"
-:: run / shell / untainted :: exec -- "${ZRUN[@]}" ':: run / exec' --shell-untainted "${@}"
-:: run / exec / untainted :: exec -- "${ZRUN[@]}" ':: run / exec' --exec-untainted "${@}"
+:: run / shell :: exec -- "${ZRUN}" ':: run / exec' --shell "${@}"
+:: run / shell / untainted :: exec -- "${ZRUN}" ':: run / exec' --shell-untainted "${@}"
+:: run / exec / untainted :: exec -- "${ZRUN}" ':: run / exec' --exec-untainted "${@}"
 
-:: run / interpreter / scriptlet / bash :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<bash>' -- "${@}"
-:: run / interpreter / scriptlet / bash+ :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<bash+>' -- "${@}"
-:: run / interpreter / scriptlet / python3 :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<python3>' -- "${@}"
-:: run / interpreter / scriptlet / python3+ :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<python3+>' -- "${@}"
-:: run / interpreter / scriptlet / go+ :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<go+>' -- "${@}"
-:: run / interpreter / scriptlet / starlark :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet --header='<starlark>' -- "${@}"
-:: run / interpreter / scriptlet-exec :: exec -- "${ZRUN[@]}" ':: run / exec' --scriptlet-exec "${@}"
-:: run / interpreter / starlark :: exec -- "${ZRUN[@]}" ':: run / exec' --starlark "${@}"
-:: run / interpreter / template :: exec -- "${ZRUN[@]}" ':: run / exec' --template "${@}"
-:: run / interpreter / print :: exec -- "${ZRUN[@]}" ':: run / exec' --print "${@}"
+:: run / interpreter / scriptlet / bash :: exec -- "${ZRUN}" ':: run / exec' --scriptlet --header='<bash>' -- "${@}"
+:: run / interpreter / scriptlet / bash+ :: exec -- "${ZRUN}" ':: run / exec' --scriptlet --header='<bash+>' -- "${@}"
+:: run / interpreter / scriptlet / python3 :: exec -- "${ZRUN}" ':: run / exec' --scriptlet --header='<python3>' -- "${@}"
+:: run / interpreter / scriptlet / python3+ :: exec -- "${ZRUN}" ':: run / exec' --scriptlet --header='<python3+>' -- "${@}"
+:: run / interpreter / scriptlet / go+ :: exec -- "${ZRUN}" ':: run / exec' --scriptlet --header='<go+>' -- "${@}"
+:: run / interpreter / scriptlet / starlark :: exec -- "${ZRUN}" ':: run / exec' --scriptlet --header='<starlark>' -- "${@}"
+:: run / interpreter / scriptlet-exec :: exec -- "${ZRUN}" ':: run / exec' --scriptlet-exec "${@}"
+:: run / interpreter / starlark :: exec -- "${ZRUN}" ':: run / exec' --starlark "${@}"
+:: run / interpreter / template :: exec -- "${ZRUN}" ':: run / exec' --template "${@}"
+:: run / interpreter / print :: exec -- "${ZRUN}" ':: run / exec' --print "${@}"
 
-:: run / export / shell / rc :: exec -- "${ZRUN[@]}" ':: run / exec' --export=shell-rc "${@}"
-:: run / export / shell / rc-only :: exec -- "${ZRUN[@]}" ':: run / exec' --export=shell-rc-only "${@}"
-:: run / export / shell / functions :: exec -- "${ZRUN[@]}" ':: run / exec' --export=shell-functions "${@}"
+:: run / export / shell / rc :: exec -- "${ZRUN}" ':: run / exec' --export=shell-rc "${@}"
+:: run / export / shell / rc-only :: exec -- "${ZRUN}" ':: run / exec' --export=shell-rc-only "${@}"
+:: run / export / shell / functions :: exec -- "${ZRUN}" ':: run / exec' --export=shell-functions "${@}"
 
-:: run / export / prologues / bash :: exec -- "${ZRUN[@]}" ':: run / exec' --export=bash-prolog "${@}"
-:: run / export / prologues / bash+ :: exec -- "${ZRUN[@]}" ':: run / exec' --export=bash+-prolog "${@}"
-:: run / export / prologues / python3+ :: exec -- "${ZRUN[@]}" ':: run / exec' --export=python3+-prolog "${@}"
-:: run / export / prologues / go+ :: exec -- "${ZRUN[@]}" ':: run / exec' --export=go+-prolog "${@}"
+:: run / export / prologues / bash :: exec -- "${ZRUN}" ':: run / exec' --export=bash-prolog "${@}"
+:: run / export / prologues / bash+ :: exec -- "${ZRUN}" ':: run / exec' --export=bash+-prolog "${@}"
+:: run / export / prologues / python3+ :: exec -- "${ZRUN}" ':: run / exec' --export=python3+-prolog "${@}"
+:: run / export / prologues / go+ :: exec -- "${ZRUN}" ':: run / exec' --export=go+-prolog "${@}"
 
-:: run / flags / version :: exec -- "${ZRUN[@]}" ':: run / exec' --version "${@}"
-:: run / flags / sources / md5 :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-md5 "${@}"
-:: run / flags / sources / cpio :: exec -- "${ZRUN[@]}" ':: run / exec' --sources-cpio "${@}"
-:: run / flags / manual :: exec -- "${ZRUN[@]}" ':: run / exec' --manual "${@}"
-:: run / flags / manual / text :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-text "${@}"
-:: run / flags / manual / html :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-html "${@}"
-:: run / flags / manual / man :: exec -- "${ZRUN[@]}" ':: run / exec' --manual-man "${@}"
-:: run / flags / readme :: exec -- "${ZRUN[@]}" ':: run / exec' --readme "${@}"
-:: run / flags / readme / text :: exec -- "${ZRUN[@]}" ':: run / exec' --readme-text "${@}"
-:: run / flags / readme / html :: exec -- "${ZRUN[@]}" ':: run / exec' --readme-html "${@}"
-:: run / flags / sbom :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom "${@}"
-:: run / flags / sbom / text :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom-text "${@}"
-:: run / flags / sbom / html :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom-html "${@}"
-:: run / flags / sbom / json :: exec -- "${ZRUN[@]}" ':: run / exec' --sbom-json "${@}"
-:: run / flags / help :: exec -- "${ZRUN[@]}" ':: run / exec' --help "${@}"
+:: run / flags / version :: exec -- "${ZRUN}" ':: run / exec' --version "${@}"
+:: run / flags / sources / md5 :: exec -- "${ZRUN}" ':: run / exec' --sources-md5 "${@}"
+:: run / flags / sources / cpio :: exec -- "${ZRUN}" ':: run / exec' --sources-cpio "${@}"
+:: run / flags / manual :: exec -- "${ZRUN}" ':: run / exec' --manual "${@}"
+:: run / flags / manual / text :: exec -- "${ZRUN}" ':: run / exec' --manual-text "${@}"
+:: run / flags / manual / html :: exec -- "${ZRUN}" ':: run / exec' --manual-html "${@}"
+:: run / flags / manual / man :: exec -- "${ZRUN}" ':: run / exec' --manual-man "${@}"
+:: run / flags / readme :: exec -- "${ZRUN}" ':: run / exec' --readme "${@}"
+:: run / flags / readme / text :: exec -- "${ZRUN}" ':: run / exec' --readme-text "${@}"
+:: run / flags / readme / html :: exec -- "${ZRUN}" ':: run / exec' --readme-html "${@}"
+:: run / flags / sbom :: exec -- "${ZRUN}" ':: run / exec' --sbom "${@}"
+:: run / flags / sbom / text :: exec -- "${ZRUN}" ':: run / exec' --sbom-text "${@}"
+:: run / flags / sbom / html :: exec -- "${ZRUN}" ':: run / exec' --sbom-html "${@}"
+:: run / flags / sbom / json :: exec -- "${ZRUN}" ':: run / exec' --sbom-json "${@}"
+:: run / flags / help :: exec -- "${ZRUN}" ':: run / exec' --help "${@}"
 
-:: run / wrapper / z-input :: exec -- "${ZRUN[@]}" ':: run / exec' --input "${@}"
-:: run / wrapper / z-select :: exec -- "${ZRUN[@]}" ':: run / exec' --select "${@}"
-:: run / wrapper / z-fzf :: exec -- "${ZRUN[@]}" ':: run / exec' --fzf "${@}"
+:: run / wrapper / z-input :: exec -- "${ZRUN}" ':: run / exec' --input "${@}"
+:: run / wrapper / z-select :: exec -- "${ZRUN}" ':: run / exec' --select "${@}"
+:: run / wrapper / z-fzf :: exec -- "${ZRUN}" ':: run / exec' --fzf "${@}"
 
 
 
@@ -101,11 +101,11 @@
 	case "${_target}" in
 		( debug-build )
 			export -- __BUILD_SUFFIX=native
-			"${ZRUN[@]}" ':: go / build / * / debug' "${_main}"
+			"${ZRUN}" ':: go / build / * / debug' "${_main}"
 		;;&
 		( release-build )
 			export -- __BUILD_SUFFIX=native
-			"${ZRUN[@]}" ':: go / build / * / release' "${_main}"
+			"${ZRUN}" ':: go / build / * / release' "${_main}"
 		;;&
 		( debug | debug-build )
 			_command=( "./.outputs/binaries/${_main}--debug--native" "${_extra_arguments[@]}" "${@}" )

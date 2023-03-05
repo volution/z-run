@@ -5,35 +5,35 @@
 
 
 ++<< python / test / all
-	"${ZRUN[@]}" ':: python / test / noop'
-	"${ZRUN[@]}" ':: python / test / prolog'
-	"${ZRUN[@]}" ':: python / test / exit'
-	"${ZRUN[@]}" ':: python / test / log' 2> /dev/null
-	"${ZRUN[@]}" ':: python / test / panic' 2> /dev/null || true
-	"${ZRUN[@]}" ':: python / test / zrun_spawn'
-	"${ZRUN[@]}" ':: python / test / zrun_exec'
-	"${ZRUN[@]}" ':: python / test / zspawn'
-	"${ZRUN[@]}" ':: python / test / zexec'
-	"${ZRUN[@]}" ':: python / test / spawn'
-	"${ZRUN[@]}" ':: python / test / exec'
-	"${ZRUN[@]}" ':: python / test / redirects' 2> /dev/null
-	"${ZRUN[@]}" ':: python / test / pipeline'
-	"${ZRUN[@]}" ':: python / test / wait'
-	"${ZRUN[@]}" ':: python / test / communicate'
-	"${ZRUN[@]}" ':: python / test / pipes'
-	"${ZRUN[@]}" ':: python / test / paths / join'
-	"${ZRUN[@]}" ':: python / test / paths / split'
-	"${ZRUN[@]}" ':: python / test / stat'
-	"${ZRUN[@]}" ':: python / test / walk' > /dev/null
-	"${ZRUN[@]}" ':: python / test / touch'
-	"${ZRUN[@]}" ':: python / test / environment' > /dev/null
-	"${ZRUN[@]}" ':: python / test / sleep'
-	"${ZRUN[@]}" ':: python / test / files'
-	"${ZRUN[@]}" ':: python / test / random'
-	"${ZRUN[@]}" ':: python / test / hash'
-	"${ZRUN[@]}" ':: python / test / arguments'
-	"${ZRUN[@]}" ':: python / test / quoting / shell'
-	"${ZRUN[@]}" ':: python / test / quoting / python'
+	"${ZRUN}" ':: python / test / noop'
+	"${ZRUN}" ':: python / test / prolog'
+	"${ZRUN}" ':: python / test / exit'
+	"${ZRUN}" ':: python / test / log' 2> /dev/null
+	"${ZRUN}" ':: python / test / panic' 2> /dev/null || true
+	"${ZRUN}" ':: python / test / zrun_spawn'
+	"${ZRUN}" ':: python / test / zrun_exec'
+	"${ZRUN}" ':: python / test / zspawn'
+	"${ZRUN}" ':: python / test / zexec'
+	"${ZRUN}" ':: python / test / spawn'
+	"${ZRUN}" ':: python / test / exec'
+	"${ZRUN}" ':: python / test / redirects' 2> /dev/null
+	"${ZRUN}" ':: python / test / pipeline'
+	"${ZRUN}" ':: python / test / wait'
+	"${ZRUN}" ':: python / test / communicate'
+	"${ZRUN}" ':: python / test / pipes'
+	"${ZRUN}" ':: python / test / paths / join'
+	"${ZRUN}" ':: python / test / paths / split'
+	"${ZRUN}" ':: python / test / stat'
+	"${ZRUN}" ':: python / test / walk' > /dev/null
+	"${ZRUN}" ':: python / test / touch'
+	"${ZRUN}" ':: python / test / environment' > /dev/null
+	"${ZRUN}" ':: python / test / sleep'
+	"${ZRUN}" ':: python / test / files'
+	"${ZRUN}" ':: python / test / random'
+	"${ZRUN}" ':: python / test / hash'
+	"${ZRUN}" ':: python / test / arguments'
+	"${ZRUN}" ':: python / test / quoting / shell'
+	"${ZRUN}" ':: python / test / quoting / python'
 !!
 
 << python / test / noop

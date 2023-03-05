@@ -10,41 +10,44 @@
 		
 		
 		
-		printf -- ':: watch / run / %s :: exec -- "${ZRUN[@]}" ":: watch / run / exec / *" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: watch / run / %s :: exec -- "${ZRUN}" ":: watch / run / exec / *" %q "${@}"\n' "${_main}" "${_main}"
 		
-		printf -- ':: watch / go / build / %s / debug :: exec -- "${ZRUN[@]}" ":: watch / go / build / * / debug" %q "${@}"\n' "${_main}" "${_main}"
-		printf -- ':: watch / go / execute / %s / debug :: exec -- "${ZRUN[@]}" ":: watch / go / execute / * / debug" %q "${@}"\n' "${_main}" "${_main}"
-		
-		
-		
-		
-		printf -- '++:: run / %s :: exec -- "${ZRUN[@]}" ":: run / exec / *" %q "${@}"\n' "${_main}" "${_main}"
-		
-		printf -- '++:: go / execute / %s / debug :: exec -- "${ZRUN[@]}" ":: go / execute / * / debug" %q "${@}"\n' "${_main}" "${_main}"
-		printf -- ':: go / execute / %s / release :: exec -- "${ZRUN[@]}" ":: go / execute / * / release" %q "${@}"\n' "${_main}" "${_main}"
-		
-		printf -- '++:: go / build / %s / debug :: exec -- "${ZRUN[@]}" ":: go / build / * / debug" %q "${@}"\n' "${_main}" "${_main}"
-		printf -- ':: go / build / %s / release :: exec -- "${ZRUN[@]}" ":: go / build / * / release" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: watch / go / build / %s / debug :: exec -- "${ZRUN}" ":: watch / go / build / * / debug" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: watch / go / execute / %s / debug :: exec -- "${ZRUN}" ":: watch / go / execute / * / debug" %q "${@}"\n' "${_main}" "${_main}"
 		
 		
 		
 		
-		printf -- ':: go / build / %s / debug / all :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / all" %q "${@}"\n' "${_main}" "${_main}"
-		printf -- ':: go / build / %s / release / all :: exec -- "${ZRUN[@]}" ":: go / build / * / release / all" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- '++:: run / %s :: exec -- "${ZRUN}" ":: run / exec / *" %q "${@}"\n' "${_main}" "${_main}"
+		
+		printf -- '++:: go / execute / %s / debug :: exec -- "${ZRUN}" ":: go / execute / * / debug" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: go / execute / %s / release :: exec -- "${ZRUN}" ":: go / execute / * / release" %q "${@}"\n' "${_main}" "${_main}"
+		
+		printf -- '++:: go / build / %s / debug :: exec -- "${ZRUN}" ":: go / build / * / debug" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: go / build / %s / release :: exec -- "${ZRUN}" ":: go / build / * / release" %q "${@}"\n' "${_main}" "${_main}"
+		
+		
+		
+		
+		printf -- ':: go / build / %s / debug / all :: exec -- "${ZRUN}" ":: go / build / * / debug / all" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: go / build / %s / release / all :: exec -- "${ZRUN}" ":: go / build / * / release / all" %q "${@}"\n' "${_main}" "${_main}"
+		
+		printf -- ':: go / build / %s / debug / native :: exec -- "${ZRUN}" ":: go / build / * / debug / native" %q "${@}"\n' "${_main}" "${_main}"
+		printf -- ':: go / build / %s / release / native :: exec -- "${ZRUN}" ":: go / build / * / release / native" %q "${@}"\n' "${_main}" "${_main}"
 		
 		for _os in linux darwin freebsd openbsd android ; do
-			printf -- ':: go / build / %s / debug / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / x86_64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
-			printf -- ':: go / build / %s / release / %s / x86_64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / x86_64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / debug / %s / x86_64 :: exec -- "${ZRUN}" ":: go / build / * / debug / %q / x86_64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / release / %s / x86_64 :: exec -- "${ZRUN}" ":: go / build / * / release / %q / x86_64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
 		for _os in linux darwin freebsd openbsd android ; do
-			printf -- ':: go / build / %s / debug / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
-			printf -- ':: go / build / %s / release / %s / aarch64 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / debug / %s / aarch64 :: exec -- "${ZRUN}" ":: go / build / * / debug / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / release / %s / aarch64 :: exec -- "${ZRUN}" ":: go / build / * / release / %q / aarch64" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
 		for _os in linux ; do
-			printf -- ':: go / build / %s / debug / %s / armv6 :: exec -- "${ZRUN[@]}" ":: go / build / * / debug / %q / armv6" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
-			printf -- ':: go / build / %s / release / %s / armv6 :: exec -- "${ZRUN[@]}" ":: go / build / * / release / %q / armv6" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / debug / %s / armv6 :: exec -- "${ZRUN}" ":: go / build / * / debug / %q / armv6" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
+			printf -- ':: go / build / %s / release / %s / armv6 :: exec -- "${ZRUN}" ":: go / build / * / release / %q / armv6" %q "${@}"\n' "${_main}" "${_os}" "${_os}" "${_main}"
 		done
 		
 		
@@ -52,15 +55,15 @@
 		
 		if test -e "./documentation/manual/${_main}.1.ronn" ; then
 			
-			printf -- ':: watch / documentation / manual / render / %s :: exec -- "${ZRUN[@]}" ":: watch / documentation / manual / render / *" %q "${@}"\n' "${_main}.1" "${_main}.1"
-			printf -- ':: documentation / manual / render / %s :: exec -- "${ZRUN[@]}" ":: documentation / manual / render / *" %q "${@}"\n' "${_main}.1" "${_main}.1"
-			printf -- ':: documentation / manual / render / %s / forced :: exec -- "${ZRUN[@]}" ":: documentation / manual / render / * / forced" %q "${@}"\n' "${_main}.1" "${_main}.1"
+			printf -- ':: watch / documentation / manual / render / %s :: exec -- "${ZRUN}" ":: watch / documentation / manual / render / *" %q "${@}"\n' "${_main}.1" "${_main}.1"
+			printf -- ':: documentation / manual / render / %s :: exec -- "${ZRUN}" ":: documentation / manual / render / *" %q "${@}"\n' "${_main}.1" "${_main}.1"
+			printf -- ':: documentation / manual / render / %s / forced :: exec -- "${ZRUN}" ":: documentation / manual / render / * / forced" %q "${@}"\n' "${_main}.1" "${_main}.1"
 			
-			printf -- ':: documentation / manual / open / %s / man :: exec -- "${ZRUN[@]}" ":: documentation / manual / open / * / man" %q "${@}"\n' "${_main}.1" "${_main}.1"
-			printf -- ':: documentation / manual / open / %s / text :: exec -- "${ZRUN[@]}" ":: documentation / manual / open / * / text" %q "${@}"\n' "${_main}.1" "${_main}.1"
+			printf -- ':: documentation / manual / open / %s / man :: exec -- "${ZRUN}" ":: documentation / manual / open / * / man" %q "${@}"\n' "${_main}.1" "${_main}.1"
+			printf -- ':: documentation / manual / open / %s / text :: exec -- "${ZRUN}" ":: documentation / manual / open / * / text" %q "${@}"\n' "${_main}.1" "${_main}.1"
 			
 			for _browser in firefox chromium webview links ; do
-				printf -- ':: documentation / manual / open / %s / html / %s :: exec -- "${ZRUN[@]}" ":: documentation / manual / open / * / html / %q" %q "${@}"\n' "${_main}.1" "${_browser}" "${_browser}" "${_main}.1"
+				printf -- ':: documentation / manual / open / %s / html / %s :: exec -- "${ZRUN}" ":: documentation / manual / open / * / html / %q" %q "${@}"\n' "${_main}.1" "${_browser}" "${_browser}" "${_main}.1"
 			done
 		fi
 		

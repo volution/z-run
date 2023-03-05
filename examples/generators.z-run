@@ -44,7 +44,7 @@
 
 <<== generator / 6
 	test "${#}" -eq 0
-	"${ZRUN[@]}" ':: generator / 6 / x'
+	"${ZRUN}" ':: generator / 6 / x'
 !!
 
 << generator / 6 / x

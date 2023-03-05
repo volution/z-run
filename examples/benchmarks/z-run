@@ -16,7 +16,7 @@
 
 << benchmark / noop / all
 	test "${#}" -eq 0
-	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+	exec -- "${ZRUN}" ':: benchmark / exec' \
 			"${ZRUN_WORKSPACE}/noop-statistics--all.txt" \
 			\
 			--warmup 500 \
@@ -45,7 +45,7 @@
 
 << benchmark / noop / python
 	test "${#}" -eq 0
-	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+	exec -- "${ZRUN}" ':: benchmark / exec' \
 			"${ZRUN_WORKSPACE}/noop-statistics--python.txt" \
 			\
 			--warmup 500 \
@@ -62,7 +62,7 @@
 
 << benchmark / noop / bash
 	test "${#}" -eq 0
-	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+	exec -- "${ZRUN}" ':: benchmark / exec' \
 			"${ZRUN_WORKSPACE}/noop-statistics--bash.txt" \
 			\
 			--warmup 2000 \
@@ -79,7 +79,7 @@
 
 << benchmark / noop / starlark
 	test "${#}" -eq 0
-	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+	exec -- "${ZRUN}" ':: benchmark / exec' \
 			"${ZRUN_WORKSPACE}/noop-statistics--starlark.txt" \
 			\
 			--warmup 2000 \
@@ -94,7 +94,7 @@
 
 << benchmark / noop / version
 	test "${#}" -eq 0
-	exec -- "${ZRUN[@]}" ':: benchmark / exec' \
+	exec -- "${ZRUN}" ':: benchmark / exec' \
 			"${ZRUN_WORKSPACE}/noop-statistics--version.txt" \
 			\
 			--warmup 2000 \

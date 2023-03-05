@@ -5,17 +5,17 @@
 	test "${#}" -ge 1
 	_target="${1}"
 	shift -- 1
-	"${ZRUN[@]}" ':: ssh / sync' "${_target}"
-	exec -- "${ZRUN[@]}" ssh "${_target}" ':: ssh / remote / main' "${@}"
+	"${ZRUN}" ':: ssh / sync' "${_target}"
+	exec -- "${ZRUN}" ssh "${_target}" ':: ssh / remote / main' "${@}"
 !!
 
 << ssh / launch / extended
 	test "${#}" -ge 1
 	_target="${1}"
 	shift -- 1
-	"${ZRUN[@]}" ':: ssh / sync' "${_target}"
+	"${ZRUN}" ':: ssh / sync' "${_target}"
 	export __TEST="${RANDOM}"
-	exec -- "${ZRUN[@]}" --ssh --ssh-target="${_target}" --ssh-export=__TEST ':: ssh / remote / main' "${@}"
+	exec -- "${ZRUN}" --ssh --ssh-target="${_target}" --ssh-export=__TEST ':: ssh / remote / main' "${@}"
 !!
 
 --<< ssh / sync
@@ -44,7 +44,7 @@
 	
 	if false ; then
 		cd -- "${HOME}"
-		"${ZRUN[@]}" ':: ssh / remote / delegate'
+		"${ZRUN}" ':: ssh / remote / delegate'
 	fi
 	
 	_index=0
