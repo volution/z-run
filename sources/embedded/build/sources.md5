@@ -3,7 +3,7 @@ a99c8cdff2a4335bc55dc9062d6289c3 *cmd/z-input.go
 0d77bbb71a6c0114f74ea217bdb74358 *cmd/z-run.go
 b9b2bfb8aa287dc8bc64d88d0a3058b9 *cmd/z-select.go
 9821544f92824278c0b37c68398854fd *embedded/bash.go
-16a9830466e69d1a42b36637a7c215e4 *embedded/bash/prolog.bash
+d07df174e8d59fa47f10bb38364daa33 *embedded/bash/prolog.bash
 79161c6370339ef7e9f84c50ba6d311b *embedded/bash/prolog_0.bash
 4a17a49c6b52dd3806bbd7e5b0e9454d *embedded/bash/shell_functions.bash
 6601b329879e4bee32fc9fec3a19e789 *embedded/bash/shell_rc.bash
