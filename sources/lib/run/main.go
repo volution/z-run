@@ -44,6 +44,8 @@ type SshContext struct {
 	executablePaths []string
 	terminal string
 	workspace string
+	options []string
+	verbose bool
 	cache string
 	libraryLocalSocket string
 	libraryRemoteSocket string
@@ -270,6 +272,17 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 				} else if strings.HasPrefix (_argument, "--ssh-workspace=") {
 					_workspace := _argument[len ("--ssh-workspace="):]
 					_sshContext.workspace = _workspace
+				} else if strings.HasPrefix (_argument, "--ssh-launcher=") {
+					_launcher := _argument[len ("--ssh-launcher="):]
+					_sshContext.launcher = _launcher
+				} else if strings.HasPrefix (_argument, "--ssh-delegate=") {
+					_delegate := _argument[len ("--ssh-delegate="):]
+					_sshContext.delegate = _delegate
+				} else if strings.HasPrefix (_argument, "--ssh-option=") {
+					_option := _argument[len ("--ssh-option="):]
+					_sshContext.options = append (_sshContext.options, _option)
+				} else if _argument == "--ssh-verbose" {
+					_sshContext.verbose = true
 				} else {
 					return Errorf (0xeed6fa17, "invalid argument `%s`", _argument)
 				}

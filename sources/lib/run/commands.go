@@ -244,6 +244,8 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 	_sshExecutablePaths := _sshContext.executablePaths
 	_sshTerminal := _sshContext.terminal
 	_sshWorkspace := _sshContext.workspace
+	_sshOptions := _sshContext.options
+	_sshVerbose := _sshContext.verbose
 	_sshCache := _sshContext.cache
 	_sshLibraryLocalSocket := _sshContext.libraryLocalSocket
 	_sshLibraryRemoteSocket := _sshContext.libraryRemoteSocket
@@ -368,6 +370,13 @@ func doHandleExecuteScriptletSsh (_library LibraryStore, _scriptlet *Scriptlet, 
 //			Logf ('d', 0x93bc5a69, "SSH with TTY allowed;")
 			_sshArguments = append (_sshArguments, "-t")
 		}
+	}
+	
+	if _sshVerbose {
+		_sshArguments = append (_sshArguments, "-v")
+	}
+	for _, _sshOption := range _sshOptions {
+		_sshArguments = append (_sshArguments, "-o", _sshOption)
 	}
 	
 	_sshArguments = append (_sshArguments, "-R", _sshLibraryRemoteSocket + ":" + _sshLibraryLocalSocket)
