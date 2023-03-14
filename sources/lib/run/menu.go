@@ -99,7 +99,7 @@ func MenuMain (_executable string, _arguments []string, _environment map[string]
 
 func menuSelect (_inputs []string, _context *Context) ([]string, *Error) {
 	
-	_prefixHash := true
+	_prefixHash := false
 	_prefixStrip := 0
 	_suffixStrip := 0
 	
