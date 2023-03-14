@@ -33,11 +33,12 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/gdamore/tcell v1.4.0 // indirect
+	github.com/gdamore/tcell/v2 v2.6.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/saracen/walker v0.1.3 // indirect
 )
 
 replace (
 	github.com/colinmarc/cdb => github.com/cipriancraciun/go-cdb-lib v0.0.0-20190809203657-d959ce9cc674
-	github.com/junegunn/fzf => github.com/cipriancraciun/fzf v0.0.0-20220118143627-3c4af3253e85
+	github.com/junegunn/fzf => github.com/cipriancraciun/fzf v0.0.0-20230314092702-b7fd371a785c
 )
