@@ -25,6 +25,7 @@
 
 --<<.. deploy / list / main
 	z-run
+	z-execve
 	z-input
 	z-select
 	z-fzf

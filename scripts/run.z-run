@@ -56,6 +56,7 @@
 :: run / flags / sbom / json :: exec -- "${ZRUN}" ':: run / exec' --sbom-json "${@}"
 :: run / flags / help :: exec -- "${ZRUN}" ':: run / exec' --help "${@}"
 
+:: run / wrapper / z-execve :: exec -- "${ZRUN}" ':: run / exec' --execve "${@}"
 :: run / wrapper / z-input :: exec -- "${ZRUN}" ':: run / exec' --input "${@}"
 :: run / wrapper / z-select :: exec -- "${ZRUN}" ':: run / exec' --select "${@}"
 :: run / wrapper / z-fzf :: exec -- "${ZRUN}" ':: run / exec' --fzf "${@}"

@@ -190,7 +190,7 @@
 
 
 ++<< go / build / all / debug
-	for _main in z-run z-input z-select z-fzf ; do
+	for _main in z-run z-execve z-input z-select z-fzf ; do
 		printf -- '[ii]  building `%s`...\n' "${_main}" >&2
 		"${ZRUN}" ':: go / build / * / debug / all' "${_main}" "${@}"
 	done
@@ -321,7 +321,7 @@
 !!
 
 ++<< go / build / all / release
-	for _main in z-run z-input z-select z-fzf ; do
+	for _main in z-run z-execve z-input z-select z-fzf ; do
 		printf -- '[ii]  building `%s`...\n' "${_main}" >&2
 		"${ZRUN}" ':: go / build / * / release / all' "${_main}" "${@}"
 	done

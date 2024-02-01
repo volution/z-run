@@ -5,7 +5,7 @@
 	
 	test "${#}" -eq 0
 	
-	for _main in z-run z-input z-select z-fzf ; do
+	for _main in z-run z-execve z-input z-select z-fzf ; do
 		
 		
 		
