@@ -18,9 +18,9 @@ c3b76b61baa2fd78b28460c7fab83d59 *embedded/documentation/help--footer.txt
 6f51da3336edb5deaff8d06876101cd0 *embedded/documentation/sbom.json
 0bfe45493b496a5df7027541382b0bff *embedded/documentation/sbom.txt
 35585845c8b1c58f8748791c618b9869 *embedded/documentation/z-run--help.txt
-0c83504fea674e136771ff9166e636a1 *embedded/documentation/z-run--manual.html
-992c2c5b97b110767f65704f354a3589 *embedded/documentation/z-run--manual.man
-962ec3c792ffb1c40ef77b0d9cb8b057 *embedded/documentation/z-run--manual.txt
+f11907ca86fc1c941c11c487a9c13ad4 *embedded/documentation/z-run--manual.html
+09cb1bda5f2a6fcaa7422757a916de4b *embedded/documentation/z-run--manual.man
+f19ef9764264401f3b08665bc3303d72 *embedded/documentation/z-run--manual.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
 717e3274a1f055a3a3dbe97cad5962dc *embedded/prologues/python3.py0
