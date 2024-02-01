@@ -143,7 +143,7 @@
 	
 	if test "${__BUILD_QUICK:-false}" != true ; then
 		_flags+=( -a )
-		_gcflags+=( 'all=-l=4' )
+		_gcflags+=( 'all=-l=0' )
 		_ldflags+=( 'all=-s' )
 	fi
 	
@@ -203,6 +203,8 @@
 	
 	printf -- '[ii]  building for `%s`...\n' 'linux / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / debug / linux / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'linux / i686' >&2
+	"${ZRUN}" ':: go / build / * / debug / linux / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'linux / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / debug / linux / aarch64' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'linux / armv6' >&2
@@ -215,18 +217,31 @@
 	
 	printf -- '[ii]  building for `%s`...\n' 'freebsd / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / debug / freebsd / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'freebsd / i686' >&2
+	"${ZRUN}" ':: go / build / * / debug / freebsd / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'freebsd / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / debug / freebsd / aarch64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'freebsd / armv6' >&2
+	"${ZRUN}" ':: go / build / * / debug / freebsd / armv6' "${@}"
 	
 	printf -- '[ii]  building for `%s`...\n' 'openbsd / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / debug / openbsd / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'openbsd / i686' >&2
+	"${ZRUN}" ':: go / build / * / debug / openbsd / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'openbsd / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / debug / openbsd / aarch64' "${@}"
 	
 	printf -- '[ii]  building for `%s`...\n' 'android / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / debug / android / x86_64' "${@}"
+	# printf -- '[ii]  building for `%s`...\n' 'android / i686' >&2
+	# "${ZRUN}" ':: go / build / * / debug / android / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'android / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / debug / android / aarch64' "${@}"
+	# printf -- '[ii]  building for `%s`...\n' 'android / armv6' >&2
+	# "${ZRUN}" ':: go / build / * / debug / android / armv6' "${@}"
+	
+	# printf -- '[ii]  building for `%s`...\n' 'wasi / wasm32' >&2
+	# "${ZRUN}" ':: go / build / * / debug / wasi / wasm32' "${@}"
 !!
 
 --<< go / build / * / debug / native
@@ -238,6 +253,13 @@
 	export -- GOOS=linux
 	export -- GOARCH=amd64
 	export -- __BUILD_SUFFIX=linux--x86_64
+	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
+!!
+
+--<< go / build / * / debug / linux / i686
+	export -- GOOS=linux
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=linux--i686
 	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
 !!
 
@@ -277,6 +299,13 @@
 	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
 !!
 
+--<< go / build / * / debug / freebsd / i686
+	export -- GOOS=freebsd
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=freebsd--i686
+	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
+!!
+
 --<< go / build / * / debug / freebsd / aarch64
 	export -- GOOS=freebsd
 	export -- GOARCH=arm64
@@ -284,10 +313,24 @@
 	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
 !!
 
+--<< go / build / * / debug / freebsd / armv6
+	export -- GOOS=freebsd
+	export -- GOARCH=arm
+	export -- __BUILD_SUFFIX=freebsd--armv6
+	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
+!!
+
 --<< go / build / * / debug / openbsd / x86_64
 	export -- GOOS=openbsd
 	export -- GOARCH=amd64
 	export -- __BUILD_SUFFIX=openbsd--x86_64
+	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
+!!
+
+--<< go / build / * / debug / openbsd / i686
+	export -- GOOS=openbsd
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=openbsd--i686
 	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
 !!
 
@@ -305,10 +348,31 @@
 	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
 !!
 
+--<< go / build / * / debug / android / i686
+	export -- GOOS=android
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=android--i686
+	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
+!!
+
 --<< go / build / * / debug / android / aarch64
 	export -- GOOS=android
 	export -- GOARCH=arm64
 	export -- __BUILD_SUFFIX=android--aarch64
+	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
+!!
+
+--<< go / build / * / debug / android / armv6
+	export -- GOOS=android
+	export -- GOARCH=arm
+	export -- __BUILD_SUFFIX=android--armv6
+	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
+!!
+
+--<< go / build / * / debug / wasi / wasm32
+	export -- GOOS=wasip1
+	export -- GOARCH=wasm
+	export -- __BUILD_SUFFIX=wasi--wasm32
 	exec -- "${ZRUN}" ':: go / build / * / debug' "${@}"
 !!
 
@@ -334,6 +398,8 @@
 	
 	printf -- '[ii]  building for `%s`...\n' 'linux / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / release / linux / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'linux / i686' >&2
+	"${ZRUN}" ':: go / build / * / release / linux / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'linux / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / release / linux / aarch64' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'linux / armv6' >&2
@@ -346,18 +412,31 @@
 	
 	printf -- '[ii]  building for `%s`...\n' 'freebsd / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / release / freebsd / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'freebsd / i686' >&2
+	"${ZRUN}" ':: go / build / * / release / freebsd / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'freebsd / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / release / freebsd / aarch64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'freebsd / armv6' >&2
+	"${ZRUN}" ':: go / build / * / release / freebsd / armv6' "${@}"
 	
 	printf -- '[ii]  building for `%s`...\n' 'openbsd / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / release / openbsd / x86_64' "${@}"
+	printf -- '[ii]  building for `%s`...\n' 'openbsd / i686' >&2
+	"${ZRUN}" ':: go / build / * / release / openbsd / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'openbsd / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / release / openbsd / aarch64' "${@}"
 	
 	printf -- '[ii]  building for `%s`...\n' 'android / x86_64' >&2
 	"${ZRUN}" ':: go / build / * / release / android / x86_64' "${@}"
+	# printf -- '[ii]  building for `%s`...\n' 'android / i686' >&2
+	# "${ZRUN}" ':: go / build / * / release / android / i686' "${@}"
 	printf -- '[ii]  building for `%s`...\n' 'android / aarch64' >&2
 	"${ZRUN}" ':: go / build / * / release / android / aarch64' "${@}"
+	# printf -- '[ii]  building for `%s`...\n' 'android / armv6' >&2
+	# "${ZRUN}" ':: go / build / * / release / android / armv6' "${@}"
+	
+	# printf -- '[ii]  building for `%s`...\n' 'wasi / wasm32' >&2
+	# "${ZRUN}" ':: go / build / * / release / wasi / wasm32' "${@}"
 !!
 
 --<< go / build / * / release / native
@@ -369,6 +448,13 @@
 	export -- GOOS=linux
 	export -- GOARCH=amd64
 	export -- __BUILD_SUFFIX=linux--x86_64
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / linux / i686
+	export -- GOOS=linux
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=linux--i686
 	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
 !!
 
@@ -408,6 +494,13 @@
 	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
 !!
 
+--<< go / build / * / release / freebsd / i686
+	export -- GOOS=freebsd
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=freebsd--i686
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
 --<< go / build / * / release / freebsd / aarch64
 	export -- GOOS=freebsd
 	export -- GOARCH=arm64
@@ -415,10 +508,24 @@
 	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
 !!
 
+--<< go / build / * / release / freebsd / armv6
+	export -- GOOS=freebsd
+	export -- GOARCH=arm
+	export -- __BUILD_SUFFIX=freebsd--armv6
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
 --<< go / build / * / release / openbsd / x86_64
 	export -- GOOS=openbsd
 	export -- GOARCH=amd64
 	export -- __BUILD_SUFFIX=openbsd--x86_64
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / openbsd / i686
+	export -- GOOS=openbsd
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=openbsd--i686
 	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
 !!
 
@@ -436,10 +543,31 @@
 	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
 !!
 
+--<< go / build / * / release / android / i686
+	export -- GOOS=android
+	export -- GOARCH=386
+	export -- __BUILD_SUFFIX=android--i686
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
 --<< go / build / * / release / android / aarch64
 	export -- GOOS=android
 	export -- GOARCH=arm64
 	export -- __BUILD_SUFFIX=android--aarch64
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / android / armv6
+	export -- GOOS=android
+	export -- GOARCH=arm
+	export -- __BUILD_SUFFIX=android--armv6
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
+--<< go / build / * / release / wasi / wasm32
+	export -- GOOS=wasip1
+	export -- GOARCH=wasm
+	export -- __BUILD_SUFFIX=wasi--wasm32
 	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
 !!
 

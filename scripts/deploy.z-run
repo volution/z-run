@@ -8,27 +8,72 @@
 
 
 
---<<.. deploy / list / variant
+--<<.. deploy / list / variant / 0
+	
 	linux--x86_64
+	linux--i686
 	linux--aarch64
 	linux--armv6
+	
 	darwin--x86_64
 	darwin--aarch64
+	
 	freebsd--x86_64
+	freebsd--i686
 	freebsd--aarch64
+	freebsd--armv6
+	
 	openbsd--x86_64
+	openbsd--i686
 	openbsd--aarch64
+	
 	android--x86_64
+	android--i686 ##
 	android--aarch64
+	android--armv6 ##
+	
+	wasi--wasm32 ##
 !!
 
 
---<<.. deploy / list / main
+--<<.. deploy / list / main / 0
 	z-run
 	z-execve
 	z-input
 	z-select
 	z-fzf
+!!
+
+
+
+
+<< deploy / list / variant
+	test "${#}" -eq 0
+	readarray -t -- _variants < <( exec -- "${ZRUN}" ':: deploy / list / variant / 0' )
+	for _variant in "${_variants[@]}" ; do
+		case "${_variant}" in
+			( '' ) ;;
+			( '#'* | *' ##' ) ;;
+			( * )
+				printf -- '%s\n' "${_variant}"
+			;;
+		esac
+	done
+!!
+
+
+<< deploy / list / main
+	test "${#}" -eq 0
+	readarray -t -- _mains < <( exec -- "${ZRUN}" ':: deploy / list / main / 0' )
+	for _main in "${_mains[@]}" ; do
+		case "${_main}" in
+			( '' ) ;;
+			( '#'* | *' ##' ) ;;
+			( * )
+				printf -- '%s\n' "${_main}"
+			;;
+		esac
+	done
 !!
 
 
@@ -514,7 +559,7 @@
 		printf -- ':: deploy / publish / %s / all :: exec -- "${ZRUN}" ":: deploy / publish" %q "${@}"\n' "${_main}" "${_main}"
 		printf -- ':: deploy / publish / %s / all / no-github :: exec -- "${ZRUN}" ":: deploy / publish / no-github" %q "${@}"\n' "${_main}" "${_main}"
 		
-		printf -- ':: deploy / release / %s / all :: exec -- "${ZRUN}" ":: deploy / release" %q %q "${@}"\n' "${_main}" all "${_main}"
+		printf -- ':: deploy / release / %s / all :: exec -- "${ZRUN}" ":: deploy / release" %q "${@}"\n' "${_main}" "${_main}"
 		
 		for _variant in "${_variants[@]}" ; do
 			printf -- ':: deploy / rsync / %s / %s :: exec -- "${ZRUN}" ":: deploy / rsync / *" %q %q "${@}"\n' "${_main}" "${_variant}" "${_main}" "${_variant}"
