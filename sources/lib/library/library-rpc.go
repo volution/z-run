@@ -47,10 +47,30 @@ func NewLibraryRpcServer (_library LibraryStore, _url string) (*LibraryRpcServer
 	}
 //	Logf ('d', 0x49d3cc32, "listening library RPC server on `%s` / `%s`...", _network, _address)
 	var _listener net.Listener
-	if _listener_0, _error := net.Listen (_network, _address); _error == nil {
-		_listener = _listener_0
-	} else {
-		return nil, Errorw (0x565a3b35, _error)
+	switch _network {
+		case "tcp", "tcp4", "tcp6" :
+			if _addressTcp, _error := net.ResolveTCPAddr (_network, _address); _error == nil {
+				if _listener_0, _error := net.ListenTCP (_network, _addressTcp); _error == nil {
+					_listener = _listener_0
+				} else {
+					return nil, Errorw (0x565a3b35, _error)
+				}
+			} else {
+				return nil, Errorw (0x213fd418, _error)
+			}
+		case "unix" :
+			if _addressUnix, _error := net.ResolveUnixAddr (_network, _address); _error == nil {
+				if _listener_0, _error := net.ListenUnix (_network, _addressUnix); _error == nil {
+					_listener_0.SetUnlinkOnClose (true)
+					_listener = _listener_0
+				} else {
+					return nil, Errorw (0x4901dd75, _error)
+				}
+			} else {
+				return nil, Errorw (0x2b490243, _error)
+			}
+		default :
+			return nil, Errorf (0xee3bfacc, "invalid RPC address `%s` / `%s`!", _network, _address)
 	}
 	_exports := & LibraryRpcServerExports {}
 	_rpc := rpc.NewServer ()
