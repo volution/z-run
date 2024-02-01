@@ -470,7 +470,7 @@ func parseInterpreter_0 (_scriptletLabel string, _scriptletBody_0 string, _scrip
 					_interpreterArgumentsExtraDashNow = true
 					_interpreterArgumentsExtraAllowed = true
 				
-				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9" :
+				case "python", "python2", "python2.7", "python3", "python3.6", "python3.7", "python3.8", "python3.9", "python3.10", "python3.11" :
 					_interpreterArguments = append (_interpreterArguments, "-E", "-s", "-S", "-u")
 //!					_interpreterArguments = append (_interpreterArguments, "-O", "-O")
 					_interpreterArgumentsExtraDash = false
