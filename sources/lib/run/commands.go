@@ -13,6 +13,7 @@ import "os/exec"
 import "path"
 import "sort"
 import "strings"
+import "time"
 
 import . "github.com/volution/z-run/lib/library"
 import . "github.com/volution/z-run/lib/store"
@@ -225,7 +226,18 @@ func doExportLibraryCdb (_library LibraryStore, _path string, _context *Context)
 
 
 func doExportLibraryRpc (_library LibraryStore, _url string, _context *Context) (*Error) {
+	_ppidInitial := os.Getppid ()
 	if _server, _error := NewLibraryRpcServer (_library, _url); _error == nil {
+		go func () () {
+				for {
+					time.Sleep (1 * time.Second)
+					_ppidNew := os.Getppid ()
+					if _ppidNew != _ppidInitial {
+						break;
+					}
+				}
+				_server.ServeStop ()
+			} ()
 		return _server.Serve ()
 	} else {
 		return _error
