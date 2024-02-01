@@ -99,3 +99,34 @@
 	"${ZRUN}" ":: templates / fingerprint / script / execute-time"
 !!
 
+
+<< templates / library / list / labels
+	#! {{}}
+	{{- range $_label := Z_select_all_labels -}}
+	{{ $_label }}
+	{{ end -}}
+!!
+
+<< templates / library / list / fingerprints
+	#! {{}}
+	{{- range $_fingerprint := Z_select_all_fingerprints -}}
+	{{ $_fingerprint }}
+	{{ end -}}
+!!
+
+<< templates / library / list / labels / fingerprints
+	#! {{}}
+	{{- range $_label := Z_select_all_labels -}}
+	{{ $_scriptlet := Z_resolve_meta_by_label $_label -}}
+	{{ $_scriptlet.Label }} -> {{ $_scriptlet.Fingerprint }}
+	{{ end -}}
+!!
+
+<< templates / library / list / fingerprints / labels
+	#! {{}}
+	{{- range $_fingerprint := Z_select_all_fingerprints -}}
+	{{ $_scriptlet := Z_resolve_meta_by_fingerprint $_fingerprint -}}
+	{{ $_scriptlet.Fingerprint }} -> {{ $_scriptlet.Label }}
+	{{ end -}}
+!!
+
