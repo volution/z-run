@@ -135,6 +135,73 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 			return templateFuncZrun (_library, _context, _scriptlet, _arguments)
 		}
 	
+	_extraFunctions["Z_select_all_labels"] = func () ([]string, error) {
+			if _labels, _error := _library.SelectLabels (); _error == nil {
+				return _labels, nil
+			} else {
+				return nil, _error.ToError ()
+			}
+		}
+	_extraFunctions["Z_select_all_fingerprints"] = func () ([]string, error) {
+			if _fingerprints, _error := _library.SelectFingerprints (); _error == nil {
+				return _fingerprints, nil
+			} else {
+				return nil, _error.ToError ()
+			}
+		}
+	
+	_extraFunctions["Z_resolve_full_by_label"] = func (_scriptlet string) (*Scriptlet, error) {
+			if _scriptlet, _error := _library.ResolveFullByLabel (_scriptlet); _error == nil {
+				return _scriptlet, nil
+			} else {
+				return nil, _error.ToError ()
+			}
+		}
+	_extraFunctions["Z_resolve_full_by_label"] = func (_scriptlet string) (*Scriptlet, error) {
+			if _scriptlet, _error := _library.ResolveFullByLabel (_scriptlet); _error == nil {
+				return _scriptlet, nil
+			} else {
+				return nil, _error.ToError ()
+			}
+		}
+	_extraFunctions["Z_resolve_full_by_fingerprint"] = func (_scriptlet string) (*Scriptlet, error) {
+			if _scriptlet, _error := _library.ResolveFullByFingerprint (_scriptlet); _error == nil {
+				return _scriptlet, nil
+			} else {
+				return nil, _error.ToError ()
+			}
+		}
+	
+	_extraFunctions["Z_resolve_meta_by_label"] = func (_scriptlet string) (*Scriptlet, error) {
+			if _scriptlet, _error := _library.ResolveMetaByLabel (_scriptlet); _error == nil {
+				return _scriptlet, nil
+			} else {
+				return nil, _error.ToError ()
+			}
+		}
+	_extraFunctions["Z_resolve_meta_by_fingerprint"] = func (_scriptlet string) (*Scriptlet, error) {
+			if _scriptlet, _error := _library.ResolveMetaByFingerprint (_scriptlet); _error == nil {
+				return _scriptlet, nil
+			} else {
+				return nil, _error.ToError ()
+			}
+		}
+	
+	_extraFunctions["Z_resolve_body_by_label"] = func (_scriptlet string) (string, error) {
+			if _body, _, _error := _library.ResolveBodyByLabel (_scriptlet); _error == nil {
+				return _body, nil
+			} else {
+				return "", _error.ToError ()
+			}
+		}
+	_extraFunctions["Z_resolve_body_by_fingerprint"] = func (_scriptlet string) (string, error) {
+			if _body, _, _error := _library.ResolveBodyByFingerprint (_scriptlet); _error == nil {
+				return _body, nil
+			} else {
+				return "", _error.ToError ()
+			}
+		}
+	
 	return executeTemplate_0 (
 			_scriptlet.Body,
 			_context.cleanArguments,
