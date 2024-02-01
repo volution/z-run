@@ -18,6 +18,7 @@
 
 
 :: examples / execute-scriptlet :: exec -- "${ZRUN}" ':: examples / exec' execute-scriptlet "${@}"
+:: examples / execute-scriptlet-by-fingerprint :: exec -- "${ZRUN}" ':: examples / exec' execute-scriptlet-by-fingerprint "${@}"
 :: examples / execute-scriptlet-ssh :: exec -- "${ZRUN}" ':: examples / exec' execute-scriptlet-ssh "${@}"
 
 :: examples / select-execute-scriptlet :: exec -- "${ZRUN}" ':: examples / exec' select-execute-scriptlet "${@}"
@@ -25,6 +26,7 @@
 
 :: examples / select-export-scriptlet-label :: exec -- "${ZRUN}" ':: examples / exec' select-export-scriptlet-label "${@}"
 :: examples / select-export-scriptlet-body :: exec -- "${ZRUN}" ':: examples / exec' select-export-scriptlet-body "${@}"
+:: examples / select-export-scriptlet-fingerprint :: exec -- "${ZRUN}" ':: examples / exec' select-export-scriptlet-fingerprint "${@}"
 :: examples / select-export-scriptlet-label-and-body :: exec -- "${ZRUN}" ':: examples / exec' select-export-scriptlet-label-and-body "${@}"
 
 :: examples / export-scriptlet-labels :: exec -- "${ZRUN}" ':: examples / exec' export-scriptlet-labels "${@}"
