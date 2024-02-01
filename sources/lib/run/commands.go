@@ -439,6 +439,15 @@ func doHandleExportScriptletBody (_library LibraryStore, _scriptlet *Scriptlet, 
 }
 
 
+func doHandleExportScriptletFingerprint (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, *Error) {
+	if _, _error := fmt.Fprintf (_stream, "%s\n", _scriptlet.Fingerprint); _error == nil {
+		return true, nil
+	} else {
+		return false, Errorw (0x0215c181, _error)
+	}
+}
+
+
 func doHandleExportScriptletLegacy (_library LibraryStore, _scriptlet *Scriptlet, _stream io.Writer, _context *Context) (bool, *Error) {
 	if _, _error := fmt.Fprintf (_stream, ":: %s\n%s\n", _scriptlet.Label, _scriptlet.Body); _error == nil {
 		return true, nil
@@ -467,6 +476,27 @@ func doHandleWithLabel (_library LibraryStore, _label string, _handler doHandler
 			}
 		} else {
 			return Errorf (0x3be6dcd7, "unknown scriptlet for `%s`", _label)
+		}
+	} else {
+		return _error
+	}
+}
+
+
+func doHandleWithFingerprint (_library LibraryStore, _fingerprint string, _handler doHandler, _context *Context) (*Error) {
+	if _scriptlet, _error := _library.ResolveFullByFingerprint (_fingerprint); _error == nil {
+		if _scriptlet != nil {
+			if _handled, _error := _handler (_library, _scriptlet, _context); _error == nil {
+				if _handled {
+					return nil
+				} else {
+					return Errorf (0xcc60e35c, "unhandled scriptlet `%s`", _fingerprint)
+				}
+			} else {
+				return _error
+			}
+		} else {
+			return Errorf (0x54e5301b, "unknown scriptlet for `%s`", _fingerprint)
 		}
 	} else {
 		return _error

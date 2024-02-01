@@ -305,12 +305,18 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 					case "execute-scriptlet", "execute" :
 						_command = "execute-scriptlet"
 					
+					case "execute-scriptlet-by-fingerprint" :
+						_command = "execute-scriptlet-by-fingerprint"
+					
 					case "execute-scriptlet-ssh", "execute-ssh", "ssh" :
 						_command = "execute-scriptlet-ssh"
 						_sshContext = & SshContext {}
 					
 					case "export-scriptlet-body", "export-body" :
 						_command = "export-scriptlet-body"
+					
+					case "export-scriptlet-fingerprint", "export-fingerprint" :
+						_command = "export-scriptlet-fingerprint"
 					
 					case "select-execute-scriptlet", "select-execute" :
 						_command = "select-execute-scriptlet"
@@ -323,6 +329,9 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 					
 					case "select-export-scriptlet-body", "select-body" :
 						_command = "select-export-scriptlet-body"
+					
+					case "select-export-scriptlet-fingerprint", "select-fingerprint" :
+						_command = "select-export-scriptlet-fingerprint"
 					
 					case "select-export-scriptlet-label-and-body" :
 						_command = "select-export-scriptlet-label-and-body"
@@ -599,6 +608,12 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 			}
 			return doHandleWithLabel (_library, _scriptlet, doHandleExecuteScriptlet, _context)
 		
+		case "execute-scriptlet-by-fingerprint" :
+			if _scriptlet == "" {
+				return Errorf (0x36b0bd45, "execute:  expected scriptlet")
+			}
+			return doHandleWithFingerprint (_library, _scriptlet, doHandleExecuteScriptlet, _context)
+		
 		case "execute-scriptlet-ssh" :
 			if _scriptlet == "" {
 				return Errorf (0xcc3c2ea6, "execute-ssh:  expected scriptlet")
@@ -607,6 +622,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 					return doHandleExecuteScriptletSsh (_library, _scriptlet, _sshContext, _context)
 				}
 			return doHandleWithLabel (_library, _scriptlet, _handler, _context)
+		
 		
 		case "export-scriptlet-body" :
 			if _scriptlet == "" {
@@ -617,6 +633,18 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 			}
 			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
+				}
+			return doHandleWithLabel (_library, _scriptlet, _handler, _context)
+		
+		case "export-scriptlet-fingerprint" :
+			if _scriptlet == "" {
+				return Errorf (0x031eecbe, "export:  expected scriptlet")
+			}
+			if len (_cleanArguments) != 0 {
+				return Errorf (0x6a783fab, "export:  unexpected arguments")
+			}
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
+					return doHandleExportScriptletFingerprint (_library, _scriptlet, os.Stdout, _context)
 				}
 			return doHandleWithLabel (_library, _scriptlet, _handler, _context)
 		
@@ -694,6 +722,19 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 			}
 			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
 					return doHandleExportScriptletBody (_library, _scriptlet, os.Stdout, _context)
+				}
+			if _scriptlet != "" {
+				return doSelectHandleWithLabel (_library, _scriptlet, _handler, _context)
+			} else {
+				return doSelectHandle (_library, _handler, _context)
+			}
+		
+		case "select-export-scriptlet-fingerprint" :
+			if len (_cleanArguments) != 0 {
+				return Errorf (0xc1bd6f9d, "select:  unexpected arguments")
+			}
+			_handler := func (_library LibraryStore, _scriptlet *Scriptlet, _context *Context) (bool, *Error) {
+					return doHandleExportScriptletFingerprint (_library, _scriptlet, os.Stdout, _context)
 				}
 			if _scriptlet != "" {
 				return doSelectHandleWithLabel (_library, _scriptlet, _handler, _context)
