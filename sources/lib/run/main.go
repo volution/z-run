@@ -476,6 +476,8 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 	if _scriptlet != "" {
 		if strings.HasPrefix (_scriptlet, ":: ") {
 			_scriptlet = _scriptlet[3:]
+		} else if strings.HasPrefix (_scriptlet, "::") {
+			_scriptlet = _scriptlet[2:]
 		} else {
 			return Errorf (0x72ad17f7, "invalid scriptlet label `%s`", _scriptlet)
 		}

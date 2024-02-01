@@ -201,6 +201,13 @@ func executeTemplate (_library LibraryStore, _scriptlet *Scriptlet, _context *Co
 				return "", _error.ToError ()
 			}
 		}
+	_extraFunctions["Z_resolve_fingerprint_by_label"] = func (_scriptlet string) (string, error) {
+			if _fingerprint, _, _error := _library.ResolveFingerprintByLabel (_scriptlet); _error == nil {
+				return _fingerprint, nil
+			} else {
+				return "", _error.ToError ()
+			}
+		}
 	
 	return executeTemplate_0 (
 			_scriptlet.Body,
