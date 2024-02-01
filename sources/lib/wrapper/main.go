@@ -13,6 +13,7 @@ import "syscall"
 
 import . "github.com/volution/z-run/lib/run"
 import . "github.com/volution/z-run/lib/fzf"
+import . "github.com/volution/z-run/lib/execve"
 import . "github.com/volution/z-run/lib/input"
 import . "github.com/volution/z-run/lib/mainlib"
 import . "github.com/volution/z-run/lib/common"
@@ -299,6 +300,9 @@ func WrapperMain (_context *MainContext) (*Error) {
 		case "[z-run:scriptlet-exec]" :
 			// NOP
 		
+		case "[z-run:execve]" :
+			// NOP
+		
 		case "[z-run:input]" :
 			// NOP
 		
@@ -351,6 +355,10 @@ func WrapperMain (_context *MainContext) (*Error) {
 				_delegateExecutable = _executable
 				_delegateArgument0 = "[z-run:fzf]"
 				_delegateArguments = _arguments[1:]
+			
+			case "--execve" :
+				_argument0 = "[z-run:execve]"
+				_arguments = _arguments[1:]
 			
 			case "--input" :
 				_argument0 = "[z-run:input]"
@@ -417,6 +425,13 @@ func WrapperMain (_context *MainContext) (*Error) {
 				panic (AbortError (_error))
 			} else {
 				panic (AbortUnreachable (0x8f827319))
+			}
+		
+		case "[z-run:execve]" :
+			if _error := ExecveMain (_arguments, _environmentMap); _error != nil {
+				panic (AbortError (_error))
+			} else {
+				panic (AbortUnreachable (0x42354226))
 			}
 		
 		case "[z-run:input]" :
