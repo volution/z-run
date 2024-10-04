@@ -100,9 +100,23 @@
 !!
 
 
-<< templates / library / list / labels
+<< templates / library / list / labels / all
 	#! {{}}
 	{{- range $_label := Z_select_all_labels -}}
+	{{ $_label }}
+	{{ end -}}
+!!
+
+<< templates / library / list / labels / top
+	#! {{}}
+	{{- range $_label := Z_select_top_labels -}}
+	{{ $_label }}
+	{{ end -}}
+!!
+
+<< templates / library / list / labels / visible
+	#! {{}}
+	{{- range $_label := Z_select_visible_labels -}}
 	{{ $_label }}
 	{{ end -}}
 !!
