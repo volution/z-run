@@ -32,6 +32,8 @@ type Scriptlet struct {
 	Index uint `json:"-"`
 	Visible bool `json:"visible"`
 	Hidden bool `json:"hidden"`
+	Captured bool `json:"captured"`
+	Top bool `json:"top"`
 	Menus []string `json:"menus,omitempty"`
 }
 
@@ -59,8 +61,9 @@ type Library struct {
 	ScriptletFingerprints []string `json:"scriptlet_fingerprints"`
 	ScriptletsByFingerprint map[string]uint `json:"scriptlets_by_fingerprint"`
 	
-	ScriptletLabels []string `json:"scriptlet_labels"`
 	ScriptletLabelsAll []string `json:"scriptlet_labels_all"`
+	ScriptletLabelsTop []string `json:"scriptlet_labels_top"`
+	ScriptletLabelsVisible []string `json:"scriptlet_labels_visible"`
 	ScriptletsByLabel map[string]uint `json:"scriptlets_by_label"`
 	
 	ScriptletContexts map[string]*ScriptletContext `json:"scriptlet_contexts"`
@@ -100,8 +103,9 @@ func NewLibrary () (*Library) {
 			Scriptlets : make ([]*Scriptlet, 0, 1024),
 			ScriptletFingerprints : make ([]string, 0, 1024),
 			ScriptletsByFingerprint : make (map[string]uint, 1024),
-			ScriptletLabels : make ([]string, 0, 1024),
 			ScriptletLabelsAll : make ([]string, 0, 1024),
+			ScriptletLabelsTop : make ([]string, 0, 1024),
+			ScriptletLabelsVisible : make ([]string, 0, 1024),
 			ScriptletsByLabel : make (map[string]uint, 1024),
 			ScriptletContexts : make (map[string]*ScriptletContext, 16),
 			LibraryContext : & LibraryContext {},
@@ -113,12 +117,16 @@ func (_library *Library) SelectFingerprints () ([]string, *Error) {
 	return _library.ScriptletFingerprints, nil
 }
 
-func (_library *Library) SelectLabels () ([]string, *Error) {
-	return _library.ScriptletLabels, nil
-}
-
 func (_library *Library) SelectLabelsAll () ([]string, *Error) {
 	return _library.ScriptletLabelsAll, nil
+}
+
+func (_library *Library) SelectLabelsTop () ([]string, *Error) {
+	return _library.ScriptletLabelsTop, nil
+}
+
+func (_library *Library) SelectLabelsVisible () ([]string, *Error) {
+	return _library.ScriptletLabelsVisible, nil
 }
 
 

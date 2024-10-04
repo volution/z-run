@@ -16,8 +16,9 @@ type LibraryStore interface {
 	ResolveMetaByFingerprint (_fingerprint string) (*Scriptlet, *Error)
 	ResolveBodyByFingerprint (_fingerprint string) (string, bool, *Error)
 	
-	SelectLabels () ([]string, *Error)
 	SelectLabelsAll () ([]string, *Error)
+	SelectLabelsTop () ([]string, *Error)
+	SelectLabelsVisible () ([]string, *Error)
 	ResolveFullByLabel (_label string) (*Scriptlet, *Error)
 	ResolveMetaByLabel (_label string) (*Scriptlet, *Error)
 	ResolveBodyByLabel (_label string) (string, bool, *Error)
@@ -69,9 +70,22 @@ func (_library *LibraryStoreInput) SelectFingerprints () ([]string, *Error) {
 	}
 }
 
-func (_library *LibraryStoreInput) SelectLabels () ([]string, *Error) {
+func (_library *LibraryStoreInput) SelectLabelsAll () ([]string, *Error) {
 	var _value []string
-	if _found, _error := _library.store.SelectObject (_library.instance, false, "scriptlets-indices", "labels", &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject (_library.instance, false, "scriptlets-indices", "labels-all", &_value); _error == nil {
+		if _found {
+			return _value, nil
+		} else {
+			return nil, Errorf (0x4d9d3702, "invalid store")
+		}
+	} else {
+		return nil, _error
+	}
+}
+
+func (_library *LibraryStoreInput) SelectLabelsTop () ([]string, *Error) {
+	var _value []string
+	if _found, _error := _library.store.SelectObject (_library.instance, false, "scriptlets-indices", "labels-top", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
@@ -82,13 +96,13 @@ func (_library *LibraryStoreInput) SelectLabels () ([]string, *Error) {
 	}
 }
 
-func (_library *LibraryStoreInput) SelectLabelsAll () ([]string, *Error) {
+func (_library *LibraryStoreInput) SelectLabelsVisible () ([]string, *Error) {
 	var _value []string
-	if _found, _error := _library.store.SelectObject (_library.instance, false, "scriptlets-indices", "labels-all", &_value); _error == nil {
+	if _found, _error := _library.store.SelectObject (_library.instance, false, "scriptlets-indices", "labels-visible", &_value); _error == nil {
 		if _found {
 			return _value, nil
 		} else {
-			return nil, Errorf (0x4d9d3702, "invalid store")
+			return nil, Errorf (0xbc8d26cf, "invalid store")
 		}
 	} else {
 		return nil, _error

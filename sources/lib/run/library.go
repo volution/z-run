@@ -79,8 +79,11 @@ func includeScriptlet (_library *Library, _scriptlet *Scriptlet) (*Error) {
 	
 	_library.ScriptletFingerprints = append (_library.ScriptletFingerprints, _scriptlet.Fingerprint)
 	_library.ScriptletLabelsAll = append (_library.ScriptletLabelsAll, _scriptlet.Label)
-	if !_scriptlet.Hidden || _scriptlet.Visible {
-		_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
+	if _scriptlet.Top {
+		_library.ScriptletLabelsTop = append (_library.ScriptletLabelsTop, _scriptlet.Label)
+	}
+	if _scriptlet.Visible {
+		_library.ScriptletLabelsVisible = append (_library.ScriptletLabelsVisible, _scriptlet.Label)
 	}
 	
 	_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = _scriptlet.Index

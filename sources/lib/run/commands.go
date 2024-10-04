@@ -24,20 +24,29 @@ import . "github.com/volution/z-run/embedded"
 
 
 
-func doExportScriptletLabels (_library LibraryStore, _all bool, _stream io.Writer, _context *Context) (*Error) {
+func doExportScriptletLabels (_library LibraryStore, _type string, _stream io.Writer, _context *Context) (*Error) {
 	var _labels []string
-	if _all {
-		if _labels_0, _error := _library.SelectLabelsAll (); _error == nil {
-			_labels = _labels_0
-		} else {
-			return _error
-		}
-	} else {
-		if _labels_0, _error := _library.SelectLabels (); _error == nil {
-			_labels = _labels_0
-		} else {
-			return _error
-		}
+	switch _type {
+		case "all" :
+			if _labels_0, _error := _library.SelectLabelsAll (); _error == nil {
+				_labels = _labels_0
+			} else {
+				return _error
+			}
+		case "top" :
+			if _labels_0, _error := _library.SelectLabelsTop (); _error == nil {
+				_labels = _labels_0
+			} else {
+				return _error
+			}
+		case "visible" :
+			if _labels_0, _error := _library.SelectLabelsVisible (); _error == nil {
+				_labels = _labels_0
+			} else {
+				return _error
+			}
+		default :
+			return Errorw (0xc31af0a7, nil)
 	}
 	_buffer := bytes.NewBuffer (nil)
 	for _, _label := range _labels {
@@ -120,8 +129,9 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	
 	_fingerprints := make ([]string, 0, 1024)
 	_fingerprintsByLabels := make (map[string]string, 1024)
-	_labels := make ([]string, 0, 1024)
 	_labelsAll := make ([]string, 0, 1024)
+	_labelsTop := make ([]string, 0, 1024)
+	_labelsVisible := make ([]string, 0, 1024)
 	_labelsByFingerprints := make (map[string]string, 1024)
 	_contextsIdentifiers := make (map[string]bool, 16)
 	
@@ -151,8 +161,11 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 			}
 			_fingerprints = append (_fingerprints, _fingerprint)
 			_labelsAll = append (_labelsAll, _label)
-			if !_meta.Hidden || _meta.Visible {
-				_labels = append (_labels, _label)
+			if _meta.Top {
+				_labelsTop = append (_labelsTop, _label)
+			}
+			if _meta.Visible {
+				_labelsVisible = append (_labelsVisible, _label)
 			}
 			_fingerprintsByLabels[_label] = _fingerprint
 			_labelsByFingerprints[_fingerprint] = _label
@@ -176,8 +189,9 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	}
 	
 	sort.Strings (_fingerprints)
-	sort.Strings (_labels)
 	sort.Strings (_labelsAll)
+	sort.Strings (_labelsTop)
+	sort.Strings (_labelsVisible)
 	
 	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "fingerprints", _fingerprints); _error != nil {
 		return _error
@@ -185,10 +199,13 @@ func doExportLibraryStore (_library LibraryStore, _store StoreOutput, _context *
 	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels-by-fingerprints", _labelsByFingerprints); _error != nil {
 		return _error
 	}
-	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels", _labels); _error != nil {
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels-all", _labelsAll); _error != nil {
 		return _error
 	}
-	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels-all", _labelsAll); _error != nil {
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels-top", _labelsTop); _error != nil {
+		return _error
+	}
+	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "labels-visible", _labelsVisible); _error != nil {
 		return _error
 	}
 	if _error := _store.IncludeObject (_libraryFingerprint, false, "scriptlets-indices", "fingerprints-by-labels", _fingerprintsByLabels); _error != nil {
@@ -751,7 +768,7 @@ func doSelectLabel_1 (_inputs []string, _context *Context) (string, *Error) {
 
 func doSelectLabels_0 (_library LibraryStore, _context *Context) ([]string, *Error) {
 	var _inputs []string
-	if _inputs_0, _error := _library.SelectLabels (); _error == nil {
+	if _inputs_0, _error := _library.SelectLabelsTop (); _error == nil {
 		_inputs = _inputs_0
 	} else {
 		return nil, _error

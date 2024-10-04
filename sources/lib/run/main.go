@@ -340,14 +340,17 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 					case "select-export-scriptlet-label-and-body" :
 						_command = "select-export-scriptlet-label-and-body"
 					
-					case "export-scriptlet-labels", "export-labels", "list" :
-						_command = "export-scriptlet-labels-all"
-					
 					case "export-scriptlet-labels-all", "export-labels-all", "list-all" :
 						_command = "export-scriptlet-labels-all"
 					
 					case "export-scriptlet-labels-top", "export-labels-top", "list-top" :
 						_command = "export-scriptlet-labels-top"
+					
+					case "export-scriptlet-labels-visible", "export-labels-visible", "list-visible" :
+						_command = "export-scriptlet-labels-visible"
+					
+					case "export-scriptlet-labels", "export-labels", "list" :
+						_command = "export-scriptlet-labels-visible"
 					
 					case "parse-library" :
 						_command = "parse-library"
@@ -762,15 +765,17 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 			}
 		
 		
-		case "export-scriptlet-labels-all", "export-scriptlet-labels-top" :
+		case "export-scriptlet-labels-all", "export-scriptlet-labels-top", "export-scriptlet-labels-visible" :
 			if (_scriptlet != "") || (len (_cleanArguments) != 0) {
 				return Errorf (0xf7b9c7f3, "export:  unexpected scriptlet or arguments")
 			}
 			switch _command {
 				case "export-scriptlet-labels-all" :
-					return doExportScriptletLabels (_library, true, os.Stdout, _context)
+					return doExportScriptletLabels (_library, "all", os.Stdout, _context)
 				case "export-scriptlet-labels-top" :
-					return doExportScriptletLabels (_library, false, os.Stdout, _context)
+					return doExportScriptletLabels (_library, "top", os.Stdout, _context)
+				case "export-scriptlet-labels-visible" :
+					return doExportScriptletLabels (_library, "visible", os.Stdout, _context)
 				default :
 					panic (AbortUnreachable (0xe558fe68))
 			}

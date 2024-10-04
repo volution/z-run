@@ -202,7 +202,7 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 					case '*' :
 						// NOP
 					case '+' :
-						_scriptlet.Hidden = true
+						_scriptlet.Captured = true
 					default :
 						return nil, Errorf (0x51045db3, "invalid state `%s`", _menu)
 				}
@@ -213,12 +213,18 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 	{
 		sort.Sort (_library.Scriptlets)
 		sort.Strings (_library.ScriptletFingerprints)
-		_library.ScriptletLabels = make ([]string, 0, len (_library.Scriptlets))
+		_library.ScriptletLabelsTop = make ([]string, 0, len (_library.Scriptlets))
+		_library.ScriptletLabelsVisible = make ([]string, 0, len (_library.Scriptlets))
 		for _index, _scriptlet := range _library.Scriptlets {
+			_scriptlet.Top = (!_scriptlet.Hidden && !_scriptlet.Captured) || _scriptlet.Visible
+			_scriptlet.Visible = _scriptlet.Visible || !_scriptlet.Hidden
 			_library.ScriptletsByFingerprint[_scriptlet.Fingerprint] = uint (_index)
 			_library.ScriptletsByLabel[_scriptlet.Label] = uint (_index)
-			if !_scriptlet.Hidden || _scriptlet.Visible {
-				_library.ScriptletLabels = append (_library.ScriptletLabels, _scriptlet.Label)
+			if _scriptlet.Top {
+				_library.ScriptletLabelsTop = append (_library.ScriptletLabelsTop, _scriptlet.Label)
+			}
+			if _scriptlet.Visible {
+				_library.ScriptletLabelsVisible = append (_library.ScriptletLabelsVisible, _scriptlet.Label)
 			}
 		}
 	}

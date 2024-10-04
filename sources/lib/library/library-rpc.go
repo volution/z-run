@@ -359,34 +359,6 @@ func (_exports *LibraryRpcServerExports) ResolveBodyByFingerprint (_input *Libra
 
 
 
-type LibraryRpc_SelectLabels_Input struct {
-}
-
-type LibraryRpc_SelectLabels_Output struct {
-	Labels []string
-	Error *Error
-}
-
-func (_client *LibraryRpcClient) SelectLabels () ([]string, *Error) {
-	_input := LibraryRpc_SelectLabels_Input {}
-	_output := LibraryRpc_SelectLabels_Output {}
-	if _error := _client.rpc.Call ("Library.SelectLabels", &_input, &_output); _error == nil {
-		return _output.Labels, _output.Error
-	} else {
-		return nil, Errorw (0x149f3d3e, _error)
-	}
-}
-
-func (_exports *LibraryRpcServerExports) SelectLabels (_input *LibraryRpc_SelectLabels_Input, _output *LibraryRpc_SelectLabels_Output) (error) {
-	_exports.server.mutex.RLock ()
-	defer _exports.server.mutex.RUnlock ()
-	_output.Labels, _output.Error = _exports.server.library.SelectLabels ()
-	return nil
-}
-
-
-
-
 type LibraryRpc_SelectLabelsAll_Input struct {
 }
 
@@ -409,6 +381,62 @@ func (_exports *LibraryRpcServerExports) SelectLabelsAll (_input *LibraryRpc_Sel
 	_exports.server.mutex.RLock ()
 	defer _exports.server.mutex.RUnlock ()
 	_output.Labels, _output.Error = _exports.server.library.SelectLabelsAll ()
+	return nil
+}
+
+
+
+
+type LibraryRpc_SelectLabelsTop_Input struct {
+}
+
+type LibraryRpc_SelectLabelsTop_Output struct {
+	Labels []string
+	Error *Error
+}
+
+func (_client *LibraryRpcClient) SelectLabelsTop () ([]string, *Error) {
+	_input := LibraryRpc_SelectLabelsTop_Input {}
+	_output := LibraryRpc_SelectLabelsTop_Output {}
+	if _error := _client.rpc.Call ("Library.SelectLabelsTop", &_input, &_output); _error == nil {
+		return _output.Labels, _output.Error
+	} else {
+		return nil, Errorw (0x149f3d3e, _error)
+	}
+}
+
+func (_exports *LibraryRpcServerExports) SelectLabelsTop (_input *LibraryRpc_SelectLabelsTop_Input, _output *LibraryRpc_SelectLabelsTop_Output) (error) {
+	_exports.server.mutex.RLock ()
+	defer _exports.server.mutex.RUnlock ()
+	_output.Labels, _output.Error = _exports.server.library.SelectLabelsTop ()
+	return nil
+}
+
+
+
+
+type LibraryRpc_SelectLabelsVisible_Input struct {
+}
+
+type LibraryRpc_SelectLabelsVisible_Output struct {
+	Labels []string
+	Error *Error
+}
+
+func (_client *LibraryRpcClient) SelectLabelsVisible () ([]string, *Error) {
+	_input := LibraryRpc_SelectLabelsVisible_Input {}
+	_output := LibraryRpc_SelectLabelsVisible_Output {}
+	if _error := _client.rpc.Call ("Library.SelectLabelsVisible", &_input, &_output); _error == nil {
+		return _output.Labels, _output.Error
+	} else {
+		return nil, Errorw (0x599231d8, _error)
+	}
+}
+
+func (_exports *LibraryRpcServerExports) SelectLabelsVisible (_input *LibraryRpc_SelectLabelsVisible_Input, _output *LibraryRpc_SelectLabelsVisible_Output) (error) {
+	_exports.server.mutex.RLock ()
+	defer _exports.server.mutex.RUnlock ()
+	_output.Labels, _output.Error = _exports.server.library.SelectLabelsVisible ()
 	return nil
 }
 
