@@ -178,18 +178,22 @@ func parseLibrary (_sources []*Source, _libraryIdentifier string, _context *Cont
 	
 	
 	{
-		_menus := make ([]*Scriptlet, 0, 1024)
+		_menusMap := make (map[string]*Scriptlet, 1024)
+		_menuKeys := make ([]string, 0, 1024)
 		for _, _scriptlet := range _library.Scriptlets {
 			if _scriptlet.Kind == "menu-pending" {
-				_menus = append (_menus, _scriptlet)
+				_menuKeys = append (_menuKeys, _scriptlet.Label)
+				_menusMap[_scriptlet.Label] = _scriptlet
 			}
 		}
-		for _, _scriptlet := range _menus {
+		sort.Strings (_menuKeys)
+		for _index := len (_menuKeys) - 1; _index >= 0; _index -= 1 {
+			_scriptlet := _menusMap[_menuKeys[_index]]
 			if _error := parseFromMenu (_library, _scriptlet, _context); _error != nil {
 				return nil, _error
 			}
 		}
-		for _, _scriptlet := range _menus {
+		for _, _scriptlet := range _menusMap {
 			_scriptlet.Kind = "menu"
 		}
 	}
@@ -611,26 +615,45 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*
 					return Errorf (0x11ca1466, "invalid menu mode `%s`", _matcher)
 			}
 			_mode := _matcher[:1]
+			_mode0 := _mode[0]
 			_matcher = _matcher[1:]
 			if _matcher == "" {
 				for _, _scriptlet := range _scriptlets {
+					if (_mode0 == '+') && _scriptlet.Captured {
+						continue
+					}
 					_labels = append (_labels, _scriptlet.Label)
 					_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+					if _mode0 == '+' {
+						_scriptlet.Captured = true
+					}
 				}
 			} else if strings.HasPrefix (_matcher, "= ") {
 				_pattern := _matcher[2:]
 				for _, _scriptlet := range _scriptlets {
 					if _scriptlet.Label == _pattern {
+						if (_mode0 == '+') && _scriptlet.Captured {
+							continue
+						}
 						_labels = append (_labels, _scriptlet.Label)
 						_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+						if _mode0 == '+' {
+							_scriptlet.Captured = true
+						}
 					}
 				}
 			} else if strings.HasPrefix (_matcher, "^ ") {
 				_pattern := _matcher[2:]
 				for _, _scriptlet := range _scriptlets {
 					if strings.HasPrefix (_scriptlet.Label, _pattern) {
+						if (_mode0 == '+') && _scriptlet.Captured {
+							continue
+						}
 						_labels = append (_labels, _scriptlet.Label)
 						_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+						if _mode0 == '+' {
+							_scriptlet.Captured = true
+						}
 					}
 				}
 			} else if strings.HasPrefix (_matcher, "~ ") {
@@ -642,8 +665,14 @@ func parseFromMenu (_library *Library, _source *Scriptlet, _context *Context) (*
 				}
 				for _, _scriptlet := range _scriptlets {
 					if _pattern.MatchString (_scriptlet.Label) {
+						if (_mode0 == '+') && _scriptlet.Captured {
+							continue
+						}
 						_labels = append (_labels, _scriptlet.Label)
 						_scriptlet.Menus = append (_scriptlet.Menus, _mode + " " + _source.Label)
+						if _mode0 == '+' {
+							_scriptlet.Captured = true
+						}
 					}
 				}
 			} else {
