@@ -275,7 +275,7 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 			if ! _stat.Mode () .IsRegular () {
 				return nil, Errorf (0x5b3ae1d5, "invalid library cached at `%s`;", _cacheLibrary)
 			}
-			if _library, _error := resolveLibraryCached (_cacheLibrary); _error == nil {
+			if _library, _error := resolveLibraryCached (_cacheLibrary, true); _error == nil {
 				if _fresh, _error := checkLibraryCached (_library); _error == nil {
 					if _fresh {
 //						Logf ('d', 0xa33ecc63, "using library cached at `%s`;", _cacheLibrary)
@@ -337,25 +337,32 @@ func resolveLibrary (_candidate string, _context *Context, _lookupPaths []string
 
 
 
-func resolveLibraryCached (_path string) (LibraryStore, *Error) {
+func resolveLibraryCached (_path string, _checkFingerprint bool) (LibraryStore, *Error) {
 	_fileName := path.Base (_path)
 	if ! strings.HasSuffix (_fileName, ".cdb") {
 		return nil, Errorf (0x06574f0e, "invalid library cached file name `%s`", _path)
 	}
-	_fingerprint := _fileName[: len (_fileName) - 4]
+	_fingerprint := ""
+	if _checkFingerprint {
+		_fingerprint = _fileName[: len (_fileName) - 4]
+	}
 	if _store, _error := NewCdbStoreInput (_path); _error == nil {
 		if _library, _error := NewLibraryStoreInput (_store, _path, _fingerprint); _error == nil {
 //			Logf ('d', 0x63ae360d, "opened library cached at `%s`;", _path)
-			if _fingerprint_0, _error := _library.Fingerprint (); _error == nil {
-				if _fingerprint_0 == _fingerprint {
-					return _library, nil
+			if _checkFingerprint {
+				if _fingerprint_0, _error := _library.Fingerprint (); _error == nil {
+					if _fingerprint_0 == _fingerprint {
+						// NOP
+					} else {
+						_store.Close ()
+						return nil, Errorf (0xa0e14143, "invalid store")
+					}
 				} else {
-					return nil, Errorf (0xa0e14143, "invalid store")
+					_store.Close ()
+					return nil, _error
 				}
-			} else {
-				_store.Close ()
-				return nil, _error
 			}
+			return _library, nil
 		} else {
 			_store.Close ()
 			return nil, _error

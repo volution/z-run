@@ -582,7 +582,7 @@ func RunMain (_executable string, _argument0 string, _arguments []string, _envir
 				return _error
 			}
 		} else {
-			if _library_0, _error := resolveLibraryCached (_libraryCacheUrl); _error == nil {
+			if _library_0, _error := resolveLibraryCached (_libraryCacheUrl, false); _error == nil {
 				_library = _library_0
 			} else {
 				return _error
