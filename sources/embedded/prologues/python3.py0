@@ -791,17 +791,19 @@ def __Z__create (*, Z = None, __import__ = __import__) :
 		return _argument
 	
 	@_inject
-	def __Z__extract_argument (*, _expected = None, _enforce = True) :
+	def __Z__extract_argument (*, _expected = None, _fallback = None, _enforce = None) :
+		if _enforce is None :
+			_enforce = _fallback is None
 		if PY.len (Z.arguments) == 0 :
 			if _enforce :
 				Z.panic ((_enforce, 0x7f1cfd35), "invalid arguments:  expected at least one, received none!")
-			return None
+			return _fallback
 		_argument = Z.arguments[0]
 		if _expected is not None :
 			if _argument not in _expected :
 				if _enforce :
 					Z.panic ((_enforce, 0x9b16a981), "invalid arguments:  expected some, received `%s`!", _argument)
-				return None
+				return _fallback
 		Z.arguments = Z.arguments[1:]
 		return _argument
 	
