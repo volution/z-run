@@ -128,7 +128,7 @@
 			-I os=POSIX \
 			-O indent=2 \
 			-O width=78 \
-			-W all \
+			-W base,error,unsupp \
 		< "./documentation/manual/${_manual}.man" \
 	| col -b -x \
 		>| "./documentation/manual/${_manual}.txt.tmp" \
