@@ -1,7 +1,15 @@
 #!/dev/null
 
 
-&&== path .
+&&== path-exclude-all
+&&== path /usr/local/bin
+&&== path /usr/bin
+&&== path /bin
+
+&&== env-exclude-all
+&&== env-include TERM
+&&== env-include USER HOME SHELL TMPDIR
+&&== env-include LANG LC_ALL
 
 &&== env ENV_KEY_1 value
 &&== env-fallback ENV_KEY_2 default
