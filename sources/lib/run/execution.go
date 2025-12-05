@@ -22,7 +22,7 @@ import . "github.com/volution/z-run/embedded"
 
 
 
-func prepareEnvironment (_context *Context, _overrides []map[string]string, _fallbacks []map[string]string) ([]string) {
+func prepareEnvironment (_context *Context, _overrides []map[string]string, _fallbacks []map[string]string, _includes []string, _excludes []string, _excludeAll bool) ([]string) {
 	
 	_extraEnvironment := make (map[string]string, 16)
 	
@@ -43,11 +43,11 @@ func prepareEnvironment (_context *Context, _overrides []map[string]string, _fal
 	_overrides_0 = append (_overrides_0, _extraEnvironment)
 	_overrides_0 = append (_overrides_0, _overrides ...)
 	
-	return prepareEnvironment_0 (_context.cleanEnvironment, _overrides_0, _fallbacks)
+	return prepareEnvironment_0 (_context.cleanEnvironment, _overrides_0, _fallbacks, _includes, _excludes, _excludeAll)
 }
 
 
-func prepareEnvironment_0 (_environment map[string]string, _overrides []map[string]string, _fallbacks []map[string]string) ([]string) {
+func prepareEnvironment_0 (_environment map[string]string, _overrides []map[string]string, _fallbacks []map[string]string, _includes []string, _excludes []string, _excludeAll bool) ([]string) {
 	
 	_environmentMap := make (map[string]string, len (_environment))
 	
@@ -58,7 +58,31 @@ func prepareEnvironment_0 (_environment map[string]string, _overrides []map[stri
 		if _value == "" {
 			continue
 		}
-		_environmentMap[_name] = _value
+		_include := true
+		if _include {
+			if _excludeAll {
+				_include = false
+			}
+		}
+		if _include {
+			for _, _nameExclude := range _excludes {
+				if _nameExclude == _name {
+					_include = false
+					break
+				}
+			}
+		}
+		if !_include {
+			for _, _nameInclude := range _includes {
+				if _nameInclude == _name {
+					_include = true
+					break
+				}
+			}
+		}
+		if _include {
+			_environmentMap[_name] = _value
+		}
 	}
 	for _, _fallbacks := range _fallbacks {
 		for _name, _value := range _fallbacks {
@@ -108,12 +132,20 @@ func prepareExecution (_libraryUrl string, _libraryIdentifier string, _libraryFi
 	}
 	
 	var _scriptletExecutablePaths []string
+	var _scriptletExecutablePathsExcludeAll bool
 	var _scriptletEnvironmentOverrides map[string]string
 	var _scriptletEnvironmentFallbacks map[string]string
+	var _scriptletEnvironmentIncludes []string
+	var _scriptletEnvironmentExcludes []string
+	var _scriptletEnvironmentExcludeAll bool
 	if _scriptlet.Context != nil {
 		_scriptletExecutablePaths = _scriptlet.Context.ExecutablePaths
+		_scriptletExecutablePathsExcludeAll = _scriptlet.Context.ExecutablePathsExcludeAll
 		_scriptletEnvironmentOverrides = _scriptlet.Context.EnvironmentOverrides
 		_scriptletEnvironmentFallbacks = _scriptlet.Context.EnvironmentFallbacks
+		_scriptletEnvironmentIncludes = _scriptlet.Context.EnvironmentIncludes
+		_scriptletEnvironmentExcludes = _scriptlet.Context.EnvironmentExcludes
+		_scriptletEnvironmentExcludeAll = _scriptlet.Context.EnvironmentExcludeAll
 	}
 	
 	var _cleanArguments []string
@@ -144,8 +176,12 @@ func prepareExecution (_libraryUrl string, _libraryIdentifier string, _libraryFi
 			_scriptlet.Source.LineEnd,
 			
 			_scriptletExecutablePaths,
+			_scriptletExecutablePathsExcludeAll,
 			_scriptletEnvironmentOverrides,
 			_scriptletEnvironmentFallbacks,
+			_scriptletEnvironmentIncludes,
+			_scriptletEnvironmentExcludes,
+			_scriptletEnvironmentExcludeAll,
 			
 			_context.selfExecutable,
 			_cleanArguments,
@@ -183,8 +219,12 @@ func prepareExecution_0 (
 			_scriptletSourceLineEnd uint,
 			
 			_scriptletExecutablePaths []string,
+			_scriptletExecutablePathsExcludeAll bool,
 			_scriptletEnvironmentOverrides map[string]string,
 			_scriptletEnvironmentFallbacks map[string]string,
+			_scriptletEnvironmentIncludes []string,
+			_scriptletEnvironmentExcludes []string,
+			_scriptletEnvironmentExcludeAll bool,
 			
 			_selfExecutable string,
 			_cleanArguments []string,
@@ -560,13 +600,7 @@ func prepareExecution_0 (
 	for _, _path_1 := range _scriptletExecutablePaths {
 		_found := false
 		for _, _path_2 := range _executablePaths {
-			if _path_1 == _path_2 || _found {
-				_found = true
-				break
-			}
-		}
-		for _, _path_2 := range _contextExecutablePaths {
-			if _path_1 == _path_2 || _found {
+			if _path_1 == _path_2 {
 				_found = true
 				break
 			}
@@ -575,16 +609,18 @@ func prepareExecution_0 (
 			_executablePaths = append (_executablePaths, _path_1)
 		}
 	}
-	for _, _path_1 := range _contextExecutablePaths {
-		_found := false
-		for _, _path_2 := range _executablePaths {
-			if _path_1 == _path_2 || _found {
-				_found = true
-				break
+	if !_scriptletExecutablePathsExcludeAll {
+		for _, _path_1 := range _contextExecutablePaths {
+			_found := false
+			for _, _path_2 := range _executablePaths {
+				if _path_1 == _path_2 {
+					_found = true
+					break
+				}
 			}
-		}
-		if !_found {
-			_executablePaths = append (_executablePaths, _path_1)
+			if !_found {
+				_executablePaths = append (_executablePaths, _path_1)
+			}
 		}
 	}
 	
@@ -637,6 +673,9 @@ func prepareExecution_0 (
 				_interpreterEnvironmentFallbacks,
 				_scriptletEnvironmentFallbacks,
 			},
+			_scriptletEnvironmentIncludes,
+			_scriptletEnvironmentExcludes,
+			_scriptletEnvironmentExcludeAll,
 		)
 	
 	if _interpreterExecutable_0, _error := ResolveExecutable (_interpreterExecutable, _executablePaths); _error == nil {

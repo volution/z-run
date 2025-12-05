@@ -47,8 +47,12 @@ type ScriptletSource struct {
 type ScriptletContext struct {
 	Identifier string `json:"identifier"`
 	ExecutablePaths []string `json:"executable_paths"`
+	ExecutablePathsExcludeAll bool `json:"executable_paths_exclude_all"`
 	EnvironmentOverrides map[string]string `json:"environment_overrides"`
 	EnvironmentFallbacks map[string]string `json:"environment_fallbacks"`
+	EnvironmentIncludes []string `json:"environment_includes"`
+	EnvironmentExcludes []string `json:"environment_excludes"`
+	EnvironmentExcludeAll bool `json:"environment_exclude_all"`
 }
 
 

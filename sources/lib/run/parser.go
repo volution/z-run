@@ -1081,8 +1081,16 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 				} else if strings.HasPrefix (_lineTrimmed, "&&== ") {
 					
 					_descriptor := _lineTrimmed[strings.IndexByte (_lineTrimmed, ' ') + 1:]
-					_kind := _descriptor[: strings.IndexByte (_descriptor, ' ')]
-					_descriptor = _descriptor[len (_kind) + 1 :]
+					_kindLimit := strings.IndexByte (_descriptor, ' ')
+					if _kindLimit == -1 {
+						_kindLimit = len (_descriptor)
+					}
+					_kind := _descriptor[:_kindLimit]
+					if _kindLimit < len (_descriptor) {
+						_descriptor = _descriptor[_kindLimit + 1 :]
+					} else {
+						_descriptor = ""
+					}
 					_kind = strings.TrimSpace (_kind)
 					_descriptor = strings.TrimSpace (_descriptor)
 					
@@ -1094,6 +1102,8 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						
 						case "path" :
 							_kind = "path"
+						case "path-exclude-all" :
+							_kind = "path-exclude-all"
 						
 						case "environment", "env" :
 							_kind = "environment-override"
@@ -1123,8 +1133,13 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 						case "environment-fallback-append-path", "env-fallback-append-path", "env-path-fallback-append" :
 							_kind = "environment-fallback-append-path"
 						
+						case "environment-include", "env-include" :
+							_kind = "environment-include"
 						case "environment-exclude", "env-exclude" :
 							_kind = "environment-exclude"
+						
+						case "environment-exclude-all", "env-exclude-all" :
+							_kind = "environment-exclude-all"
 						
 						case "z-run" :
 							_kind = "z-run"
@@ -1162,6 +1177,14 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							}
 							if !_disabled {
 								_parseContext.scriptletContext.ExecutablePaths = append (_parseContext.scriptletContext.ExecutablePaths, _path)
+							}
+							
+						case "path-exclude-all" :
+							if _descriptor != "" {
+								return Errorf (0x6c5926a9, "syntax (%d):  unexpected statement path descriptor | %s", _lineIndex, _line)
+							}
+							if !_disabled {
+								_parseContext.scriptletContext.ExecutablePathsExcludeAll = true
 							}
 							
 						case "environment-override", "environment-fallback",
@@ -1224,6 +1247,27 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								_environment[_name] = _value
 							}
 							
+						case "environment-include" :
+							if _descriptor == "" {
+								return Errorf (0x30b52635, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
+							}
+							_descriptor := strings.Split (_descriptor, " ")
+							for _, _name := range _descriptor {
+								if _name == "" {
+									continue
+								}
+								if _, _exists := _parseContext.scriptletContext.EnvironmentOverrides[_name]; _exists && !_disabled {
+									return Errorf (0x93bfc675, "invalid syntax (%d):  duplicate statement environment key (include and override) | %s", _lineIndex, _line)
+								}
+								for _, _nameOther := range _parseContext.scriptletContext.EnvironmentExcludes {
+									if (_name == _nameOther) && !_disabled {
+										return Errorf (0x1226a46d, "invalid syntax (%d):  duplicate statement environment key (include and exclude) | %s", _lineIndex, _line)
+									}
+								}
+								if !_disabled {
+									_parseContext.scriptletContext.EnvironmentIncludes = append (_parseContext.scriptletContext.EnvironmentIncludes, _name)
+								}
+							}
 						case "environment-exclude" :
 							if _descriptor == "" {
 								return Errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
@@ -1234,13 +1278,26 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 									continue
 								}
 								if _, _exists := _parseContext.scriptletContext.EnvironmentOverrides[_name]; _exists && !_disabled {
-									return Errorf (0x0ed5990f, "invalid syntax (%d):  duplicate statement environment key | %s", _lineIndex, _line)
+									return Errorf (0x0ed5990f, "invalid syntax (%d):  duplicate statement environment key (exclude and override) | %s", _lineIndex, _line)
+								}
+								for _, _nameOther := range _parseContext.scriptletContext.EnvironmentIncludes {
+									if (_name == _nameOther) && !_disabled {
+										return Errorf (0xb66f8aac, "invalid syntax (%d):  duplicate statement environment key (exclude and include) | %s", _lineIndex, _line)
+									}
 								}
 								if !_disabled {
-									_parseContext.scriptletContext.EnvironmentOverrides[_name] = ""
+									_parseContext.scriptletContext.EnvironmentExcludes = append (_parseContext.scriptletContext.EnvironmentExcludes, _name)
 								}
 							}
-						
+							
+						case "environment-exclude-all" :
+							if _descriptor != "" {
+								return Errorf (0xea304b2d, "syntax (%d):  unexpected statement environment descriptor | %s", _lineIndex, _line)
+							}
+							if !_disabled {
+								_parseContext.scriptletContext.EnvironmentExcludeAll = true
+							}
+							
 						case "z-run" :
 							if _descriptor == "" {
 								return Errorf (0x2abc5316, "invalid syntax (%d):  empty statement `z-run` executable descriptor | %s", _lineIndex, _line)
@@ -1438,7 +1495,7 @@ func loadFromSource_0 (_library *Library, _source *Source, _context *Context) (s
 				Args : []string {
 						"[z-run:generator]",
 					},
-				Env : prepareEnvironment (_context, nil, nil),
+				Env : prepareEnvironment (_context, nil, nil, nil, nil, false),
 				Stdin : nil,
 				Stdout : nil,
 				Stderr : os.Stderr,

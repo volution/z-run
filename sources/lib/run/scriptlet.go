@@ -130,8 +130,12 @@ func ScriptletMain (_selfExecutable string, _arguments []string, _environment ma
 			0,
 			
 			nil,
+			false,
 			nil,
 			nil,
+			nil,
+			nil,
+			false,
 			
 			_selfExecutable,
 			_arguments,
