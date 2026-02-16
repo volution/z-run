@@ -18,9 +18,9 @@ f4186f762156ca21d1c14491eeca467a *embedded/documentation/sbom.html
 db39778c818b5d47f2cdd9812953c88f *embedded/documentation/sbom.json
 89513797d916f307801a6e36a9b0f3ed *embedded/documentation/sbom.txt
 35585845c8b1c58f8748791c618b9869 *embedded/documentation/z-run--help.txt
-eb64eda0430ba2a1fbf0c90ab0fb35fe *embedded/documentation/z-run--manual.html
-389a8e2632d622d1b330e127dd5d4a7e *embedded/documentation/z-run--manual.man
-771e2edd3449f80a1d6dc378ad1f3c38 *embedded/documentation/z-run--manual.txt
+0df9a3eb225b72e67d7c2ba6551e9ea9 *embedded/documentation/z-run--manual.html
+9976feec661df6eec3f3df0c8d21ee1c *embedded/documentation/z-run--manual.man
+0a7446c75d07cd704a3717c5c8c2d27f *embedded/documentation/z-run--manual.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
 96298d53821a125adba4e0b661e1d4c4 *embedded/prologues/python3.py0
@@ -60,7 +60,7 @@ de17c1ae759ee8f03dd8526a737a4883 *lib/mainlib/runtime.go
 1d87f92f5302d315742f111981bef074 *lib/run/library.go
 c901cfd330d168507d1d272abbbc024f *lib/run/main.go
 7e71573c941010e0998b5651e56ae1de *lib/run/menu.go
-023b1cbdac7cfaa146b294cc9765c488 *lib/run/parser.go
+6ac465ac6c0599ca78e60165eb3e3d46 *lib/run/parser.go
 41726004ffa28c13d0969804fcdfa77f *lib/run/resolution.go
 2a0d6503766417e5a81a75283434bb3e *lib/run/scriptlet.go
 34600019e39ab1353b454255fd4b9ead *lib/run/starlark.go
