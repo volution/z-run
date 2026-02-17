@@ -1187,7 +1187,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							
 						case "path-exclude-all" :
 							if _ignoreError {
-								return Errorw (0x8d1f57e0, nil)
+								return Errorf (0x8d1f57e0, "syntax (%d):  invalid statement `??` marker | %s", _lineIndex, _line)
 							}
 							if _descriptor != "" {
 								return Errorf (0x6c5926a9, "syntax (%d):  unexpected statement path descriptor | %s", _lineIndex, _line)
@@ -1200,9 +1200,6 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 								"environment-override-path", "environment-fallback-path",
 								"environment-override-append-path", "environment-fallback-append-path" :
 							
-							if _ignoreError {
-								return Errorw (0x264c5cea, nil)
-							}
 							if _descriptor == "" {
 								return Errorf (0xa36b04fa, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 							}
@@ -1227,9 +1224,17 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 									return Errorf (0x2124d511, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
 								}
 								if _path_0, _error := ResolveAbsolutePath (_context.workspace, path.Dir (_sourcePath), _value); _error != nil {
-									return _error
+									if !_ignoreError {
+										return _error
+									} else {
+										_disabled = true
+									}
 								} else {
 									_value = _path_0
+								}
+							} else {
+								if _ignoreError {
+									return Errorf (0x264c5cea, "syntax (%d):  invalid statement `??` marker | %s", _lineIndex, _line)
 								}
 							}
 							if !_disabled {
@@ -1261,7 +1266,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							
 						case "environment-include" :
 							if _ignoreError {
-								return Errorw (0xda4899e1, nil)
+								return Errorf (0xda4899e1, "syntax (%d):  invalid statement `??` marker | %s", _lineIndex, _line)
 							}
 							if _descriptor == "" {
 								return Errorf (0x30b52635, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
@@ -1285,7 +1290,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							}
 						case "environment-exclude" :
 							if _ignoreError {
-								return Errorw (0xdb5e7bf2, nil)
+								return Errorf (0xdb5e7bf2, "syntax (%d):  invalid statement `??` marker | %s", _lineIndex, _line)
 							}
 							if _descriptor == "" {
 								return Errorf (0x7f049882, "invalid syntax (%d):  empty statement environment descriptor | %s", _lineIndex, _line)
@@ -1310,7 +1315,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							
 						case "environment-exclude-all" :
 							if _ignoreError {
-								return Errorw (0x6f18fdf9, nil)
+								return Errorf (0x6f18fdf9, "syntax (%d):  invalid statement `??` marker | %s", _lineIndex, _line)
 							}
 							if _descriptor != "" {
 								return Errorf (0xea304b2d, "syntax (%d):  unexpected statement environment descriptor | %s", _lineIndex, _line)
@@ -1321,7 +1326,7 @@ func parseFromData (_library *Library, _sourceData []byte, _sourcePath string, _
 							
 						case "z-run" :
 							if _ignoreError {
-								return Errorw (0x180f7c4e, nil)
+								return Errorf (0x180f7c4e, "syntax (%d):  invalid statement `??` marker | %s", _lineIndex, _line)
 							}
 							if _descriptor == "" {
 								return Errorf (0x2abc5316, "invalid syntax (%d):  empty statement `z-run` executable descriptor | %s", _lineIndex, _line)
