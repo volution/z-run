@@ -10,3 +10,7 @@
 &&== env-path __PUBLISH ./.publish
 
 
+&&??== env-path __GO_INSTALL_1_26 /usr/lib64/go/1.26
+&&??== env-path __GO_INSTALL_1_20 /usr/lib64/go/1.20
+
+

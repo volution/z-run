@@ -574,8 +574,7 @@
 !!
 
 --<< go / build / * / release / darwin / x86_64--go-1.20
-	test -d /usr/lib64/go/1.20/bin
-	export -- PATH="/usr/lib64/go/1.20/bin:${PATH}"
+	export -- GOVER=1.20
 	export -- GOOS=darwin
 	export -- GOARCH=amd64
 	export -- __BUILD_SUFFIX=darwin--x86_64--go-1.20
@@ -715,11 +714,19 @@
 	export -- GOTMPDIR="${_outputs}/go/tmp"
 	export -- GOCACHE="${_outputs}/go/cache"
 	
-	if test -e "${_outputs}/go-tool" ; then
-		_go="$( exec -- readlink -e -- "${_outputs}/go-tool" )"
-	else
-		_go="$( type -P -- go )"
-	fi
+	case "${GOVER:-latest}" in
+		( 1.26 | latest )
+			test -n "${__GO_INSTALL_1_26:-}"
+			_go="$( exec -- readlink -e -- "${__GO_INSTALL_1_26}/bin/go" )"
+		;;
+		( 1.20 )
+			test -n "${__GO_INSTALL_1_20:-}"
+			_go="$( exec -- readlink -e -- "${__GO_INSTALL_1_20}/bin/go" )"
+		;;
+		( custom )
+			_go="$( exec -- readlink -e -- "${_outputs}/go-tool" )"
+		;;
+	esac
 	
 	cd -- "${_sources}"
 	
