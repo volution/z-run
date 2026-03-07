@@ -18,6 +18,8 @@
 	darwin--x86_64
 	darwin--aarch64
 	
+	darwin--x86_64--go-1.20
+	
 	freebsd--x86_64
 	freebsd--i686
 	freebsd--aarch64

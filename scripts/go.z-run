@@ -573,6 +573,15 @@
 	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
 !!
 
+--<< go / build / * / release / darwin / x86_64--go-1.20
+	test -d /usr/lib64/go/1.20/bin
+	export -- PATH="/usr/lib64/go/1.20/bin:${PATH}"
+	export -- GOOS=darwin
+	export -- GOARCH=amd64
+	export -- __BUILD_SUFFIX=darwin--x86_64--go-1.20
+	exec -- "${ZRUN}" ':: go / build / * / release' "${@}"
+!!
+
 
 
 
