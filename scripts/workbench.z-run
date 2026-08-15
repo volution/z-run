@@ -58,6 +58,8 @@
 		mkdir -- "${_scratch}"
 	elif test -e "${HOME}/go/.scratch" ; then
 		_scratch="$( exec -- readlink -e -- "${HOME}/go/.scratch" )"
+	elif test -e "${HOME}/.../volatile/workbench/go--scratch" ; then
+		_scratch="$( exec -- readlink -e -- "${HOME}/.../volatile/workbench/go--scratch" )"
 	else
 		_scratch="${TMPDIR:-/tmp}/go--scratch--${UID}"
 	fi
