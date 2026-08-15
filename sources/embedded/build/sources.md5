@@ -15,12 +15,12 @@ c3b76b61baa2fd78b28460c7fab83d59 *embedded/documentation/help--footer.txt
 8005d9bf1d057d73a6775adde7e85cdc *embedded/documentation/readme.html
 3ed9afe33c261683cd905b00c31aa49f *embedded/documentation/readme.txt
 f4186f762156ca21d1c14491eeca467a *embedded/documentation/sbom.html
-db39778c818b5d47f2cdd9812953c88f *embedded/documentation/sbom.json
+ed54fa9546bc3cdace2d32807a8e6149 *embedded/documentation/sbom.json
 89513797d916f307801a6e36a9b0f3ed *embedded/documentation/sbom.txt
 35585845c8b1c58f8748791c618b9869 *embedded/documentation/z-run--help.txt
-1023dbc3ad3a7781564a69bad188b209 *embedded/documentation/z-run--manual.html
-1173d8a24992e1e47d540a417d185fce *embedded/documentation/z-run--manual.man
-ea72e67efd14d7da551fcf133946d6b5 *embedded/documentation/z-run--manual.txt
+4a8a4e2d6e096043a1ce3857f568716e *embedded/documentation/z-run--manual.html
+5f2338170e96089e85e9207e440be6cd *embedded/documentation/z-run--manual.man
+e0b2965e85e0781224f3d1db589041d6 *embedded/documentation/z-run--manual.txt
 b1e1c36106351c75d7f9d05767aa0e1e *embedded/prologues.go
 bb2839ab009617e6ae7fd5b5bd16ccaf *embedded/prologues/go.go0
 96298d53821a125adba4e0b661e1d4c4 *embedded/prologues/python3.py0
