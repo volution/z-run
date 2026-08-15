@@ -1,4 +1,4 @@
 untrusted comment: signature from minisign secret key
-RUTDbEzfmLaKpszg92IcdfcNSn9b6/Bgj0oTcZb++YRKo3P0tgMtf95aV+s+Fg/kWmYYE5ptq1Moic3f+S+TD8/CgKBiotqIMw8=
+RUTDbEzfmLaKpmiC6FRlFW1UKw5Jh8AHQgMX4gdJzKYniMYU1N+5dNOLXO/qwN72djTTMXozKWOWDQksOdVIr1AiJZY7ddj8xgg=
 trusted comment: z-fzf--openbsd--aarch64--v0.22.0--preview
-8ubvTmjqkPRKUkTl8aC2dX+Xs1hVL/GlCKxWkMdBBgN/F98nfnLrzXnQ0rlTPEFyuR+UzgmK8IOr63PKe8WXCQ==
+HtqqSwZMbZ2Abw7/y7661JZXlH5xWGGEtU7G+B+ZFRwTfFFeG5tYppBvHtEcAZZ5yuXdAQSKR98HJdBZjFl6BA==
